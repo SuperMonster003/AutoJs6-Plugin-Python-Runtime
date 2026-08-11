@@ -21,6 +21,11 @@ PINNED_KEYSTORE_SHA256 = (
 PINNED_CERTIFICATE_SHA256 = (
     "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
 )
+HOST_API_IDS = (
+    "common-plugin-api",
+    "protocol-wire-api",
+    "python-runtime-api",
+)
 
 
 def parse_properties(source: str) -> dict[str, str]:
@@ -79,6 +84,7 @@ class R6RcProvenanceSourceTest(unittest.TestCase):
             "PluginArm64Apk",
             "PluginX8664Apk",
             "PluginUniversalApk",
+            "CommonPluginApiAar",
             "ProtocolWireApiAar",
             "PythonRuntimeApiAar",
             "Aapt2",
@@ -92,6 +98,38 @@ class R6RcProvenanceSourceTest(unittest.TestCase):
                 rf"\s*\[string\]\s*\${name}(?:,|\s*\))"
             )
             self.assertRegex(WRITER, pattern, name)
+
+    def test_host_api_inventory_is_exactly_three_release_aars(self) -> None:
+        verifier_ids_match = re.search(
+            r"\$hostApiIds\s*=\s*@\((?P<body>.*?)\)",
+            VERIFIER,
+            flags=re.DOTALL,
+        )
+        self.assertIsNotNone(verifier_ids_match)
+        verifier_ids = tuple(
+            re.findall(r"'([^']+)'", verifier_ids_match.group("body"))
+        )
+        writer_ids = tuple(
+            re.findall(
+                r"\[ordered\]@\{\s*id\s*=\s*'([^']+)';\s*path\s*=\s*\$[A-Za-z]+Aar\s*\}",
+                WRITER,
+            )
+        )
+        self.assertEqual(verifier_ids, HOST_API_IDS)
+        self.assertEqual(writer_ids, HOST_API_IDS)
+        exact_inventory_marker = (
+            "Host API AAR lock inventory must contain exactly common-plugin-api, "
+            "protocol-wire-api, and python-runtime-api file/SHA-256 pairs"
+        )
+        for source in (VERIFIER, WRITER):
+            self.assertIn("$expectedHostApiLockKeys", source)
+            self.assertIn("$unexpectedHostApiLockKeys", source)
+            self.assertIn("$missingHostApiLockKeys", source)
+            self.assertIn(exact_inventory_marker, source)
+        self.assertIn(
+            "Resolve-ExistingFile $CommonPluginApiAar 'Common Plugin API AAR'",
+            WRITER,
+        )
 
     def test_claims_are_exactly_local_candidate_and_negative_mutation_is_rejected(self) -> None:
         validate_local_candidate_claims(parse_claims(WRITER))
@@ -149,6 +187,31 @@ class R6RcProvenanceSourceTest(unittest.TestCase):
         self.assertIn("Get-Sha256 $storePath", VERIFIER)
         self.assertIn("Host API AAR lock identifies a dirty source tree", VERIFIER)
         self.assertIn("explicit clean Host HEAD identity", VERIFIER)
+
+    def test_gradle_release_tasks_require_exact_host_distribution_provenance(self) -> None:
+        for marker in (
+            "expectedHostApiLockKeys",
+            "releaseHostApiProvenanceReady",
+            "Release artifact creation requires a clean Host HEAD",
+            "collectReleaseFiles",
+            "appendDigestToReleasedFiles",
+        ):
+            self.assertIn(marker, APP_BUILD)
+        self.assertIn(
+            "Host API AAR lock must contain exactly the three release AAR",
+            APP_BUILD,
+        )
+
+    def test_stable_source_gate_requires_version_and_host_compatibility(self) -> None:
+        self.assertIn(
+            "VERSION_NAME must be exactly 0.1.0 for the stable source freeze",
+            VERIFIER,
+        )
+        self.assertIn(
+            "Python runtime metadata does not enforce the final Host 6.8.0",
+            VERIFIER,
+        )
+        self.assertIn("PythonRuntimePluginInfoService", VERIFIER)
 
     def test_provenance_requires_four_singleton_pinned_signers_and_records_lock(self) -> None:
         self.assertIn("locks/release-identity.lock", WRITER)

@@ -1,64 +1,90 @@
-# ADR 0001: R2 Python runtime candidate
+# ADR 0001: Python runtime baseline for 0.1.0
 
-- Status: provisional for the R2 proof of concept
-- Date: 2026-08-09
+- Status: accepted for 0.1.0 release preparation
+- Date: 2026-08-11
 
 ## Decision
 
-Use Chaquopy 17.0.0 with its Python 3.13 line (expected CPython 3.13.9) for the first
-independent-APK execution proof. Package only arm64-v8a and x86_64, install no pip
-requirements, start CPython lazily inside :python_runtime, and retire that process after
-every dispatched execution generation.
+Use Chaquopy 17.0.0 with its CPython 3.13.9 runtime as the production baseline
+for the independently installed Python Runtime Plugin 0.1.0. Package only
+`arm64-v8a` and `x86_64`, include the standard library but no third-party Python
+packages, start CPython lazily in `:python_runtime`, and retire that process after
+each dispatched execution generation.
 
-This is a POC selection, not the final production-runtime decision. Before promotion, an
-official CPython Android embedding POC must be measured against the same protocol and device
-matrix.
+The intended release pair is Plugin 0.1.0 with AutoJs6 Host 6.8.0. The exact
+final Host identity (version name/code, source revision, release-AAR manifest and
+the corresponding compatibility bounds) is still a release blocker and must be
+frozen before final artifacts are built. This ADR does not claim that a final
+Host 6.8.0 pair, a `v0.1.0` tag, or a published release already exists.
 
-## Why this candidate
+## Why this runtime
 
-- Chaquopy 17 documents minSdk 24 and Android Gradle Plugin 7.3 through 9.2 support.
+- Chaquopy 17 documents minSdk 24 and Android Gradle Plugin 7.3 through 9.2
+  support.
 - Its Python 3.13 runtime matches the project's 64-bit-only initial ABI scope.
-- It supplies Android packaging and interpreter startup so R2 can concentrate on the Binder,
-  descriptor, execution, output, and process-lifecycle contract.
-- Version 17 reports 16 KB page support for Chaquopy itself, while also warning that bundled
-  third-party wheels require separate verification. R2 bundles no third-party wheels.
+- It supplies maintained Android packaging and interpreter startup while the
+  plugin owns the Binder, descriptor, execution, output and process-lifecycle
+  contract.
+- Version 17 reports 16 KB page support for Chaquopy itself. Bundled third-party
+  wheels would require separate verification, so 0.1.0 bundles none.
 
-## Non-sandbox boundary
+An official-CPython Android embedding comparison remains useful future research,
+but it is not a 0.1.0 release gate. Replacing Chaquopy would be a new runtime
+decision with fresh protocol, packaging, security and device evidence.
 
-Chaquopy exposes a java module and jclass. Disabling its convenience import hook does not
-constitute a secure Java-interoperability boundary. The POC therefore does not claim to sandbox
-Python. Its intended containment is the independent Android UID/process, a source manifest which
-requests no Android permissions, a same-signer Binder caller policy, and the absence of any host
-capability broker. The merged APK permission set must still be verified before acceptance.
+## Trusted-local, non-sandbox boundary
 
-The bootstrap deliberately passes no Context, Binder, host callback, ScriptRuntime, View, or
-other host object into user globals. That narrower property remains useful even though Python can
-reach Java APIs available inside the plugin process.
+Python input is user-selected local code trusted for the permissions and APIs
+reachable by the plugin UID. Chaquopy exposes a `java` module and `jclass`;
+disabling a convenience import hook does not create a Java-interoperability
+security boundary. The plugin therefore does **not** claim to sandbox hostile
+Python.
 
-## Cancellation and generation policy
+Containment comes from an independent Android UID/process, a source manifest
+requesting no Android permissions, same-signer and exact-host Binder admission,
+bounded Binder/PFD transport, and the absence of an ambient host capability
+broker. The bootstrap passes no Android `Context`, Binder handle, host callback,
+`ScriptRuntime`, view, or other host object into Python globals. These controls
+reduce host exposure but do not turn trusted-local Python into untrusted-code
+isolation.
 
-Chaquopy exposes one process-wide Python singleton. Java thread interruption, Python tracing, and
-asynchronous exception injection do not reliably stop native extensions or hostile code. R2 thus
-advertises PROCESS_RESTART_ONLY and not cooperative cancellation.
+## Cancellation, hot-plug and generation policy
 
-A normal result or structured Python failure is delivered first; the host then closes the session
-and the plugin retires :python_runtime. Cancel, timeout, or callback death retires it immediately.
-The host interprets Binder death using its local cancel/deadline state and must never replay a
-dispatched request. A new bind creates a new positive runtime generation.
+Chaquopy exposes one process-wide Python singleton. Java thread interruption,
+Python tracing and asynchronous exception injection cannot reliably stop native
+extensions or hostile code. The provider therefore advertises
+`PROCESS_RESTART_ONLY`, not cooperative cancellation.
 
-## Promotion blockers
+A normal result or structured Python failure is delivered first; the host then
+closes the session and the plugin retires `:python_runtime`. Cancel, timeout,
+callback death or Binder death terminates the current execution generation. A
+request which reached dispatch is never replayed automatically.
 
-- Produce and compare an official CPython Android embedding POC.
-- Resolve and hash every Chaquopy/CPython artifact and record dependency verification metadata.
-- Revalidate the checked-in Gradle 9.5.0 wrapper JAR against its official
-  distribution checksum, wrapper-main container hash and embedded-entry hash
-  after any wrapper or distribution change; the URL alone does not establish
-  wrapper-JAR provenance.
-- Confirm packaged platform.python_version() is exactly 3.13.9.
-- Verify every packaged ELF for both declared ABIs and 16 KB page compatibility.
-- Compile and run Binder/PFD/UID/death, cancellation/rebind, no-replay, and leak tests.
-- Decide whether Chaquopy's Java bridge is acceptable for production or whether official CPython
-  embedding is required to narrow the plugin-local attack surface.
+Provider availability is hot-plugged without a Host restart:
+
+- installing or re-enabling the plugin makes the next new execution eligible;
+- a missing or disabled provider must produce an install/enable prompt and must
+  never fall back to another script engine;
+- uninstall, disable or update during an in-flight call may kill its Binder, in
+  which case that execution terminates and is not replayed; and
+- a later new execution performs discovery again, validates the selected
+  component and pins its current package/signing/runtime identity.
+
+## 0.1.0 release-preparation gates
+
+- Freeze and enforce the exact final AutoJs6 6.8.0 Host identity and release-AAR
+  manifest used by the plugin.
+- Keep every Chaquopy/CPython artifact, Gradle wrapper byte, dependency checksum
+  and packaged ABI/native inventory pinned and independently reviewable.
+- Confirm packaged `platform.python_version()` is exactly 3.13.9 and retain
+  focused Binder/PFD/UID/death, cancellation/rebind and no-replay evidence on
+  the exact final artifacts.
+- Sign with the long-term SM003 release identity recorded in
+  `locks/release-identity.lock`; any signer rotation requires an explicit new
+  trust decision.
+- Generate fresh source, build, focused device and publication evidence after
+  every source, lock, AAR, version or signer change. Historical RC evidence must
+  not be relabeled as stable-release evidence.
 
 ## Official references
 

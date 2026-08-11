@@ -274,8 +274,11 @@ Assert-True ($runtimeInventoryCandidateTest -match 'test_rejects_explicit_artifa
 Assert-True ($runtimeInventoryCandidateTest -match 'test_rejects_extra_runtime_binary_in_metadata') 'Extra-runtime-artifact negative test is absent'
 Assert-True ($runtimeInventoryCandidateTest -match 'test_rejects_wrong_runtime_component_version') 'Wrong-runtime-version negative test is absent'
 Assert-True ($runtimeInventoryCandidateTest -match 'test_rejects_wrong_abi_runtime_artifact') 'Wrong-runtime-ABI negative test is absent'
-Assert-True ($readme -match 'does not\s+claim that Python code is sandboxed') 'README non-sandbox boundary is missing'
-Assert-True ($runtimeAdr -match 'Chaquopy exposes a java module and jclass') 'Runtime-selection ADR does not record the Java bridge boundary'
+Assert-True (
+    $readme -match '(?i)trusted-local,\s*non-sandbox|hostile-code sandbox' -or
+    $readme -match '可信本地脚本.*(?:不是|不让).*沙箱'
+) 'README trusted-local non-sandbox boundary is missing'
+Assert-True ($runtimeAdr -match 'Chaquopy exposes a `?java`? module and `?jclass`?') 'Runtime-selection ADR does not record the Java bridge boundary'
 Assert-True ($lockWorkflow -match '--write-locks --write-verification-metadata sha256') 'Supply-chain lock bootstrap workflow is absent'
 Assert-True ($lockWorkflow -match '-Pautojs\.python\.runtime\.lock\.bootstrap=true') 'Bootstrap workflow does not require its explicit property'
 Assert-True ($lockWorkflow -match 'canonical inventory digest') 'Per-artifact canonical inventory workflow is absent'
@@ -351,7 +354,10 @@ else {
     $wrapperProvenanceStatus = 'READY'
 }
 
-$expectedAars = @('protocol-wire-api', 'python-runtime-api')
+$expectedAars = @('common-plugin-api', 'protocol-wire-api', 'python-runtime-api')
+$expectedHostLockKeys = @('format') + @($expectedAars | ForEach-Object { @("$($_).file", "$($_).sha256") })
+Assert-True ($hostLock['format'] -ceq '1') 'Unsupported host API AAR lock format'
+Assert-True ((($hostLock.Keys | Sort-Object) -join "`n") -ceq (($expectedHostLockKeys | Sort-Object) -join "`n")) 'Host API AAR lock contains missing or unexpected keys'
 $allHostAarsPresent = $true
 foreach ($id in $expectedAars) {
     $fileName = $hostLock["$id.file"]
@@ -371,7 +377,7 @@ foreach ($id in $expectedAars) {
 }
 
 $unexpectedAars = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'libs') -Filter '*.aar' -File | Where-Object {
-    $_.Name -notin @('protocol-wire-api.aar', 'python-runtime-api.aar')
+    $_.Name -notin @('common-plugin-api.aar', 'protocol-wire-api.aar', 'python-runtime-api.aar')
 })
 Assert-True ($unexpectedAars.Count -eq 0) 'Unexpected AAR exists under libs'
 
@@ -385,10 +391,10 @@ foreach ($directory in $localeDirectories) {
     Assert-True ($strings -match 'name="plugin_description"') "Missing plugin_description in $relativePath"
 }
 
-Assert-True ($roadmap -match 'Soak completion confirmed') 'Protected-soak release is not documented'
-Assert-True ($roadmap -match 'poll for up to nine minutes') 'Cross-Codex Gradle serialization is not documented'
-Assert-True ($roadmap -match 'Wrapper provenance blocker cleared') 'Cleared wrapper provenance blocker is absent from the roadmap'
-Assert-True ($roadmap -match 'R2-D: protected-soak device evidence contract') 'Deferred device contract is missing from the roadmap'
+Assert-True ($roadmap -match 'R6-P2: final source and Host-pair freeze') 'Stable source and Host-pair freeze stage is missing from the roadmap'
+Assert-True ($roadmap -match 'Existing\s+RC receipts are historical') 'Historical RC evidence boundary is missing from the roadmap'
+Assert-True ($roadmap -match 'complete API 24-36 by ABI matrix.*not automatic' -or $roadmap -match '(?s)complete API 24-36 by ABI matrix.*not automatic') 'Risk-proportional device evidence policy is missing from the roadmap'
+Assert-True ($roadmap -match 'production receipt') 'Independent production receipt boundary is missing from the roadmap'
 
 $validBootstrap = @{
     PropertyValue = 'true'
@@ -429,13 +435,13 @@ Write-Output 'RUNTIME_SOURCE=PRESENT_STATIC_GATE_DOES_NOT_PROVE_COMPILE'
 Write-Output 'LOCAL_BOOTSTRAP_TEST=SEPARATE_NON_ANDROID_EVIDENCE'
 Write-Output 'STATIC_GATE_GRADLE_EXECUTED=NO'
 Write-Output 'STATIC_GATE_ADB_EXECUTED=NO'
-Write-Output "HOST_AARS=$(if ($allHostAarsPresent) { 'HASH_PINNED_RELEASE_PAIR' } else { 'DEFERRED_FAIL_CLOSED' })"
+Write-Output "HOST_AARS=$(if ($allHostAarsPresent) { 'HASH_PINNED_RELEASE_TRIPLET' } else { 'DEFERRED_FAIL_CLOSED' })"
 Write-Output "RUNTIME_ARTIFACT_HASHES=$($runtimeArtifactState)_FAIL_CLOSED"
 Write-Output "GRADLE_WRAPPER_PROVENANCE=$wrapperProvenanceStatus"
 Write-Output "GRADLE_BUILD_ADMISSION=$(if (-not $allHostAarsPresent) { 'BLOCKED_RUNTIME_AND_HOST_LOCKS' } elseif ($runtimeArtifactState -eq 'RESOLVED') { 'ORDINARY_CONFIGURATION_READY' } else { 'BOOTSTRAP_ONLY_RUNTIME_LOCK' })"
 Write-Output "RUNTIME_LOCK_BOOTSTRAP_NEGATIVE_CASES=$($bootstrapNegativeCases.Count)_PASS"
 Write-Output 'RUNTIME_INVENTORY_CANDIDATE=READ_ONLY_REVIEW_ONLY'
 Write-Output 'DEFERRED_DEVICE_PLAN=PRESENT_NOT_EXECUTABLE'
-Write-Output 'DEVICE_RUNNER=NOT_IMPLEMENTED'
+Write-Output 'DEVICE_RUNNER=NOT_INSPECTED_BY_THIS_STATIC_GATE'
 Write-Output 'DEVICE_RECEIPT=NOT_CREATED'
 Write-Output 'DEVICE_ACCEPTANCE=NOT_CLAIMED'

@@ -152,6 +152,7 @@ def format_changelog_items(changelog, limit=None):
 
 def build_language_list(target_code, languages):
     repo_url = languages[target_code]["repo_url"]
+    default_branch = languages[target_code]["default_branch"]
     lines = []
     for code in LANGUAGE_CODES:
         content = languages[code]
@@ -160,7 +161,7 @@ def build_language_list(target_code, languages):
             lines.append(f"- {label} # {content['text_current_lowercase']}")
         else:
             lines.append(
-                f"- {markdown_link(label, f'{repo_url}/blob/master/.readme/README-{code}.md')}"
+                f"- {markdown_link(label, f'{repo_url}/blob/{default_branch}/.readme/README-{code}.md')}"
             )
     return "\n".join(lines)
 
@@ -168,6 +169,7 @@ def build_language_list(target_code, languages):
 def build_readme_values(code, languages, changelogs):
     content = dict(languages[code])
     repo_url = content["repo_url"]
+    default_branch = content["default_branch"]
     content["placeholder_ul_languages_all_supported"] = build_language_list(code, languages)
     content["placeholder_features"] = bullet_list(content["features"])
     content["placeholder_security_limits"] = bullet_list(content["security_limits"])
@@ -179,7 +181,7 @@ def build_readme_values(code, languages, changelogs):
     ).rstrip()
     content["placeholder_read_more_in_changelog_md"] = markdown_link(
         f"CHANGELOG-{code}.md",
-        f"{repo_url}/blob/master/app/src/main/assets/doc/CHANGELOG-{code}.md",
+        f"{repo_url}/blob/{default_branch}/app/src/main/assets/doc/CHANGELOG-{code}.md",
     )
     return content
 

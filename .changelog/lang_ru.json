@@ -5,6 +5,23 @@
   "changelog_label_improvement": "Улучшено",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v0.1.0": {
+      "released_date": "2026/08/11 (подготовка выпуска; без tag и публикации)",
+      "hint": [
+        "0.1.0 еще готовится; остаются финальная идентичность хоста, GitHub repository и authentication, официальный plugin index и production receipt"
+      ],
+      "feature": [
+        "Протокол Python 1.0-1.1 для AutoJs6 6.8.0, ограниченный project workspace и read-only snapshots app/device/execution/project",
+        "Hot-plug без перезапуска хоста: install или повторное включение позволяет следующему запуску заново найти и pin ID, без fallback при отсутствии или отключении",
+        "Binder death во время работы завершает текущий запуск без replay; новые запуски заново обнаруживают provider"
+      ],
+      "improvement": [
+        "Chaquopy закреплен как trusted-local, non-sandbox runtime; долгосрочный signer — SM003, owner runtime/security/release — SuperMonster003"
+      ],
+      "dependency": [
+        "Зафиксированы {{ runtime_dependency }} и CPython {{ python_version_expected }}; финальные artifacts проверяются после заморозки исходников"
+      ]
+    },
     "v0.1.0-alpha.1": {
       "released_date": "2026/08/09",
       "hint": [

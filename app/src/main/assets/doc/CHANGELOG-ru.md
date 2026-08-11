@@ -4,6 +4,17 @@
 
 ******
 
+# v0.1.0
+
+###### 2026/08/11 (подготовка выпуска; без tag и публикации)
+
+* `Примечание` 0.1.0 еще готовится; остаются финальная идентичность хоста, GitHub repository и authentication, официальный plugin index и production receipt
+* `Добавлено` Протокол Python 1.0-1.1 для AutoJs6 6.8.0, ограниченный project workspace и read-only snapshots app/device/execution/project
+* `Добавлено` Hot-plug без перезапуска хоста: install или повторное включение позволяет следующему запуску заново найти и pin ID, без fallback при отсутствии или отключении
+* `Добавлено` Binder death во время работы завершает текущий запуск без replay; новые запуски заново обнаруживают provider
+* `Улучшено` Chaquopy закреплен как trusted-local, non-sandbox runtime; долгосрочный signer — SM003, owner runtime/security/release — SuperMonster003
+* `Зависимость` Зафиксированы Chaquopy 17.0.0 и CPython 3.13.9; финальные artifacts проверяются после заморозки исходников
+
 # v0.1.0-alpha.1
 
 ###### 2026/08/09

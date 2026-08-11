@@ -6,7 +6,7 @@
   <p>
     <a href="{{ repo_url }}/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/{{ repo_slug }}?label=Release"/></a>
     <a href="{{ repo_url }}/issues"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/{{ repo_slug }}?color=A24232&label=Issues"/></a>
-    <a href="{{ repo_url }}/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/{{ repo_slug }}?color=534BAE&label=License"/></a>
+    <a href="{{ repo_url }}/blob/{{ default_branch }}/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/{{ repo_slug }}?color=534BAE&label=License"/></a>
   </p>
 </div>
 
@@ -81,6 +81,15 @@ protocol: {{ protocol_version }}
 
 > {{ p_host_integration_status }}
 
+```text
+release target: {{ release_target }}
+release state: {{ release_state }}
+paired host: {{ host_pairing }}
+release branch: {{ default_branch }}
+long-term signer: {{ long_term_signer }}
+runtime/security/release owner: {{ release_owner }}
+```
+
 ******
 
 ### {{ h3_security }}
@@ -113,7 +122,7 @@ protocol: {{ protocol_version }}
 
 {{ p_roadmap }}
 
-- [{{ text_link_roadmap }}]({{ repo_url }}/blob/master/ROADMAP.md)
+- [{{ text_link_roadmap }}]({{ repo_url }}/blob/{{ default_branch }}/ROADMAP.md)
 
 ******
 
@@ -136,7 +145,7 @@ protocol: {{ protocol_version }}
 {{ p_static_verification }}:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r2-static.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r6-release-source.ps1
 ```
 
 {{ p_bootstrap_verification }}:

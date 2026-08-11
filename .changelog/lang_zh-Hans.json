@@ -5,6 +5,23 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v0.1.0": {
+      "released_date": "2026/08/11 (发布准备中; 尚未 tag 或发布)",
+      "hint": [
+        "0.1.0 仍在发布准备阶段; 最终 Host 身份, GitHub 仓库与认证, 官方插件索引和 production receipt 尚待完成"
+      ],
+      "feature": [
+        "面向 AutoJs6 6.8.0 的 Python 协议 1.0-1.1, 有界项目 workspace 与只读 app/device/execution/project 能力快照",
+        "无需重启 Host 的热插拔: 安装或重新启用后下次新执行重新发现并 pin 身份, 缺失或禁用绝不 fallback",
+        "在途 Binder death 终止当前执行且不得重放, 后续新执行重新发现 provider"
+      ],
+      "improvement": [
+        "将 Chaquopy 固定为 trusted-local, non-sandbox 运行时; SM003 为长期 signer, SuperMonster003 为 runtime/security/release owner"
+      ],
+      "dependency": [
+        "锁定 {{ runtime_dependency }} 与 CPython {{ python_version_expected }}; 正式产物须在最终源码冻结后重新验证"
+      ]
+    },
     "v0.1.0-alpha.1": {
       "released_date": "2026/08/09",
       "hint": [

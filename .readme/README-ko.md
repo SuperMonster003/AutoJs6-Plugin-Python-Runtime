@@ -37,7 +37,7 @@
 
 Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트가 하나의 Python 소스 스냅샷을 전용 프로세스에 전달하면 CPython으로 실행하고 제한된 출력, 구조화된 예외, 하나의 종료 상태를 반환합니다.
 
-> 현재 R2 개념 증명 단계입니다. 런타임 소스와 로컬 bootstrap 의미 검사는 있지만 Gradle 설정, Android 컴파일, APK 검사, Binder 검증 및 기기 승인은 실행하지 않았습니다.
+> 0.1.0은 정식 릴리스 준비 중입니다. 로컬 RC 빌드, APK, Binder 및 API 31 arm64-v8a 기기 한 대의 증거가 있지만 소스 거버넌스 변경 후 다시 동결해야 합니다. v0.1.0 tag, GitHub Release 및 production receipt는 아직 없습니다.
 
 ******
 
@@ -49,7 +49,7 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 - stdout과 stderr 순서를 유지하고 제한된 chunk를 credit으로 전달합니다.
 - `SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.
 - 프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.
-- 취소, timeout 또는 callback death 후 스크립트를 재실행하지 않고 전용 프로세스를 폐기합니다.
+- 호스트 재시작이 필요 없습니다. 설치 또는 재활성화 후 다음 새 실행이 provider를 다시 검색하고 pin하며, 실행 중 Binder death는 해당 실행을 종료하고 자동 재실행하지 않습니다.
 
 ******
 
@@ -67,7 +67,7 @@ Python request: 3.13
 expected packaged Python: 3.13.9
 ```
 
-빌드는 Python 3.13을 요청합니다. 3.13.9는 현재 Chaquopy 릴리스 정보에 따른 예상 패키지 버전이며 APK 검사와 기기 실행 전에는 검증된 사실이 아닙니다.
+빌드는 Python 3.13을 요청합니다. 동결된 로컬 RC 산출물과 정확한 기기 실행은 CPython 3.13.9를 기록했습니다. 최종 0.1.0은 소스 동결 후 버전과 hash를 다시 검증해야 합니다.
 
 ******
 
@@ -81,10 +81,10 @@ expected packaged Python: 3.13.9
 service action: org.autojs.plugin.python.RUNTIME
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: V1
+protocol: 1.0-1.1
 ```
 
-SOURCE descriptor만 받습니다. workspace archive와 stdin snapshot 한도는 0이며 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.
+독립 SOURCE, 선택적인 제한 workspace archive 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. stdin snapshot은 비활성 상태이며 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.
 
 ******
 
@@ -92,7 +92,16 @@ SOURCE descriptor만 받습니다. workspace archive와 stdin snapshot 한도는
 
 ******
 
-> 프로토콜 및 호스트 연결은 진행 중이지만 필요한 release AAR은 아직 게시 및 검증되지 않았습니다. 이 scaffold 설치만으로 동작하는 Python 엔진이 구성되지는 않습니다.
+> 0.1.0은 AutoJs6 6.8.0 전용이지만 최종 호스트 ID와 호환 범위는 아직 동결되지 않았습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 호스트 재시작은 필요 없습니다. 공식 index, tag 및 Release는 미완료입니다.
+
+```text
+release target: 0.1.0
+release state: release preparation; not tagged or published
+paired host: AutoJs6 6.8.0
+release branch: master
+long-term signer: SM003
+runtime/security/release owner: SuperMonster003
+```
 
 ******
 
@@ -100,7 +109,7 @@ SOURCE descriptor만 받습니다. workspace archive와 stdin snapshot 한도는
 
 ******
 
-소스 manifest는 Android 권한을 요청하지 않습니다. exported service는 호스트 서명 권한을 요구하고 Binder 진입점에서 호출 UID, 설치된 호스트 패키지 및 현재 서명을 다시 확인합니다. Chaquopy Java bridge에는 접근할 수 있으므로 별도 Android UID, 전용 프로세스 및 좁은 Binder 경계에 의존하며 CPython을 보안 sandbox로 간주하지 않습니다.
+Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code sandbox가 아닙니다. exported service는 호스트 서명 권한을 요구하고 UID, package 및 signer를 다시 확인합니다. 별도 Android UID, 전용 프로세스 및 좁은 Binder 경계는 노출을 줄이지만 Python을 sandbox로 만들지 않습니다. 장기 릴리스 signer는 SM003이며 runtime/security/release owner는 SuperMonster003입니다.
 
 ******
 
@@ -121,11 +130,11 @@ SOURCE descriptor만 받습니다. workspace archive와 stdin snapshot 한도는
 
 ******
 
-- workspace archive, stdin snapshot, online pip 및 wheel 다운로드를 지원하지 않습니다.
+- stdin snapshot, workspace 쓰기, online pip 및 wheel 다운로드를 지원하지 않습니다.
 - UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.
-- AutoJs6 capability broker 및 호스트 API 연결은 아직 없습니다.
+- 실시간 AutoJs6 capability broker는 없습니다. 첫 API는 실행 시작 시 동결된 app/device/execution/project snapshot과 plugin-private workspace의 제한된 읽기 전용 접근만 사용합니다.
 - 32비트 Android와 임의의 native wheel은 보장하지 않습니다.
-- 로컬 CPython 테스트는 Chaquopy, Android, Binder 또는 기기 승인 증거가 아닙니다.
+- arm64-v8a에는 API 31 기기 증거가 있습니다. x86_64는 현재 packaging 증거만 있으며 기기 실행이나 완전한 기기 matrix로 제시하지 않습니다.
 
 ******
 
@@ -133,7 +142,7 @@ SOURCE descriptor만 받습니다. workspace archive와 stdin snapshot 한도는
 
 ******
 
-독립 R2 저장소, 정적 경계, provider/bootstrap 소스 및 로컬 의미 테스트가 준비되었습니다. QV710AF65F의 보호 soak 동안 Gradle과 ADB를 연기합니다. release AAR, 의존성 해석, Android 컴파일, APK/16 KB, Binder/PFD 및 기기 매트릭스는 미완료입니다.
+R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. R6-P4는 0.1.0을 준비 중입니다. 남은 blocker는 최종 AutoJs6 6.8.0 ID, GitHub 인증과 repository, 공식 plugin index, 현재 소스의 새 provenance 및 게시 후 production receipt입니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.
 
 - [ROADMAP.md 보기](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -142,6 +151,17 @@ SOURCE descriptor만 받습니다. workspace archive와 stdin snapshot 한도는
 ### 변경 이력
 
 ******
+
+# v0.1.0
+
+###### 2026/08/11 (릴리스 준비 중; tag 및 게시 전)
+
+* `안내` 0.1.0은 준비 중입니다. 최종 호스트 ID, GitHub repository와 인증, 공식 plugin index 및 production receipt가 남아 있습니다
+* `추가` AutoJs6 6.8.0과 함께 사용하는 Python 프로토콜 1.0-1.1, 제한된 project workspace 및 읽기 전용 app/device/execution/project snapshot
+* `추가` 호스트 재시작 없는 hot-plug: install 또는 재활성화 후 다음 새 실행이 ID를 다시 검색하고 pin하며 없거나 비활성 상태면 fallback하지 않습니다
+* `추가` 실행 중 Binder death는 replay 없이 현재 실행을 종료하고 이후 새 실행이 provider를 다시 검색합니다
+* `개선` Chaquopy를 trusted-local, non-sandbox runtime으로 고정. 장기 signer는 SM003이며 runtime/security/release owner는 SuperMonster003
+* `의존성` Chaquopy 17.0.0과 CPython 3.13.9를 lock. 최종 artifact는 소스 동결 후 다시 검증합니다
 
 # v0.1.0-alpha.1
 
@@ -166,7 +186,7 @@ SOURCE descriptor만 받습니다. workspace archive와 stdin snapshot 한도는
 Gradle이나 ADB를 호출하지 않는 파일시스템 정적 검사:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r2-static.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r6-release-source.ps1
 ```
 
 로컬 CPython을 사용한 이식 가능한 bootstrap 의미 테스트:
@@ -176,7 +196,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-이 검사는 Android 동작을 증명하지 않습니다. Gradle, APK, Binder 및 기기 검증은 보호 soak 이후 수행해야 합니다.
+정적 검사와 로컬 CPython은 Android 증거를 대체하지 않습니다. 기존 RC와 단일 기기 결과는 이력입니다. 최종 소스 동결 후에는 릴리스 ID에 직접 연결된 빌드, APK, Binder 및 대표 기기 검사만 다시 실행합니다.
 
 ******
 
@@ -184,16 +204,17 @@ python -B -m unittest tools.tests.test_bootstrap -v
 
 ******
 
-현재 빌드하지 않습니다. AAR 또는 SHA-256이 고정되지 않으면 release 설정은 fail closed됩니다.
+이 문서 변경에서는 빌드하지 않습니다. release 설정은 AAR, SHA-256, signer 또는 runtime lock drift 시 fail closed됩니다. 0.1.0은 준비 중이며 tag나 게시가 완료되지 않았습니다.
 
 빌드 전에 다음 release AAR을 `libs`에 배치하고 고정해야 합니다:
 
 ```text
+common-plugin-api.aar
 protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Maven의 Chaquopy 17.0.0과 stdlib만 사용할 예정입니다. 의존성 검증, native 라이브러리, 라이선스 및 16 KB page 호환성은 미검증입니다.
+Maven의 Chaquopy 17.0.0과 CPython 3.13.9를 lock하고 stdlib만 package합니다. 최종 게시에서는 의존성 metadata, native library, 16 KB page, NOTICE, SM003 signer 및 배포 APK 세 개를 다시 확인합니다.
 
 ******
 
@@ -201,7 +222,7 @@ Maven의 Chaquopy 17.0.0과 stdlib만 사용할 예정입니다. 의존성 검�
 
 ******
 
-프로젝트 소스는 MPL-2.0입니다. Chaquopy, CPython 및 기타 구성 요소는 각 라이선스를 따릅니다.
+프로젝트 소스는 MPL-2.0입니다. Chaquopy, CPython 및 기타 구성 요소는 각 라이선스를 따르며 attribution과 upstream/project source 접근은 `THIRD_PARTY_NOTICES.md`에 기록됩니다.
 
 ******
 

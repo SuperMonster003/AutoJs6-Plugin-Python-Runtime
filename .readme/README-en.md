@@ -37,7 +37,7 @@ The current README.md supports the following languages:
 
 Python Runtime is an independent provider for version 1 of the Python protocol. The host gives one Python source snapshot to a dedicated plugin process, which executes it with CPython and returns bounded output, structured exceptions, and exactly one terminal state.
 
-> This is currently an R2 proof of concept. Runtime source and local bootstrap semantic checks are present, but Gradle configuration, Android compilation, APK inspection, Binder validation, and device acceptance have not run.
+> Version 0.1.0 is in release preparation. Local RC build, APK, Binder, and one API 31 arm64-v8a device evidence exist, but source-governance changes require a fresh freeze; no v0.1.0 tag, GitHub Release, or production receipt exists yet.
 
 ******
 
@@ -49,7 +49,7 @@ Python Runtime is an independent provider for version 1 of the Python protocol. 
 - Collect stdout and stderr in their original order, then deliver bounded chunks under credits.
 - Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.
 - Allow one active session in the runtime process with no provider-side queue.
-- Retire the dedicated process after cancellation, timeout, callback death, or an isolating close path, without automatically replaying the script.
+- Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed.
 
 ******
 
@@ -67,7 +67,7 @@ Python request: 3.13
 expected packaged Python: 3.13.9
 ```
 
-The build requests Python 3.13. Version 3.13.9 is the expected packaged version recorded from the current Chaquopy release information, not a verified fact until APK inspection and device execution are complete.
+The build requests Python 3.13. Frozen local RC artifacts and exact device execution recorded CPython 3.13.9; the final 0.1.0 version and hashes must still be rechecked after source freeze.
 
 ******
 
@@ -81,10 +81,10 @@ The host discovers and calls the plugin with the following identities:
 service action: org.autojs.plugin.python.RUNTIME
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: V1
+protocol: 1.0-1.1
 ```
 
-The plugin accepts only a SOURCE descriptor. Workspace-archive and stdin-snapshot limits are zero, and no Context, Binder, host runtime object, or callback sink is injected into script globals.
+The plugin accepts an independent SOURCE, an optional bounded workspace archive, and the protocol 1.1 read-only host capability snapshot; stdin snapshots remain disabled. It injects no Context, Binder, host runtime object, or callback sink into script globals.
 
 ******
 
@@ -92,7 +92,16 @@ The plugin accepts only a SOURCE descriptor. Workspace-archive and stdin-snapsho
 
 ******
 
-> The protocol and host wiring roadmap is progressing, but the release AARs required by this repository have not been published and verified. Installing this scaffold alone does not establish a usable end-to-end Python engine.
+> Version 0.1.0 is paired only with AutoJs6 6.8.0, whose final host identity and compatibility bounds are not frozen yet. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no host restart. The official index, tag, and Release remain pending.
+
+```text
+release target: 0.1.0
+release state: release preparation; not tagged or published
+paired host: AutoJs6 6.8.0
+release branch: master
+long-term signer: SM003
+runtime/security/release owner: SuperMonster003
+```
 
 ******
 
@@ -100,7 +109,7 @@ The plugin accepts only a SOURCE descriptor. Workspace-archive and stdin-snapsho
 
 ******
 
-The source manifest requests no Android permission. The exported service requires the host signature permission and rechecks the calling UID, installed host package, and current signer set at Binder entry points. Python can still reach a Java bridge through Chaquopy, so this plugin relies on a separate Android UID, a dedicated process, and a narrow Binder capability boundary; it does not claim CPython is a security sandbox.
+The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. The exported service requires the host signature permission and rechecks UID, package, and signer; a separate Android UID, dedicated process, and narrow Binder boundary reduce host exposure but do not sandbox Python. SM003 is the long-term release signer, and SuperMonster003 owns runtime, security, and release.
 
 ******
 
@@ -121,11 +130,11 @@ The source manifest requests no Android permission. The exported service require
 
 ******
 
-- Workspace archives, stdin snapshots, online pip, and runtime wheel downloads are unsupported.
+- Stdin snapshots, workspace write-back, online pip, and runtime wheel downloads are unsupported.
 - There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.
-- There is no AutoJs6 capability broker yet; host APIs such as console, files, device, accessibility, and shell are not connected.
+- There is no live AutoJs6 capability broker; the first APIs use only the app/device/execution/project snapshot frozen at execution start and bounded read-only access to the plugin-private workspace.
 - 32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.
-- Local CPython unit tests are not treated as Chaquopy, Android, Binder, or device-acceptance evidence.
+- arm64-v8a has API 31 device evidence; x86_64 currently has packaging evidence only and is not presented as device execution or a complete device matrix.
 
 ******
 
@@ -133,7 +142,7 @@ The source manifest requests no Android permission. The exported service require
 
 ******
 
-The independent R2 repository, static boundary, provider/bootstrap sources, and local semantic tests are present. All Gradle and ADB work is deferred while QV710AF65F runs a protected soak. Release AARs, dependency resolution, Android compilation, APK and 16 KB page checks, Binder/PFD validation, and the device matrix remain incomplete; refer to the project roadmap for checkbox status.
+The R6-P2/P3 local RC and concentrated device evidence are now historical. R6-P4 prepares 0.1.0; remaining blockers are the final AutoJs6 6.8.0 identity, GitHub authentication and repository, the official plugin index, fresh current-source provenance, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -142,6 +151,17 @@ The independent R2 repository, static boundary, provider/bootstrap sources, and 
 ### Release history
 
 ******
+
+# v0.1.0
+
+###### 2026/08/11 (release preparation; not tagged or published)
+
+* `Hint` 0.1.0 remains in release preparation; final host identity, GitHub repository and authentication, official plugin index, and production receipt are pending
+* `Feature` Python protocol 1.0-1.1 paired with AutoJs6 6.8.0, a bounded project workspace, and read-only app/device/execution/project capability snapshots
+* `Feature` Hot-plug without a host restart: install or re-enable makes the next new execution rediscover and pin identity, while missing or disabled never falls back
+* `Feature` In-flight Binder death terminates the current execution without replay; later new executions rediscover the provider
+* `Improvement` Fix Chaquopy as a trusted-local, non-sandbox runtime; SM003 is the long-term signer and SuperMonster003 owns runtime, security, and release
+* `Dependency` Lock Chaquopy 17.0.0 and CPython 3.13.9; final artifacts require fresh verification after source freeze
 
 # v0.1.0-alpha.1
 
@@ -166,7 +186,7 @@ The independent R2 repository, static boundary, provider/bootstrap sources, and 
 Filesystem-only static verification which invokes neither Gradle nor ADB:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r2-static.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r6-release-source.ps1
 ```
 
 Portable bootstrap semantic tests under the machine's local CPython:
@@ -176,7 +196,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-Neither check proves the Android runtime works. Gradle, APK, Binder, and device verification must be completed separately after the protected soak.
+Static and local CPython checks cannot replace Android evidence. Existing local RC and single-device results are historical; after final source freeze, rerun only the build, APK, Binder, and representative-device checks directly bound to the release identity.
 
 ******
 
@@ -184,16 +204,17 @@ Neither check proves the Android runtime works. Gradle, APK, Binder, and device 
 
 ******
 
-No build is run at this stage. Release configuration fails closed while protocol AARs are missing or their SHA-256 values are not locked.
+This documentation slice runs no build. Release configuration fails closed on protocol AAR, SHA-256, signer, or runtime-lock drift; 0.1.0 remains preparation only and is neither tagged nor published.
 
 The following release AARs must be staged and locked in the repository `libs` directory before a build:
 
 ```text
+common-plugin-api.aar
 protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-The runtime is planned to use Chaquopy 17.0.0 from Maven and package only the stdlib. Dependency verification metadata, the native-library inventory, license obligations, and 16 KB page compatibility remain build-acceptance items.
+The runtime locks Chaquopy 17.0.0 and CPython 3.13.9 from Maven and packages only the stdlib. Final release must recheck dependency metadata, native libraries, 16 KB pages, notices, the SM003 signer, and all three distribution APKs.
 
 ******
 
@@ -201,7 +222,7 @@ The runtime is planned to use Chaquopy 17.0.0 from Maven and package only the st
 
 ******
 
-Project source is licensed under MPL-2.0. Chaquopy, CPython, and other third-party components remain under their respective licenses.
+Project source is licensed under MPL-2.0. Chaquopy, CPython, and other third-party components retain their licenses; attribution and upstream and project-source access are documented in `THIRD_PARTY_NOTICES.md`.
 
 ******
 

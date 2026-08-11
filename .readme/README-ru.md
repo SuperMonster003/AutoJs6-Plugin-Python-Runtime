@@ -37,7 +37,7 @@
 
 Python Runtime — независимый provider протокола Python V1. Хост передает один снимок исходного кода в отдельный процесс, который выполняет его в CPython и возвращает ограниченный вывод, структурированные исключения и одно терминальное состояние.
 
-> Сейчас это прототип R2. Исходники среды и локальные семантические проверки bootstrap готовы, но конфигурация Gradle, компиляция Android, проверка APK, Binder и испытания на устройстве не выполнялись.
+> Версия 0.1.0 готовится к официальному выпуску. Есть локальные RC-свидетельства сборки, APK, Binder и одного устройства API 31 arm64-v8a, но после изменений управления исходники нужно заморозить заново. Тега v0.1.0, GitHub Release и production receipt пока нет.
 
 ******
 
@@ -49,7 +49,7 @@ Python Runtime — независимый provider протокола Python V1.
 - Сохранение порядка stdout и stderr с передачей ограниченных chunks по credits.
 - Возврат `SystemExit`, синтаксических и runtime ошибок с ограниченным структурированным traceback.
 - Один активный сеанс на процесс без очереди provider.
-- Завершение отдельного процесса после отмены, timeout или callback death без повтора сценария.
+- Перезапуск хоста не нужен: следующая новая сессия после установки или повторного включения заново обнаруживает и фиксирует provider, а Binder death во время выполнения завершает его без автоматического повтора.
 
 ******
 
@@ -67,7 +67,7 @@ Python request: 3.13
 expected packaged Python: 3.13.9
 ```
 
-Сборка запрашивает Python 3.13. 3.13.9 — ожидаемая версия пакета по текущим данным Chaquopy, но она не подтверждена до анализа APK и запуска на устройстве.
+Сборка запрашивает Python 3.13. Замороженные локальные RC-артефакты и точный запуск на устройстве зафиксировали CPython 3.13.9; версию и hashes финальной 0.1.0 нужно проверить заново после заморозки исходников.
 
 ******
 
@@ -81,10 +81,10 @@ expected packaged Python: 3.13.9
 service action: org.autojs.plugin.python.RUNTIME
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: V1
+protocol: 1.0-1.1
 ```
 
-Принимается только descriptor SOURCE. Лимиты workspace archive и stdin snapshot равны нулю; Context, Binder, объекты хоста и callback sink в сценарий не внедряются.
+Принимаются отдельный SOURCE, необязательный ограниченный workspace archive и read-only snapshot возможностей хоста протокола 1.1; stdin snapshot остается выключенным. Context, Binder, объекты хоста и callback sink не внедряются.
 
 ******
 
@@ -92,7 +92,16 @@ protocol: V1
 
 ******
 
-> Протокол и подключение хоста развиваются, но требуемые release AAR еще не опубликованы и не проверены. Установка этого scaffold сама по себе не создает рабочий Python engine.
+> Версия 0.1.0 предназначена только для AutoJs6 6.8.0, но финальная идентичность хоста и границы совместимости еще не заморожены. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения хост перезапускать не нужно. Официальный index, tag и Release еще ожидаются.
+
+```text
+release target: 0.1.0
+release state: release preparation; not tagged or published
+paired host: AutoJs6 6.8.0
+release branch: master
+long-term signer: SM003
+runtime/security/release owner: SuperMonster003
+```
 
 ******
 
@@ -100,7 +109,7 @@ protocol: V1
 
 ******
 
-Исходный manifest не запрашивает разрешений Android. Exported service требует signature permission хоста и повторно проверяет UID, установленный пакет хоста и текущие подписи. Java bridge Chaquopy остается доступным, поэтому изоляция основана на отдельном Android UID, выделенном процессе и узкой границе Binder; CPython не считается безопасной sandbox.
+Runtime Chaquopy предназначен только для доверенных локальных сценариев, а не как hostile-code sandbox. Exported service требует signature permission хоста и проверяет UID, package и signer; отдельный Android UID, процесс и узкая граница Binder уменьшают воздействие, но не делают Python sandbox. Долгосрочный release signer — SM003, а SuperMonster003 отвечает за runtime, security и release.
 
 ******
 
@@ -121,11 +130,11 @@ protocol: V1
 
 ******
 
-- Нет workspace archive, stdin snapshot, online pip и загрузки wheels.
+- Нет stdin snapshot, записи в workspace, online pip и загрузки wheels.
 - Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.
-- Пока нет AutoJs6 capability broker и подключения host API.
+- Нет realtime AutoJs6 capability broker; первые API используют только замороженный при запуске snapshot app/device/execution/project и ограниченное read-only чтение private workspace плагина.
 - 32-разрядный Android и произвольные native wheels не гарантируются.
-- Локальные тесты CPython не являются доказательством Chaquopy, Android, Binder или устройства.
+- Для arm64-v8a есть свидетельство устройства API 31; для x86_64 пока только packaging, не запуск на устройстве и не полная матрица.
 
 ******
 
@@ -133,7 +142,7 @@ protocol: V1
 
 ******
 
-Независимый репозиторий R2, статическая граница, исходники provider/bootstrap и локальные тесты готовы. Gradle и ADB отложены на время защищенного soak QV710AF65F. Release AAR, зависимости, компиляция Android, проверки APK/16 KB, Binder/PFD и матрица устройств не завершены.
+Локальные RC- и концентрированные device-свидетельства R6-P2/P3 сохранены как история. R6-P4 готовит 0.1.0; остаются финальная идентичность AutoJs6 6.8.0, GitHub authentication и repository, официальный plugin index, новая provenance текущих исходников и production receipt после публикации. Полная API×ABI matrix и новый soak не являются автоматическими gates.
 
 - [Открыть ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -142,6 +151,17 @@ protocol: V1
 ### История версий
 
 ******
+
+# v0.1.0
+
+###### 2026/08/11 (подготовка выпуска; без tag и публикации)
+
+* `Примечание` 0.1.0 еще готовится; остаются финальная идентичность хоста, GitHub repository и authentication, официальный plugin index и production receipt
+* `Добавлено` Протокол Python 1.0-1.1 для AutoJs6 6.8.0, ограниченный project workspace и read-only snapshots app/device/execution/project
+* `Добавлено` Hot-plug без перезапуска хоста: install или повторное включение позволяет следующему запуску заново найти и pin ID, без fallback при отсутствии или отключении
+* `Добавлено` Binder death во время работы завершает текущий запуск без replay; новые запуски заново обнаруживают provider
+* `Улучшено` Chaquopy закреплен как trusted-local, non-sandbox runtime; долгосрочный signer — SM003, owner runtime/security/release — SuperMonster003
+* `Зависимость` Зафиксированы Chaquopy 17.0.0 и CPython 3.13.9; финальные artifacts проверяются после заморозки исходников
 
 # v0.1.0-alpha.1
 
@@ -166,7 +186,7 @@ protocol: V1
 Статическая проверка файлов без Gradle и ADB:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r2-static.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r6-release-source.ps1
 ```
 
 Переносимые семантические тесты bootstrap в локальном CPython:
@@ -176,7 +196,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-Эти проверки не доказывают работу Android. Gradle, APK, Binder и устройство нужно проверить после защищенного soak.
+Статические проверки и локальный CPython не заменяют Android-свидетельства. Существующие RC и результат одного устройства исторические; после финальной заморозки повторяются только build, APK, Binder и representative-device проверки, связанные с release identity.
 
 ******
 
@@ -184,16 +204,17 @@ python -B -m unittest tools.tests.test_bootstrap -v
 
 ******
 
-Сборка сейчас не выполняется. Release-конфигурация fail closed, пока AAR или SHA-256 не зафиксированы.
+Этот срез документации не запускает сборку. Release-конфигурация fail closed при drift AAR, SHA-256, signer или runtime lock; 0.1.0 пока готовится, без tag и публикации.
 
 Перед сборкой следующие release AAR нужно разместить и зафиксировать в `libs`:
 
 ```text
+common-plugin-api.aar
 protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Планируется Chaquopy 17.0.0 из Maven только со stdlib. Метаданные зависимостей, native-библиотеки, лицензии и 16 KB page еще требуют проверки.
+Runtime фиксирует Chaquopy 17.0.0 и CPython 3.13.9 из Maven и включает только stdlib. Финальный release повторно проверяет metadata, native libraries, 16 KB page, NOTICE, signer SM003 и три распространяемых APK.
 
 ******
 
@@ -201,7 +222,7 @@ python-runtime-api.aar
 
 ******
 
-Исходный код распространяется по MPL-2.0. Chaquopy, CPython и другие компоненты сохраняют свои лицензии.
+Исходный код распространяется по MPL-2.0. Chaquopy, CPython и другие компоненты сохраняют свои лицензии; атрибуция и доступ к upstream/project source описаны в `THIRD_PARTY_NOTICES.md`.
 
 ******
 

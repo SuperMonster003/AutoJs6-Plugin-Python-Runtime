@@ -22,6 +22,10 @@ param(
 
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
+    [string] $CommonPluginApiAar,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
     [string] $ProtocolWireApiAar,
 
     [Parameter(Mandatory = $true)]
@@ -377,11 +381,31 @@ function Get-RuntimeLockRecord([string] $Path) {
 function Get-HostApiLockRecord(
     [string] $Path,
     [string] $HostCommit,
+    [string] $CommonAar,
     [string] $ProtocolAar,
     [string] $PythonAar
 ) {
     $properties = Read-UniqueProperties $Path 'Host API AAR lock'
     Assert-True ((Get-RequiredProperty $properties 'format' 'Host API AAR lock') -ceq '1') 'Host API AAR lock format is not 1'
+    $hostApiEntries = @(
+        [ordered]@{ id = 'common-plugin-api'; path = $CommonAar },
+        [ordered]@{ id = 'protocol-wire-api'; path = $ProtocolAar },
+        [ordered]@{ id = 'python-runtime-api'; path = $PythonAar }
+    )
+    $hostApiIds = @($hostApiEntries | ForEach-Object { [string] $_.id })
+    $expectedHostApiLockKeys = @('format')
+    foreach ($id in $hostApiIds) {
+        $expectedHostApiLockKeys += @("$id.file", "$id.sha256")
+    }
+    $unexpectedHostApiLockKeys = @(
+        $properties.Keys | Where-Object { $expectedHostApiLockKeys -cnotcontains [string] $_ }
+    )
+    $missingHostApiLockKeys = @(
+        $expectedHostApiLockKeys | Where-Object { -not $properties.ContainsKey($_) }
+    )
+    Assert-True (
+        $unexpectedHostApiLockKeys.Count -eq 0 -and $missingHostApiLockKeys.Count -eq 0
+    ) 'Host API AAR lock inventory must contain exactly common-plugin-api, protocol-wire-api, and python-runtime-api file/SHA-256 pairs'
     $rawLock = Get-Content -Raw -LiteralPath $Path -Encoding UTF8
     Assert-True ($rawLock -notmatch '(?im)dirty current tree') 'Host API AAR lock still identifies a dirty source tree'
     $hostHeadMatch = [regex]::Match(
@@ -398,15 +422,13 @@ function Get-HostApiLockRecord(
     ) 'Host API AAR lock Host HEAD differs from the frozen host commit'
 
     $records = [ordered]@{}
-    foreach ($entry in @(
-        [ordered]@{ id = 'protocol-wire-api'; path = $ProtocolAar },
-        [ordered]@{ id = 'python-runtime-api'; path = $PythonAar }
-    )) {
+    foreach ($entry in $hostApiEntries) {
         $id = [string] $entry.id
         $aarPath = [string] $entry.path
         $lockedFile = Get-RequiredProperty $properties "$id.file" 'Host API AAR lock'
         $lockedSha256 = (Get-RequiredProperty $properties "$id.sha256" 'Host API AAR lock').ToLowerInvariant()
         Assert-True ($lockedFile -ceq [IO.Path]::GetFileName($aarPath)) "Host API AAR lock filename mismatch for $id"
+        Assert-True ([IO.Path]::GetExtension($lockedFile) -ceq '.aar') "Host API AAR lock filename is not an AAR for $id"
         Assert-True ($lockedFile -notmatch '-debug\.aar$') "Host API AAR lock points to a debug AAR for $id"
         Assert-True ($lockedSha256 -match $sha256Pattern) "Host API AAR lock SHA-256 is invalid for $id"
         $fileRecord = New-FileRecord $aarPath
@@ -428,6 +450,7 @@ $HostApk = Resolve-ExistingFile $HostApk 'Host APK'
 $PluginArm64Apk = Resolve-ExistingFile $PluginArm64Apk 'Plugin arm64-v8a APK'
 $PluginX8664Apk = Resolve-ExistingFile $PluginX8664Apk 'Plugin x86_64 APK'
 $PluginUniversalApk = Resolve-ExistingFile $PluginUniversalApk 'Plugin universal APK'
+$CommonPluginApiAar = Resolve-ExistingFile $CommonPluginApiAar 'Common Plugin API AAR'
 $ProtocolWireApiAar = Resolve-ExistingFile $ProtocolWireApiAar 'Protocol Wire API AAR'
 $PythonRuntimeApiAar = Resolve-ExistingFile $PythonRuntimeApiAar 'Python Runtime API AAR'
 $Aapt2 = Resolve-ExistingFile $Aapt2 'aapt2'
@@ -504,7 +527,12 @@ $signerSetSha256 = Get-Utf8Sha256 ((@($referenceSigners | Sort-Object) -join "`n
 
 $hostApiLockPath = Join-Path $pluginRepo 'locks/host-api-aars.lock'
 $runtimeLockPath = Join-Path $pluginRepo 'locks/python-runtime.lock'
-$hostApiLockRecord = Get-HostApiLockRecord $hostApiLockPath $hostIdentity.commit $ProtocolWireApiAar $PythonRuntimeApiAar
+$hostApiLockRecord = Get-HostApiLockRecord `
+    $hostApiLockPath `
+    $hostIdentity.commit `
+    $CommonPluginApiAar `
+    $ProtocolWireApiAar `
+    $PythonRuntimeApiAar
 $runtimeLockRecord = Get-RuntimeLockRecord $runtimeLockPath
 
 $aapt2Version = Invoke-NativeCapture $Aapt2 @('version') 'aapt2 version inspection'

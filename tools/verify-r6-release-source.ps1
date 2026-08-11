@@ -64,6 +64,21 @@ $appBuild = if (Test-Path -LiteralPath $appBuildPath -PathType Leaf) {
     ''
 }
 
+function Read-RequiredSource([string] $RelativePath) {
+    $path = Join-Path $repoRoot $RelativePath
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+        Add-Blocker "Required release source is missing: $RelativePath"
+        return ''
+    }
+    return Get-Content -Raw -LiteralPath $path -Encoding UTF8
+}
+
+$manifest = Read-RequiredSource 'app/src/main/AndroidManifest.xml'
+$metadataSource = Read-RequiredSource 'app/src/main/java/io/github/supermonster003/autojs6/plugin/python/runtime/PythonRuntimeMetadata.kt'
+$pluginInfoSource = Read-RequiredSource 'app/src/main/java/io/github/supermonster003/autojs6/plugin/python/runtime/PythonRuntimePluginInfoService.kt'
+$runtimeAdr = Read-RequiredSource 'docs/adr/0001-python-runtime-selection.md'
+$maintenancePolicy = Read-RequiredSource 'docs/maintenance/CPYTHON_RUNTIME_POLICY.md'
+
 foreach ($marker in @(
     'releaseSigningPropertyNames',
     'releaseSigningReady',
@@ -75,9 +90,12 @@ foreach ($marker in @(
     'unsigned release artifacts are forbidden',
     'VERSION_BUILD must equal the Git commit count',
     'Release artifact creation requires a clean Git worktree',
+    'Release artifact creation requires a clean Host HEAD',
     'getOutputFileName',
     '?: "universal"',
-    'rootProject.name'
+    'rootProject.name',
+    'collectReleaseFiles',
+    'appendDigestToReleasedFiles'
 )) {
     if (-not $appBuild.Contains($marker)) {
         Add-Blocker "Release source marker is missing: $marker"
@@ -96,9 +114,31 @@ $versionName = $versionProperties['VERSION_NAME']
 $versionBuild = 0
 if ([string]::IsNullOrWhiteSpace($versionName)) {
     Add-Blocker 'VERSION_NAME is missing'
+} elseif ($versionName -cne '0.1.0') {
+    Add-Blocker 'VERSION_NAME must be exactly 0.1.0 for the stable source freeze'
 }
 if (-not [int]::TryParse($versionProperties['VERSION_BUILD'], [ref] $versionBuild) -or $versionBuild -le 0) {
     Add-Blocker 'VERSION_BUILD must be a positive integer'
+}
+
+if ($metadataSource -notmatch 'minHostVersionCode\s*=\s*[1-9][0-9]*L') {
+    Add-Blocker 'Python runtime metadata does not enforce the final Host 6.8.0 minimum version code'
+}
+if ($pluginInfoSource -notmatch 'class\s+PythonRuntimePluginInfoService\s*:\s*Service\(\)' -or
+    $pluginInfoSource -notmatch 'IPluginInfoProvider\.Stub') {
+    Add-Blocker 'Plugin Center INFO service implementation is missing or incomplete'
+}
+if ($manifest -notmatch 'android:name="\.PythonRuntimePluginInfoService"' -or
+    $manifest -notmatch 'android:name="org\.autojs\.plugin\.INFO"') {
+    Add-Blocker 'Plugin Center INFO service manifest declaration is missing'
+}
+if ($runtimeAdr -notmatch 'Status:\s*accepted for 0\.1\.0') {
+    Add-Blocker 'Runtime ADR is not accepted for 0.1.0'
+}
+foreach ($owner in @('Runtime owner', 'Security owner', 'Release owner')) {
+    if ($maintenancePolicy -notmatch "(?s)$owner.*SuperMonster003") {
+        Add-Blocker "$owner is not assigned to SuperMonster003"
+    }
 }
 
 $head = Invoke-GitReadOnly @('rev-parse', '--verify', 'HEAD')
@@ -206,10 +246,29 @@ if ($hostApiLockRaw -notmatch '(?im)^#\s*Distribution manifest SHA-256:\s*[0-9a-
 if ($hostApiLock['format'] -cne '1') {
     Add-Blocker 'Host API AAR lock format is not 1'
 }
-foreach ($id in @('protocol-wire-api', 'python-runtime-api')) {
+$hostApiIds = @('common-plugin-api', 'protocol-wire-api', 'python-runtime-api')
+$expectedHostApiLockKeys = @('format')
+foreach ($id in $hostApiIds) {
+    $expectedHostApiLockKeys += @("$id.file", "$id.sha256")
+}
+$unexpectedHostApiLockKeys = @(
+    $hostApiLock.Keys | Where-Object { $expectedHostApiLockKeys -cnotcontains [string] $_ }
+)
+$missingHostApiLockKeys = @(
+    $expectedHostApiLockKeys | Where-Object { -not $hostApiLock.ContainsKey($_) }
+)
+if ($unexpectedHostApiLockKeys.Count -ne 0 -or $missingHostApiLockKeys.Count -ne 0) {
+    Add-Blocker 'Host API AAR lock inventory must contain exactly common-plugin-api, protocol-wire-api, and python-runtime-api file/SHA-256 pairs'
+}
+foreach ($id in $hostApiIds) {
     $fileName = $hostApiLock["$id.file"]
     $expectedHash = $hostApiLock["$id.sha256"]
-    if ([string]::IsNullOrWhiteSpace($fileName) -or $fileName -ne [IO.Path]::GetFileName($fileName)) {
+    if (
+        [string]::IsNullOrWhiteSpace($fileName) -or
+        $fileName -cne [IO.Path]::GetFileName($fileName) -or
+        [IO.Path]::GetExtension($fileName) -cne '.aar' -or
+        $fileName -match '-debug\.aar$'
+    ) {
         Add-Blocker "Invalid locked AAR filename for $id"
         continue
     }

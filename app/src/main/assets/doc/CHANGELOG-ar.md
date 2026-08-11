@@ -4,6 +4,17 @@
 
 ******
 
+# v0.1.0
+
+###### 2026/08/11 (تحضير للنشر؛ دون tag أو نشر)
+
+* `ملاحظة` ما زال 0.1.0 قيد التحضير؛ تبقى هوية المضيف النهائية ومستودع GitHub والمصادقة والفهرس الرسمي وproduction receipt
+* `إضافة` بروتوكول Python ‏1.0-1.1 مقترن بـ AutoJs6 6.8.0 وproject workspace محدود وsnapshots ‏app/device/execution/project للقراءة فقط
+* `إضافة` Hot-plug دون إعادة تشغيل المضيف: يسمح التثبيت أو إعادة التفعيل للتنفيذ الجديد التالي بإعادة اكتشاف الهوية وpin دون fallback عند الفقد أو التعطيل
+* `إضافة` ينهي Binder death أثناء التشغيل التنفيذ الحالي دون replay؛ تعيد عمليات التنفيذ الجديدة اكتشاف provider
+* `تحسين` تثبيت Chaquopy كبيئة trusted-local وnon-sandbox؛ ‏SM003 هو signer طويل الأجل وSuperMonster003 هو owner لـ runtime/security/release
+* `اعتماد` قفل Chaquopy 17.0.0 وCPython 3.13.9؛ تعاد مراجعة artifacts النهائية بعد تجميد المصدر
+
 # v0.1.0-alpha.1
 
 ###### 2026/08/09

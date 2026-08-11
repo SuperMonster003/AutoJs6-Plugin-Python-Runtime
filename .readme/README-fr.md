@@ -37,7 +37,7 @@ Le fichier README.md actuel est disponible dans les langues suivantes:
 
 Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal.
 
-> Il s'agit actuellement d'une preuve de concept R2. Les sources et les vérifications sémantiques locales du bootstrap sont présentes, mais la configuration Gradle, la compilation Android, l'inspection de l'APK, la validation Binder et les tests sur appareil n'ont pas été exécutés.
+> La version 0.1.0 est en préparation de publication. Des preuves locales RC existent pour la construction, l'APK, Binder et un appareil API 31 arm64-v8a, mais les changements de gouvernance imposent un nouveau gel; aucun tag v0.1.0, GitHub Release ou production receipt n'existe encore.
 
 ******
 
@@ -49,7 +49,7 @@ Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte t
 - Conserver l'ordre de stdout et stderr puis livrer des chunks bornés sous crédits.
 - Signaler `SystemExit`, les erreurs de syntaxe et les exceptions avec une traceback structurée bornée.
 - Autoriser une session active par processus sans file d'attente côté fournisseur.
-- Retirer le processus après annulation, délai dépassé ou décès du callback sans rejouer le script.
+- Ne pas redémarrer l'hôte: la prochaine nouvelle exécution après installation ou réactivation redécouvre et épingle le provider; une mort Binder en cours termine cette exécution sans jamais la rejouer.
 
 ******
 
@@ -67,7 +67,7 @@ Python request: 3.13
 expected packaged Python: 3.13.9
 ```
 
-La construction demande Python 3.13. 3.13.9 est la version empaquetée attendue d'après les informations Chaquopy actuelles; elle ne sera vérifiée qu'après inspection de l'APK et exécution sur appareil.
+La construction demande Python 3.13. Les artefacts RC locaux gelés et l'exécution exacte sur appareil ont enregistré CPython 3.13.9; la version et les hashes finaux de 0.1.0 devront être revérifiés après le gel des sources.
 
 ******
 
@@ -81,10 +81,10 @@ L'hôte découvre et appelle le plug-in avec les identités suivantes:
 service action: org.autojs.plugin.python.RUNTIME
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: V1
+protocol: 1.0-1.1
 ```
 
-Seul un descripteur SOURCE est accepté. Les limites de workspace archive et stdin snapshot sont nulles, et aucun Context, Binder, objet d'exécution hôte ou callback sink n'est injecté.
+Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facultative et le snapshot en lecture seule des capacités hôte du protocole 1.1; stdin snapshot reste désactivé. Aucun Context, Binder, objet d'exécution hôte ou callback sink n'est injecté.
 
 ******
 
@@ -92,7 +92,16 @@ Seul un descripteur SOURCE est accepté. Les limites de workspace archive et std
 
 ******
 
-> Le protocole et le raccordement hôte progressent, mais les AAR release requis ne sont pas encore publiés et vérifiés. Installer ce scaffold ne fournit pas à lui seul un moteur Python utilisable de bout en bout.
+> La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, dont l'identité finale et les limites de compatibilité ne sont pas encore gelées. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'index officiel, le tag et la Release restent en attente.
+
+```text
+release target: 0.1.0
+release state: release preparation; not tagged or published
+paired host: AutoJs6 6.8.0
+release branch: master
+long-term signer: SM003
+runtime/security/release owner: SuperMonster003
+```
 
 ******
 
@@ -100,7 +109,7 @@ Seul un descripteur SOURCE est accepté. Les limites de workspace archive et std
 
 ******
 
-Le manifeste source ne demande aucune permission Android. Le service exporté exige la permission de signature de l'hôte et revérifie l'UID appelant, le paquet hôte installé et ses signatures. Le pont Java de Chaquopy reste accessible: l'isolation repose donc sur un UID Android distinct, un processus dédié et une frontière Binder étroite; CPython n'est pas présenté comme un bac à sable.
+Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un sandbox de code hostile. Le service exporté exige la permission de signature hôte et revérifie UID, paquet et signer; UID Android distinct, processus dédié et frontière Binder étroite réduisent l'exposition sans isoler Python comme sandbox. SM003 est le signer de publication à long terme et SuperMonster003 possède les rôles runtime, sécurité et release.
 
 ******
 
@@ -121,11 +130,11 @@ Le manifeste source ne demande aucune permission Android. Le service exporté ex
 
 ******
 
-- Les archives de workspace, stdin snapshot, pip en ligne et téléchargements de wheel sont indisponibles.
+- Stdin snapshot, l'écriture dans le workspace, pip en ligne et les téléchargements de wheel sont indisponibles.
 - Aucun script UI, débogueur, REPL ou accès arbitraire aux objets Java de l'hôte.
-- Aucun broker de capacités AutoJs6; les API hôte ne sont pas encore raccordées.
+- Aucun broker AutoJs6 temps réel; les premières API utilisent seulement le snapshot app/device/execution/project gelé au démarrage et un accès borné en lecture seule au workspace privé du plug-in.
 - Le support Android 32 bits et les wheels natives tierces ne sont pas garantis.
-- Les tests CPython locaux ne constituent pas une preuve Chaquopy, Android, Binder ou appareil.
+- arm64-v8a dispose d'une preuve appareil API 31; x86_64 n'a actuellement qu'une preuve d'empaquetage, ni exécution appareil ni matrice complète.
 
 ******
 
@@ -133,7 +142,7 @@ Le manifeste source ne demande aucune permission Android. Le service exporté ex
 
 ******
 
-Le dépôt R2 indépendant, la frontière statique, les sources provider/bootstrap et les tests sémantiques locaux sont présents. Gradle et ADB sont différés pendant le soak protégé de QV710AF65F. Les AAR release, la résolution des dépendances, la compilation Android, les contrôles APK/16 KB, Binder/PFD et la matrice d'appareils restent incomplets.
+Les preuves RC locales et appareil concentrées de R6-P2/P3 sont désormais historiques. R6-P4 prépare 0.1.0; les blockers restants sont l'identité finale AutoJs6 6.8.0, l'authentification et le dépôt GitHub, l'index officiel, une provenance des sources actuelles et un production receipt après publication. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.
 
 - [Voir ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -142,6 +151,17 @@ Le dépôt R2 indépendant, la frontière statique, les sources provider/bootstr
 ### Historique des versions
 
 ******
+
+# v0.1.0
+
+###### 2026/08/11 (préparation de publication; ni tag ni publication)
+
+* `Note` 0.1.0 reste en préparation; l'identité hôte finale, le dépôt et l'authentification GitHub, l'index officiel et le production receipt sont en attente
+* `Fonction` Protocole Python 1.0-1.1 associé à AutoJs6 6.8.0, workspace projet borné et snapshots app/device/execution/project en lecture seule
+* `Fonction` Hot-plug sans redémarrage hôte: installation ou réactivation permet à la prochaine exécution de redécouvrir et épingler l'identité, sans fallback si absent ou désactivé
+* `Fonction` La mort Binder en cours termine l'exécution sans replay; les nouvelles exécutions redécouvrent le provider
+* `Amélioration` Chaquopy est fixé comme runtime trusted-local et non-sandbox; SM003 est le signer à long terme et SuperMonster003 possède runtime, sécurité et release
+* `Dépendance` Verrouillage de Chaquopy 17.0.0 et CPython 3.13.9; les artefacts finaux seront revérifiés après le gel des sources
 
 # v0.1.0-alpha.1
 
@@ -166,7 +186,7 @@ Le dépôt R2 indépendant, la frontière statique, les sources provider/bootstr
 Vérification statique du système de fichiers sans Gradle ni ADB:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r2-static.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r6-release-source.ps1
 ```
 
 Tests sémantiques portables du bootstrap avec le CPython local:
@@ -176,7 +196,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-Ces contrôles ne prouvent pas le fonctionnement Android. Gradle, APK, Binder et appareil devront être validés après le soak protégé.
+Les contrôles statiques et CPython local ne remplacent pas les preuves Android. Les résultats RC et mono-appareil existants sont historiques; après le gel final, seuls les contrôles construction, APK, Binder et appareil représentatif liés à l'identité de publication seront rejoués.
 
 ******
 
@@ -184,16 +204,17 @@ Ces contrôles ne prouvent pas le fonctionnement Android. Gradle, APK, Binder et
 
 ******
 
-Aucune construction n'est lancée. La configuration release échoue fermée tant que les AAR ou leurs SHA-256 ne sont pas verrouillés.
+Cette tranche documentaire ne lance aucune construction. La configuration release échoue fermée sur toute dérive AAR, SHA-256, signer ou runtime lock; 0.1.0 reste en préparation, sans tag ni publication.
 
 Ces AAR release doivent être placés et verrouillés dans `libs` avant toute construction:
 
 ```text
+common-plugin-api.aar
 protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Le moteur doit utiliser Chaquopy 17.0.0 depuis Maven et n'empaqueter que la stdlib. Métadonnées de vérification, bibliothèques natives, licences et compatibilité 16 KB restent à accepter.
+Le runtime verrouille Chaquopy 17.0.0 et CPython 3.13.9 depuis Maven et n'empaquette que la stdlib. La publication finale doit revérifier métadonnées, bibliothèques natives, pages 16 KB, NOTICE, signer SM003 et les trois APK distribués.
 
 ******
 
@@ -201,7 +222,7 @@ Le moteur doit utiliser Chaquopy 17.0.0 depuis Maven et n'empaqueter que la stdl
 
 ******
 
-Le code source utilise MPL-2.0. Chaquopy, CPython et les autres composants gardent leurs licences respectives.
+Le code source utilise MPL-2.0. Chaquopy, CPython et les autres composants gardent leurs licences; les attributions et accès aux sources amont et du projet figurent dans `THIRD_PARTY_NOTICES.md`.
 
 ******
 

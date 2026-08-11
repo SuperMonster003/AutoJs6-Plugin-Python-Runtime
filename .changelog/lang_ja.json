@@ -5,6 +5,23 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v0.1.0": {
+      "released_date": "2026/08/11 (リリース準備中; tag・公開前)",
+      "hint": [
+        "0.1.0 は準備中です. 最終ホスト ID, GitHub repository と認証, 公式 plugin index, production receipt は未完了です"
+      ],
+      "feature": [
+        "AutoJs6 6.8.0 と組み合わせる Python プロトコル 1.0-1.1, 上限付き project workspace, 読み取り専用 app/device/execution/project snapshot",
+        "ホスト再起動なしの hot-plug: install または再有効化後の次の新規実行で ID を再検出・pin し, 不在・無効時は fallback しません",
+        "実行中の Binder death は replay せず現在の実行を終了し, 後続の新規実行で provider を再検出します"
+      ],
+      "improvement": [
+        "Chaquopy を trusted-local, non-sandbox runtime として固定. 長期 signer は SM003, runtime/security/release owner は SuperMonster003"
+      ],
+      "dependency": [
+        "{{ runtime_dependency }} と CPython {{ python_version_expected }} を lock. 最終 artifact はソース凍結後に再検証します"
+      ]
+    },
     "v0.1.0-alpha.1": {
       "released_date": "2026/08/09",
       "hint": [

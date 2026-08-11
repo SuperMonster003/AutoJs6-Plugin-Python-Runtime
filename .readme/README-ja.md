@@ -37,7 +37,7 @@
 
 Python Runtime は Python プロトコル V1 の独立 provider です. ホストから 1 つの Python ソーススナップショットを専用プロセスで受け取り, CPython で実行して, 制限付き出力, 構造化例外, 1 つの終端状態を返します.
 
-> 現段階は R2 概念実証です. ランタイムソースとローカル bootstrap 意味テストはありますが, Gradle 設定, Android コンパイル, APK 検査, Binder 検証, 端末受け入れテストは未実施です.
+> 0.1.0 は正式リリース準備中です. ローカル RC のビルド, APK, Binder, API 31 arm64-v8a 端末 1 台の証拠はありますが, ソース管理変更後に再凍結が必要です. v0.1.0 tag, GitHub Release, production receipt はまだありません.
 
 ******
 
@@ -49,7 +49,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 - stdout と stderr の順序を保ち, 上限付き chunk を credit で送信します.
 - `SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.
 - プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.
-- キャンセル, timeout, callback death 後はスクリプトを再実行せず専用プロセスを破棄します.
+- ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません.
 
 ******
 
@@ -67,7 +67,7 @@ Python request: 3.13
 expected packaged Python: 3.13.9
 ```
 
-ビルドは Python 3.13 を要求します. 3.13.9 は現在の Chaquopy リリース情報による期待値であり, APK 検査と端末実行までは検証済み事実ではありません.
+ビルドは Python 3.13 を要求します. 凍結済みローカル RC 産物と正確な端末実行では CPython 3.13.9 を記録しました. 最終 0.1.0 はソース凍結後に版と hash を再検証します.
 
 ******
 
@@ -81,10 +81,10 @@ expected packaged Python: 3.13.9
 service action: org.autojs.plugin.python.RUNTIME
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: V1
+protocol: 1.0-1.1
 ```
 
-SOURCE descriptor のみ受け付けます. workspace archive と stdin snapshot の上限は 0 で, Context, Binder, ホストオブジェクト, callback sink をスクリプトへ注入しません.
+独立 SOURCE, 任意の上限付き workspace archive, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. stdin snapshot は無効のままで, Context, Binder, ホストオブジェクト, callback sink は注入しません.
 
 ******
 
@@ -92,7 +92,16 @@ SOURCE descriptor のみ受け付けます. workspace archive と stdin snapshot
 
 ******
 
-> プロトコルとホスト配線は進行中ですが, 必要な release AAR は未公開・未検証です. この scaffold をインストールするだけでは Python エンジンは利用できません.
+> 0.1.0 は AutoJs6 6.8.0 専用ですが, 最終ホスト ID と互換範囲は未凍結です. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化にホスト再起動は不要です. 公式 index, tag, Release は未完了です.
+
+```text
+release target: 0.1.0
+release state: release preparation; not tagged or published
+paired host: AutoJs6 6.8.0
+release branch: master
+long-term signer: SM003
+runtime/security/release owner: SuperMonster003
+```
 
 ******
 
@@ -100,7 +109,7 @@ SOURCE descriptor のみ受け付けます. workspace archive と stdin snapshot
 
 ******
 
-ソース manifest は Android 権限を要求しません. exported service はホスト署名権限を要求し, Binder 入口で UID, インストール済みホスト, 現在の署名を再検査します. Chaquopy の Java bridge は利用可能なため, 分離 UID, 専用プロセス, 狭い Binder 境界に依存し, CPython を安全な sandbox とはみなしません.
+Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-code sandbox ではありません. exported service はホスト署名権限を要求し UID, package, signer を再検査します. 分離 Android UID, 専用プロセス, 狭い Binder 境界は露出を減らしますが Python を sandbox 化しません. 長期リリース signer は SM003, runtime/security/release owner は SuperMonster003 です.
 
 ******
 
@@ -121,11 +130,11 @@ SOURCE descriptor のみ受け付けます. workspace archive と stdin snapshot
 
 ******
 
-- workspace archive, stdin snapshot, online pip, wheel ダウンロードは未対応です.
+- stdin snapshot, workspace への書き戻し, online pip, wheel ダウンロードは未対応です.
 - UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.
-- AutoJs6 capability broker とホスト API 接続はまだありません.
+- リアルタイム AutoJs6 capability broker はありません. 最初の API は実行開始時に凍結した app/device/execution/project snapshot と plugin-private workspace の上限付き読み取り専用アクセスだけを使います.
 - 32 bit Android と任意の native wheel は保証しません.
-- ローカル CPython テストは Chaquopy, Android, Binder, 端末の受け入れ証拠ではありません.
+- arm64-v8a には API 31 端末証拠があります. x86_64 は現時点で packaging 証拠のみで, 端末実行や完全な端末 matrix とは扱いません.
 
 ******
 
@@ -133,7 +142,7 @@ SOURCE descriptor のみ受け付けます. workspace archive と stdin snapshot
 
 ******
 
-独立 R2 リポジトリ, 静的境界, provider/bootstrap ソース, ローカル意味テストは用意済みです. QV710AF65F の保護 soak 中は Gradle と ADB を延期します. release AAR, 依存解決, Android コンパイル, APK/16 KB, Binder/PFD, 端末マトリクスは未完了です.
+R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. R6-P4 は 0.1.0 を準備中です. 残る blocker は最終 AutoJs6 6.8.0 ID, GitHub 認証と repository, 公式 plugin index, 現在ソースの新 provenance, 公開後の production receipt です. 完全な API×ABI matrix と新 soak は自動 gate ではありません.
 
 - [ROADMAP.md を表示](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -142,6 +151,17 @@ SOURCE descriptor のみ受け付けます. workspace archive と stdin snapshot
 ### 更新履歴
 
 ******
+
+# v0.1.0
+
+###### 2026/08/11 (リリース準備中; tag・公開前)
+
+* `注記` 0.1.0 は準備中です. 最終ホスト ID, GitHub repository と認証, 公式 plugin index, production receipt は未完了です
+* `追加` AutoJs6 6.8.0 と組み合わせる Python プロトコル 1.0-1.1, 上限付き project workspace, 読み取り専用 app/device/execution/project snapshot
+* `追加` ホスト再起動なしの hot-plug: install または再有効化後の次の新規実行で ID を再検出・pin し, 不在・無効時は fallback しません
+* `追加` 実行中の Binder death は replay せず現在の実行を終了し, 後続の新規実行で provider を再検出します
+* `改善` Chaquopy を trusted-local, non-sandbox runtime として固定. 長期 signer は SM003, runtime/security/release owner は SuperMonster003
+* `依存関係` Chaquopy 17.0.0 と CPython 3.13.9 を lock. 最終 artifact はソース凍結後に再検証します
 
 # v0.1.0-alpha.1
 
@@ -166,7 +186,7 @@ SOURCE descriptor のみ受け付けます. workspace archive と stdin snapshot
 Gradle と ADB を使わないファイルシステム静的検査:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r2-static.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r6-release-source.ps1
 ```
 
 ローカル CPython による可搬 bootstrap 意味テスト:
@@ -176,7 +196,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-これらは Android 動作を証明しません. Gradle, APK, Binder, 端末検証は保護 soak 後に行います.
+静的検査とローカル CPython は Android 証拠を代替しません. 既存 RC と単一端末結果は履歴です. 最終ソース凍結後は release ID に直接結び付くビルド, APK, Binder, 代表端末検証だけを再実行します.
 
 ******
 
@@ -184,16 +204,17 @@ python -B -m unittest tools.tests.test_bootstrap -v
 
 ******
 
-現在はビルドしません. AAR または SHA-256 が未固定なら release 設定は fail closed します.
+このドキュメント変更ではビルドしません. release 設定は AAR, SHA-256, signer, runtime lock の drift で fail closed します. 0.1.0 は準備中で, tag も公開もされていません.
 
 ビルド前に次の release AAR を `libs` に配置して固定する必要があります:
 
 ```text
+common-plugin-api.aar
 protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Maven の Chaquopy 17.0.0 と stdlib のみを使う予定です. 依存検証, native ライブラリ, ライセンス, 16 KB page 対応は未検証です.
+Maven の Chaquopy 17.0.0 と CPython 3.13.9 を lock し, stdlib のみを package します. 最終公開では依存 metadata, native library, 16 KB page, NOTICE, SM003 signer, 3 種の配布 APK を再確認します.
 
 ******
 
@@ -201,7 +222,7 @@ Maven の Chaquopy 17.0.0 と stdlib のみを使う予定です. 依存検証, 
 
 ******
 
-プロジェクトソースは MPL-2.0 です. Chaquopy, CPython, その他の依存物は各ライセンスに従います.
+プロジェクトソースは MPL-2.0 です. Chaquopy, CPython, その他の依存物は各ライセンスに従い, 帰属と upstream/project source の取得方法は `THIRD_PARTY_NOTICES.md` に記載します.
 
 ******
 

@@ -37,7 +37,7 @@
 
 Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python 源码快照交给专用插件进程, 插件使用 CPython 执行并返回有界输出, 结构化异常和唯一终态.
 
-> 当前仅为 R2 概念验证. 运行时源码与本机 bootstrap 语义检查已经落地, 但尚未执行 Gradle 配置, Android 编译, APK 检查, Binder 验证或设备验收.
+> 当前处于 0.1.0 正式发布准备阶段. 已有本地 RC 的构建, APK, Binder 和一台 API 31 arm64-v8a 设备证据, 但源码治理后必须重新冻结; 当前尚未创建 v0.1.0 tag, GitHub Release 或 production receipt.
 
 ******
 
@@ -49,7 +49,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 - 按原始顺序收集 stdout 和 stderr, 再通过有界 chunk 与 credit 传送.
 - 返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.
 - 同一运行时进程只允许一个活动会话, provider 侧不排队.
-- 取消, 超时, callback 死亡和需要隔离的关闭路径会淘汰专用进程, 且不会自动重放脚本.
+- Host 无需重启; 安装或重新启用插件后下一次新执行会重新发现并 pin provider 身份, 在途 Binder death 会终止该执行且绝不自动重放.
 
 ******
 
@@ -67,7 +67,7 @@ Python request: 3.13
 expected packaged Python: 3.13.9
 ```
 
-构建请求 Python 3.13. 3.13.9 是根据当前 Chaquopy 发布信息记录的预期打包版本, 在 APK 解析和设备执行完成前不作为已验证事实.
+构建请求 Python 3.13. 已冻结的本地 RC 产物与精确设备执行记录为 CPython 3.13.9; 最终 0.1.0 在源码冻结后仍须重新核验版本和哈希.
 
 ******
 
@@ -81,10 +81,10 @@ expected packaged Python: 3.13.9
 service action: org.autojs.plugin.python.RUNTIME
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: V1
+protocol: 1.0-1.1
 ```
 
-插件只接收 SOURCE 描述符. workspace archive 与 stdin snapshot 的限制均为零, 也不向脚本注入 Context, Binder, 宿主运行时对象或 callback sink.
+插件接收独立 SOURCE, 可选的有界 workspace archive 以及协议 1.1 的只读宿主能力快照; stdin snapshot 仍关闭. 插件不会向脚本注入 Context, Binder, 宿主运行时对象或 callback sink.
 
 ******
 
@@ -92,7 +92,16 @@ protocol: V1
 
 ******
 
-> 协议与宿主接线路线图正在推进, 但本仓库所需的 release AAR 尚未发布和校验. 仅安装当前 scaffold 不能建立可用的端到端 Python 引擎.
+> 0.1.0 只与 AutoJs6 6.8.0 配对, 但最终 Host 身份和兼容界限尚未冻结. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 官方索引, tag 和 Release 尚未完成.
+
+```text
+release target: 0.1.0
+release state: release preparation; not tagged or published
+paired host: AutoJs6 6.8.0
+release branch: master
+long-term signer: SM003
+runtime/security/release owner: SuperMonster003
+```
 
 ******
 
@@ -100,7 +109,7 @@ protocol: V1
 
 ******
 
-源码 manifest 不请求 Android 权限. Exported service 要求宿主签名权限, 并在 Binder 入口复核调用 UID, 已安装宿主包和当前签名集合. Python 通过 Chaquopy 仍可访问 Java bridge, 因此本插件依赖独立 Android UID, 专用进程和窄 Binder 能力边界. 明确边界为 `does not claim that Python code is sandboxed`.
+Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Exported service 要求宿主签名权限并复核 UID, 包和 signer; 独立 Android UID, 专用进程和窄 Binder 边界降低宿主暴露, 但不让 Python 成为沙箱. SM003 是长期发行 signer, SuperMonster003 承担 runtime, security 与 release owner.
 
 ******
 
@@ -121,11 +130,11 @@ protocol: V1
 
 ******
 
-- 不支持 workspace archive, stdin snapshot, 在线 pip 或运行时下载 wheel.
+- 不支持 stdin snapshot, workspace 写回, 在线 pip 或运行时下载 wheel.
 - 不提供 UI 脚本, 调试器, REPL 或任意宿主 Java 对象访问.
-- 不提供 AutoJs6 能力 broker; console, 文件, 设备, 辅助功能, shell 等宿主 API 尚未接入.
+- 不提供实时 AutoJs6 能力 broker; 首批 API 仅使用执行启动时冻结的 app/device/execution/project 快照和插件私有 workspace 的有界只读文件接口.
 - 不声明 32 位 Android 支持, 也不保证任意第三方 native wheel 可用.
-- 不把本机 CPython 单元测试当作 Chaquopy, Android, Binder 或设备验收证据.
+- arm64-v8a 有 API 31 真机证据; x86_64 当前仅有打包证据, 不冒充设备执行或完整设备矩阵.
 
 ******
 
@@ -133,7 +142,7 @@ protocol: V1
 
 ******
 
-R2 的独立仓库, 静态边界, provider/bootstrap 源码和本机语义测试已落地. 因 QV710AF65F 正在进行受保护 soak, 所有 Gradle 与 ADB 工作暂缓. release AAR, 依赖解析, Android 编译, APK/16 KB page 检查, Binder/PFD 验证和设备矩阵仍未完成; 勾选状态以项目路线图为准.
+R6-P2/P3 的本地 RC 与集中设备证据已历史化. R6-P4 正在准备 0.1.0; 剩余 blocker 是最终 Host 6.8.0 身份, GitHub 认证与仓库, 官方插件索引, 当前源码的新 provenance 以及发布后的 production receipt. 完整 API×ABI 矩阵和新 soak 不作为自动门禁.
 
 - [查看 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -142,6 +151,17 @@ R2 的独立仓库, 静态边界, provider/bootstrap 源码和本机语义测试
 ### 版本历史
 
 ******
+
+# v0.1.0
+
+###### 2026/08/11 (发布准备中; 尚未 tag 或发布)
+
+* `提示` 0.1.0 仍在发布准备阶段; 最终 Host 身份, GitHub 仓库与认证, 官方插件索引和 production receipt 尚待完成
+* `新增` 面向 AutoJs6 6.8.0 的 Python 协议 1.0-1.1, 有界项目 workspace 与只读 app/device/execution/project 能力快照
+* `新增` 无需重启 Host 的热插拔: 安装或重新启用后下次新执行重新发现并 pin 身份, 缺失或禁用绝不 fallback
+* `新增` 在途 Binder death 终止当前执行且不得重放, 后续新执行重新发现 provider
+* `优化` 将 Chaquopy 固定为 trusted-local, non-sandbox 运行时; SM003 为长期 signer, SuperMonster003 为 runtime/security/release owner
+* `依赖` 锁定 Chaquopy 17.0.0 与 CPython 3.13.9; 正式产物须在最终源码冻结后重新验证
 
 # v0.1.0-alpha.1
 
@@ -166,7 +186,7 @@ R2 的独立仓库, 静态边界, provider/bootstrap 源码和本机语义测试
 不调用 Gradle 或 ADB 的文件系统静态检查:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r2-static.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r6-release-source.ps1
 ```
 
 使用本机 CPython 运行可移植 bootstrap 语义测试:
@@ -176,7 +196,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-这两项检查都不能证明 Android runtime 可用. Gradle, APK, Binder 与设备验证必须在受保护 soak 完成后单独补齐.
+静态和本机 CPython 检查不能替代 Android 证据. 既有本地 RC 与单设备结果是历史证据; 最终源码冻结后只重跑与发布身份直接相关的构建, APK, Binder 和代表性设备验证.
 
 ******
 
@@ -184,16 +204,17 @@ python -B -m unittest tools.tests.test_bootstrap -v
 
 ******
 
-当前不运行构建. Release 配置会在协议 AAR 缺失或 SHA-256 尚未锁定时 fail closed.
+当前文档切片不运行构建. Release 配置在协议 AAR, SHA-256, signer 或运行时锁漂移时 fail closed; 0.1.0 仍处于准备阶段, 尚未 tag 或发布.
 
 构建前必须在仓库 `libs` 目录暂存并锁定以下 release AAR:
 
 ```text
+common-plugin-api.aar
 protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-运行时计划通过 Maven 使用 Chaquopy 17.0.0, 仅打包 stdlib. 依赖校验元数据, native 库清单, 许可证义务和 16 KB page 兼容性仍是构建验收项.
+运行时通过 Maven 锁定 Chaquopy 17.0.0 与 CPython 3.13.9, 仅打包 stdlib. 最终发布必须重新核对依赖校验元数据, native 库, 16 KB page, NOTICE, SM003 signer 和三种发行 APK.
 
 ******
 
@@ -201,7 +222,7 @@ python-runtime-api.aar
 
 ******
 
-项目源码使用 MPL-2.0. Chaquopy, CPython 和其他第三方组件继续适用各自的许可证.
+项目源码使用 MPL-2.0. Chaquopy, CPython 和其他第三方组件继续适用各自许可证; 归属, 上游源码与本项目源码获取说明见 `THIRD_PARTY_NOTICES.md`.
 
 ******
 

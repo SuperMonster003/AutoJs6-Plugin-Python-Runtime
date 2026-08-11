@@ -18,6 +18,21 @@
         tools:ignore="MissingApplicationIcon"
         tools:targetApi="33">
 
+        <meta-data
+            android:name="org.autojs.plugin.info.AUTHOR"
+            android:value="SuperMonster003" />
+
+        <service
+            android:name=".PythonRuntimePluginInfoService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN">
+            <intent-filter>
+                <action android:name="org.autojs.plugin.INFO" />
+                <category android:name="python" />
+            </intent-filter>
+        </service>
+
         <service
             android:name=".service.PythonRuntimePluginService"
             android:enabled="true"

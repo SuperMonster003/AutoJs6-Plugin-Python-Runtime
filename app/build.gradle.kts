@@ -164,7 +164,30 @@ val hostApiLockFile = rootProject.file("locks/host-api-aars.lock")
 require(hostApiLockFile.isFile) {
     "Missing host API lock: ${hostApiLockFile.relativeTo(rootProject.projectDir)}"
 }
+val hostApiLockText = hostApiLockFile.readText(Charsets.UTF_8)
 val hostApiLock = hostApiLockFile.loadUniqueLock()
+val hostApiIds = listOf("common-plugin-api", "protocol-wire-api", "python-runtime-api")
+val expectedHostApiLockKeys = setOf("format") + hostApiIds.flatMap { id ->
+    listOf("$id.file", "$id.sha256")
+}
+require(hostApiLock.stringPropertyNames() == expectedHostApiLockKeys) {
+    "Host API AAR lock must contain exactly the three release AAR file/SHA-256 pairs"
+}
+require(hostApiLock.requiredValue("format") == "1") {
+    "Unsupported host API AAR lock format"
+}
+val releaseHostApiProvenanceReady =
+    Regex(
+        "(?m)^#\\s*Host HEAD:\\s*[0-9a-fA-F]{40,64}\\s+" +
+            "\\((?:clean current tree|clean source tree)\\)\\s*$",
+    ).containsMatchIn(hostApiLockText) &&
+        Regex(
+            "(?m)^#\\s*Host source fingerprint:\\s*[0-9a-fA-F]{64}\\s*$",
+        ).containsMatchIn(hostApiLockText) &&
+        Regex(
+            "(?m)^#\\s*Distribution manifest SHA-256:\\s*[0-9a-fA-F]{64}\\s*$",
+        ).containsMatchIn(hostApiLockText) &&
+        !Regex("(?im)^#\\s*Host HEAD:.*\\bdirty\\b").containsMatchIn(hostApiLockText)
 
 val runtimeSupplyLockFile = rootProject.file("locks/python-runtime.lock")
 require(runtimeSupplyLockFile.isFile) {
@@ -353,6 +376,7 @@ fun lockedHostApiAar(id: String): File {
 
 val protocolWireApiAar = lockedHostApiAar("protocol-wire-api")
 val pythonRuntimeApiAar = lockedHostApiAar("python-runtime-api")
+val commonPluginApiAar = lockedHostApiAar("common-plugin-api")
 
 val releaseSigningValues = releaseSigningPropertyNames.associateWith { key ->
     signs.properties.getProperty(key)?.trim()?.takeIf(String::isNotEmpty)
@@ -492,6 +516,7 @@ chaquopy {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+    implementation(files(commonPluginApiAar))
     implementation(files(protocolWireApiAar))
     implementation(files(pythonRuntimeApiAar))
 
@@ -507,6 +532,47 @@ tasks.withType(JavaCompile::class.java).configureEach {
     options.encoding = "UTF-8"
 }
 
+val collectReleaseFiles by tasks.registering(Sync::class) {
+    description = "Collects the three signed release APK variants"
+    dependsOn("assembleRelease")
+    from(layout.buildDirectory.dir("outputs/apk/release"))
+    into(rootProject.layout.projectDirectory.dir("release"))
+    include("${rootProject.name.lowercase()}-v${versions.appVersionName}-*.apk")
+}
+
+tasks.register<Copy>("appendDigestToReleasedFiles") {
+    description = "Appends CRC32 digests to the three released APK filenames"
+    dependsOn(collectReleaseFiles)
+    val sourceDirectory = rootProject.file("release")
+    from(sourceDirectory)
+    into(rootProject.file("releases"))
+    include("${rootProject.name.lowercase()}-v${versions.appVersionName}-*.apk")
+    doFirst {
+        val releasePrefix = "${rootProject.name.lowercase()}-v${versions.appVersionName}-"
+        rootProject.file("releases").listFiles()
+            .orEmpty()
+            .filter { it.isFile && it.name.startsWith(releasePrefix) && it.name.endsWith(".apk") }
+            .forEach { stale ->
+                require(stale.delete()) { "Unable to remove stale release APK: ${stale.absolutePath}" }
+            }
+    }
+    rename { name ->
+        val stem = name.removeSuffix(".apk")
+        val digest = utils.digestCRC32(sourceDirectory.resolve(name))
+        "$stem-$digest.apk"
+    }
+    doLast {
+        val outputs = rootProject.file("releases").listFiles()
+            .orEmpty()
+            .filter { it.isFile && it.name.endsWith(".apk") }
+            .filter { it.name.startsWith("${rootProject.name.lowercase()}-v${versions.appVersionName}-") }
+        require(outputs.size == 3) {
+            "Expected exactly three digested release APKs for ${versions.appVersionName}"
+        }
+        println("Destination: ${rootProject.file("releases")}")
+    }
+}
+
 fun gitOutput(vararg arguments: String): String {
     val process = ProcessBuilder(listOf("git", *arguments))
         .directory(rootProject.projectDir)
@@ -519,31 +585,40 @@ fun gitOutput(vararg arguments: String): String {
     return output
 }
 
-val releaseArtifactTaskName = Regex(
-    "^(assemble|bundle|package|publish).*(release).*$",
-    setOf(RegexOption.IGNORE_CASE),
-)
-tasks.configureEach {
-    if (!releaseArtifactTaskName.matches(name)) return@configureEach
+fun isReleaseArtifactTask(taskName: String): Boolean =
+    taskName.equals("assembleRelease", ignoreCase = true) ||
+        taskName.equals("bundleRelease", ignoreCase = true) ||
+        taskName.equals("packageRelease", ignoreCase = true) ||
+        taskName.equals("collectReleaseFiles", ignoreCase = true) ||
+        taskName.equals("appendDigestToReleasedFiles", ignoreCase = true) ||
+        Regex("^publish.*release.*$", RegexOption.IGNORE_CASE).matches(taskName)
 
-    doFirst {
-        require(releaseSigningReady) {
-            "Release artifact creation requires sign.properties with storeFile, storePassword, " +
-                "keyAlias, and keyPassword, plus the exact release-identity.lock keystore bytes; " +
-                "unsigned release artifacts are forbidden and signer drift is forbidden"
-        }
-        val head = gitOutput("rev-parse", "--verify", "HEAD")
-        require(Regex("[0-9a-fA-F]{40,64}").matches(head)) {
-            "Release candidate provenance requires a full Git commit identity"
-        }
-        val commitCount = gitOutput("rev-list", "--count", "HEAD").toIntOrNull()
-            ?: error("Release candidate provenance requires a numeric Git commit count")
-        require(versions.appVersionCode == commitCount) {
-            "VERSION_BUILD must equal the Git commit count before release artifact creation"
-        }
-        require(gitOutput("status", "--porcelain", "--untracked-files=all").isEmpty()) {
-            "Release artifact creation requires a clean Git worktree"
-        }
+gradle.taskGraph.whenReady {
+    val createsReleaseArtifact = allTasks.any { task ->
+        task.project == project && isReleaseArtifactTask(task.name)
+    }
+    if (!createsReleaseArtifact) return@whenReady
+
+    require(releaseSigningReady) {
+        "Release artifact creation requires sign.properties with storeFile, storePassword, " +
+            "keyAlias, and keyPassword, plus the exact release-identity.lock keystore bytes; " +
+            "unsigned release artifacts are forbidden and signer drift is forbidden"
+    }
+    require(releaseHostApiProvenanceReady) {
+        "Release artifact creation requires a clean Host HEAD, source fingerprint, and " +
+            "distribution manifest identity in locks/host-api-aars.lock"
+    }
+    val head = gitOutput("rev-parse", "--verify", "HEAD")
+    require(Regex("[0-9a-fA-F]{40,64}").matches(head)) {
+        "Release candidate provenance requires a full Git commit identity"
+    }
+    val commitCount = gitOutput("rev-list", "--count", "HEAD").toIntOrNull()
+        ?: error("Release candidate provenance requires a numeric Git commit count")
+    require(versions.appVersionCode == commitCount) {
+        "VERSION_BUILD must equal the Git commit count before release artifact creation"
+    }
+    require(gitOutput("status", "--porcelain", "--untracked-files=all").isEmpty()) {
+        "Release artifact creation requires a clean Git worktree"
     }
 }
 

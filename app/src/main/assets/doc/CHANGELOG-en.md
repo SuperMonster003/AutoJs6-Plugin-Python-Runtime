@@ -4,6 +4,17 @@
 
 ******
 
+# v0.1.0
+
+###### 2026/08/11 (release preparation; not tagged or published)
+
+* `Hint` 0.1.0 remains in release preparation; final host identity, GitHub repository and authentication, official plugin index, and production receipt are pending
+* `Feature` Python protocol 1.0-1.1 paired with AutoJs6 6.8.0, a bounded project workspace, and read-only app/device/execution/project capability snapshots
+* `Feature` Hot-plug without a host restart: install or re-enable makes the next new execution rediscover and pin identity, while missing or disabled never falls back
+* `Feature` In-flight Binder death terminates the current execution without replay; later new executions rediscover the provider
+* `Improvement` Fix Chaquopy as a trusted-local, non-sandbox runtime; SM003 is the long-term signer and SuperMonster003 owns runtime, security, and release
+* `Dependency` Lock Chaquopy 17.0.0 and CPython 3.13.9; final artifacts require fresh verification after source freeze
+
 # v0.1.0-alpha.1
 
 ###### 2026/08/09

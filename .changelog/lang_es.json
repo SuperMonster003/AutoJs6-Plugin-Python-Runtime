@@ -5,6 +5,23 @@
   "changelog_label_improvement": "Mejora",
   "changelog_label_dependency": "Dependencia",
   "$data": {
+    "v0.1.0": {
+      "released_date": "2026/08/11 (preparación de publicación; sin tag ni publicación)",
+      "hint": [
+        "0.1.0 sigue en preparación; faltan identidad host final, repositorio y autenticación GitHub, índice oficial y production receipt"
+      ],
+      "feature": [
+        "Protocolo Python 1.0-1.1 emparejado con AutoJs6 6.8.0, workspace de proyecto acotado y snapshots app/device/execution/project de solo lectura",
+        "Hot-plug sin reiniciar el host: instalar o reactivar permite que la siguiente ejecución redescubra y fije la identidad, sin fallback si falta o está desactivado",
+        "La muerte Binder en curso termina la ejecución sin replay; nuevas ejecuciones redescubren el provider"
+      ],
+      "improvement": [
+        "Chaquopy queda como runtime trusted-local y non-sandbox; SM003 es signer a largo plazo y SuperMonster003 es owner de runtime, seguridad y release"
+      ],
+      "dependency": [
+        "Bloqueo de {{ runtime_dependency }} y CPython {{ python_version_expected }}; los artefactos finales se verificarán tras congelar el código"
+      ]
+    },
     "v0.1.0-alpha.1": {
       "released_date": "2026/08/09",
       "hint": [
