@@ -43,7 +43,7 @@
     "arm64-v8a 有 API 31 真机证据; x86_64 当前仅有打包证据, 不冒充设备执行或完整设备矩阵."
   ],
   "h3_roadmap": "路线图",
-  "p_roadmap": "R6-P2/P3 的本地 RC 与集中设备证据已历史化. 本次 clean VERSION_BUILD=8 freeze commit 固定了稳定 Plugin 源码身份和精确 Host 6.8.0/5275 lock; 剩余 blocker 仅为精确产物的 APK/P3 provenance, 官方插件索引, tag/Release 以及发布后的 production receipt. 完整 API×ABI 矩阵和新 soak 不作为自动门禁.",
+  "p_roadmap": "R6-P2/P3 的本地 RC 与集中设备证据已历史化. 本次 clean VERSION_BUILD=9 freeze commit 固定了稳定 Plugin 源码身份和精确 Host 6.8.0/5275 lock; 剩余 blocker 仅为精确产物的 APK/P3 provenance, 官方插件索引, tag/Release 以及发布后的 production receipt. 完整 API×ABI 矩阵和新 soak 不作为自动门禁.",
   "text_link_roadmap": "查看 ROADMAP.md",
   "h3_release_history": "版本历史",
   "h5_for_more_release_history": "更多版本",

@@ -43,7 +43,7 @@
     "arm64-v8a에는 API 31 기기 증거가 있습니다. x86_64는 현재 packaging 증거만 있으며 기기 실행이나 완전한 기기 matrix로 제시하지 않습니다."
   ],
   "h3_roadmap": "로드맵",
-  "p_roadmap": "R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=8 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. 남은 blocker는 exact artifact의 APK/P3 provenance, 공식 plugin index, tag/Release 및 게시 후 production receipt뿐입니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.",
+  "p_roadmap": "R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=9 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. 남은 blocker는 exact artifact의 APK/P3 provenance, 공식 plugin index, tag/Release 및 게시 후 production receipt뿐입니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.",
   "text_link_roadmap": "ROADMAP.md 보기",
   "h3_release_history": "변경 이력",
   "h5_for_more_release_history": "다른 버전",

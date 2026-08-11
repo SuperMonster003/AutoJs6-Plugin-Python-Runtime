@@ -99,7 +99,7 @@ El complemento acepta una SOURCE independiente, un workspace archive acotado opc
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ El runtime Chaquopy es solo para scripts locales de confianza, no un sandbox de 
 
 ******
 
-La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 ya son históricas. Este clean VERSION_BUILD=8 freeze commit fija la identidad fuente estable del Plugin y el lock Host exacto 6.8.0/5275; los únicos blockers restantes son la provenance APK/P3 de los artefactos exactos, el índice oficial, tag/Release y production receipt posterior a publicar. Una matriz API×ABI completa y un soak nuevo no son gates automáticos.
+La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 ya son históricas. Este clean VERSION_BUILD=9 freeze commit fija la identidad fuente estable del Plugin y el lock Host exacto 6.8.0/5275; los únicos blockers restantes son la provenance APK/P3 de los artefactos exactos, el índice oficial, tag/Release y production receipt posterior a publicar. Una matriz API×ABI completa y un soak nuevo no son gates automáticos.
 
 - [Ver ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 

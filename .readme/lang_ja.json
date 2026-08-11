@@ -43,7 +43,7 @@
     "arm64-v8a には API 31 端末証拠があります. x86_64 は現時点で packaging 証拠のみで, 端末実行や完全な端末 matrix とは扱いません."
   ],
   "h3_roadmap": "ロードマップ",
-  "p_roadmap": "R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. この clean VERSION_BUILD=8 freeze commit が stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します. 残る blocker は exact artifact の APK/P3 provenance, 公式 plugin index, tag/Release, 公開後の production receipt のみです. 完全な API×ABI matrix と新 soak は自動 gate ではありません.",
+  "p_roadmap": "R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. この clean VERSION_BUILD=9 freeze commit が stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します. 残る blocker は exact artifact の APK/P3 provenance, 公式 plugin index, tag/Release, 公開後の production receipt のみです. 完全な API×ABI matrix と新 soak は自動 gate ではありません.",
   "text_link_roadmap": "ROADMAP.md を表示",
   "h3_release_history": "更新履歴",
   "h5_for_more_release_history": "その他のバージョン",

@@ -99,7 +99,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=8 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. 남은 blocker는 exact artifact의 APK/P3 provenance, 공식 plugin index, tag/Release 및 게시 후 production receipt뿐입니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.
+R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=9 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. 남은 blocker는 exact artifact의 APK/P3 provenance, 공식 plugin index, tag/Release 및 게시 후 production receipt뿐입니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.
 
 - [ROADMAP.md 보기](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 

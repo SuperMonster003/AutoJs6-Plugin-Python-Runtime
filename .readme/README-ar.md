@@ -99,7 +99,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
-أصبحت أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=8 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ العوائق المتبقية فقط هي APK/P3 provenance للـ artifacts الدقيقة والفهرس الرسمي وtag/Release وproduction receipt بعد النشر. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.
+أصبحت أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=9 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ العوائق المتبقية فقط هي APK/P3 provenance للـ artifacts الدقيقة والفهرس الرسمي وtag/Release وproduction receipt بعد النشر. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.
 
 - [عرض ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 

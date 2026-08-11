@@ -99,7 +99,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-R6-P2/P3 的本機 RC 及集中裝置證據已歷史化. 本次 clean VERSION_BUILD=8 freeze commit 固定了穩定 Plugin 原始碼身分及精確 Host 6.8.0/5275 lock; 剩餘 blocker 僅為精確產物的 APK/P3 provenance, 官方外掛程式索引, tag/Release 及發佈後的 production receipt. 完整 API×ABI 矩陣及新 soak 不屬自動門禁.
+R6-P2/P3 的本機 RC 及集中裝置證據已歷史化. 本次 clean VERSION_BUILD=9 freeze commit 固定了穩定 Plugin 原始碼身分及精確 Host 6.8.0/5275 lock; 剩餘 blocker 僅為精確產物的 APK/P3 provenance, 官方外掛程式索引, tag/Release 及發佈後的 production receipt. 完整 API×ABI 矩陣及新 soak 不屬自動門禁.
 
 - [檢視 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 

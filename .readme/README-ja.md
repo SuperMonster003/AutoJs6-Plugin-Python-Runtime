@@ -99,7 +99,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. この clean VERSION_BUILD=8 freeze commit が stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します. 残る blocker は exact artifact の APK/P3 provenance, 公式 plugin index, tag/Release, 公開後の production receipt のみです. 完全な API×ABI matrix と新 soak は自動 gate ではありません.
+R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. この clean VERSION_BUILD=9 freeze commit が stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します. 残る blocker は exact artifact の APK/P3 provenance, 公式 plugin index, tag/Release, 公開後の production receipt のみです. 完全な API×ABI matrix と新 soak は自動 gate ではありません.
 
 - [ROADMAP.md を表示](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 

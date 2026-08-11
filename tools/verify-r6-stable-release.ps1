@@ -147,7 +147,7 @@ $pinnedPluginPackage = 'io.github.supermonster003.autojs6.plugin.python.runtime'
 $pinnedHostVersionName = '6.8.0'
 $pinnedHostVersionCode = 5275L
 $pinnedPluginVersionName = '0.1.0'
-$pinnedPluginVersionCode = 8L
+$pinnedPluginVersionCode = 9L
 $pinnedReleaseTag = 'v0.1.0'
 $pinnedReleaseUrl = 'https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/releases/tag/v0.1.0'
 $pinnedReleaseKeystoreSha256 = '0d6b79e4d4efe77829dbcc2e21096931ba7b0349df82f3b58c3e9d24e84f1df0'
@@ -538,7 +538,7 @@ $hostRepository = Get-RequiredMember $repositories 'host' 'Final provenance repo
 $pluginRepository = Get-RequiredMember $repositories 'plugin' 'Final provenance repositories'
 Assert-RepositoryRecord $hostRepository $ExpectedHostCommit 'Host repository provenance'
 Assert-RepositoryRecord $pluginRepository $ExpectedPluginCommit 'Plugin repository provenance'
-Assert-True ([long] (Get-RequiredMember $pluginRepository 'commitCount' 'Plugin repository provenance') -eq $pinnedPluginVersionCode) 'Plugin commit count is not VERSION_BUILD 8'
+Assert-True ([long] (Get-RequiredMember $pluginRepository 'commitCount' 'Plugin repository provenance') -eq $pinnedPluginVersionCode) 'Plugin commit count is not VERSION_BUILD 9'
 Assert-True (
     [IO.Path]::GetFullPath([string] (Get-RequiredMember $pluginRepository 'root' 'Plugin repository provenance')).Equals(
         $pluginRepo,
@@ -727,7 +727,7 @@ Assert-ExactObjectKeys $pluginVersions @('baseline', 'candidate') 'P3 plugin ver
 $baselineVersionCode = [long] (Get-RequiredMember $pluginVersions 'baseline' 'P3 plugin versions')
 $candidateVersionCode = [long] (Get-RequiredMember $pluginVersions 'candidate' 'P3 plugin versions')
 Assert-True ($baselineVersionCode -gt 0 -and $baselineVersionCode -lt $pinnedPluginVersionCode) 'P3 baseline versionCode is not an older positive build'
-Assert-True ($candidateVersionCode -eq $pinnedPluginVersionCode) 'P3 candidate versionCode is not 8'
+Assert-True ($candidateVersionCode -eq $pinnedPluginVersionCode) 'P3 candidate versionCode is not 9'
 
 $observations = @((Get-RequiredMember $p3Json 'observations' 'P3 evidence'))
 Assert-True ($observations.Count -eq 15) 'P3 must contain exactly 15 observations'

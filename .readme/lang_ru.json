@@ -43,7 +43,7 @@
     "Для arm64-v8a есть свидетельство устройства API 31; для x86_64 пока только packaging, не запуск на устройстве и не полная матрица."
   ],
   "h3_roadmap": "План",
-  "p_roadmap": "Локальные RC- и концентрированные device-свидетельства R6-P2/P3 сохранены как история. Этот clean VERSION_BUILD=8 freeze commit фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock; остаются только APK/P3 provenance точных artifacts, официальный plugin index, tag/Release и production receipt после публикации. Полная API×ABI matrix и новый soak не являются автоматическими gates.",
+  "p_roadmap": "Локальные RC- и концентрированные device-свидетельства R6-P2/P3 сохранены как история. Этот clean VERSION_BUILD=9 freeze commit фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock; остаются только APK/P3 provenance точных artifacts, официальный plugin index, tag/Release и production receipt после публикации. Полная API×ABI matrix и новый soak не являются автоматическими gates.",
   "text_link_roadmap": "Открыть ROADMAP.md",
   "h3_release_history": "История версий",
   "h5_for_more_release_history": "Другие версии",

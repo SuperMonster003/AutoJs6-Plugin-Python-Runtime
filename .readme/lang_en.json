@@ -43,7 +43,7 @@
     "arm64-v8a has API 31 device evidence; x86_64 currently has packaging evidence only and is not presented as device execution or a complete device matrix."
   ],
   "h3_roadmap": "Roadmap",
-  "p_roadmap": "The R6-P2/P3 local RC and concentrated device evidence are now historical. This clean VERSION_BUILD=8 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; the only remaining blockers are exact-artifact APK/P3 provenance, the official plugin index, tag/Release, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.",
+  "p_roadmap": "The R6-P2/P3 local RC and concentrated device evidence are now historical. This clean VERSION_BUILD=9 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; the only remaining blockers are exact-artifact APK/P3 provenance, the official plugin index, tag/Release, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.",
   "text_link_roadmap": "View ROADMAP.md",
   "h3_release_history": "Release history",
   "h5_for_more_release_history": "For more releases",

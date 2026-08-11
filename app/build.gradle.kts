@@ -522,6 +522,7 @@ chaquopy {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21")
     implementation(files(commonPluginApiAar))
     implementation(files(protocolWireApiAar))
     implementation(files(pythonRuntimeApiAar))

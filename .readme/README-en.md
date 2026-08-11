@@ -99,7 +99,7 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-The R6-P2/P3 local RC and concentrated device evidence are now historical. This clean VERSION_BUILD=8 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; the only remaining blockers are exact-artifact APK/P3 provenance, the official plugin index, tag/Release, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.
+The R6-P2/P3 local RC and concentrated device evidence are now historical. This clean VERSION_BUILD=9 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; the only remaining blockers are exact-artifact APK/P3 provenance, the official plugin index, tag/Release, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
