@@ -180,7 +180,9 @@ function Get-ApkInfo([string] $Path, [string] $Role) {
         "(?m)^package:\s+name='([^']+)'\s+versionCode='([0-9]+)'\s+versionName='([^']*)'.*$"
     )
     Assert-True $packageMatch.Success "$Role has no parseable package/version badging"
-    $sdkMatch = [regex]::Match($badging, "(?m)^sdkVersion:'([^']+)'\s*$")
+    # aapt2 36.1 emits minSdkVersion while older aapt variants emit sdkVersion.
+    # Both names represent the same manifest minSdk field.
+    $sdkMatch = [regex]::Match($badging, "(?m)^(?:minSdkVersion|sdkVersion):'([^']+)'\s*$")
     $targetSdkMatch = [regex]::Match($badging, "(?m)^targetSdkVersion:'([^']+)'\s*$")
     $compileSdkMatch = [regex]::Match($packageMatch.Value, "compileSdkVersion='([^']+)'")
     Assert-True ($sdkMatch.Success -and $targetSdkMatch.Success -and $compileSdkMatch.Success) "$Role SDK badging is incomplete"
