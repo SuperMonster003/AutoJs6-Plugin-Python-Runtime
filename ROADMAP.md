@@ -67,9 +67,9 @@ A completed lower evidence level never substitutes for a later one.
 - [x] Regenerate the Host release-AAR distribution after the final Host commit
   and stage the Plugin AAR lock for that exact manifest.
 - [x] Set the stable version to `0.1.0`, enforce `minHostVersionCode=5275`, and
-  set `VERSION_BUILD=10` for this single final source-freeze commit.
+  set `VERSION_BUILD=11` for this single final source-freeze commit.
 - [x] Freeze the final Host AAR lock and Plugin identity in this one commit; once
-  committed, its repository commit count is exactly `10`, equal to
+  committed, its repository commit count is exactly `11`, equal to
   `VERSION_BUILD` without requiring a follow-up identity edit.
 
 Exit criterion: one clean Host identity and one clean Plugin source identity,

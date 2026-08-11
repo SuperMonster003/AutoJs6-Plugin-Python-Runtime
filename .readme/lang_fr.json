@@ -43,7 +43,7 @@
     "arm64-v8a dispose d'une preuve appareil API 31; x86_64 n'a actuellement qu'une preuve d'empaquetage, ni exécution appareil ni matrice complète."
   ],
   "h3_roadmap": "Feuille de route",
-  "p_roadmap": "Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques. Ce clean VERSION_BUILD=10 freeze commit fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275; la provenance des APK stables est évaluée par rapport à ces identités exactes et tout production receipt doit utiliser la même base. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.",
+  "p_roadmap": "Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques. Ce clean VERSION_BUILD=11 freeze commit fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275; la provenance des APK stables est évaluée par rapport à ces identités exactes et tout production receipt doit utiliser la même base. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.",
   "text_link_roadmap": "Voir ROADMAP.md",
   "h3_release_history": "Historique des versions",
   "h5_for_more_release_history": "Autres versions",

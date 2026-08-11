@@ -43,7 +43,7 @@
     "يوجد دليل جهاز API 31 لـ arm64-v8a؛ أما x86_64 فلديه دليل packaging فقط وليس تنفيذا على جهاز أو مصفوفة كاملة."
   ],
   "h3_roadmap": "خارطة الطريق",
-  "p_roadmap": "تبقى أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=10 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ تقيم stable APK provenance مقابل هذه exact identities ويجب أن يستخدم أي production receipt الأساس نفسه. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.",
+  "p_roadmap": "تبقى أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=11 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ تقيم stable APK provenance مقابل هذه exact identities ويجب أن يستخدم أي production receipt الأساس نفسه. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.",
   "text_link_roadmap": "عرض ROADMAP.md",
   "h3_release_history": "سجل الإصدارات",
   "h5_for_more_release_history": "المزيد من الإصدارات",
