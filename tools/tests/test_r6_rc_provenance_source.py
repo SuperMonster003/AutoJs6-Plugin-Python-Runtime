@@ -12,6 +12,36 @@ VERIFIER = (REPO_ROOT / "tools" / "verify-r6-release-source.ps1").read_text(
     encoding="utf-8"
 )
 APP_BUILD = (REPO_ROOT / "app" / "build.gradle.kts").read_text(encoding="utf-8")
+METADATA = (
+    REPO_ROOT
+    / "app"
+    / "src"
+    / "main"
+    / "java"
+    / "io"
+    / "github"
+    / "supermonster003"
+    / "autojs6"
+    / "plugin"
+    / "python"
+    / "runtime"
+    / "PythonRuntimeMetadata.kt"
+).read_text(encoding="utf-8")
+PLUGIN_INFO = (
+    REPO_ROOT
+    / "app"
+    / "src"
+    / "main"
+    / "java"
+    / "io"
+    / "github"
+    / "supermonster003"
+    / "autojs6"
+    / "plugin"
+    / "python"
+    / "runtime"
+    / "PythonRuntimePluginInfoService.kt"
+).read_text(encoding="utf-8")
 RELEASE_IDENTITY_LOCK = (
     REPO_ROOT / "locks" / "release-identity.lock"
 ).read_text(encoding="utf-8")
@@ -208,10 +238,30 @@ class R6RcProvenanceSourceTest(unittest.TestCase):
             VERIFIER,
         )
         self.assertIn(
-            "Python runtime metadata does not enforce the final Host 6.8.0",
+            "Python runtime metadata does not enforce the final Host 6.8.0 minimum versionCode 5275",
             VERIFIER,
         )
+        self.assertIn("minHostVersionCode = 5275L", METADATA)
         self.assertIn("PythonRuntimePluginInfoService", VERIFIER)
+
+    def test_official_index_identity_is_exact_and_build_declared(self) -> None:
+        markers = (
+            'buildConfigField("String", "PLUGIN_ID", "\\"python-runtime\\"")',
+            'buildConfigField("String", "PLUGIN_ENGINE", "\\"python\\"")',
+            'buildConfigField("String", "PLUGIN_VARIANT", "\\"cpython-3.13\\"")',
+            'resValue("string", "plugin_id", "python-runtime")',
+            'resValue("string", "plugin_engine", "python")',
+            'resValue("string", "plugin_variant", "cpython-3.13")',
+        )
+        for marker in markers:
+            self.assertIn(marker, APP_BUILD)
+            self.assertIn(marker, VERIFIER)
+        for marker in (
+            "id = BuildConfig.PLUGIN_ID",
+            "engine = BuildConfig.PLUGIN_ENGINE",
+            "variant = BuildConfig.PLUGIN_VARIANT",
+        ):
+            self.assertIn(marker, PLUGIN_INFO)
 
     def test_provenance_requires_four_singleton_pinned_signers_and_records_lock(self) -> None:
         self.assertIn("locks/release-identity.lock", WRITER)

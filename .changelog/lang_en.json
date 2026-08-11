@@ -6,12 +6,12 @@
   "changelog_label_dependency": "Dependency",
   "$data": {
     "v0.1.0": {
-      "released_date": "2026/08/11 (release preparation; not tagged or published)",
+      "released_date": "2026/08/12 (source frozen; not tagged or published)",
       "hint": [
-        "0.1.0 remains in release preparation; final host identity, GitHub repository and authentication, official plugin index, and production receipt are pending"
+        "The 0.1.0 source identity and exact Host lock are frozen; final APK/P3 provenance, official plugin index, tag/Release, and production receipt are pending"
       ],
       "feature": [
-        "Python protocol 1.0-1.1 paired with AutoJs6 6.8.0, a bounded project workspace, and read-only app/device/execution/project capability snapshots",
+        "Python protocol 1.0-1.1 paired with AutoJs6 6.8.0 / versionCode 5275, a bounded project workspace, and read-only app/device/execution/project capability snapshots",
         "Hot-plug without a host restart: install or re-enable makes the next new execution rediscover and pin identity, while missing or disabled never falls back",
         "In-flight Binder death terminates the current execution without replay; later new executions rediscover the provider"
       ],

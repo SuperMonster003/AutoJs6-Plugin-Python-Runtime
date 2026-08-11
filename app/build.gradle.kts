@@ -403,6 +403,12 @@ android {
         versionCode = versions.appVersionCode
         versionName = versions.appVersionName
 
+        buildConfigField("String", "PLUGIN_ID", "\"python-runtime\"")
+        buildConfigField("String", "PLUGIN_ENGINE", "\"python\"")
+        buildConfigField("String", "PLUGIN_VARIANT", "\"cpython-3.13\"")
+        resValue("string", "plugin_id", "python-runtime")
+        resValue("string", "plugin_engine", "python")
+        resValue("string", "plugin_variant", "cpython-3.13")
         resValue("string", "plugin_author", "SuperMonster003")
         resValue("string", "plugin_version_date", utils.getDateString("MMM d, yyyy", "GMT+08:00"))
 

@@ -1,6 +1,6 @@
 # ADR 0001: Python runtime baseline for 0.1.0
 
-- Status: accepted for 0.1.0 release preparation
+- Status: accepted for 0.1.0
 - Date: 2026-08-11
 
 ## Decision
@@ -11,11 +11,13 @@ for the independently installed Python Runtime Plugin 0.1.0. Package only
 packages, start CPython lazily in `:python_runtime`, and retire that process after
 each dispatched execution generation.
 
-The intended release pair is Plugin 0.1.0 with AutoJs6 Host 6.8.0. The exact
-final Host identity (version name/code, source revision, release-AAR manifest and
-the corresponding compatibility bounds) is still a release blocker and must be
-frozen before final artifacts are built. This ADR does not claim that a final
-Host 6.8.0 pair, a `v0.1.0` tag, or a published release already exists.
+The release pair is Plugin 0.1.0 with AutoJs6 Host 6.8.0. The minimum compatible
+Host is frozen and enforced as versionCode 5275. The final clean Host source is
+`2caddcb763b39f0bf450909742fa6ec4caba27a8`; its three-AAR release distribution
+manifest SHA-256 is
+`9f296ad45c24b7eb3e217e4d0ce6c96ba2593966b2bed1db1f2846d658987818`, as
+recorded in `locks/host-api-aars.lock`. This ADR does not claim that a
+`v0.1.0` tag or published release already exists.
 
 ## Why this runtime
 
@@ -72,8 +74,9 @@ Provider availability is hot-plugged without a Host restart:
 
 ## 0.1.0 release-preparation gates
 
-- Freeze and enforce the exact final AutoJs6 6.8.0 Host identity and release-AAR
-  manifest used by the plugin.
+- Enforce AutoJs6 6.8.0 / versionCode 5275 as the minimum Host and retain the
+  exact final clean Host source revision and three-AAR release manifest in the
+  Plugin lock.
 - Keep every Chaquopy/CPython artifact, Gradle wrapper byte, dependency checksum
   and packaged ABI/native inventory pinned and independently reviewable.
 - Confirm packaged `platform.python_version()` is exactly 3.13.9 and retain

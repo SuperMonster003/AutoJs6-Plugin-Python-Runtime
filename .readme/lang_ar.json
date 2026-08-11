@@ -6,7 +6,7 @@
   "p_languages_all_supported_for_readme": "يتوفر README.md الحالي باللغات التالية",
   "h3_introduction": "مقدمة",
   "p_introduction": "Python Runtime هو provider مستقل للإصدار V1 من بروتوكول Python. يرسل المضيف لقطة مصدر واحدة إلى عملية مخصصة تنفذها عبر CPython وتعيد خرجا محدودا واستثناءات منظمة وحالة نهائية واحدة.",
-  "p_evidence_boundary": "الإصدار 0.1.0 قيد التحضير للنشر الرسمي. توجد أدلة RC محلية للبناء وAPK وBinder وجهاز API 31 arm64-v8a واحد، لكن تغييرات حوكمة المصدر تتطلب تجميدا جديدا. لا يوجد بعد tag ‏v0.1.0 أو GitHub Release أو production receipt.",
+  "p_evidence_boundary": "جمدت source identity للإصدار 0.1.0 وHost lock الدقيقة. تبقى أدلة RC المحلية للبناء وAPK وBinder وجهاز API 31 arm64-v8a واحد تاريخية؛ لم تكتمل بعد APK/P3 provenance النهائية وtag ‏v0.1.0 وGitHub Release وproduction receipt.",
   "h3_functions": "الميزات",
   "features": [
     "تنفيذ لقطة مصدر Python بترميز UTF-8 كـ `__main__`.",
@@ -22,7 +22,7 @@
   "p_plugin_interface": "يكتشف المضيف الإضافة ويستدعيها بالمعرفات التالية",
   "p_plugin_scope": "تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1؛ يظل stdin snapshot معطلا ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.",
   "h3_host_integration_status": "حالة تكامل المضيف",
-  "p_host_integration_status": "يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، لكن هوية المضيف النهائية وحدود التوافق لم تجمد بعد. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج المضيف إلى إعادة تشغيل بعد التثبيت أو التفعيل. ما زالت الفهرسة الرسمية وtag وRelease معلقة.",
+  "p_host_integration_status": "يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ما زالت APK/P3 provenance النهائية والفهرسة الرسمية وtag وRelease معلقة.",
   "h3_security": "الأمان والخصوصية",
   "p_security": "بيئة Chaquopy مخصصة للنصوص المحلية الموثوقة وليست hostile-code sandbox. تتطلب exported service إذن توقيع المضيف وتتحقق من UID والحزمة وsigner؛ يقلل Android UID المستقل والعملية المخصصة وحد Binder الضيق تعرض المضيف لكنه لا يجعل Python sandbox. ‏SM003 هو signer طويل الأجل ويتولى SuperMonster003 ملكية runtime وsecurity وrelease.",
   "h3_security_limits": "حدود التشغيل",
@@ -43,7 +43,7 @@
     "يوجد دليل جهاز API 31 لـ arm64-v8a؛ أما x86_64 فلديه دليل packaging فقط وليس تنفيذا على جهاز أو مصفوفة كاملة."
   ],
   "h3_roadmap": "خارطة الطريق",
-  "p_roadmap": "أصبحت أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يحضر R6-P4 الإصدار 0.1.0؛ العوائق المتبقية هي هوية AutoJs6 6.8.0 النهائية ومصادقة GitHub والمستودع والفهرس الرسمي وprovenance جديدة للمصدر الحالي وproduction receipt بعد النشر. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.",
+  "p_roadmap": "أصبحت أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=8 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ العوائق المتبقية فقط هي APK/P3 provenance للـ artifacts الدقيقة والفهرس الرسمي وtag/Release وproduction receipt بعد النشر. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.",
   "text_link_roadmap": "عرض ROADMAP.md",
   "h3_release_history": "سجل الإصدارات",
   "h5_for_more_release_history": "المزيد من الإصدارات",

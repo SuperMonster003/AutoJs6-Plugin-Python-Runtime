@@ -37,7 +37,7 @@
 
 Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트가 하나의 Python 소스 스냅샷을 전용 프로세스에 전달하면 CPython으로 실행하고 제한된 출력, 구조화된 예외, 하나의 종료 상태를 반환합니다.
 
-> 0.1.0은 정식 릴리스 준비 중입니다. 로컬 RC 빌드, APK, Binder 및 API 31 arm64-v8a 기기 한 대의 증거가 있지만 소스 거버넌스 변경 후 다시 동결해야 합니다. v0.1.0 tag, GitHub Release 및 production receipt는 아직 없습니다.
+> 0.1.0 source identity와 exact Host lock은 동결되었습니다. 기존 로컬 RC build, APK, Binder 및 API 31 arm64-v8a 기기 한 대의 증거는 이력 증거로 남습니다. 최종 APK/P3 provenance, v0.1.0 tag, GitHub Release 및 production receipt는 미완료입니다.
 
 ******
 
@@ -79,6 +79,9 @@ expected packaged Python: 3.13.9
 
 ```text
 service action: org.autojs.plugin.python.RUNTIME
+official index plugin id: python-runtime
+official index engine: python
+official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
 protocol: 1.0-1.1
@@ -92,12 +95,12 @@ protocol: 1.0-1.1
 
 ******
 
-> 0.1.0은 AutoJs6 6.8.0 전용이지만 최종 호스트 ID와 호환 범위는 아직 동결되지 않았습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 호스트 재시작은 필요 없습니다. 공식 index, tag 및 Release는 미완료입니다.
+> 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. 최종 APK/P3 provenance, 공식 index, tag 및 Release는 미완료입니다.
 
 ```text
 release target: 0.1.0
-release state: release preparation; not tagged or published
-paired host: AutoJs6 6.8.0
+release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -142,7 +145,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. R6-P4는 0.1.0을 준비 중입니다. 남은 blocker는 최종 AutoJs6 6.8.0 ID, GitHub 인증과 repository, 공식 plugin index, 현재 소스의 새 provenance 및 게시 후 production receipt입니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.
+R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=8 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. 남은 blocker는 exact artifact의 APK/P3 provenance, 공식 plugin index, tag/Release 및 게시 후 production receipt뿐입니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.
 
 - [ROADMAP.md 보기](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -154,10 +157,10 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. R
 
 # v0.1.0
 
-###### 2026/08/11 (릴리스 준비 중; tag 및 게시 전)
+###### 2026/08/12 (소스 동결 완료; tag 및 게시 전)
 
-* `안내` 0.1.0은 준비 중입니다. 최종 호스트 ID, GitHub repository와 인증, 공식 plugin index 및 production receipt가 남아 있습니다
-* `추가` AutoJs6 6.8.0과 함께 사용하는 Python 프로토콜 1.0-1.1, 제한된 project workspace 및 읽기 전용 app/device/execution/project snapshot
+* `안내` 0.1.0 source identity와 exact Host lock은 동결되었습니다. 최종 APK/P3 provenance, 공식 plugin index, tag/Release 및 production receipt가 남아 있습니다
+* `추가` AutoJs6 6.8.0 / versionCode 5275와 함께 사용하는 Python 프로토콜 1.0-1.1, 제한된 project workspace 및 읽기 전용 app/device/execution/project snapshot
 * `추가` 호스트 재시작 없는 hot-plug: install 또는 재활성화 후 다음 새 실행이 ID를 다시 검색하고 pin하며 없거나 비활성 상태면 fallback하지 않습니다
 * `추가` 실행 중 Binder death는 replay 없이 현재 실행을 종료하고 이후 새 실행이 provider를 다시 검색합니다
 * `개선` Chaquopy를 trusted-local, non-sandbox runtime으로 고정. 장기 signer는 SM003이며 runtime/security/release owner는 SuperMonster003

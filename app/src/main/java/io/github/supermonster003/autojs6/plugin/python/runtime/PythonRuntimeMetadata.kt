@@ -37,6 +37,7 @@ internal object PythonRuntimeMetadata {
             implementation = PythonImplementation.CPYTHON,
             pythonVersion = PYTHON_VERSION,
             isolationMode = PythonIsolationMode.DEDICATED_PLUGIN_PROCESS,
+            minHostVersionCode = 5275L,
         ).also(PythonRuntimeValidation::validateRuntimeInfo)
     }
 

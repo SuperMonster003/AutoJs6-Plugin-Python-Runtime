@@ -44,6 +44,7 @@ __pycache__/
 !/tools/tests/**
 !/tools/verify-r2-static.ps1
 !/tools/verify-r6-release-source.ps1
+!/tools/verify-r6-stable-release.ps1
 !/tools/write-r6-rc-provenance.ps1
 
 /gradle/wrappers/backup/

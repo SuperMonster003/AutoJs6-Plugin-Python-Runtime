@@ -22,6 +22,8 @@ A completed lower evidence level never substitutes for a later one.
 - [x] Select the SM003 identity pinned by `locks/release-identity.lock` as the
   long-term release signer.
 - [x] Target Plugin 0.1.0 for pairing with AutoJs6 Host 6.8.0.
+- [x] Freeze and enforce AutoJs6 Host versionCode `5275` as the minimum
+  compatibility boundary for Plugin 0.1.0.
 - [x] Freeze hot-plug semantics: no Host restart; installation/re-enablement
   affects the next new execution; missing/disabled prompts and fails closed;
   in-flight Binder death terminates without replay; later executions rediscover
@@ -46,18 +48,28 @@ A completed lower evidence level never substitutes for a later one.
 
 - [x] Accept the runtime selection, trusted-local boundary, long-term signer,
   ownership and hot-plug maintenance policy.
-- [ ] Freeze the exact AutoJs6 Host 6.8.0 version name/code, source revision,
-  release-AAR distribution manifest and enforceable compatibility bounds.
+- [x] Freeze the AutoJs6 Host version name/code and enforceable compatibility
+  floor as `6.8.0` / `5275`.
+- [x] Freeze clean Host source
+  `2caddcb763b39f0bf450909742fa6ec4caba27a8` and three-AAR manifest SHA-256
+  `9f296ad45c24b7eb3e217e4d0ce6c96ba2593966b2bed1db1f2846d658987818`.
 - [x] Add an explicit foreground install/enable prompt for Explorer, Editor,
   Python Project and Floating Menu launches. Background tasks, broadcasts,
   services and direct engine calls retain stable errors and never open UI.
 - [x] Compile the Host adapter and Plugin INFO service against the exact local
   three-AAR distribution (`common-plugin-api`, `protocol-wire-api`, and
   `python-runtime-api`) while keeping dirty-tree evidence non-publishable.
-- [ ] Regenerate the Host release-AAR distribution after the final Host commit
-  and update the Plugin AAR lock to that exact manifest.
-- [ ] Set the stable version to `0.1.0`, set `VERSION_BUILD` to the final Plugin
-  commit count, and make one clean source-freeze commit.
+- [x] Declare the exact Official Index source identity in `defaultConfig` as
+  `plugin_id=python-runtime`, `plugin_engine=python`, and
+  `plugin_variant=cpython-3.13`; keep INFO metadata on those same BuildConfig
+  values without extending the Index schema.
+- [x] Regenerate the Host release-AAR distribution after the final Host commit
+  and stage the Plugin AAR lock for that exact manifest.
+- [x] Set the stable version to `0.1.0`, enforce `minHostVersionCode=5275`, and
+  set `VERSION_BUILD=8` for this single final source-freeze commit.
+- [x] Freeze the final Host AAR lock and Plugin identity in this one commit; once
+  committed, its repository commit count is exactly `8`, equal to
+  `VERSION_BUILD` without requiring a follow-up identity edit.
 
 Exit criterion: one clean Host identity and one clean Plugin source identity,
 with all locks/notices/version metadata referring to those exact sources.

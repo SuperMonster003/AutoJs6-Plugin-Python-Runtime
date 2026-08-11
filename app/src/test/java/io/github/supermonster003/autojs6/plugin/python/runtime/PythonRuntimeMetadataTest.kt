@@ -15,6 +15,13 @@ import org.junit.Test
 
 class PythonRuntimeMetadataTest {
     @Test
+    fun officialIndexIdentityIsExactAndBuildDeclared() {
+        assertEquals("python-runtime", BuildConfig.PLUGIN_ID)
+        assertEquals("python", BuildConfig.PLUGIN_ENGINE)
+        assertEquals("cpython-3.13", BuildConfig.PLUGIN_VARIANT)
+    }
+
+    @Test
     fun runtimeInfoAdvertisesExactPinnedIdentityAndIsolation() {
         val info = PythonRuntimeMetadata.runtimeInfo
         val protocolMax = PythonProtocolVersion(
@@ -30,7 +37,7 @@ class PythonRuntimeMetadataTest {
         assertEquals(PythonImplementation.CPYTHON, info.implementation)
         assertEquals("3.13.9", info.pythonVersion)
         assertEquals(PythonIsolationMode.DEDICATED_PLUGIN_PROCESS, info.isolationMode)
-        assertNull(info.minHostVersionCode)
+        assertEquals(5_275L, info.minHostVersionCode)
         assertNull(info.maxHostVersionCode)
     }
 

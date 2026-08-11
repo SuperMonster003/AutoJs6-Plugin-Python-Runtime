@@ -6,7 +6,7 @@
   "p_languages_all_supported_for_readme": "El README.md actual está disponible en los siguientes idiomas",
   "h3_introduction": "Introducción",
   "p_introduction": "Python Runtime es un proveedor independiente del protocolo Python V1. El host entrega una instantánea de código Python a un proceso dedicado, que la ejecuta con CPython y devuelve salida acotada, excepciones estructuradas y un único estado terminal.",
-  "p_evidence_boundary": "La versión 0.1.0 está en preparación de publicación. Existen pruebas RC locales de compilación, APK, Binder y un dispositivo API 31 arm64-v8a, pero los cambios de gobierno exigen un nuevo congelado; aún no existen tag v0.1.0, GitHub Release ni production receipt.",
+  "p_evidence_boundary": "La identidad fuente 0.1.0 y el lock Host exacto están congelados. Las pruebas RC locales de compilación, APK, Binder y un dispositivo API 31 arm64-v8a siguen siendo históricas; la provenance APK/P3 final, el tag v0.1.0, GitHub Release y production receipt aún no están completos.",
   "h3_functions": "Funciones",
   "features": [
     "Ejecutar una instantánea UTF-8 como `__main__`.",
@@ -22,7 +22,7 @@
   "p_plugin_interface": "El host descubre e invoca el complemento con las siguientes identidades",
   "p_plugin_scope": "El complemento acepta una SOURCE independiente, un workspace archive acotado opcional y el snapshot de capacidades host de solo lectura del protocolo 1.1; stdin snapshot sigue desactivado. No se inyectan Context, Binder, objetos del runtime host ni callback sinks.",
   "h3_host_integration_status": "Estado de integración con el host",
-  "p_host_integration_status": "La versión 0.1.0 se empareja solo con AutoJs6 6.8.0, cuya identidad final y límites de compatibilidad aún no están congelados. Cada ejecución nueva redescubre el provider; si falta o está desactivado pide instalar o activar sin fallback, y la instalación o reactivación no exige reiniciar el host. El índice oficial, el tag y la Release siguen pendientes.",
+  "p_host_integration_status": "La versión 0.1.0 se empareja solo con AutoJs6 6.8.0, con el versionCode mínimo del Host 5275 congelado y aplicado; la revisión final y limpia del código fuente del Host y el manifiesto de distribución de los tres AAR están registrados en el lock. Cada ejecución nueva redescubre el provider; si falta o está desactivado pide instalar o activar sin fallback, y la instalación o reactivación no exige reiniciar el Host. La provenance APK/P3 final, el índice oficial, el tag y la Release siguen pendientes.",
   "h3_security": "Seguridad y privacidad",
   "p_security": "El runtime Chaquopy es solo para scripts locales de confianza, no un sandbox de código hostil. El servicio exportado exige el permiso de firma host y comprueba UID, paquete y signer; UID Android separado, proceso dedicado y frontera Binder estrecha reducen la exposición sin aislar Python como sandbox. SM003 es el signer de publicación a largo plazo y SuperMonster003 es owner de runtime, seguridad y release.",
   "h3_security_limits": "Límites operativos",
@@ -43,7 +43,7 @@
     "arm64-v8a tiene evidencia de dispositivo API 31; x86_64 solo tiene evidencia de empaquetado, no ejecución en dispositivo ni matriz completa."
   ],
   "h3_roadmap": "Hoja de ruta",
-  "p_roadmap": "La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 ya son históricas. R6-P4 prepara 0.1.0; los blockers restantes son la identidad final AutoJs6 6.8.0, autenticación y repositorio GitHub, índice oficial, provenance del código actual y production receipt posterior a publicar. Una matriz API×ABI completa y un soak nuevo no son gates automáticos.",
+  "p_roadmap": "La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 ya son históricas. Este clean VERSION_BUILD=8 freeze commit fija la identidad fuente estable del Plugin y el lock Host exacto 6.8.0/5275; los únicos blockers restantes son la provenance APK/P3 de los artefactos exactos, el índice oficial, tag/Release y production receipt posterior a publicar. Una matriz API×ABI completa y un soak nuevo no son gates automáticos.",
   "text_link_roadmap": "Ver ROADMAP.md",
   "h3_release_history": "Historial de versiones",
   "h5_for_more_release_history": "Más versiones",

@@ -6,7 +6,7 @@
   "p_languages_all_supported_for_readme": "Le fichier README.md actuel est disponible dans les langues suivantes",
   "h3_introduction": "Introduction",
   "p_introduction": "Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal.",
-  "p_evidence_boundary": "La version 0.1.0 est en préparation de publication. Des preuves locales RC existent pour la construction, l'APK, Binder et un appareil API 31 arm64-v8a, mais les changements de gouvernance imposent un nouveau gel; aucun tag v0.1.0, GitHub Release ou production receipt n'existe encore.",
+  "p_evidence_boundary": "L'identité source 0.1.0 et le lock Host exact sont gelés. Les preuves RC locales de construction, APK, Binder et d'un appareil API 31 arm64-v8a restent historiques; la provenance APK/P3 finale, le tag v0.1.0, la GitHub Release et le production receipt ne sont pas encore terminés.",
   "h3_functions": "Fonctions",
   "features": [
     "Exécuter un instantané de source Python UTF-8 en tant que `__main__`.",
@@ -22,7 +22,7 @@
   "p_plugin_interface": "L'hôte découvre et appelle le plug-in avec les identités suivantes",
   "p_plugin_scope": "Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facultative et le snapshot en lecture seule des capacités hôte du protocole 1.1; stdin snapshot reste désactivé. Aucun Context, Binder, objet d'exécution hôte ou callback sink n'est injecté.",
   "h3_host_integration_status": "État de l'intégration hôte",
-  "p_host_integration_status": "La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, dont l'identité finale et les limites de compatibilité ne sont pas encore gelées. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'index officiel, le tag et la Release restent en attente.",
+  "p_host_integration_status": "La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. La provenance APK/P3 finale, l'index officiel, le tag et la Release restent en attente.",
   "h3_security": "Sécurité et confidentialité",
   "p_security": "Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un sandbox de code hostile. Le service exporté exige la permission de signature hôte et revérifie UID, paquet et signer; UID Android distinct, processus dédié et frontière Binder étroite réduisent l'exposition sans isoler Python comme sandbox. SM003 est le signer de publication à long terme et SuperMonster003 possède les rôles runtime, sécurité et release.",
   "h3_security_limits": "Limites d'exécution",
@@ -43,7 +43,7 @@
     "arm64-v8a dispose d'une preuve appareil API 31; x86_64 n'a actuellement qu'une preuve d'empaquetage, ni exécution appareil ni matrice complète."
   ],
   "h3_roadmap": "Feuille de route",
-  "p_roadmap": "Les preuves RC locales et appareil concentrées de R6-P2/P3 sont désormais historiques. R6-P4 prépare 0.1.0; les blockers restants sont l'identité finale AutoJs6 6.8.0, l'authentification et le dépôt GitHub, l'index officiel, une provenance des sources actuelles et un production receipt après publication. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.",
+  "p_roadmap": "Les preuves RC locales et appareil concentrées de R6-P2/P3 sont désormais historiques. Ce clean VERSION_BUILD=8 freeze commit fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275; les seuls blockers restants sont la provenance APK/P3 des artefacts exacts, l'index officiel, le tag/Release et un production receipt après publication. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.",
   "text_link_roadmap": "Voir ROADMAP.md",
   "h3_release_history": "Historique des versions",
   "h5_for_more_release_history": "Autres versions",

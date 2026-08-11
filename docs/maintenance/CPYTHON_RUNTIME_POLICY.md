@@ -30,11 +30,13 @@ dependency checksums, and `docs/adr/0001-python-runtime-selection.md` records
 the selection decision. Prose version strings are descriptive and must not
 override those files.
 
-Plugin 0.1.0 is intended to pair with AutoJs6 Host 6.8.0. The final Host
-version name/code, source commit, release-AAR distribution manifest and protocol
-compatibility bounds have not yet been frozen as one release identity. That is
-a release blocker: release notes must state the exact validated Host identity
-rather than broaden it to an untested 6.8.0 family.
+Plugin 0.1.0 pairs with AutoJs6 Host 6.8.0 and enforces versionCode 5275 as its
+minimum compatibility boundary. The final clean Host source commit
+`2caddcb763b39f0bf450909742fa6ec4caba27a8` and three-AAR distribution manifest
+SHA-256 `9f296ad45c24b7eb3e217e4d0ce6c96ba2593966b2bed1db1f2846d658987818`
+are recorded in `locks/host-api-aars.lock` as one release identity. Release
+notes must state that exact validated Host identity rather than broaden it to
+an untested 6.8.0 family.
 
 The official source repository is:
 

@@ -37,9 +37,9 @@ class PythonRuntimePluginInfoService : Service() {
                 versionName = BuildConfig.VERSION_NAME,
                 versionCode = BuildConfig.VERSION_CODE.toLong(),
                 versionDate = getString(R.string.plugin_version_date),
-                id = PLUGIN_ID,
-                engine = ENGINE,
-                variant = VARIANT,
+                id = BuildConfig.PLUGIN_ID,
+                engine = BuildConfig.PLUGIN_ENGINE,
+                variant = BuildConfig.PLUGIN_VARIANT,
                 supportedAbis = PythonRuntimeMetadata.capabilities.supportedAbis.toTypedArray(),
                 capabilities = capabilities,
             )
@@ -49,9 +49,6 @@ class PythonRuntimePluginInfoService : Service() {
     override fun onBind(intent: Intent?): IBinder = binder
 
     private companion object {
-        const val PLUGIN_ID = "python-runtime"
-        const val ENGINE = "python"
-        const val VARIANT = "cpython-3.13"
         const val RUNTIME_ACTION = "org.autojs.plugin.python.RUNTIME"
         const val CAPABILITY_PYTHON_VERSION = "pythonVersion"
         const val CAPABILITY_PROVIDER_ID = "pythonProviderId"

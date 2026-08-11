@@ -102,6 +102,19 @@ foreach ($marker in @(
     }
 }
 
+foreach ($marker in @(
+    'buildConfigField("String", "PLUGIN_ID", "\"python-runtime\"")',
+    'buildConfigField("String", "PLUGIN_ENGINE", "\"python\"")',
+    'buildConfigField("String", "PLUGIN_VARIANT", "\"cpython-3.13\"")',
+    'resValue("string", "plugin_id", "python-runtime")',
+    'resValue("string", "plugin_engine", "python")',
+    'resValue("string", "plugin_variant", "cpython-3.13")'
+)) {
+    if (-not $appBuild.Contains($marker)) {
+        Add-Blocker "Official Index identity marker is missing: $marker"
+    }
+}
+
 if ($appBuild -notmatch 'releaseSigningPropertyNames\s*=\s*setOf\("storeFile",\s*"storePassword",\s*"keyAlias",\s*"keyPassword"\)') {
     Add-Blocker 'Release signing guard does not declare the exact four required property names'
 }
@@ -121,8 +134,8 @@ if (-not [int]::TryParse($versionProperties['VERSION_BUILD'], [ref] $versionBuil
     Add-Blocker 'VERSION_BUILD must be a positive integer'
 }
 
-if ($metadataSource -notmatch 'minHostVersionCode\s*=\s*[1-9][0-9]*L') {
-    Add-Blocker 'Python runtime metadata does not enforce the final Host 6.8.0 minimum version code'
+if ($metadataSource -notmatch 'minHostVersionCode\s*=\s*5275L') {
+    Add-Blocker 'Python runtime metadata does not enforce the final Host 6.8.0 minimum versionCode 5275'
 }
 if ($pluginInfoSource -notmatch 'class\s+PythonRuntimePluginInfoService\s*:\s*Service\(\)' -or
     $pluginInfoSource -notmatch 'IPluginInfoProvider\.Stub') {

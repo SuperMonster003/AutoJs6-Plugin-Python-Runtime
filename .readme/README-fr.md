@@ -37,7 +37,7 @@ Le fichier README.md actuel est disponible dans les langues suivantes:
 
 Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal.
 
-> La version 0.1.0 est en préparation de publication. Des preuves locales RC existent pour la construction, l'APK, Binder et un appareil API 31 arm64-v8a, mais les changements de gouvernance imposent un nouveau gel; aucun tag v0.1.0, GitHub Release ou production receipt n'existe encore.
+> L'identité source 0.1.0 et le lock Host exact sont gelés. Les preuves RC locales de construction, APK, Binder et d'un appareil API 31 arm64-v8a restent historiques; la provenance APK/P3 finale, le tag v0.1.0, la GitHub Release et le production receipt ne sont pas encore terminés.
 
 ******
 
@@ -79,6 +79,9 @@ L'hôte découvre et appelle le plug-in avec les identités suivantes:
 
 ```text
 service action: org.autojs.plugin.python.RUNTIME
+official index plugin id: python-runtime
+official index engine: python
+official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
 protocol: 1.0-1.1
@@ -92,12 +95,12 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 
 ******
 
-> La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, dont l'identité finale et les limites de compatibilité ne sont pas encore gelées. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'index officiel, le tag et la Release restent en attente.
+> La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. La provenance APK/P3 finale, l'index officiel, le tag et la Release restent en attente.
 
 ```text
 release target: 0.1.0
-release state: release preparation; not tagged or published
-paired host: AutoJs6 6.8.0
+release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -142,7 +145,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 ******
 
-Les preuves RC locales et appareil concentrées de R6-P2/P3 sont désormais historiques. R6-P4 prépare 0.1.0; les blockers restants sont l'identité finale AutoJs6 6.8.0, l'authentification et le dépôt GitHub, l'index officiel, une provenance des sources actuelles et un production receipt après publication. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.
+Les preuves RC locales et appareil concentrées de R6-P2/P3 sont désormais historiques. Ce clean VERSION_BUILD=8 freeze commit fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275; les seuls blockers restants sont la provenance APK/P3 des artefacts exacts, l'index officiel, le tag/Release et un production receipt après publication. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.
 
 - [Voir ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -154,10 +157,10 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 sont désormais hist
 
 # v0.1.0
 
-###### 2026/08/11 (préparation de publication; ni tag ni publication)
+###### 2026/08/12 (sources gelées; ni tag ni publication)
 
-* `Note` 0.1.0 reste en préparation; l'identité hôte finale, le dépôt et l'authentification GitHub, l'index officiel et le production receipt sont en attente
-* `Fonction` Protocole Python 1.0-1.1 associé à AutoJs6 6.8.0, workspace projet borné et snapshots app/device/execution/project en lecture seule
+* `Note` L'identité source 0.1.0 et le lock Host exact sont gelés; la provenance APK/P3 finale, l'index officiel, le tag/Release et le production receipt sont en attente
+* `Fonction` Protocole Python 1.0-1.1 associé à AutoJs6 6.8.0 / versionCode 5275, workspace projet borné et snapshots app/device/execution/project en lecture seule
 * `Fonction` Hot-plug sans redémarrage hôte: installation ou réactivation permet à la prochaine exécution de redécouvrir et épingler l'identité, sans fallback si absent ou désactivé
 * `Fonction` La mort Binder en cours termine l'exécution sans replay; les nouvelles exécutions redécouvrent le provider
 * `Amélioration` Chaquopy est fixé comme runtime trusted-local et non-sandbox; SM003 est le signer à long terme et SuperMonster003 possède runtime, sécurité et release

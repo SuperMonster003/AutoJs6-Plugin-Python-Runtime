@@ -1,8 +1,8 @@
 # AutoJs6 host protocol distribution lock.
 # Source gate: verifyPythonReleaseApiDistributionGate
-# Host HEAD: 3721bae9c340a3b389244841d01ddb0cad5cea0a (clean current tree)
-# Host source fingerprint: f0b91d3c48962538013b9ef4a173b6fe41ef83309d69810fcee6bbb113f23869
-# Distribution manifest SHA-256: dac72546938987445b5ff6efbddf6ccf48807a53f67d6b6adf73b3532a3c5efa
+# Host HEAD: 2caddcb763b39f0bf450909742fa6ec4caba27a8 (clean current tree)
+# Host source fingerprint: 4de961d6cc8f5df204cf535091179199c73946e945da70efed408794a4ad766b
+# Distribution manifest SHA-256: 9f296ad45c24b7eb3e217e4d0ce6c96ba2593966b2bed1db1f2846d658987818
 format=1
 common-plugin-api.file=common-plugin-api.aar
 common-plugin-api.sha256=6d75eb2350aa56ed412dabf84b34c0f65b9a6f6cfce3f3c23f79b9b198c24a63

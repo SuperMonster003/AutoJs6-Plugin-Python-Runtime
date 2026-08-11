@@ -6,12 +6,12 @@
   "changelog_label_dependency": "اعتماد",
   "$data": {
     "v0.1.0": {
-      "released_date": "2026/08/11 (تحضير للنشر؛ دون tag أو نشر)",
+      "released_date": "2026/08/12 (جمد المصدر؛ دون tag أو نشر)",
       "hint": [
-        "ما زال 0.1.0 قيد التحضير؛ تبقى هوية المضيف النهائية ومستودع GitHub والمصادقة والفهرس الرسمي وproduction receipt"
+        "جمدت source identity للإصدار 0.1.0 وHost lock الدقيقة؛ تبقى APK/P3 provenance النهائية والفهرس الرسمي وtag/Release وproduction receipt"
       ],
       "feature": [
-        "بروتوكول Python ‏1.0-1.1 مقترن بـ AutoJs6 6.8.0 وproject workspace محدود وsnapshots ‏app/device/execution/project للقراءة فقط",
+        "بروتوكول Python ‏1.0-1.1 مقترن بـ AutoJs6 6.8.0 / versionCode 5275 وproject workspace محدود وsnapshots ‏app/device/execution/project للقراءة فقط",
         "Hot-plug دون إعادة تشغيل المضيف: يسمح التثبيت أو إعادة التفعيل للتنفيذ الجديد التالي بإعادة اكتشاف الهوية وpin دون fallback عند الفقد أو التعطيل",
         "ينهي Binder death أثناء التشغيل التنفيذ الحالي دون replay؛ تعيد عمليات التنفيذ الجديدة اكتشاف provider"
       ],

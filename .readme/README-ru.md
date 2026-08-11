@@ -37,7 +37,7 @@
 
 Python Runtime — независимый provider протокола Python V1. Хост передает один снимок исходного кода в отдельный процесс, который выполняет его в CPython и возвращает ограниченный вывод, структурированные исключения и одно терминальное состояние.
 
-> Версия 0.1.0 готовится к официальному выпуску. Есть локальные RC-свидетельства сборки, APK, Binder и одного устройства API 31 arm64-v8a, но после изменений управления исходники нужно заморозить заново. Тега v0.1.0, GitHub Release и production receipt пока нет.
+> Идентичность исходников 0.1.0 и точный Host lock заморожены. Существующие локальные RC-свидетельства build, APK, Binder и одного устройства API 31 arm64-v8a остаются историческими; финальная APK/P3 provenance, тег v0.1.0, GitHub Release и production receipt еще не готовы.
 
 ******
 
@@ -79,6 +79,9 @@ expected packaged Python: 3.13.9
 
 ```text
 service action: org.autojs.plugin.python.RUNTIME
+official index plugin id: python-runtime
+official index engine: python
+official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
 protocol: 1.0-1.1
@@ -92,12 +95,12 @@ protocol: 1.0-1.1
 
 ******
 
-> Версия 0.1.0 предназначена только для AutoJs6 6.8.0, но финальная идентичность хоста и границы совместимости еще не заморожены. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения хост перезапускать не нужно. Официальный index, tag и Release еще ожидаются.
+> Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Финальная APK/P3 provenance, официальный index, tag и Release еще ожидаются.
 
 ```text
 release target: 0.1.0
-release state: release preparation; not tagged or published
-paired host: AutoJs6 6.8.0
+release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -142,7 +145,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
-Локальные RC- и концентрированные device-свидетельства R6-P2/P3 сохранены как история. R6-P4 готовит 0.1.0; остаются финальная идентичность AutoJs6 6.8.0, GitHub authentication и repository, официальный plugin index, новая provenance текущих исходников и production receipt после публикации. Полная API×ABI matrix и новый soak не являются автоматическими gates.
+Локальные RC- и концентрированные device-свидетельства R6-P2/P3 сохранены как история. Этот clean VERSION_BUILD=8 freeze commit фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock; остаются только APK/P3 provenance точных artifacts, официальный plugin index, tag/Release и production receipt после публикации. Полная API×ABI matrix и новый soak не являются автоматическими gates.
 
 - [Открыть ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -154,10 +157,10 @@ Runtime Chaquopy предназначен только для доверенны
 
 # v0.1.0
 
-###### 2026/08/11 (подготовка выпуска; без tag и публикации)
+###### 2026/08/12 (исходники заморожены; без tag и публикации)
 
-* `Примечание` 0.1.0 еще готовится; остаются финальная идентичность хоста, GitHub repository и authentication, официальный plugin index и production receipt
-* `Добавлено` Протокол Python 1.0-1.1 для AutoJs6 6.8.0, ограниченный project workspace и read-only snapshots app/device/execution/project
+* `Примечание` Идентичность исходников 0.1.0 и точный Host lock заморожены; остаются финальная APK/P3 provenance, официальный plugin index, tag/Release и production receipt
+* `Добавлено` Протокол Python 1.0-1.1 для AutoJs6 6.8.0 / versionCode 5275, ограниченный project workspace и read-only snapshots app/device/execution/project
 * `Добавлено` Hot-plug без перезапуска хоста: install или повторное включение позволяет следующему запуску заново найти и pin ID, без fallback при отсутствии или отключении
 * `Добавлено` Binder death во время работы завершает текущий запуск без replay; новые запуски заново обнаруживают provider
 * `Улучшено` Chaquopy закреплен как trusted-local, non-sandbox runtime; долгосрочный signer — SM003, owner runtime/security/release — SuperMonster003

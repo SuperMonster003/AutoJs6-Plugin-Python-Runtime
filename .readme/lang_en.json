@@ -6,7 +6,7 @@
   "p_languages_all_supported_for_readme": "The current README.md supports the following languages",
   "h3_introduction": "Introduction",
   "p_introduction": "Python Runtime is an independent provider for version 1 of the Python protocol. The host gives one Python source snapshot to a dedicated plugin process, which executes it with CPython and returns bounded output, structured exceptions, and exactly one terminal state.",
-  "p_evidence_boundary": "Version 0.1.0 is in release preparation. Local RC build, APK, Binder, and one API 31 arm64-v8a device evidence exist, but source-governance changes require a fresh freeze; no v0.1.0 tag, GitHub Release, or production receipt exists yet.",
+  "p_evidence_boundary": "The 0.1.0 source identity and exact Host lock are frozen. Existing local RC build, APK, Binder, and one API 31 arm64-v8a device evidence remain historical; final APK/P3 provenance, the v0.1.0 tag, GitHub Release, and production receipt are not complete yet.",
   "h3_functions": "Features",
   "features": [
     "Execute one UTF-8 Python source snapshot as `__main__`.",
@@ -22,7 +22,7 @@
   "p_plugin_interface": "The host discovers and calls the plugin with the following identities",
   "p_plugin_scope": "The plugin accepts an independent SOURCE, an optional bounded workspace archive, and the protocol 1.1 read-only host capability snapshot; stdin snapshots remain disabled. It injects no Context, Binder, host runtime object, or callback sink into script globals.",
   "h3_host_integration_status": "Host integration status",
-  "p_host_integration_status": "Version 0.1.0 is paired only with AutoJs6 6.8.0, whose final host identity and compatibility bounds are not frozen yet. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no host restart. The official index, tag, and Release remain pending.",
+  "p_host_integration_status": "Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Final APK/P3 provenance, the official index, tag, and Release remain pending.",
   "h3_security": "Security and privacy",
   "p_security": "The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. The exported service requires the host signature permission and rechecks UID, package, and signer; a separate Android UID, dedicated process, and narrow Binder boundary reduce host exposure but do not sandbox Python. SM003 is the long-term release signer, and SuperMonster003 owns runtime, security, and release.",
   "h3_security_limits": "Operational limits",
@@ -43,7 +43,7 @@
     "arm64-v8a has API 31 device evidence; x86_64 currently has packaging evidence only and is not presented as device execution or a complete device matrix."
   ],
   "h3_roadmap": "Roadmap",
-  "p_roadmap": "The R6-P2/P3 local RC and concentrated device evidence are now historical. R6-P4 prepares 0.1.0; remaining blockers are the final AutoJs6 6.8.0 identity, GitHub authentication and repository, the official plugin index, fresh current-source provenance, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.",
+  "p_roadmap": "The R6-P2/P3 local RC and concentrated device evidence are now historical. This clean VERSION_BUILD=8 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; the only remaining blockers are exact-artifact APK/P3 provenance, the official plugin index, tag/Release, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.",
   "text_link_roadmap": "View ROADMAP.md",
   "h3_release_history": "Release history",
   "h5_for_more_release_history": "For more releases",

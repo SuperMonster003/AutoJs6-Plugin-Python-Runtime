@@ -37,7 +37,7 @@
 
 Python Runtime 是獨立的 Python 協定 V1 provider. 宿主將單一 Python 原始碼快照交給專用外掛程序, 外掛使用 CPython 執行並回傳有界輸出, 結構化例外與唯一終態.
 
-> 目前正在準備正式發布 0.1.0. 已有本機 RC 的建置, APK, Binder 與一部 API 31 arm64-v8a 裝置證據, 但原始碼治理後必須重新凍結; 目前尚未建立 v0.1.0 tag, GitHub Release 或 production receipt.
+> 0.1.0 原始碼身分與精確 Host lock 已凍結. 既有本機 RC 的建置, APK, Binder 與一部 API 31 arm64-v8a 裝置證據仍屬歷史證據; 目前尚未完成最終 APK/P3 provenance, v0.1.0 tag, GitHub Release 或 production receipt.
 
 ******
 
@@ -79,6 +79,9 @@ expected packaged Python: 3.13.9
 
 ```text
 service action: org.autojs.plugin.python.RUNTIME
+official index plugin id: python-runtime
+official index engine: python
+official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
 protocol: 1.0-1.1
@@ -92,12 +95,12 @@ protocol: 1.0-1.1
 
 ******
 
-> 0.1.0 只與 AutoJs6 6.8.0 配對, 但最終宿主身分與相容界限尚未凍結. 每次新執行都重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後無須重新啟動宿主. 官方索引, tag 與 Release 尚待完成.
+> 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂與三件 AAR distribution manifest 已寫入 lock. 每次新執行都重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後無須重新啟動宿主. 最終 APK/P3 provenance, 官方索引, tag 與 Release 尚待完成.
 
 ```text
 release target: 0.1.0
-release state: release preparation; not tagged or published
-paired host: AutoJs6 6.8.0
+release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -142,7 +145,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-R6-P2/P3 的本機 RC 與集中裝置證據已歷史化. R6-P4 正在準備 0.1.0; 剩餘 blocker 是最終 Host 6.8.0 身分, GitHub 認證與儲存庫, 官方外掛索引, 目前原始碼的新 provenance, 以及發布後的 production receipt. 完整 API×ABI 矩陣與新 soak 不屬自動門禁.
+R6-P2/P3 的本機 RC 與集中裝置證據已歷史化. 本次 clean VERSION_BUILD=8 freeze commit 固定了穩定 Plugin 原始碼身分與精確 Host 6.8.0/5275 lock; 剩餘 blocker 僅為精確產物的 APK/P3 provenance, 官方外掛索引, tag/Release 與發布後的 production receipt. 完整 API×ABI 矩陣與新 soak 不屬自動門禁.
 
 - [檢視 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -154,10 +157,10 @@ R6-P2/P3 的本機 RC 與集中裝置證據已歷史化. R6-P4 正在準備 0.1.
 
 # v0.1.0
 
-###### 2026/08/11 (發布準備中; 尚未 tag 或發布)
+###### 2026/08/12 (原始碼已凍結; 尚未 tag 或發布)
 
-* `提示` 0.1.0 仍在發布準備階段; 最終 Host 身分, GitHub 儲存庫與認證, 官方外掛索引和 production receipt 尚待完成
-* `新增` 面向 AutoJs6 6.8.0 的 Python 協定 1.0-1.1, 有界專案 workspace 與唯讀 app/device/execution/project 能力快照
+* `提示` 0.1.0 原始碼身分與精確 Host lock 已凍結; 最終 APK/P3 provenance, 官方外掛索引, tag/Release 與 production receipt 尚待完成
+* `新增` 面向 AutoJs6 6.8.0 / versionCode 5275 的 Python 協定 1.0-1.1, 有界專案 workspace 與唯讀 app/device/execution/project 能力快照
 * `新增` 無須重新啟動 Host 的熱插拔: 安裝或重新啟用後下一次新執行重新發現並 pin 身分, 缺失或停用時絕不 fallback
 * `新增` 執行中的 Binder death 終止目前執行且不得重播, 後續新執行重新發現 provider
 * `改善` 將 Chaquopy 固定為 trusted-local, non-sandbox 執行環境; SM003 為長期 signer, SuperMonster003 為 runtime/security/release owner

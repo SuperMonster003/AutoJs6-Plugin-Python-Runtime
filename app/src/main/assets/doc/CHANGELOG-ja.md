@@ -6,10 +6,10 @@
 
 # v0.1.0
 
-###### 2026/08/11 (リリース準備中; tag・公開前)
+###### 2026/08/12 (ソース凍結済み; tag・公開前)
 
-* `注記` 0.1.0 は準備中です. 最終ホスト ID, GitHub repository と認証, 公式 plugin index, production receipt は未完了です
-* `追加` AutoJs6 6.8.0 と組み合わせる Python プロトコル 1.0-1.1, 上限付き project workspace, 読み取り専用 app/device/execution/project snapshot
+* `注記` 0.1.0 source identity と exact Host lock は凍結済みです. 最終 APK/P3 provenance, 公式 plugin index, tag/Release, production receipt は未完了です
+* `追加` AutoJs6 6.8.0 / versionCode 5275 と組み合わせる Python プロトコル 1.0-1.1, 上限付き project workspace, 読み取り専用 app/device/execution/project snapshot
 * `追加` ホスト再起動なしの hot-plug: install または再有効化後の次の新規実行で ID を再検出・pin し, 不在・無効時は fallback しません
 * `追加` 実行中の Binder death は replay せず現在の実行を終了し, 後続の新規実行で provider を再検出します
 * `改善` Chaquopy を trusted-local, non-sandbox runtime として固定. 長期 signer は SM003, runtime/security/release owner は SuperMonster003

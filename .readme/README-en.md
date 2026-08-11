@@ -37,7 +37,7 @@ The current README.md supports the following languages:
 
 Python Runtime is an independent provider for version 1 of the Python protocol. The host gives one Python source snapshot to a dedicated plugin process, which executes it with CPython and returns bounded output, structured exceptions, and exactly one terminal state.
 
-> Version 0.1.0 is in release preparation. Local RC build, APK, Binder, and one API 31 arm64-v8a device evidence exist, but source-governance changes require a fresh freeze; no v0.1.0 tag, GitHub Release, or production receipt exists yet.
+> The 0.1.0 source identity and exact Host lock are frozen. Existing local RC build, APK, Binder, and one API 31 arm64-v8a device evidence remain historical; final APK/P3 provenance, the v0.1.0 tag, GitHub Release, and production receipt are not complete yet.
 
 ******
 
@@ -79,6 +79,9 @@ The host discovers and calls the plugin with the following identities:
 
 ```text
 service action: org.autojs.plugin.python.RUNTIME
+official index plugin id: python-runtime
+official index engine: python
+official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
 protocol: 1.0-1.1
@@ -92,12 +95,12 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 
 ******
 
-> Version 0.1.0 is paired only with AutoJs6 6.8.0, whose final host identity and compatibility bounds are not frozen yet. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no host restart. The official index, tag, and Release remain pending.
+> Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Final APK/P3 provenance, the official index, tag, and Release remain pending.
 
 ```text
 release target: 0.1.0
-release state: release preparation; not tagged or published
-paired host: AutoJs6 6.8.0
+release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -142,7 +145,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-The R6-P2/P3 local RC and concentrated device evidence are now historical. R6-P4 prepares 0.1.0; remaining blockers are the final AutoJs6 6.8.0 identity, GitHub authentication and repository, the official plugin index, fresh current-source provenance, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.
+The R6-P2/P3 local RC and concentrated device evidence are now historical. This clean VERSION_BUILD=8 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; the only remaining blockers are exact-artifact APK/P3 provenance, the official plugin index, tag/Release, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -154,10 +157,10 @@ The R6-P2/P3 local RC and concentrated device evidence are now historical. R6-P4
 
 # v0.1.0
 
-###### 2026/08/11 (release preparation; not tagged or published)
+###### 2026/08/12 (source frozen; not tagged or published)
 
-* `Hint` 0.1.0 remains in release preparation; final host identity, GitHub repository and authentication, official plugin index, and production receipt are pending
-* `Feature` Python protocol 1.0-1.1 paired with AutoJs6 6.8.0, a bounded project workspace, and read-only app/device/execution/project capability snapshots
+* `Hint` The 0.1.0 source identity and exact Host lock are frozen; final APK/P3 provenance, official plugin index, tag/Release, and production receipt are pending
+* `Feature` Python protocol 1.0-1.1 paired with AutoJs6 6.8.0 / versionCode 5275, a bounded project workspace, and read-only app/device/execution/project capability snapshots
 * `Feature` Hot-plug without a host restart: install or re-enable makes the next new execution rediscover and pin identity, while missing or disabled never falls back
 * `Feature` In-flight Binder death terminates the current execution without replay; later new executions rediscover the provider
 * `Improvement` Fix Chaquopy as a trusted-local, non-sandbox runtime; SM003 is the long-term signer and SuperMonster003 owns runtime, security, and release

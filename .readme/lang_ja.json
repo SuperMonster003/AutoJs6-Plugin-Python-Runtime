@@ -6,7 +6,7 @@
   "p_languages_all_supported_for_readme": "現在の README.md は次の言語に対応しています",
   "h3_introduction": "概要",
   "p_introduction": "Python Runtime は Python プロトコル V1 の独立 provider です. ホストから 1 つの Python ソーススナップショットを専用プロセスで受け取り, CPython で実行して, 制限付き出力, 構造化例外, 1 つの終端状態を返します.",
-  "p_evidence_boundary": "0.1.0 は正式リリース準備中です. ローカル RC のビルド, APK, Binder, API 31 arm64-v8a 端末 1 台の証拠はありますが, ソース管理変更後に再凍結が必要です. v0.1.0 tag, GitHub Release, production receipt はまだありません.",
+  "p_evidence_boundary": "0.1.0 source identity と exact Host lock は凍結済みです. ローカル RC の build, APK, Binder, API 31 arm64-v8a 端末 1 台の証拠は履歴証拠のままです. 最終 APK/P3 provenance, v0.1.0 tag, GitHub Release, production receipt は未完了です.",
   "h3_functions": "機能",
   "features": [
     "1 つの UTF-8 Python ソースを `__main__` として実行します.",
@@ -22,7 +22,7 @@
   "p_plugin_interface": "ホストは次の識別子でプラグインを検出して呼び出します",
   "p_plugin_scope": "独立 SOURCE, 任意の上限付き workspace archive, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. stdin snapshot は無効のままで, Context, Binder, ホストオブジェクト, callback sink は注入しません.",
   "h3_host_integration_status": "ホスト統合状況",
-  "p_host_integration_status": "0.1.0 は AutoJs6 6.8.0 専用ですが, 最終ホスト ID と互換範囲は未凍結です. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化にホスト再起動は不要です. 公式 index, tag, Release は未完了です.",
+  "p_host_integration_status": "0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. 最終 APK/P3 provenance, 公式 index, tag, Release は未完了です.",
   "h3_security": "セキュリティとプライバシー",
   "p_security": "Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-code sandbox ではありません. exported service はホスト署名権限を要求し UID, package, signer を再検査します. 分離 Android UID, 専用プロセス, 狭い Binder 境界は露出を減らしますが Python を sandbox 化しません. 長期リリース signer は SM003, runtime/security/release owner は SuperMonster003 です.",
   "h3_security_limits": "動作制限",
@@ -43,7 +43,7 @@
     "arm64-v8a には API 31 端末証拠があります. x86_64 は現時点で packaging 証拠のみで, 端末実行や完全な端末 matrix とは扱いません."
   ],
   "h3_roadmap": "ロードマップ",
-  "p_roadmap": "R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. R6-P4 は 0.1.0 を準備中です. 残る blocker は最終 AutoJs6 6.8.0 ID, GitHub 認証と repository, 公式 plugin index, 現在ソースの新 provenance, 公開後の production receipt です. 完全な API×ABI matrix と新 soak は自動 gate ではありません.",
+  "p_roadmap": "R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. この clean VERSION_BUILD=8 freeze commit が stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します. 残る blocker は exact artifact の APK/P3 provenance, 公式 plugin index, tag/Release, 公開後の production receipt のみです. 完全な API×ABI matrix と新 soak は自動 gate ではありません.",
   "text_link_roadmap": "ROADMAP.md を表示",
   "h3_release_history": "更新履歴",
   "h5_for_more_release_history": "その他のバージョン",

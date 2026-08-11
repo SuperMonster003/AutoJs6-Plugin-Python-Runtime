@@ -66,6 +66,9 @@ expected packaged Python: {{ python_version_expected }}
 
 ```text
 service action: {{ service_action }}
+official index plugin id: {{ plugin_id }}
+official index engine: {{ plugin_engine }}
+official index variant: {{ plugin_variant }}
 protocol provider id: {{ provider_id }}
 engine: {{ engine_id }}
 protocol: {{ protocol_version }}

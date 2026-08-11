@@ -37,7 +37,7 @@
 
 Python Runtime は Python プロトコル V1 の独立 provider です. ホストから 1 つの Python ソーススナップショットを専用プロセスで受け取り, CPython で実行して, 制限付き出力, 構造化例外, 1 つの終端状態を返します.
 
-> 0.1.0 は正式リリース準備中です. ローカル RC のビルド, APK, Binder, API 31 arm64-v8a 端末 1 台の証拠はありますが, ソース管理変更後に再凍結が必要です. v0.1.0 tag, GitHub Release, production receipt はまだありません.
+> 0.1.0 source identity と exact Host lock は凍結済みです. ローカル RC の build, APK, Binder, API 31 arm64-v8a 端末 1 台の証拠は履歴証拠のままです. 最終 APK/P3 provenance, v0.1.0 tag, GitHub Release, production receipt は未完了です.
 
 ******
 
@@ -79,6 +79,9 @@ expected packaged Python: 3.13.9
 
 ```text
 service action: org.autojs.plugin.python.RUNTIME
+official index plugin id: python-runtime
+official index engine: python
+official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
 protocol: 1.0-1.1
@@ -92,12 +95,12 @@ protocol: 1.0-1.1
 
 ******
 
-> 0.1.0 は AutoJs6 6.8.0 専用ですが, 最終ホスト ID と互換範囲は未凍結です. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化にホスト再起動は不要です. 公式 index, tag, Release は未完了です.
+> 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. 最終 APK/P3 provenance, 公式 index, tag, Release は未完了です.
 
 ```text
 release target: 0.1.0
-release state: release preparation; not tagged or published
-paired host: AutoJs6 6.8.0
+release state: stable source identity frozen by the clean VERSION_BUILD=8 commit with the final Host lock; not tagged or published
+paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -142,7 +145,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. R6-P4 は 0.1.0 を準備中です. 残る blocker は最終 AutoJs6 6.8.0 ID, GitHub 認証と repository, 公式 plugin index, 現在ソースの新 provenance, 公開後の production receipt です. 完全な API×ABI matrix と新 soak は自動 gate ではありません.
+R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. この clean VERSION_BUILD=8 freeze commit が stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します. 残る blocker は exact artifact の APK/P3 provenance, 公式 plugin index, tag/Release, 公開後の production receipt のみです. 完全な API×ABI matrix と新 soak は自動 gate ではありません.
 
 - [ROADMAP.md を表示](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -154,10 +157,10 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. R6
 
 # v0.1.0
 
-###### 2026/08/11 (リリース準備中; tag・公開前)
+###### 2026/08/12 (ソース凍結済み; tag・公開前)
 
-* `注記` 0.1.0 は準備中です. 最終ホスト ID, GitHub repository と認証, 公式 plugin index, production receipt は未完了です
-* `追加` AutoJs6 6.8.0 と組み合わせる Python プロトコル 1.0-1.1, 上限付き project workspace, 読み取り専用 app/device/execution/project snapshot
+* `注記` 0.1.0 source identity と exact Host lock は凍結済みです. 最終 APK/P3 provenance, 公式 plugin index, tag/Release, production receipt は未完了です
+* `追加` AutoJs6 6.8.0 / versionCode 5275 と組み合わせる Python プロトコル 1.0-1.1, 上限付き project workspace, 読み取り専用 app/device/execution/project snapshot
 * `追加` ホスト再起動なしの hot-plug: install または再有効化後の次の新規実行で ID を再検出・pin し, 不在・無効時は fallback しません
 * `追加` 実行中の Binder death は replay せず現在の実行を終了し, 後続の新規実行で provider を再検出します
 * `改善` Chaquopy を trusted-local, non-sandbox runtime として固定. 長期 signer は SM003, runtime/security/release owner は SuperMonster003
