@@ -1,8 +1,8 @@
 # Python Runtime Plugin Roadmap
 
-Status: R6 release preparation for Plugin 0.1.0. The authorized official
-repository, `v0.1.0` tag and GitHub release are still pending; this document
-does not claim publication.
+Status: R6 release preparation for Plugin 0.1.0. The official public repository
+and `master` branch now exist; the final stable source, `v0.1.0` tag and GitHub
+release are still pending. This document does not claim publication.
 
 This roadmap favors exact, reviewable release progress. Source/static, Android
 build, APK packaging, Binder/device and public-release evidence remain distinct.
@@ -84,9 +84,12 @@ x86_64 packaging-only status.
 
 ## R6-P4: official publication and production receipt
 
-- [ ] Create the empty official repository at
+- [x] Create the official public repository at
   `https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime`, without an
-  unrelated generated initial commit, and push the frozen `master` branch.
+  unrelated generated initial commit, and push the release-preparation
+  `master` branch.
+- [ ] Push the final frozen `0.1.0` source commit to `master` and independently
+  verify that the remote branch resolves to that exact commit.
 - [ ] Create and push lightweight tag `v0.1.0` at the exact release commit, in
   line with the existing AutoJs6 plugin family convention.
 - [ ] Create a draft GitHub release and upload only stable distributable APKs

@@ -40,9 +40,9 @@ The official source repository is:
 
 https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime
 
-Repository authorization and release preparation do not prove that a remote,
-tag or published release exists. Those facts require independently recorded
-publication evidence.
+The public repository and `master` branch exist. Their presence does not prove
+that a stable tag or published release exists; those facts require
+independently recorded publication evidence for the final frozen commit.
 
 ## Long-term release signer
 
