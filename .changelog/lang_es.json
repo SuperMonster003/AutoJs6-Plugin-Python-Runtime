@@ -1,0 +1,23 @@
+{
+  "changelog_label_hint": "Nota",
+  "changelog_label_feature": "Función",
+  "changelog_label_fix": "Corrección",
+  "changelog_label_improvement": "Mejora",
+  "changelog_label_dependency": "Dependencia",
+  "$data": {
+    "v0.1.0-alpha.1": {
+      "released_date": "2026/08/09",
+      "hint": [
+        "Código de prueba de concepto R2; Gradle, APK, Binder y dispositivo no están validados"
+      ],
+      "feature": [
+        "Scaffold provider Python V1 independiente con proceso dedicado, una sesión activa y sin cola provider",
+        "Ejecución `__main__` de una fuente, stdout/stderr acotados, excepciones estructuradas y cancelación por reinicio",
+        "Generación ordenada de README y changelogs integrados en 10 idiomas"
+      ],
+      "dependency": [
+        "Preselección de {{ runtime_dependency }} y Python {{ python_line }}; versiones y hashes requieren verificación de compilación"
+      ]
+    }
+  }
+}

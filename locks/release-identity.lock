@@ -1,0 +1,7 @@
+# R6 release identity lock. Package names and the production signing identity
+# are immutable release inputs; changing any value requires a new reviewed lock.
+format=1
+host.package=org.autojs.autojs6
+plugin.package=io.github.supermonster003.autojs6.plugin.python.runtime
+release.keystore.sha256=0d6b79e4d4efe77829dbcc2e21096931ba7b0349df82f3b58c3e9d24e84f1df0
+release.certificate.sha256=31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213

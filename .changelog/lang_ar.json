@@ -1,0 +1,23 @@
+{
+  "changelog_label_hint": "ملاحظة",
+  "changelog_label_feature": "إضافة",
+  "changelog_label_fix": "إصلاح",
+  "changelog_label_improvement": "تحسين",
+  "changelog_label_dependency": "اعتماد",
+  "$data": {
+    "v0.1.0-alpha.1": {
+      "released_date": "2026/08/09",
+      "hint": [
+        "مصادر نموذج R2 أولي؛ لم يتم التحقق من Gradle أو APK أو Binder أو الأجهزة"
+      ],
+      "feature": [
+        "scaffold مستقل لـ provider Python V1 بعملية مخصصة وجلسة واحدة ودون طابور",
+        "تنفيذ مصدر واحد كـ `__main__` مع stdout/stderr محدودين واستثناءات منظمة وإلغاء بإعادة العملية",
+        "إنشاء README وسجلات مدمجة بعشر لغات وفق ترتيب ثابت"
+      ],
+      "dependency": [
+        "اختيار أولي لـ {{ runtime_dependency }} وPython {{ python_line }}؛ الإصدارات وhashes تحتاج تحقق البناء"
+      ]
+    }
+  }
+}

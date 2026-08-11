@@ -1,0 +1,22 @@
+{
+  "repo_url": "https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime",
+  "repo_slug": "SuperMonster003/AutoJs6-Plugin-Python-Runtime",
+  "docs_autojs6_url": "https://docs.autojs6.com",
+  "chaquopy_url": "https://chaquo.com/chaquopy/",
+  "cpython_url": "https://www.python.org/",
+  "service_action": "org.autojs.plugin.python.RUNTIME",
+  "provider_id": "org.autojs.python.runtime.cpython",
+  "engine_id": "python",
+  "protocol_version": "V1",
+  "runtime_dependency": "Chaquopy 17.0.0",
+  "python_line": "3.13",
+  "python_version_expected": "3.13.9",
+  "input_format": "UTF-8 Python source snapshot",
+  "output_format": "ordered bounded stdout/stderr chunks and a structured terminal result",
+  "max_source_bytes": "4 MiB",
+  "max_output_bytes": "4 MiB",
+  "max_output_chunk_bytes": "16 KiB",
+  "max_output_chunks": "4096",
+  "max_timeout": "60 s",
+  "local_aars": "protocol-wire-api.aar\npython-runtime-api.aar"
+}

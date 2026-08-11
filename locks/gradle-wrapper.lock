@@ -1,0 +1,17 @@
+# Gradle wrapper executable provenance lock.
+#
+# The checked-in JAR was extracted from gradle-wrapper-main-9.5.0.jar inside an
+# official Gradle 9.5.0 bin distribution only after the complete distribution
+# matched the separately fetched official SHA-256 below.
+format=1
+distribution.version=9.5.0
+distribution.url=https://services.gradle.org/distributions/gradle-9.5.0-bin.zip
+distribution.sha256=553c78f50dafcd54d65b9a444649057857469edf836431389695608536d6b746
+wrapper.jar.state=READY
+wrapper.jar.expected.sha256=497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7
+wrapper.jar.expected.provenance=OFFICIAL_GRADLE_9_5_0_DISTRIBUTION_EMBEDDED_WRAPPER
+wrapper.jar.observed.sha256=497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7
+wrapper.jar.observed.provenance=OFFICIAL_GRADLE_9_5_0_DISTRIBUTION_EMBEDDED_WRAPPER
+wrapper.jar.source.entry=gradle-9.5.0/lib/plugins/gradle-wrapper-main-9.5.0.jar!/gradle-wrapper.jar
+wrapper.jar.source.container.sha256=11954fe51c5f8d56321f694ebb2aec206c3871eab57e0bef4465b9c281003982
+wrapper.jar.blocker=NONE

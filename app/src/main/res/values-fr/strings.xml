@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Moteur Python pour AutoJs6</string>
+    <string name="plugin_name">Moteur Python</string>
+    <string name="plugin_description">Exécute les scripts Python pour AutoJs6 dans un processus de plug-in dédié</string>
+</resources>

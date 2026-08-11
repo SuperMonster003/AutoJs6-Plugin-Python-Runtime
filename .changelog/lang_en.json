@@ -1,0 +1,23 @@
+{
+  "changelog_label_hint": "Hint",
+  "changelog_label_feature": "Feature",
+  "changelog_label_fix": "Fix",
+  "changelog_label_improvement": "Improvement",
+  "changelog_label_dependency": "Dependency",
+  "$data": {
+    "v0.1.0-alpha.1": {
+      "released_date": "2026/08/09",
+      "hint": [
+        "R2 proof-of-concept source; Gradle, APK, Binder, and device acceptance have not run"
+      ],
+      "feature": [
+        "Independent Python protocol V1 provider scaffold with a dedicated runtime process, one active session, and no provider queue",
+        "Single-source `__main__` execution, bounded stdout/stderr, structured exceptions, and process-restart cancellation",
+        "Fixed-order generation of README files and in-app changelogs in 10 languages"
+      ],
+      "dependency": [
+        "Preselected {{ runtime_dependency }} and Python {{ python_line }}; packaged versions and dependency hashes still require build verification"
+      ]
+    }
+  }
+}

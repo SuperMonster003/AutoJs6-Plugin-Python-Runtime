@@ -1,0 +1,106 @@
+{
+  "schema": "autojs6-python-runtime-deferred-device-plan-v1",
+  "status": "DEFERRED",
+  "executionAuthorized": false,
+  "scope": {
+    "repository": "AutoJs6-Plugin-Python-Runtime",
+    "stage": "R2",
+    "planOnly": true
+  },
+  "protectedSerials": [
+    "QV710AF65F"
+  ],
+  "soakCompletionGate": {
+    "required": true,
+    "confirmed": false,
+    "confirmationMustBeExplicit": true,
+    "confirmationEvidence": null
+  },
+  "targetSelection": {
+    "serial": null,
+    "exactSerialRequired": true,
+    "environmentFallbackAllowed": false,
+    "autoDiscoveryAllowed": false,
+    "fallbackAllowed": false
+  },
+  "toolPolicy": {
+    "gradleAllowed": false,
+    "connectedTaskAllowed": false,
+    "adbExecutionAllowedNow": false,
+    "futureAdbRequiredPrefix": [
+      "adb",
+      "-s",
+      "${serial}"
+    ]
+  },
+  "futureAdbArgvTemplates": [
+    {
+      "id": "preflight-state",
+      "argv": [
+        "adb",
+        "-s",
+        "${serial}",
+        "get-state"
+      ]
+    },
+    {
+      "id": "preflight-api",
+      "argv": [
+        "adb",
+        "-s",
+        "${serial}",
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ]
+    },
+    {
+      "id": "preflight-abi",
+      "argv": [
+        "adb",
+        "-s",
+        "${serial}",
+        "shell",
+        "getprop",
+        "ro.product.cpu.abilist"
+      ]
+    },
+    {
+      "id": "instrumentation",
+      "argv": [
+        "adb",
+        "-s",
+        "${serial}",
+        "shell",
+        "am",
+        "instrument",
+        "${instrumentationArgs}"
+      ]
+    },
+    {
+      "id": "restore-verification",
+      "argv": [
+        "adb",
+        "-s",
+        "${serial}",
+        "shell",
+        "pm",
+        "path",
+        "${packageName}"
+      ]
+    }
+  ],
+  "forbiddenOperations": [
+    "gradle",
+    "gradlew",
+    "gradlew.bat",
+    "connectedAndroidTest",
+    "connectedCheck",
+    "adb-without-exact-serial"
+  ],
+  "evidencePolicy": {
+    "emitReceiptNow": false,
+    "allowPassClaimNow": false,
+    "currentClaim": "NOT_RUN"
+  }
+}

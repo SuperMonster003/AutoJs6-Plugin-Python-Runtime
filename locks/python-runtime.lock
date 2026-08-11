@@ -1,0 +1,51 @@
+# Runtime supply-chain lock for the R2 proof of concept.
+#
+# DEFERRED is a source-scaffold state only. app/build.gradle.kts deliberately
+# refuses to configure until this is promoted to RESOLVED with the complete,
+# audited per-artifact inventory described in locks/README.md.
+format=2
+android.gradle.plugin.version=9.2.1
+chaquopy.plugin.version=17.0.0
+chaquopy.license=MIT
+chaquopy.repository=https://repo1.maven.org/maven2/com/chaquo/python/com.chaquo.python.gradle.plugin/17.0.0/
+python.version.requested=3.13
+python.version.expected=3.13.9
+python.license=PSF-2.0
+python.implementation=CPython
+android.minSdk=24
+android.targetSdk=36
+android.compileSdk=36
+android.abis=arm64-v8a,x86_64
+python.packages.policy=stdlib-only
+python.packages.count=0
+online.pip.allowed=false
+runtime.artifacts.state=RESOLVED
+runtime.artifacts.count=9
+runtime.artifact.000.coordinate=com.chaquo.python:target:3.13.9-0
+runtime.artifact.000.file=target-3.13.9-0-arm64-v8a.zip
+runtime.artifact.000.sha256=c19f39fecada0b3932ab7a61b0f214c1212068cbbae0dc22c2afa38a4f354b8e
+runtime.artifact.001.coordinate=com.chaquo.python:target:3.13.9-0
+runtime.artifact.001.file=target-3.13.9-0-stdlib-pyc.zip
+runtime.artifact.001.sha256=d5765953d06dc3412c2925d211f188683e1c7936cca985a3091b4183051f0587
+runtime.artifact.002.coordinate=com.chaquo.python:target:3.13.9-0
+runtime.artifact.002.file=target-3.13.9-0-x86_64.zip
+runtime.artifact.002.sha256=f9f2e36b08e60e92bcdd201eea4aff5ba13681b7b425ce24e0a140eca626674d
+runtime.artifact.003.coordinate=com.chaquo.python.runtime:bootstrap:17.0.0
+runtime.artifact.003.file=bootstrap-17.0.0-3.13.imy
+runtime.artifact.003.sha256=28c30356b123ab8ea30c91543a213911e01c3f345cc8ba875472ad3ecc1bf90e
+runtime.artifact.004.coordinate=com.chaquo.python.runtime:chaquopy:17.0.0
+runtime.artifact.004.file=chaquopy-17.0.0-3.13-arm64-v8a.so
+runtime.artifact.004.sha256=24fdece46f44d5a0037191235d33f700d65cd6761742b747dd7594c5bc0924ad
+runtime.artifact.005.coordinate=com.chaquo.python.runtime:chaquopy:17.0.0
+runtime.artifact.005.file=chaquopy-17.0.0-3.13-x86_64.so
+runtime.artifact.005.sha256=ca04e62c2d78faadec4eded08c199f35cf62bfaf4fddf226df240c22de72efba
+runtime.artifact.006.coordinate=com.chaquo.python.runtime:chaquopy_java:17.0.0
+runtime.artifact.006.file=chaquopy_java-17.0.0.jar
+runtime.artifact.006.sha256=04eed6260e65634ac1c2031d2ca8fdf90d58da226b2f070132a66c6e3af9e39b
+runtime.artifact.007.coordinate=com.chaquo.python.runtime:libchaquopy_java:17.0.0
+runtime.artifact.007.file=libchaquopy_java-17.0.0-3.13-arm64-v8a.so
+runtime.artifact.007.sha256=afc927a07bb62edd108315ed062fe5276029e7bebe692465fa95ae17fff1e3a2
+runtime.artifact.008.coordinate=com.chaquo.python.runtime:libchaquopy_java:17.0.0
+runtime.artifact.008.file=libchaquopy_java-17.0.0-3.13-x86_64.so
+runtime.artifact.008.sha256=e0d0ae844e67d971546cb598186f36693981fab491a6db7fe23f0b54ea385af9
+runtime.artifacts.inventory.sha256=cc4148718389c17e7756e9d72ec8264b5d0e678f5328a613ac09f7d0c996c180

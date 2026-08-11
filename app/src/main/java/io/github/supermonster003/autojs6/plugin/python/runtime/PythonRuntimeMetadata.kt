@@ -1,0 +1,70 @@
+package io.github.supermonster003.autojs6.plugin.python.runtime
+
+import io.github.supermonster003.autojs6.plugin.python.runtime.BuildConfig
+import org.autojs.plugin.python.runtime.api.PythonCancellationMode
+import org.autojs.plugin.python.runtime.api.PythonImplementation
+import org.autojs.plugin.python.runtime.api.PythonIsolationMode
+import org.autojs.plugin.python.runtime.api.PythonProtocolVersion
+import org.autojs.plugin.python.runtime.api.PythonRuntimeCapabilities
+import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
+import org.autojs.plugin.python.runtime.api.PythonRuntimeInfo
+import org.autojs.plugin.python.runtime.api.PythonRuntimeResourceLimits
+import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
+
+internal object PythonRuntimeMetadata {
+    const val PROVIDER_ID = "org.autojs.python.runtime.cpython"
+    const val PYTHON_VERSION = "3.13.9"
+    const val HOST_PACKAGE_NAME = "org.autojs.autojs6"
+    const val FIRST_OUTPUT_SEQUENCE = 1L
+
+    val protocolMinVersion = PythonProtocolVersion(
+        PythonRuntimeContract.PROTOCOL_MAJOR,
+        0,
+    )
+
+    val protocolVersion = PythonProtocolVersion(
+        PythonRuntimeContract.PROTOCOL_MAJOR,
+        PythonRuntimeContract.PROTOCOL_MINOR,
+    )
+
+    val runtimeInfo: PythonRuntimeInfo by lazy {
+        PythonRuntimeInfo(
+            protocolMin = protocolMinVersion,
+            protocolMax = protocolVersion,
+            providerId = PROVIDER_ID,
+            providerVersionName = BuildConfig.VERSION_NAME,
+            providerVersionCode = BuildConfig.VERSION_CODE.toLong(),
+            implementation = PythonImplementation.CPYTHON,
+            pythonVersion = PYTHON_VERSION,
+            isolationMode = PythonIsolationMode.DEDICATED_PLUGIN_PROCESS,
+        ).also(PythonRuntimeValidation::validateRuntimeInfo)
+    }
+
+    val capabilities: PythonRuntimeCapabilities by lazy {
+        PythonRuntimeCapabilities(
+            implementation = PythonImplementation.CPYTHON,
+            pythonVersion = PYTHON_VERSION,
+            supportedAbis = listOf("arm64-v8a", "x86_64"),
+            supportsWorkspaceArchive = true,
+            supportsStdinSnapshot = false,
+            supportsStructuredTraceback = true,
+            supportsCooperativeCancellation = false,
+            cancellationMode = PythonCancellationMode.PROCESS_RESTART_ONLY,
+            supportsHostCapabilitySnapshot = true,
+            limits = PythonRuntimeResourceLimits(
+                maxSourceBytes = 4L * 1024L * 1024L,
+                maxWorkspaceArchiveBytes = 16L * 1024L * 1024L,
+                maxWorkspaceEntries = 1024,
+                maxWorkspaceUncompressedBytes = 32L * 1024L * 1024L,
+                maxStdinBytes = 0L,
+                maxOutputBytes = 4L * 1024L * 1024L,
+                maxOutputChunkBytes = 16 * 1024,
+                maxOutputChunks = 4096L,
+                maxOutstandingOutputCredits = PythonRuntimeContract.MAX_OUTSTANDING_OUTPUT_CREDITS,
+                maxTimeoutMillis = 60_000L,
+                maxConcurrentSessions = 1,
+                maxHostCapabilitySnapshotBytes = PythonRuntimeContract.MAX_HOST_CAPABILITY_SNAPSHOT_BYTES,
+            ),
+        ).also { PythonRuntimeValidation.validateCapabilitiesAgainstInfo(it, runtimeInfo) }
+    }
+}

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AutoJs6 Python Runtime</string>
+    <string name="plugin_name">Python Runtime</string>
+    <string name="plugin_description">Runs Python scripts for AutoJs6 in a dedicated plugin process</string>
+</resources>

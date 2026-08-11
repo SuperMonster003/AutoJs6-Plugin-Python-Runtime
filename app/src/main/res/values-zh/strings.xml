@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AutoJs6 Python 运行时</string>
+    <string name="plugin_name">Python 运行时</string>
+    <string name="plugin_description">在独立插件进程中为 AutoJs6 运行 Python 脚本</string>
+</resources>

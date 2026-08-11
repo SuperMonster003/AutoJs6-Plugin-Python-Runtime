@@ -1,0 +1,23 @@
+{
+  "changelog_label_hint": "Примечание",
+  "changelog_label_feature": "Добавлено",
+  "changelog_label_fix": "Исправлено",
+  "changelog_label_improvement": "Улучшено",
+  "changelog_label_dependency": "Зависимость",
+  "$data": {
+    "v0.1.0-alpha.1": {
+      "released_date": "2026/08/09",
+      "hint": [
+        "Исходники прототипа R2; Gradle, APK, Binder и устройство не проверены"
+      ],
+      "feature": [
+        "Независимый scaffold provider Python V1 с отдельным процессом, одним сеансом и без очереди",
+        "Выполнение одной исходной программы как `__main__`, ограниченный stdout/stderr, структурированные исключения и отмена перезапуском",
+        "Упорядоченная генерация README и встроенных журналов на 10 языках"
+      ],
+      "dependency": [
+        "Предварительно выбраны {{ runtime_dependency }} и Python {{ python_line }}; версии и hashes требуют проверки сборкой"
+      ]
+    }
+  }
+}
