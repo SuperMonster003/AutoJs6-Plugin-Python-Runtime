@@ -6,14 +6,14 @@
 
 # v0.1.0
 
-###### 2026/08/12 (исходники заморожены; без tag и публикации)
+###### 2026/08/12
 
-* `Примечание` Идентичность исходников 0.1.0 и точный Host lock заморожены; остаются финальная APK/P3 provenance, официальный plugin index, tag/Release и production receipt
+* `Примечание` Версия 0.1.0 фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock
 * `Добавлено` Протокол Python 1.0-1.1 для AutoJs6 6.8.0 / versionCode 5275, ограниченный project workspace и read-only snapshots app/device/execution/project
 * `Добавлено` Hot-plug без перезапуска хоста: install или повторное включение позволяет следующему запуску заново найти и pin ID, без fallback при отсутствии или отключении
 * `Добавлено` Binder death во время работы завершает текущий запуск без replay; новые запуски заново обнаруживают provider
 * `Улучшено` Chaquopy закреплен как trusted-local, non-sandbox runtime; долгосрочный signer — SM003, owner runtime/security/release — SuperMonster003
-* `Зависимость` Зафиксированы Chaquopy 17.0.0 и CPython 3.13.9; финальные artifacts проверяются после заморозки исходников
+* `Зависимость` Зафиксированы Chaquopy 17.0.0 и CPython 3.13.9; стабильные APK привязаны к финальной идентичности исходников и проверены как точные artifacts
 
 # v0.1.0-alpha.1
 

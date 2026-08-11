@@ -37,7 +37,7 @@ Le fichier README.md actuel est disponible dans les langues suivantes:
 
 Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal.
 
-> L'identité source 0.1.0 et le lock Host exact sont gelés. Les preuves RC locales de construction, APK, Binder et d'un appareil API 31 arm64-v8a restent historiques; la provenance APK/P3 finale, le tag v0.1.0, la GitHub Release et le production receipt ne sont pas encore terminés.
+> L'identité source 0.1.0 et le lock Host exact sont gelés. Les preuves RC locales de construction, APK, Binder et d'un appareil API 31 arm64-v8a restent historiques; la provenance APK/P3 stable est liée à l'identité release exacte, tandis qu'un production receipt constitue un niveau de preuve post-publication distinct.
 
 ******
 
@@ -95,11 +95,11 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 
 ******
 
-> La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. La provenance APK/P3 finale, l'index officiel, le tag et la Release restent en attente.
+> La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
+release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=10 commit with the exact Host 6.8.0/5275 lock
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 ******
 
-Les preuves RC locales et appareil concentrées de R6-P2/P3 sont désormais historiques. Ce clean VERSION_BUILD=9 freeze commit fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275; les seuls blockers restants sont la provenance APK/P3 des artefacts exacts, l'index officiel, le tag/Release et un production receipt après publication. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.
+Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques. Ce clean VERSION_BUILD=10 freeze commit fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275; la provenance des APK stables est évaluée par rapport à ces identités exactes et tout production receipt doit utiliser la même base. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.
 
 - [Voir ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -157,14 +157,14 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 sont désormais hist
 
 # v0.1.0
 
-###### 2026/08/12 (sources gelées; ni tag ni publication)
+###### 2026/08/12
 
-* `Note` L'identité source 0.1.0 et le lock Host exact sont gelés; la provenance APK/P3 finale, l'index officiel, le tag/Release et le production receipt sont en attente
+* `Note` La version 0.1.0 fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275
 * `Fonction` Protocole Python 1.0-1.1 associé à AutoJs6 6.8.0 / versionCode 5275, workspace projet borné et snapshots app/device/execution/project en lecture seule
 * `Fonction` Hot-plug sans redémarrage hôte: installation ou réactivation permet à la prochaine exécution de redécouvrir et épingler l'identité, sans fallback si absent ou désactivé
 * `Fonction` La mort Binder en cours termine l'exécution sans replay; les nouvelles exécutions redécouvrent le provider
 * `Amélioration` Chaquopy est fixé comme runtime trusted-local et non-sandbox; SM003 est le signer à long terme et SuperMonster003 possède runtime, sécurité et release
-* `Dépendance` Verrouillage de Chaquopy 17.0.0 et CPython 3.13.9; les artefacts finaux seront revérifiés après le gel des sources
+* `Dépendance` Verrouillage de Chaquopy 17.0.0 et CPython 3.13.9; les APK stables sont liés à l'identité source finale et vérifiés comme artefacts exacts
 
 # v0.1.0-alpha.1
 
@@ -199,7 +199,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-Les contrôles statiques et CPython local ne remplacent pas les preuves Android. Les résultats RC et mono-appareil existants sont historiques; après le gel final, seuls les contrôles construction, APK, Binder et appareil représentatif liés à l'identité de publication seront rejoués.
+Les contrôles statiques et CPython local ne remplacent pas les preuves Android. Les résultats RC et mono-appareil existants sont historiques; l'acceptation release utilise les contrôles construction, APK, Binder et appareil représentatif liés à l'identité exacte.
 
 ******
 
@@ -207,7 +207,7 @@ Les contrôles statiques et CPython local ne remplacent pas les preuves Android.
 
 ******
 
-Cette tranche documentaire ne lance aucune construction. La configuration release échoue fermée sur toute dérive AAR, SHA-256, signer ou runtime lock; 0.1.0 reste en préparation, sans tag ni publication.
+La génération documentaire ne lance aucune construction. La configuration release échoue fermée sur toute dérive AAR, SHA-256, signer ou runtime lock; les artefacts stables ne sont acceptés que s'ils sont liés à l'identité release exacte.
 
 Ces AAR release doivent être placés et verrouillés dans `libs` avant toute construction:
 
@@ -217,7 +217,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Le runtime verrouille Chaquopy 17.0.0 et CPython 3.13.9 depuis Maven et n'empaquette que la stdlib. La publication finale doit revérifier métadonnées, bibliothèques natives, pages 16 KB, NOTICE, signer SM003 et les trois APK distribués.
+Le runtime verrouille Chaquopy 17.0.0 et CPython 3.13.9 depuis Maven et n'empaquette que la stdlib. Le gate release vérifie métadonnées, bibliothèques natives, pages 16 KB, NOTICE, signer SM003 et les trois APK distribués par rapport à l'identité exacte.
 
 ******
 

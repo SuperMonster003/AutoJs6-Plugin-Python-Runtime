@@ -3,7 +3,7 @@
   "repo_slug": "SuperMonster003/AutoJs6-Plugin-Python-Runtime",
   "default_branch": "master",
   "release_target": "0.1.0",
-  "release_state": "stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published",
+  "release_state": "stable 0.1.0 source identity frozen by the clean VERSION_BUILD=10 commit with the exact Host 6.8.0/5275 lock",
   "host_pairing": "AutoJs6 6.8.0 / versionCode 5275",
   "long_term_signer": "SM003",
   "release_owner": "SuperMonster003",

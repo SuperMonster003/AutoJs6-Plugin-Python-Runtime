@@ -6,14 +6,14 @@
 
 # v0.1.0
 
-###### 2026/08/12 (原始碼已凍結; 尚未 tag 或發佈)
+###### 2026/08/12
 
-* `提示` 0.1.0 原始碼身分及精確 Host lock 已凍結; 最終 APK/P3 provenance, 官方外掛程式索引, tag/Release 及 production receipt 尚待完成
+* `提示` 0.1.0 固定了穩定 Plugin 原始碼身分及精確 Host 6.8.0/5275 lock
 * `新增` 面向 AutoJs6 6.8.0 / versionCode 5275 的 Python 協議 1.0-1.1, 有界專案 workspace 及唯讀 app/device/execution/project 能力快照
 * `新增` 毋須重新啟動 Host 的熱插拔: 安裝或重新啟用後下一次新執行重新發現並 pin 身分, 缺失或停用時絕不 fallback
 * `新增` 執行中的 Binder death 終止目前執行且不得重播, 後續新執行重新發現 provider
 * `改善` 將 Chaquopy 固定為 trusted-local, non-sandbox 執行環境; SM003 為長期 signer, SuperMonster003 為 runtime/security/release owner
-* `相依項目` 鎖定 Chaquopy 17.0.0 及 CPython 3.13.9; 正式產物須在最終原始碼凍結後重新驗證
+* `相依項目` 鎖定 Chaquopy 17.0.0 及 CPython 3.13.9; 穩定 APK 與最終原始碼身分綁定並通過精確產物驗證
 
 # v0.1.0-alpha.1
 

@@ -49,10 +49,9 @@ official source repository is:
 
 https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime
 
-The 0.1.0 release is still being prepared: `v0.1.0` has not yet been tagged or
-published. Once published, source corresponding to a distributed build will be
-available from its matching release tag or recorded commit in that repository.
+Source corresponding to a distributed build is available from its matching
+release tag or recorded commit in that repository.
 If a binary was obtained from a mirror, use its version/build identity to select
-the matching tag or commit. Release preparation must preserve this notice, the
+the matching tag or commit. Stable distribution preserves this notice, the
 root `LICENSE`, the exact source revision, and the dependency locks; this
 document alone is not a substitute for the full license texts.

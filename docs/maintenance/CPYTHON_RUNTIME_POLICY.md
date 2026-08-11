@@ -1,9 +1,8 @@
 # CPython Runtime Maintenance Policy
 
-Status: R6 release-baseline policy for Plugin 0.1.0 preparation. It defines
-ownership and the minimum maintenance path; it is not a release receipt, a
-claim that `v0.1.0` has been tagged or published, or a claim that Python code is
-sandboxed.
+Status: accepted R6 release-baseline policy for Plugin 0.1.0. It defines
+ownership and the minimum maintenance path; it is neither a publication receipt
+nor a claim that Python code is sandboxed.
 
 ## Ownership
 

@@ -6,14 +6,14 @@
 
 # v0.1.0
 
-###### 2026/08/12 (sources gelées; ni tag ni publication)
+###### 2026/08/12
 
-* `Note` L'identité source 0.1.0 et le lock Host exact sont gelés; la provenance APK/P3 finale, l'index officiel, le tag/Release et le production receipt sont en attente
+* `Note` La version 0.1.0 fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275
 * `Fonction` Protocole Python 1.0-1.1 associé à AutoJs6 6.8.0 / versionCode 5275, workspace projet borné et snapshots app/device/execution/project en lecture seule
 * `Fonction` Hot-plug sans redémarrage hôte: installation ou réactivation permet à la prochaine exécution de redécouvrir et épingler l'identité, sans fallback si absent ou désactivé
 * `Fonction` La mort Binder en cours termine l'exécution sans replay; les nouvelles exécutions redécouvrent le provider
 * `Amélioration` Chaquopy est fixé comme runtime trusted-local et non-sandbox; SM003 est le signer à long terme et SuperMonster003 possède runtime, sécurité et release
-* `Dépendance` Verrouillage de Chaquopy 17.0.0 et CPython 3.13.9; les artefacts finaux seront revérifiés après le gel des sources
+* `Dépendance` Verrouillage de Chaquopy 17.0.0 et CPython 3.13.9; les APK stables sont liés à l'identité source finale et vérifiés comme artefacts exacts
 
 # v0.1.0-alpha.1
 

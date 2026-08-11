@@ -6,9 +6,9 @@
   "changelog_label_dependency": "Зависимость",
   "$data": {
     "v0.1.0": {
-      "released_date": "2026/08/12 (исходники заморожены; без tag и публикации)",
+      "released_date": "2026/08/12",
       "hint": [
-        "Идентичность исходников 0.1.0 и точный Host lock заморожены; остаются финальная APK/P3 provenance, официальный plugin index, tag/Release и production receipt"
+        "Версия 0.1.0 фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock"
       ],
       "feature": [
         "Протокол Python 1.0-1.1 для AutoJs6 6.8.0 / versionCode 5275, ограниченный project workspace и read-only snapshots app/device/execution/project",
@@ -19,7 +19,7 @@
         "Chaquopy закреплен как trusted-local, non-sandbox runtime; долгосрочный signer — SM003, owner runtime/security/release — SuperMonster003"
       ],
       "dependency": [
-        "Зафиксированы {{ runtime_dependency }} и CPython {{ python_version_expected }}; финальные artifacts проверяются после заморозки исходников"
+        "Зафиксированы {{ runtime_dependency }} и CPython {{ python_version_expected }}; стабильные APK привязаны к финальной идентичности исходников и проверены как точные artifacts"
       ]
     },
     "v0.1.0-alpha.1": {

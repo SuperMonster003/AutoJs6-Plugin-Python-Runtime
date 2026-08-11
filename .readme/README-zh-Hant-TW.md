@@ -37,7 +37,7 @@
 
 Python Runtime 是獨立的 Python 協定 V1 provider. 宿主將單一 Python 原始碼快照交給專用外掛程序, 外掛使用 CPython 執行並回傳有界輸出, 結構化例外與唯一終態.
 
-> 0.1.0 原始碼身分與精確 Host lock 已凍結. 既有本機 RC 的建置, APK, Binder 與一部 API 31 arm64-v8a 裝置證據仍屬歷史證據; 目前尚未完成最終 APK/P3 provenance, v0.1.0 tag, GitHub Release 或 production receipt.
+> 0.1.0 原始碼身分與精確 Host lock 已凍結. 既有本機 RC 的建置, APK, Binder 與一部 API 31 arm64-v8a 裝置證據仍屬歷史證據; 穩定 APK/P3 provenance 與精確 release identity 綁定, production receipt 是發布後的獨立證據層級.
 
 ******
 
@@ -95,11 +95,11 @@ protocol: 1.0-1.1
 
 ******
 
-> 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂與三件 AAR distribution manifest 已寫入 lock. 每次新執行都重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後無須重新啟動宿主. 最終 APK/P3 provenance, 官方索引, tag 與 Release 尚待完成.
+> 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂與三件 AAR distribution manifest 已寫入 lock. 每次新執行都重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後無須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
+release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=10 commit with the exact Host 6.8.0/5275 lock
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-R6-P2/P3 的本機 RC 與集中裝置證據已歷史化. 本次 clean VERSION_BUILD=9 freeze commit 固定了穩定 Plugin 原始碼身分與精確 Host 6.8.0/5275 lock; 剩餘 blocker 僅為精確產物的 APK/P3 provenance, 官方外掛索引, tag/Release 與發布後的 production receipt. 完整 API×ABI 矩陣與新 soak 不屬自動門禁.
+R6-P2/P3 的本機 RC 與集中裝置證據保留為歷史記錄. 本次 clean VERSION_BUILD=10 freeze commit 固定了穩定 Plugin 原始碼身分與精確 Host 6.8.0/5275 lock; 穩定 APK provenance 按這些精確身分驗證, 任何 production receipt 也必須使用相同依據. 完整 API×ABI 矩陣與新 soak 不屬自動門禁.
 
 - [檢視 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -157,14 +157,14 @@ R6-P2/P3 的本機 RC 與集中裝置證據已歷史化. 本次 clean VERSION_BU
 
 # v0.1.0
 
-###### 2026/08/12 (原始碼已凍結; 尚未 tag 或發布)
+###### 2026/08/12
 
-* `提示` 0.1.0 原始碼身分與精確 Host lock 已凍結; 最終 APK/P3 provenance, 官方外掛索引, tag/Release 與 production receipt 尚待完成
+* `提示` 0.1.0 固定了穩定 Plugin 原始碼身分與精確 Host 6.8.0/5275 lock
 * `新增` 面向 AutoJs6 6.8.0 / versionCode 5275 的 Python 協定 1.0-1.1, 有界專案 workspace 與唯讀 app/device/execution/project 能力快照
 * `新增` 無須重新啟動 Host 的熱插拔: 安裝或重新啟用後下一次新執行重新發現並 pin 身分, 缺失或停用時絕不 fallback
 * `新增` 執行中的 Binder death 終止目前執行且不得重播, 後續新執行重新發現 provider
 * `改善` 將 Chaquopy 固定為 trusted-local, non-sandbox 執行環境; SM003 為長期 signer, SuperMonster003 為 runtime/security/release owner
-* `相依性` 鎖定 Chaquopy 17.0.0 與 CPython 3.13.9; 正式產物須在最終原始碼凍結後重新驗證
+* `相依性` 鎖定 Chaquopy 17.0.0 與 CPython 3.13.9; 穩定 APK 與最終原始碼身分綁定並通過精確產物驗證
 
 # v0.1.0-alpha.1
 
@@ -199,7 +199,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-靜態與本機 CPython 檢查不能取代 Android 證據. 現有本機 RC 與單一裝置結果屬歷史證據; 最終原始碼凍結後只重跑與發行身分直接相關的建置, APK, Binder 與代表性裝置驗證.
+靜態與本機 CPython 檢查不能取代 Android 證據. 現有本機 RC 與單一裝置結果屬歷史證據; release acceptance 使用與精確身分直接綁定的建置, APK, Binder 與代表性裝置驗證.
 
 ******
 
@@ -207,7 +207,7 @@ python -B -m unittest tools.tests.test_bootstrap -v
 
 ******
 
-目前文件切片不執行建置. Release 設定會在協定 AAR, SHA-256, signer 或執行環境鎖漂移時 fail closed; 0.1.0 仍在準備中, 尚未 tag 或發布.
+文件產生本身不執行建置. Release 設定會在協定 AAR, SHA-256, signer 或執行環境鎖漂移時 fail closed; 穩定產物只在綁定精確 release identity 時獲接受.
 
 建置前必須在儲存庫 `libs` 目錄暫存並鎖定以下 release AAR:
 
@@ -217,7 +217,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-執行環境透過 Maven 鎖定 Chaquopy 17.0.0 與 CPython 3.13.9, 並只封裝 stdlib. 最終發行必須重新核對相依性資料, native 程式庫, 16 KB page, NOTICE, SM003 signer 與三種發行 APK.
+執行環境透過 Maven 鎖定 Chaquopy 17.0.0 與 CPython 3.13.9, 並只封裝 stdlib. Release gate 按精確身分核對相依性資料, native 程式庫, 16 KB page, NOTICE, SM003 signer 與三種發行 APK.
 
 ******
 

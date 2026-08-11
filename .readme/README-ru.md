@@ -37,7 +37,7 @@
 
 Python Runtime — независимый provider протокола Python V1. Хост передает один снимок исходного кода в отдельный процесс, который выполняет его в CPython и возвращает ограниченный вывод, структурированные исключения и одно терминальное состояние.
 
-> Идентичность исходников 0.1.0 и точный Host lock заморожены. Существующие локальные RC-свидетельства build, APK, Binder и одного устройства API 31 arm64-v8a остаются историческими; финальная APK/P3 provenance, тег v0.1.0, GitHub Release и production receipt еще не готовы.
+> Идентичность исходников 0.1.0 и точный Host lock заморожены. Существующие локальные RC-свидетельства build, APK, Binder и одного устройства API 31 arm64-v8a остаются историческими; stable APK/P3 provenance привязана к exact release identity, а production receipt является отдельным уровнем доказательства после публикации.
 
 ******
 
@@ -95,11 +95,11 @@ protocol: 1.0-1.1
 
 ******
 
-> Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Финальная APK/P3 provenance, официальный index, tag и Release еще ожидаются.
+> Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
+release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=10 commit with the exact Host 6.8.0/5275 lock
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
-Локальные RC- и концентрированные device-свидетельства R6-P2/P3 сохранены как история. Этот clean VERSION_BUILD=9 freeze commit фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock; остаются только APK/P3 provenance точных artifacts, официальный plugin index, tag/Release и production receipt после публикации. Полная API×ABI matrix и новый soak не являются автоматическими gates.
+Локальные RC- и концентрированные device-свидетельства R6-P2/P3 сохраняются как история. Этот clean VERSION_BUILD=10 freeze commit фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock; provenance стабильных APK оценивается относительно этих exact identities, и любой production receipt должен использовать ту же основу. Полная API×ABI matrix и новый soak не являются автоматическими gates.
 
 - [Открыть ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -157,14 +157,14 @@ Runtime Chaquopy предназначен только для доверенны
 
 # v0.1.0
 
-###### 2026/08/12 (исходники заморожены; без tag и публикации)
+###### 2026/08/12
 
-* `Примечание` Идентичность исходников 0.1.0 и точный Host lock заморожены; остаются финальная APK/P3 provenance, официальный plugin index, tag/Release и production receipt
+* `Примечание` Версия 0.1.0 фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock
 * `Добавлено` Протокол Python 1.0-1.1 для AutoJs6 6.8.0 / versionCode 5275, ограниченный project workspace и read-only snapshots app/device/execution/project
 * `Добавлено` Hot-plug без перезапуска хоста: install или повторное включение позволяет следующему запуску заново найти и pin ID, без fallback при отсутствии или отключении
 * `Добавлено` Binder death во время работы завершает текущий запуск без replay; новые запуски заново обнаруживают provider
 * `Улучшено` Chaquopy закреплен как trusted-local, non-sandbox runtime; долгосрочный signer — SM003, owner runtime/security/release — SuperMonster003
-* `Зависимость` Зафиксированы Chaquopy 17.0.0 и CPython 3.13.9; финальные artifacts проверяются после заморозки исходников
+* `Зависимость` Зафиксированы Chaquopy 17.0.0 и CPython 3.13.9; стабильные APK привязаны к финальной идентичности исходников и проверены как точные artifacts
 
 # v0.1.0-alpha.1
 
@@ -199,7 +199,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-Статические проверки и локальный CPython не заменяют Android-свидетельства. Существующие RC и результат одного устройства исторические; после финальной заморозки повторяются только build, APK, Binder и representative-device проверки, связанные с release identity.
+Статические проверки и локальный CPython не заменяют Android-свидетельства. Существующие RC и результат одного устройства исторические; release acceptance использует build, APK, Binder и representative-device проверки, связанные с exact identity.
 
 ******
 
@@ -207,7 +207,7 @@ python -B -m unittest tools.tests.test_bootstrap -v
 
 ******
 
-Этот срез документации не запускает сборку. Release-конфигурация fail closed при drift AAR, SHA-256, signer или runtime lock; 0.1.0 пока готовится, без tag и публикации.
+Генерация документации сама не запускает сборку. Release-конфигурация fail closed при drift AAR, SHA-256, signer или runtime lock; stable artifacts принимаются только при связи с exact release identity.
 
 Перед сборкой следующие release AAR нужно разместить и зафиксировать в `libs`:
 
@@ -217,7 +217,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Runtime фиксирует Chaquopy 17.0.0 и CPython 3.13.9 из Maven и включает только stdlib. Финальный release повторно проверяет metadata, native libraries, 16 KB page, NOTICE, signer SM003 и три распространяемых APK.
+Runtime фиксирует Chaquopy 17.0.0 и CPython 3.13.9 из Maven и включает только stdlib. Release gate проверяет metadata, native libraries, 16 KB page, NOTICE, signer SM003 и три распространяемых APK относительно exact identity.
 
 ******
 

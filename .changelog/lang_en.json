@@ -6,9 +6,9 @@
   "changelog_label_dependency": "Dependency",
   "$data": {
     "v0.1.0": {
-      "released_date": "2026/08/12 (source frozen; not tagged or published)",
+      "released_date": "2026/08/12",
       "hint": [
-        "The 0.1.0 source identity and exact Host lock are frozen; final APK/P3 provenance, official plugin index, tag/Release, and production receipt are pending"
+        "Version 0.1.0 freezes the stable Plugin source identity and exact Host 6.8.0/5275 lock"
       ],
       "feature": [
         "Python protocol 1.0-1.1 paired with AutoJs6 6.8.0 / versionCode 5275, a bounded project workspace, and read-only app/device/execution/project capability snapshots",
@@ -19,7 +19,7 @@
         "Fix Chaquopy as a trusted-local, non-sandbox runtime; SM003 is the long-term signer and SuperMonster003 owns runtime, security, and release"
       ],
       "dependency": [
-        "Lock {{ runtime_dependency }} and CPython {{ python_version_expected }}; final artifacts require fresh verification after source freeze"
+        "Lock {{ runtime_dependency }} and CPython {{ python_version_expected }}; stable APKs are bound to the final source identity and verified as exact artifacts"
       ]
     },
     "v0.1.0-alpha.1": {

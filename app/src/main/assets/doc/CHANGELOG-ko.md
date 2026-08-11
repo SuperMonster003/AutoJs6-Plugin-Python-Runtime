@@ -6,14 +6,14 @@
 
 # v0.1.0
 
-###### 2026/08/12 (소스 동결 완료; tag 및 게시 전)
+###### 2026/08/12
 
-* `안내` 0.1.0 source identity와 exact Host lock은 동결되었습니다. 최종 APK/P3 provenance, 공식 plugin index, tag/Release 및 production receipt가 남아 있습니다
+* `안내` 0.1.0은 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다
 * `추가` AutoJs6 6.8.0 / versionCode 5275와 함께 사용하는 Python 프로토콜 1.0-1.1, 제한된 project workspace 및 읽기 전용 app/device/execution/project snapshot
 * `추가` 호스트 재시작 없는 hot-plug: install 또는 재활성화 후 다음 새 실행이 ID를 다시 검색하고 pin하며 없거나 비활성 상태면 fallback하지 않습니다
 * `추가` 실행 중 Binder death는 replay 없이 현재 실행을 종료하고 이후 새 실행이 provider를 다시 검색합니다
 * `개선` Chaquopy를 trusted-local, non-sandbox runtime으로 고정. 장기 signer는 SM003이며 runtime/security/release owner는 SuperMonster003
-* `의존성` Chaquopy 17.0.0과 CPython 3.13.9를 lock. 최종 artifact는 소스 동결 후 다시 검증합니다
+* `의존성` Chaquopy 17.0.0과 CPython 3.13.9를 lock. stable APK는 final source identity에 결속되고 exact artifact로 검증됩니다
 
 # v0.1.0-alpha.1
 

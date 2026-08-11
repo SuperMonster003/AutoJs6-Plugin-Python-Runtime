@@ -1,8 +1,9 @@
 # Python Runtime Plugin Roadmap
 
-Status: R6 release preparation for Plugin 0.1.0. The official public repository
-and `master` branch now exist; the final stable source, `v0.1.0` tag and GitHub
-release are still pending. This document does not claim publication.
+Status: R6 stable-release track for Plugin 0.1.0. The official public repository,
+`master` branch and exact stable source identity exist. Tag, GitHub Release and
+asset publication facts are established only by an independent production
+receipt, not by mutable status prose or checklist state in the tagged source.
 
 This roadmap favors exact, reviewable release progress. Source/static, Android
 build, APK packaging, Binder/device and public-release evidence remain distinct.
@@ -66,9 +67,9 @@ A completed lower evidence level never substitutes for a later one.
 - [x] Regenerate the Host release-AAR distribution after the final Host commit
   and stage the Plugin AAR lock for that exact manifest.
 - [x] Set the stable version to `0.1.0`, enforce `minHostVersionCode=5275`, and
-  set `VERSION_BUILD=9` for this single final source-freeze commit.
+  set `VERSION_BUILD=10` for this single final source-freeze commit.
 - [x] Freeze the final Host AAR lock and Plugin identity in this one commit; once
-  committed, its repository commit count is exactly `9`, equal to
+  committed, its repository commit count is exactly `10`, equal to
   `VERSION_BUILD` without requiring a follow-up identity edit.
 
 Exit criterion: one clean Host identity and one clean Plugin source identity,

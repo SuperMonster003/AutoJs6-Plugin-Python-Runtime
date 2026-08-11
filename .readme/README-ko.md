@@ -37,7 +37,7 @@
 
 Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트가 하나의 Python 소스 스냅샷을 전용 프로세스에 전달하면 CPython으로 실행하고 제한된 출력, 구조화된 예외, 하나의 종료 상태를 반환합니다.
 
-> 0.1.0 source identity와 exact Host lock은 동결되었습니다. 기존 로컬 RC build, APK, Binder 및 API 31 arm64-v8a 기기 한 대의 증거는 이력 증거로 남습니다. 최종 APK/P3 provenance, v0.1.0 tag, GitHub Release 및 production receipt는 미완료입니다.
+> 0.1.0 source identity와 exact Host lock은 동결되었습니다. 기존 로컬 RC build, APK, Binder 및 API 31 arm64-v8a 기기 한 대의 증거는 이력 증거로 남습니다. stable APK/P3 provenance는 exact release identity에 결속되고 production receipt는 게시 후의 독립 증거 수준입니다.
 
 ******
 
@@ -95,11 +95,11 @@ protocol: 1.0-1.1
 
 ******
 
-> 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. 최종 APK/P3 provenance, 공식 index, tag 및 Release는 미완료입니다.
+> 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
+release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=10 commit with the exact Host 6.8.0/5275 lock
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=9 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. 남은 blocker는 exact artifact의 APK/P3 provenance, 공식 plugin index, tag/Release 및 게시 후 production receipt뿐입니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.
+R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=10 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. stable APK provenance는 해당 exact identity를 기준으로 평가되며 production receipt도 같은 기준을 사용해야 합니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.
 
 - [ROADMAP.md 보기](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -157,14 +157,14 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 
 # v0.1.0
 
-###### 2026/08/12 (소스 동결 완료; tag 및 게시 전)
+###### 2026/08/12
 
-* `안내` 0.1.0 source identity와 exact Host lock은 동결되었습니다. 최종 APK/P3 provenance, 공식 plugin index, tag/Release 및 production receipt가 남아 있습니다
+* `안내` 0.1.0은 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다
 * `추가` AutoJs6 6.8.0 / versionCode 5275와 함께 사용하는 Python 프로토콜 1.0-1.1, 제한된 project workspace 및 읽기 전용 app/device/execution/project snapshot
 * `추가` 호스트 재시작 없는 hot-plug: install 또는 재활성화 후 다음 새 실행이 ID를 다시 검색하고 pin하며 없거나 비활성 상태면 fallback하지 않습니다
 * `추가` 실행 중 Binder death는 replay 없이 현재 실행을 종료하고 이후 새 실행이 provider를 다시 검색합니다
 * `개선` Chaquopy를 trusted-local, non-sandbox runtime으로 고정. 장기 signer는 SM003이며 runtime/security/release owner는 SuperMonster003
-* `의존성` Chaquopy 17.0.0과 CPython 3.13.9를 lock. 최종 artifact는 소스 동결 후 다시 검증합니다
+* `의존성` Chaquopy 17.0.0과 CPython 3.13.9를 lock. stable APK는 final source identity에 결속되고 exact artifact로 검증됩니다
 
 # v0.1.0-alpha.1
 
@@ -199,7 +199,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-정적 검사와 로컬 CPython은 Android 증거를 대체하지 않습니다. 기존 RC와 단일 기기 결과는 이력입니다. 최종 소스 동결 후에는 릴리스 ID에 직접 연결된 빌드, APK, Binder 및 대표 기기 검사만 다시 실행합니다.
+정적 검사와 로컬 CPython은 Android 증거를 대체하지 않습니다. 기존 RC와 단일 기기 결과는 이력입니다. release acceptance는 exact identity에 직접 연결된 빌드, APK, Binder 및 대표 기기 검사를 사용합니다.
 
 ******
 
@@ -207,7 +207,7 @@ python -B -m unittest tools.tests.test_bootstrap -v
 
 ******
 
-이 문서 변경에서는 빌드하지 않습니다. release 설정은 AAR, SHA-256, signer 또는 runtime lock drift 시 fail closed됩니다. 0.1.0은 준비 중이며 tag나 게시가 완료되지 않았습니다.
+문서 생성 자체는 빌드를 실행하지 않습니다. release 설정은 AAR, SHA-256, signer 또는 runtime lock drift 시 fail closed됩니다. stable artifact는 exact release identity에 결속될 때만 허용됩니다.
 
 빌드 전에 다음 release AAR을 `libs`에 배치하고 고정해야 합니다:
 
@@ -217,7 +217,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Maven의 Chaquopy 17.0.0과 CPython 3.13.9를 lock하고 stdlib만 package합니다. 최종 게시에서는 의존성 metadata, native library, 16 KB page, NOTICE, SM003 signer 및 배포 APK 세 개를 다시 확인합니다.
+Maven의 Chaquopy 17.0.0과 CPython 3.13.9를 lock하고 stdlib만 package합니다. release gate는 의존성 metadata, native library, 16 KB page, NOTICE, SM003 signer 및 배포 APK 세 개를 exact identity에 대해 확인합니다.
 
 ******
 

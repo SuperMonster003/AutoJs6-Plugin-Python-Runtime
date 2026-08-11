@@ -6,9 +6,9 @@
   "changelog_label_dependency": "相依性",
   "$data": {
     "v0.1.0": {
-      "released_date": "2026/08/12 (原始碼已凍結; 尚未 tag 或發布)",
+      "released_date": "2026/08/12",
       "hint": [
-        "0.1.0 原始碼身分與精確 Host lock 已凍結; 最終 APK/P3 provenance, 官方外掛索引, tag/Release 與 production receipt 尚待完成"
+        "0.1.0 固定了穩定 Plugin 原始碼身分與精確 Host 6.8.0/5275 lock"
       ],
       "feature": [
         "面向 AutoJs6 6.8.0 / versionCode 5275 的 Python 協定 1.0-1.1, 有界專案 workspace 與唯讀 app/device/execution/project 能力快照",
@@ -19,7 +19,7 @@
         "將 Chaquopy 固定為 trusted-local, non-sandbox 執行環境; SM003 為長期 signer, SuperMonster003 為 runtime/security/release owner"
       ],
       "dependency": [
-        "鎖定 {{ runtime_dependency }} 與 CPython {{ python_version_expected }}; 正式產物須在最終原始碼凍結後重新驗證"
+        "鎖定 {{ runtime_dependency }} 與 CPython {{ python_version_expected }}; 穩定 APK 與最終原始碼身分綁定並通過精確產物驗證"
       ]
     },
     "v0.1.0-alpha.1": {

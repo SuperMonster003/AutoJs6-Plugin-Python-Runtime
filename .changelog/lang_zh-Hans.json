@@ -6,9 +6,9 @@
   "changelog_label_dependency": "依赖",
   "$data": {
     "v0.1.0": {
-      "released_date": "2026/08/12 (源码已冻结; 尚未 tag 或发布)",
+      "released_date": "2026/08/12",
       "hint": [
-        "0.1.0 源码身份和精确 Host lock 已冻结; 最终 APK/P3 provenance, 官方插件索引, tag/Release 和 production receipt 尚待完成"
+        "0.1.0 固定了稳定 Plugin 源码身份和精确 Host 6.8.0/5275 lock"
       ],
       "feature": [
         "面向 AutoJs6 6.8.0 / versionCode 5275 的 Python 协议 1.0-1.1, 有界项目 workspace 与只读 app/device/execution/project 能力快照",
@@ -19,7 +19,7 @@
         "将 Chaquopy 固定为 trusted-local, non-sandbox 运行时; SM003 为长期 signer, SuperMonster003 为 runtime/security/release owner"
       ],
       "dependency": [
-        "锁定 {{ runtime_dependency }} 与 CPython {{ python_version_expected }}; 正式产物须在最终源码冻结后重新验证"
+        "锁定 {{ runtime_dependency }} 与 CPython {{ python_version_expected }}; 稳定 APK 与最终源码身份绑定并通过精确产物验证"
       ]
     },
     "v0.1.0-alpha.1": {

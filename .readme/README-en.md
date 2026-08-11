@@ -37,7 +37,7 @@ The current README.md supports the following languages:
 
 Python Runtime is an independent provider for version 1 of the Python protocol. The host gives one Python source snapshot to a dedicated plugin process, which executes it with CPython and returns bounded output, structured exceptions, and exactly one terminal state.
 
-> The 0.1.0 source identity and exact Host lock are frozen. Existing local RC build, APK, Binder, and one API 31 arm64-v8a device evidence remain historical; final APK/P3 provenance, the v0.1.0 tag, GitHub Release, and production receipt are not complete yet.
+> The 0.1.0 source identity and exact Host lock are frozen. Existing local RC build, APK, Binder, and one API 31 arm64-v8a device evidence remain historical; stable APK/P3 provenance is bound to the exact release identity, while a production receipt is a separate post-publication evidence level.
 
 ******
 
@@ -95,11 +95,11 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 
 ******
 
-> Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Final APK/P3 provenance, the official index, tag, and Release remain pending.
+> Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
+release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=10 commit with the exact Host 6.8.0/5275 lock
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-The R6-P2/P3 local RC and concentrated device evidence are now historical. This clean VERSION_BUILD=9 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; the only remaining blockers are exact-artifact APK/P3 provenance, the official plugin index, tag/Release, and a post-publication production receipt. A full API-by-ABI matrix and a new soak are not automatic gates.
+The R6-P2/P3 local RC and concentrated device evidence remain historical. This clean VERSION_BUILD=10 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; stable APK provenance is evaluated against those exact identities, and any production receipt must use the same basis. A full API-by-ABI matrix and a new soak are not automatic gates.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -157,14 +157,14 @@ The R6-P2/P3 local RC and concentrated device evidence are now historical. This 
 
 # v0.1.0
 
-###### 2026/08/12 (source frozen; not tagged or published)
+###### 2026/08/12
 
-* `Hint` The 0.1.0 source identity and exact Host lock are frozen; final APK/P3 provenance, official plugin index, tag/Release, and production receipt are pending
+* `Hint` Version 0.1.0 freezes the stable Plugin source identity and exact Host 6.8.0/5275 lock
 * `Feature` Python protocol 1.0-1.1 paired with AutoJs6 6.8.0 / versionCode 5275, a bounded project workspace, and read-only app/device/execution/project capability snapshots
 * `Feature` Hot-plug without a host restart: install or re-enable makes the next new execution rediscover and pin identity, while missing or disabled never falls back
 * `Feature` In-flight Binder death terminates the current execution without replay; later new executions rediscover the provider
 * `Improvement` Fix Chaquopy as a trusted-local, non-sandbox runtime; SM003 is the long-term signer and SuperMonster003 owns runtime, security, and release
-* `Dependency` Lock Chaquopy 17.0.0 and CPython 3.13.9; final artifacts require fresh verification after source freeze
+* `Dependency` Lock Chaquopy 17.0.0 and CPython 3.13.9; stable APKs are bound to the final source identity and verified as exact artifacts
 
 # v0.1.0-alpha.1
 
@@ -199,7 +199,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-Static and local CPython checks cannot replace Android evidence. Existing local RC and single-device results are historical; after final source freeze, rerun only the build, APK, Binder, and representative-device checks directly bound to the release identity.
+Static and local CPython checks cannot replace Android evidence. Existing local RC and single-device results are historical; release acceptance uses build, APK, Binder, and representative-device checks directly bound to the exact release identity.
 
 ******
 
@@ -207,7 +207,7 @@ Static and local CPython checks cannot replace Android evidence. Existing local 
 
 ******
 
-This documentation slice runs no build. Release configuration fails closed on protocol AAR, SHA-256, signer, or runtime-lock drift; 0.1.0 remains preparation only and is neither tagged nor published.
+Documentation generation itself runs no build. Release configuration fails closed on protocol AAR, SHA-256, signer, or runtime-lock drift; stable artifacts are accepted only when bound to the exact release identity.
 
 The following release AARs must be staged and locked in the repository `libs` directory before a build:
 
@@ -217,7 +217,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-The runtime locks Chaquopy 17.0.0 and CPython 3.13.9 from Maven and packages only the stdlib. Final release must recheck dependency metadata, native libraries, 16 KB pages, notices, the SM003 signer, and all three distribution APKs.
+The runtime locks Chaquopy 17.0.0 and CPython 3.13.9 from Maven and packages only the stdlib. The release gate checks dependency metadata, native libraries, 16 KB pages, notices, the SM003 signer, and all three distribution APKs against the exact identity.
 
 ******
 

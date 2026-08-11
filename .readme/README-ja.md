@@ -37,7 +37,7 @@
 
 Python Runtime は Python プロトコル V1 の独立 provider です. ホストから 1 つの Python ソーススナップショットを専用プロセスで受け取り, CPython で実行して, 制限付き出力, 構造化例外, 1 つの終端状態を返します.
 
-> 0.1.0 source identity と exact Host lock は凍結済みです. ローカル RC の build, APK, Binder, API 31 arm64-v8a 端末 1 台の証拠は履歴証拠のままです. 最終 APK/P3 provenance, v0.1.0 tag, GitHub Release, production receipt は未完了です.
+> 0.1.0 source identity と exact Host lock は凍結済みです. ローカル RC の build, APK, Binder, API 31 arm64-v8a 端末 1 台の証拠は履歴証拠のままです. stable APK/P3 provenance は exact release identity に紐づき, production receipt は公開後の独立した証拠レベルです.
 
 ******
 
@@ -95,11 +95,11 @@ protocol: 1.0-1.1
 
 ******
 
-> 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. 最終 APK/P3 provenance, 公式 index, tag, Release は未完了です.
+> 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
+release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=10 commit with the exact Host 6.8.0/5275 lock
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. この clean VERSION_BUILD=9 freeze commit が stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します. 残る blocker は exact artifact の APK/P3 provenance, 公式 plugin index, tag/Release, 公開後の production receipt のみです. 完全な API×ABI matrix と新 soak は自動 gate ではありません.
+R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持されます. この clean VERSION_BUILD=10 freeze commit が stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します. stable APK provenance はそれらの exact identity に対して評価され, production receipt も同じ基準を使用しなければなりません. 完全な API×ABI matrix と新 soak は自動 gate ではありません.
 
 - [ROADMAP.md を表示](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -157,14 +157,14 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴化されました. �
 
 # v0.1.0
 
-###### 2026/08/12 (ソース凍結済み; tag・公開前)
+###### 2026/08/12
 
-* `注記` 0.1.0 source identity と exact Host lock は凍結済みです. 最終 APK/P3 provenance, 公式 plugin index, tag/Release, production receipt は未完了です
+* `注記` 0.1.0 は stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します
 * `追加` AutoJs6 6.8.0 / versionCode 5275 と組み合わせる Python プロトコル 1.0-1.1, 上限付き project workspace, 読み取り専用 app/device/execution/project snapshot
 * `追加` ホスト再起動なしの hot-plug: install または再有効化後の次の新規実行で ID を再検出・pin し, 不在・無効時は fallback しません
 * `追加` 実行中の Binder death は replay せず現在の実行を終了し, 後続の新規実行で provider を再検出します
 * `改善` Chaquopy を trusted-local, non-sandbox runtime として固定. 長期 signer は SM003, runtime/security/release owner は SuperMonster003
-* `依存関係` Chaquopy 17.0.0 と CPython 3.13.9 を lock. 最終 artifact はソース凍結後に再検証します
+* `依存関係` Chaquopy 17.0.0 と CPython 3.13.9 を lock. stable APK は final source identity に紐づき, exact artifact として検証されます
 
 # v0.1.0-alpha.1
 
@@ -199,7 +199,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-静的検査とローカル CPython は Android 証拠を代替しません. 既存 RC と単一端末結果は履歴です. 最終ソース凍結後は release ID に直接結び付くビルド, APK, Binder, 代表端末検証だけを再実行します.
+静的検査とローカル CPython は Android 証拠を代替しません. 既存 RC と単一端末結果は履歴です. release acceptance は exact identity に直接結び付くビルド, APK, Binder, 代表端末検証を使用します.
 
 ******
 
@@ -207,7 +207,7 @@ python -B -m unittest tools.tests.test_bootstrap -v
 
 ******
 
-このドキュメント変更ではビルドしません. release 設定は AAR, SHA-256, signer, runtime lock の drift で fail closed します. 0.1.0 は準備中で, tag も公開もされていません.
+ドキュメント生成自体はビルドを実行しません. release 設定は AAR, SHA-256, signer, runtime lock の drift で fail closed します. stable artifact は exact release identity に紐づく場合だけ受け入れます.
 
 ビルド前に次の release AAR を `libs` に配置して固定する必要があります:
 
@@ -217,7 +217,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Maven の Chaquopy 17.0.0 と CPython 3.13.9 を lock し, stdlib のみを package します. 最終公開では依存 metadata, native library, 16 KB page, NOTICE, SM003 signer, 3 種の配布 APK を再確認します.
+Maven の Chaquopy 17.0.0 と CPython 3.13.9 を lock し, stdlib のみを package します. release gate は依存 metadata, native library, 16 KB page, NOTICE, SM003 signer, 3 種の配布 APK を exact identity に対して確認します.
 
 ******
 

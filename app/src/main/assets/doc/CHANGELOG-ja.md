@@ -6,14 +6,14 @@
 
 # v0.1.0
 
-###### 2026/08/12 (ソース凍結済み; tag・公開前)
+###### 2026/08/12
 
-* `注記` 0.1.0 source identity と exact Host lock は凍結済みです. 最終 APK/P3 provenance, 公式 plugin index, tag/Release, production receipt は未完了です
+* `注記` 0.1.0 は stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します
 * `追加` AutoJs6 6.8.0 / versionCode 5275 と組み合わせる Python プロトコル 1.0-1.1, 上限付き project workspace, 読み取り専用 app/device/execution/project snapshot
 * `追加` ホスト再起動なしの hot-plug: install または再有効化後の次の新規実行で ID を再検出・pin し, 不在・無効時は fallback しません
 * `追加` 実行中の Binder death は replay せず現在の実行を終了し, 後続の新規実行で provider を再検出します
 * `改善` Chaquopy を trusted-local, non-sandbox runtime として固定. 長期 signer は SM003, runtime/security/release owner は SuperMonster003
-* `依存関係` Chaquopy 17.0.0 と CPython 3.13.9 を lock. 最終 artifact はソース凍結後に再検証します
+* `依存関係` Chaquopy 17.0.0 と CPython 3.13.9 を lock. stable APK は final source identity に紐づき, exact artifact として検証されます
 
 # v0.1.0-alpha.1
 

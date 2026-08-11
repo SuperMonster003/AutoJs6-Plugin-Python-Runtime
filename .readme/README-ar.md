@@ -37,7 +37,7 @@
 
 Python Runtime هو provider مستقل للإصدار V1 من بروتوكول Python. يرسل المضيف لقطة مصدر واحدة إلى عملية مخصصة تنفذها عبر CPython وتعيد خرجا محدودا واستثناءات منظمة وحالة نهائية واحدة.
 
-> جمدت source identity للإصدار 0.1.0 وHost lock الدقيقة. تبقى أدلة RC المحلية للبناء وAPK وBinder وجهاز API 31 arm64-v8a واحد تاريخية؛ لم تكتمل بعد APK/P3 provenance النهائية وtag ‏v0.1.0 وGitHub Release وproduction receipt.
+> جمدت source identity للإصدار 0.1.0 وHost lock الدقيقة. تبقى أدلة RC المحلية للبناء وAPK وBinder وجهاز API 31 arm64-v8a واحد تاريخية؛ ترتبط stable APK/P3 provenance بهوية release الدقيقة ويعد production receipt مستوى أدلة مستقلا بعد النشر.
 
 ******
 
@@ -95,11 +95,11 @@ protocol: 1.0-1.1
 
 ******
 
-> يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ما زالت APK/P3 provenance النهائية والفهرسة الرسمية وtag وRelease معلقة.
+> يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
 release target: 0.1.0
-release state: stable source identity frozen by the clean VERSION_BUILD=9 commit with the final Host lock; not tagged or published
+release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=10 commit with the exact Host 6.8.0/5275 lock
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -145,7 +145,7 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
-أصبحت أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=9 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ العوائق المتبقية فقط هي APK/P3 provenance للـ artifacts الدقيقة والفهرس الرسمي وtag/Release وproduction receipt بعد النشر. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.
+تبقى أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=10 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ تقيم stable APK provenance مقابل هذه exact identities ويجب أن يستخدم أي production receipt الأساس نفسه. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.
 
 - [عرض ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -157,14 +157,14 @@ runtime/security/release owner: SuperMonster003
 
 # v0.1.0
 
-###### 2026/08/12 (جمد المصدر؛ دون tag أو نشر)
+###### 2026/08/12
 
-* `ملاحظة` جمدت source identity للإصدار 0.1.0 وHost lock الدقيقة؛ تبقى APK/P3 provenance النهائية والفهرس الرسمي وtag/Release وproduction receipt
+* `ملاحظة` يثبت الإصدار 0.1.0 stable Plugin source identity وexact Host 6.8.0/5275 lock
 * `إضافة` بروتوكول Python ‏1.0-1.1 مقترن بـ AutoJs6 6.8.0 / versionCode 5275 وproject workspace محدود وsnapshots ‏app/device/execution/project للقراءة فقط
 * `إضافة` Hot-plug دون إعادة تشغيل المضيف: يسمح التثبيت أو إعادة التفعيل للتنفيذ الجديد التالي بإعادة اكتشاف الهوية وpin دون fallback عند الفقد أو التعطيل
 * `إضافة` ينهي Binder death أثناء التشغيل التنفيذ الحالي دون replay؛ تعيد عمليات التنفيذ الجديدة اكتشاف provider
 * `تحسين` تثبيت Chaquopy كبيئة trusted-local وnon-sandbox؛ ‏SM003 هو signer طويل الأجل وSuperMonster003 هو owner لـ runtime/security/release
-* `اعتماد` قفل Chaquopy 17.0.0 وCPython 3.13.9؛ تعاد مراجعة artifacts النهائية بعد تجميد المصدر
+* `اعتماد` قفل Chaquopy 17.0.0 وCPython 3.13.9؛ ترتبط stable APKs بهوية المصدر النهائية وتتحقق كـ exact artifacts
 
 # v0.1.0-alpha.1
 
@@ -199,7 +199,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -B -m unittest tools.tests.test_bootstrap -v
 ```
 
-لا تستبدل الفحوص الثابتة وCPython المحلي أدلة Android. نتائج RC والجهاز الواحد الحالية تاريخية؛ بعد تجميد المصدر النهائي تعاد فقط فحوص البناء وAPK وBinder والجهاز التمثيلي المرتبطة بهوية النشر.
+لا تستبدل الفحوص الثابتة وCPython المحلي أدلة Android. نتائج RC والجهاز الواحد الحالية تاريخية؛ يستخدم release acceptance فحوص البناء وAPK وBinder والجهاز التمثيلي المرتبطة بالهوية الدقيقة.
 
 ******
 
@@ -207,7 +207,7 @@ python -B -m unittest tools.tests.test_bootstrap -v
 
 ******
 
-لا يشغل هذا التعديل الوثائقي البناء. تفشل إعدادات release بشكل مغلق عند تغير AAR أو SHA-256 أو signer أو runtime lock؛ ما زال 0.1.0 قيد التحضير بلا tag أو نشر.
+لا يشغل توليد الوثائق البناء بذاته. تفشل إعدادات release بشكل مغلق عند تغير AAR أو SHA-256 أو signer أو runtime lock؛ لا تقبل stable artifacts إلا عند ربطها بهوية release الدقيقة.
 
 يجب وضع ملفات release AAR التالية وتثبيتها في `libs` قبل البناء:
 
@@ -217,7 +217,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-تقفل البيئة Chaquopy 17.0.0 وCPython 3.13.9 من Maven وتحزم stdlib فقط. يجب أن يعيد الإصدار النهائي فحص metadata والمكتبات الأصلية وصفحات 16 KB وNOTICE وsigner ‏SM003 وملفات APK الثلاثة.
+تقفل البيئة Chaquopy 17.0.0 وCPython 3.13.9 من Maven وتحزم stdlib فقط. يفحص release gate ‏metadata والمكتبات الأصلية وصفحات 16 KB وNOTICE وsigner ‏SM003 وملفات APK الثلاثة مقابل الهوية الدقيقة.
 
 ******
 

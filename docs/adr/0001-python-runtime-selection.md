@@ -16,8 +16,9 @@ Host is frozen and enforced as versionCode 5275. The final clean Host source is
 `2caddcb763b39f0bf450909742fa6ec4caba27a8`; its three-AAR release distribution
 manifest SHA-256 is
 `9f296ad45c24b7eb3e217e4d0ce6c96ba2593966b2bed1db1f2846d658987818`, as
-recorded in `locks/host-api-aars.lock`. This ADR does not claim that a
-`v0.1.0` tag or published release already exists.
+recorded in `locks/host-api-aars.lock`. Publication state is established by an
+independent production receipt; this ADR records the immutable runtime and
+source baseline rather than mutable publication status.
 
 ## Why this runtime
 
@@ -72,7 +73,7 @@ Provider availability is hot-plugged without a Host restart:
 - a later new execution performs discovery again, validates the selected
   component and pins its current package/signing/runtime identity.
 
-## 0.1.0 release-preparation gates
+## 0.1.0 release identity gates
 
 - Enforce AutoJs6 6.8.0 / versionCode 5275 as the minimum Host and retain the
   exact final clean Host source revision and three-AAR release manifest in the
