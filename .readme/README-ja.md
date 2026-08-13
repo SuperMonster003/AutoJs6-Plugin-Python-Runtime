@@ -100,7 +100,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
+release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -160,7 +160,7 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 
 ###### 2026/08/13
 
-* `注記` 0.1 後の U1 source alpha. live stdin interaction は未提供で, E3 端末受け入れは未実施
+* `注記` 0.1 後の U1 clean-source alpha candidate. live stdin interaction は未提供で, U1-R1 E3 は QV710AF65F/API 31/arm64 上の exact Host/Plugin artifacts に一致する canonical PASS report がある場合に限って成立し, device matrix/release/public evidence ではない
 * `追加` 最大 1 MiB の有限な事前提供 stdin snapshot を追加し, `input()` と `sys.stdin` に決定的な入力と EOF を提供
 * `追加` workspace module, nested entry の sibling/root module, package-relative import に対応して project import semantics を完成
 * `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止

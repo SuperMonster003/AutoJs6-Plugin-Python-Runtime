@@ -27,7 +27,7 @@ device promotion require the evidence levels defined in `ROADMAP.md`.
 
 ## Runtime and source contract
 
-| Property | `0.1.0` current behavior | U1 target |
+| Property | `0.1.0` historical behavior | Current U1 contract |
 | --- | --- | --- |
 | Implementation | Chaquopy 17.0.0 / CPython 3.13.9 in the Plugin process | Preserve unless a later release explicitly freezes another identity |
 | Script mode | Source bytes compiled as a file-like `__main__` | Preserve file mode; add explicit module mode only in U1-R2 |
@@ -82,7 +82,7 @@ evidence remain separate.
 
 ## stdin and `input()`
 
-### Current `0.1.0`
+### Historical `0.1.0`
 
 - Provider metadata advertises `supportsStdinSnapshot=false` and
   `maxStdinBytes=0`.

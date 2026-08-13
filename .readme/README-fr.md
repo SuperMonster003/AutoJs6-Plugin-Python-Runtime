@@ -100,7 +100,7 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
+release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -160,7 +160,7 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 
 ###### 2026/08/13
 
-* `Note` Alpha source U1 postérieure à 0.1; aucune interaction stdin en direct et acceptation appareil E3 encore en attente
+* `Note` Candidat alpha U1 à sources propres postérieur à 0.1; aucune interaction stdin en direct, et l'acceptation U1-R1 E3 n'est représentée que par un rapport canonical PASS concordant pour les artefacts Host/Plugin exacts sur QV710AF65F/API 31/arm64; ceci ne constitue pas une preuve de matrice d'appareils, de livraison ou de publication
 * `Fonction` Ajout d'un snapshot stdin fini et préfourni de 1 MiB au plus pour une entrée et une EOF déterministes avec `input()` et `sys.stdin`
 * `Fonction` Finalisation des imports projet pour les modules workspace, les modules voisins et racine d'une entrée imbriquée, et les imports relatifs au package
 * `Correction` Décodage de la source en UTF-8 strict avant exécution afin qu'un encoding cookie non UTF-8 ne contourne plus le contrat

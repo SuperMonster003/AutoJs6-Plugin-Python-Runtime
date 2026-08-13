@@ -8,7 +8,7 @@
     "v0.2.0-alpha.1": {
       "released_date": "2026/08/13",
       "hint": [
-        "Post-0.1 U1 source alpha; live stdin interaction is unavailable and E3 device acceptance remains pending"
+        "Post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable, and U1-R1 E3 is represented only by a matching canonical PASS report for the exact Host/Plugin artifacts on QV710AF65F/API 31/arm64; this is not device-matrix, release, or public evidence"
       ],
       "feature": [
         "Add a finite pre-supplied stdin snapshot of at most 1 MiB for deterministic `input()` and `sys.stdin` input and EOF",

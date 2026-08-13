@@ -8,7 +8,7 @@
 
 ###### 2026/08/13
 
-* `Hint` Post-0.1 U1 source alpha; live stdin interaction is unavailable and E3 device acceptance remains pending
+* `Hint` Post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable, and U1-R1 E3 is represented only by a matching canonical PASS report for the exact Host/Plugin artifacts on QV710AF65F/API 31/arm64; this is not device-matrix, release, or public evidence
 * `Feature` Add a finite pre-supplied stdin snapshot of at most 1 MiB for deterministic `input()` and `sys.stdin` input and EOF
 * `Feature` Complete project import semantics for workspace modules, nested-entry sibling and root modules, and package-relative imports
 * `Fix` Decode source as strict UTF-8 before execution so a non-UTF-8 encoding cookie cannot bypass the contract

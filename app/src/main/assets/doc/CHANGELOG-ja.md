@@ -8,7 +8,7 @@
 
 ###### 2026/08/13
 
-* `注記` 0.1 後の U1 source alpha. live stdin interaction は未提供で, E3 端末受け入れは未実施
+* `注記` 0.1 後の U1 clean-source alpha candidate. live stdin interaction は未提供で, U1-R1 E3 は QV710AF65F/API 31/arm64 上の exact Host/Plugin artifacts に一致する canonical PASS report がある場合に限って成立し, device matrix/release/public evidence ではない
 * `追加` 最大 1 MiB の有限な事前提供 stdin snapshot を追加し, `input()` と `sys.stdin` に決定的な入力と EOF を提供
 * `追加` workspace module, nested entry の sibling/root module, package-relative import に対応して project import semantics を完成
 * `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止

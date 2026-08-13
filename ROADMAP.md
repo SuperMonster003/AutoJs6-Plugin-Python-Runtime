@@ -182,7 +182,7 @@ true interactive prompt/reply belongs to R2.
   retain exact expected output or exception checks.
 - [x] Verify representative stdlib import semantics with the portable
   bootstrap matrix.
-- [ ] Verify the packaged CPython stdlib on an authorized device/API cell,
+- [x] Verify the packaged CPython stdlib on an authorized device/API cell,
   including `json`, `pathlib`, `re`, `math`, `datetime`, `collections`,
   `decimal`, `fractions`, `asyncio` and `importlib`; report
   platform/native-dependent modules separately.
@@ -193,7 +193,7 @@ true interactive prompt/reply belongs to R2.
   from Project Launcher, Explorer or Editor.
 - [x] Do not implicitly snapshot an arbitrary standalone script's parent
   directory.
-- [ ] Add a safe missing-adjacent-module hint which directs the user to an
+- [x] Add a safe missing-adjacent-module hint which directs the user to an
   explicit Python project without leaking private paths.
 - [x] Keep third-party imports standard and deterministic: an absent package
   raises `ModuleNotFoundError`; no online pip or hidden fallback occurs.
@@ -220,6 +220,77 @@ powershell -NoProfile -ExecutionPolicy Bypass `
   -HostRepository D:\idea-projects\AutoJs6
 ```
 
+The E3 transaction is a separate, opt-in, non-soak gate. It requires both
+repositories to be clean and pinned to exact commits, an already-passing E1/E2
+functional report, exact APK hashes, one explicit serial, a frozen user list
+and two current-run authorization switches. The runner installs only when all
+three packages are absent for every frozen user and globally; it snapshots and
+rechecks every installed APK, then uninstalls only runner-owned bytes in reverse
+order. The offline verifier alone may write the canonical report.
+
+```powershell
+if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'U1-R1 E3 requires PowerShell 7+' }
+$plugin = 'D:\idea-projects\AutoJs6-Plugin-Python-Runtime'
+$hostRepo = 'D:\idea-projects\AutoJs6'
+$adb = 'E:\.android\sdk\platform-tools\adb.exe'
+$aapt2 = 'E:\.android\sdk\build-tools\37.0.0\aapt2.exe'
+$apksigner = 'E:\.android\sdk\build-tools\37.0.0\apksigner.bat'
+$signer = '31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213'
+
+Set-Location $plugin
+& .\tools\verify-u1-r1-core-semantics.ps1 `
+  -HostRepository $hostRepo
+
+Set-Location $hostRepo
+.\gradlew.bat --console=plain `
+  :app:assembleAppDebug :app:assembleAppDebugAndroidTest
+
+Set-Location $plugin
+$hostCommit = (git -C $hostRepo rev-parse HEAD).Trim()
+$pluginCommit = (git rev-parse HEAD).Trim()
+$gate = (Resolve-Path .\build\reports\python\u1\r1-core-semantics-gate.json).Path
+$fixture = (Resolve-Path .\tools\tests\fixtures\u1-r1-device-observation-contract.json).Path
+$hostApk = (Resolve-Path "$hostRepo\app\build\outputs\apk\app\debug\autojs6-v6.8.0-arm64-v8a.apk").Path
+$testApk = (Resolve-Path "$hostRepo\app\build\outputs\apk\androidTest\app\debug\app-app-debug-androidTest.apk").Path
+$pluginApk = (Resolve-Path .\app\build\outputs\apk\debug\autojs6-plugin-python-runtime-v0.2.0-alpha.1-arm64-v8a.apk).Path
+$gateSha = (Get-FileHash -Algorithm SHA256 $gate).Hash.ToLowerInvariant()
+$fixtureSha = (Get-FileHash -Algorithm SHA256 $fixture).Hash.ToLowerInvariant()
+$hostSha = (Get-FileHash -Algorithm SHA256 $hostApk).Hash.ToLowerInvariant()
+$testSha = (Get-FileHash -Algorithm SHA256 $testApk).Hash.ToLowerInvariant()
+$pluginSha = (Get-FileHash -Algorithm SHA256 $pluginApk).Hash.ToLowerInvariant()
+$stamp = [DateTimeOffset]::UtcNow.ToString('yyyyMMddTHHmmssZ')
+$raw = Join-Path $plugin "build\reports\python\u1\r1-binder-cpython-device-run-$stamp-QV710AF65F-$($hostCommit.Substring(0,12))-$($pluginCommit.Substring(0,12)).json"
+
+& .\tools\device\run-u1-r1-binder-cpython-device.ps1 `
+  -Serial QV710AF65F -ExpectedApi 31 -ExpectedAbi arm64-v8a `
+  -ExpectedUserIds @(0, 10) `
+  -HostRepository $hostRepo -PluginRepository $plugin `
+  -ExpectedHostCommit $hostCommit -ExpectedPluginCommit $pluginCommit `
+  -FunctionalGate $gate -FunctionalGateSha256 $gateSha `
+  -ObservationFixture $fixture -ObservationFixtureSha256 $fixtureSha `
+  -HostApk $hostApk -HostSha256 $hostSha `
+  -HostTestApk $testApk -HostTestSha256 $testSha `
+  -PluginApk $pluginApk -PluginSha256 $pluginSha `
+  -ExpectedSignerSha256 $signer `
+  -AdbPath $adb -Aapt2Path $aapt2 -ApkSignerPath $apksigner `
+  -Output $raw -ConfirmNoActiveSoak -ConfirmDeviceMutation
+
+$rawSha = (Get-FileHash -Algorithm SHA256 $raw).Hash.ToLowerInvariant()
+& .\tools\verify-u1-r1-binder-cpython-device.ps1 `
+  -RawReport $raw -RawReportSha256 $rawSha `
+  -ExpectedSerial QV710AF65F -ExpectedApi 31 -ExpectedAbi arm64-v8a `
+  -ExpectedUserIds @(0, 10) `
+  -HostRepository $hostRepo -PluginRepository $plugin `
+  -ExpectedHostCommit $hostCommit -ExpectedPluginCommit $pluginCommit `
+  -FunctionalGate $gate -FunctionalGateSha256 $gateSha `
+  -ObservationFixture $fixture -ObservationFixtureSha256 $fixtureSha `
+  -HostApk $hostApk -HostSha256 $hostSha `
+  -HostTestApk $testApk -HostTestSha256 $testSha `
+  -PluginApk $pluginApk -PluginSha256 $pluginSha `
+  -ExpectedSignerSha256 $signer `
+  -AdbPath $adb -Aapt2Path $aapt2 -ApkSignerPath $apksigner
+```
+
 ### Evidence and exit condition
 
 - E1/E2 aggregate:
@@ -228,9 +299,12 @@ powershell -NoProfile -ExecutionPolicy Bypass `
   false Binder/device/release claims.
 - E3: `build/reports/python/u1/r1-binder-cpython-device.json`, generated only
   by an authorized exact-device runner.
-- Current status: E1 portable/JVM and E2 Android build gates are complete; E3
-  packaged-CPython/device acceptance remains pending and must not be inferred
-  from local CPython, JVM tests or APK assembly.
+- Current status: E1 portable/JVM and E2 Android build gates are complete. E3
+  is complete only when the canonical report above says `PASS` and binds the
+  exact clean Host/Plugin commits, three APK hashes, signer, observation
+  contract and restored device state. The accepted cell is intentionally only
+  QV710AF65F / API 31 / arm64-v8a; it is not an x86_64 run, device matrix,
+  production receipt, published artifact or release authorization.
 - Functional exit: all R1 source/portable/Android-build gates pass and flags
   truthfully match implementation. Acceptance exit: exact Host/Plugin APKs
   prove stdin PFD, real CPython `input()`, project imports, sequential-session
@@ -241,7 +315,9 @@ powershell -NoProfile -ExecutionPolicy Bypass `
 - Static stdin is not real-time interaction. Do not extend the existing AIDL
   merely to activate its already-declared stdin field; a prompt/reply callback
   in R2 requires protocol-minor, golden-wire, AAR and Host-lock work.
-- Local CPython and APK packaging cannot close the E3 acceptance box.
+- Local CPython and APK packaging cannot close the E3 acceptance box. A raw
+  device run also cannot close it until the offline verifier reproduces all
+  bindings and writes the canonical `PASS` report.
 
 ## U1-R2: module entry, live I/O and structured results
 
@@ -415,8 +491,9 @@ commands and output names are frozen before the release candidate is built.
 2. [x] U1-R1 source, portable/JVM and Android-build work is complete through
    E2, including lifecycle/encoding, bounded stdin transport/bootstrap, Host
    option and the portable import matrix.
-3. [ ] Capture exact-artifact E3 evidence for packaged CPython on an authorized
-   device/API cell; until then, device acceptance remains pending.
+3. [x] Capture exact-artifact E3 evidence for packaged CPython through the
+   frozen short-running non-soak transaction on QV710AF65F / API 31 /
+   arm64-v8a; the canonical report is the authority for this checkbox.
 4. Keep R1 functional completion separate from device-evidence freshness. R2
    design may proceed after E2, but U1-R6 cannot promote R1 without E3.
 5. Commit Plugin and any changed Host repository separately; each repository

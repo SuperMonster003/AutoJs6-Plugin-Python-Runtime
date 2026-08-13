@@ -8,7 +8,7 @@
 
 ###### 2026/08/13
 
-* `Nota` Alpha de código U1 posterior a 0.1; no hay interacción stdin en vivo y la aceptación E3 en dispositivo sigue pendiente
+* `Nota` Candidato alpha de código fuente limpio U1 posterior a 0.1; no hay interacción stdin en vivo y la aceptación U1-R1 E3 solo queda representada por un informe canonical PASS coincidente para los artefactos Host/Plugin exactos en QV710AF65F/API 31/arm64; no constituye evidencia de matriz de dispositivos, lanzamiento ni publicación
 * `Función` Añade un snapshot stdin finito y preproporcionado de hasta 1 MiB para entrada y EOF deterministas mediante `input()` y `sys.stdin`
 * `Función` Completa los imports de proyecto para módulos workspace, módulos hermanos y raíz de una entrada anidada e imports relativos al package
 * `Corrección` Decodifica el código como UTF-8 estricto antes de ejecutarlo para que un encoding cookie no UTF-8 no eluda el contrato

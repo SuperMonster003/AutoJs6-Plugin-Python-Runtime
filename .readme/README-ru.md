@@ -100,7 +100,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
+release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -160,7 +160,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 ###### 2026/08/13
 
-* `Примечание` Alpha исходников U1 после 0.1; интерактивный stdin в реальном времени недоступен, приемка E3 на устройстве еще не выполнена
+* `Примечание` Alpha-кандидат U1 с чистым состоянием исходников после 0.1; интерактивный stdin в реальном времени недоступен, а приемка U1-R1 E3 представлена только совпадающим каноническим отчетом PASS для точных артефактов Host/Plugin на QV710AF65F/API 31/arm64 и не является доказательством матрицы устройств, выпуска или публичной публикации
 * `Добавлено` Добавлен конечный заранее предоставленный snapshot stdin до 1 MiB для детерминированного ввода и EOF через `input()` и `sys.stdin`
 * `Добавлено` Завершена семантика project import для модулей workspace, соседних и корневых модулей вложенной точки входа и package-relative imports
 * `Исправлено` Исходник декодируется как strict UTF-8 до выполнения, поэтому encoding cookie с иной кодировкой больше не обходит контракт

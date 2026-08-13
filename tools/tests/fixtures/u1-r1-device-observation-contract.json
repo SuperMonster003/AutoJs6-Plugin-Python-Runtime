@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "contract": "AUTOJS6_PYTHON_RUNTIME_U1_R1_DEVICE_OBSERVATIONS",
+  "track": "U1",
+  "phase": "R1",
+  "runnerComponent": "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner",
+  "instrumentationArguments": {},
+  "selectors": [
+    {
+      "id": "public-semantics",
+      "selector": "org.autojs.autojs.engine.PythonU1R1AcceptanceInstrumentationTest#publicScriptEngineRunsStdinStdlibRelativeImportsAndIsolatesSequentialWorkspaces",
+      "arguments": {
+        "autojs.python.u1r1.acceptance.enabled": "true"
+      },
+      "covered": [
+        "REAL_CPYTHON_3_13_9",
+        "PUBLIC_ENGINE_STDIN_SNAPSHOT",
+        "INPUT_PROMPT_AND_UNICODE_LINES",
+        "PACKAGED_STDLIB_IMPORTS",
+        "PROJECT_AND_RELATIVE_IMPORTS",
+        "SEQUENTIAL_WORKSPACE_ISOLATION",
+        "PINNED_PROVIDER_CALLBACK_UID",
+        "ONE_STARTED_ONE_TERMINAL"
+      ]
+    },
+    {
+      "id": "start-lease",
+      "selector": "org.autojs.autojs.core.plugin.python.PythonRuntimeU1R1StartLeaseInstrumentationTest#openedButNeverStartedSessionExpiresAndNextExecutionSucceeds",
+      "arguments": {
+        "autojs.python.u1r1.startLease.enabled": "true"
+      },
+      "covered": [
+        "OPENED_SESSION_START_LEASE",
+        "NO_USER_CODE_BEFORE_START",
+        "LEASE_RELEASES_SLOT_AND_DESCRIPTORS",
+        "NEXT_FINITE_EXECUTION_SUCCEEDS"
+      ]
+    }
+  ]
+}

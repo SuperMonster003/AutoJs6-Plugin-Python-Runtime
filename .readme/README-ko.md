@@ -100,7 +100,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
+release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -160,7 +160,7 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 
 ###### 2026/08/13
 
-* `안내` 0.1 이후 U1 source alpha. 실시간 stdin interaction은 제공하지 않으며 E3 기기 승인은 아직 대기 중
+* `안내` 0.1 이후 U1 clean-source alpha candidate. 실시간 stdin interaction은 제공하지 않으며, U1-R1 E3 승인은 QV710AF65F/API 31/arm64의 exact Host/Plugin artifacts와 일치하는 canonical PASS report로만 성립하고 device matrix/release/public 증거가 아님
 * `추가` 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 추가하여 `input()`과 `sys.stdin`에 결정적 입력과 EOF 제공
 * `추가` workspace module, 중첩 entry의 sibling/root module 및 package-relative import를 지원하도록 project import semantics 완성
 * `수정` 실행 전에 source를 strict UTF-8로 decode하여 비 UTF-8 encoding cookie가 contract를 우회하지 못하도록 수정

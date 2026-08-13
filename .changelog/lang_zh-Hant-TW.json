@@ -8,7 +8,7 @@
     "v0.2.0-alpha.1": {
       "released_date": "2026/08/13",
       "hint": [
-        "0.1 之後的 U1 原始碼 alpha; 不提供即時 stdin 互動, E3 裝置驗收仍待執行"
+        "0.1 之後的 U1 clean-source alpha 候選; 不提供即時 stdin 互動, U1-R1 E3 驗收僅由與 QV710AF65F/API 31/arm64 上 exact Host/Plugin artifacts 匹配的 canonical PASS report 表示, 不屬於裝置矩陣/發布/公開證據"
       ],
       "feature": [
         "新增最大 1 MiB 的有限預先提供 stdin snapshot, 為 `input()` 與 `sys.stdin` 提供確定性輸入和 EOF",

@@ -8,7 +8,7 @@
 
 ###### 2026/08/13
 
-* `안내` 0.1 이후 U1 source alpha. 실시간 stdin interaction은 제공하지 않으며 E3 기기 승인은 아직 대기 중
+* `안내` 0.1 이후 U1 clean-source alpha candidate. 실시간 stdin interaction은 제공하지 않으며, U1-R1 E3 승인은 QV710AF65F/API 31/arm64의 exact Host/Plugin artifacts와 일치하는 canonical PASS report로만 성립하고 device matrix/release/public 증거가 아님
 * `추가` 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 추가하여 `input()`과 `sys.stdin`에 결정적 입력과 EOF 제공
 * `추가` workspace module, 중첩 entry의 sibling/root module 및 package-relative import를 지원하도록 project import semantics 완성
 * `수정` 실행 전에 source를 strict UTF-8로 decode하여 비 UTF-8 encoding cookie가 contract를 우회하지 못하도록 수정

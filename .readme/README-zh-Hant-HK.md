@@ -100,7 +100,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
+release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -160,7 +160,7 @@ R6-P2/P3 的本機 RC 及集中裝置證據保留為歷史記錄. 本次 clean V
 
 ###### 2026/08/13
 
-* `提示` 0.1 之後的 U1 原始碼 alpha; 不提供即時 stdin 互動, E3 裝置驗收仍待執行
+* `提示` 0.1 之後的 U1 clean-source alpha 候選; 不提供即時 stdin 互動, U1-R1 E3 驗收僅由與 QV710AF65F/API 31/arm64 上 exact Host/Plugin artifacts 匹配的 canonical PASS report 表示, 不屬於裝置矩陣/發佈/公開證據
 * `新增` 新增最大 1 MiB 的有限預先提供 stdin snapshot, 為 `input()` 及 `sys.stdin` 提供確定輸入和 EOF
 * `新增` 完善專案 import 語義, 支援 workspace 模組, 巢狀入口同層及根模組與 package-relative import
 * `修正` 執行前以 strict UTF-8 解碼原始碼, 非 UTF-8 encoding cookie 不再繞過合約

@@ -8,7 +8,7 @@
 
 ###### 2026/08/13
 
-* `Note` Alpha source U1 postérieure à 0.1; aucune interaction stdin en direct et acceptation appareil E3 encore en attente
+* `Note` Candidat alpha U1 à sources propres postérieur à 0.1; aucune interaction stdin en direct, et l'acceptation U1-R1 E3 n'est représentée que par un rapport canonical PASS concordant pour les artefacts Host/Plugin exacts sur QV710AF65F/API 31/arm64; ceci ne constitue pas une preuve de matrice d'appareils, de livraison ou de publication
 * `Fonction` Ajout d'un snapshot stdin fini et préfourni de 1 MiB au plus pour une entrée et une EOF déterministes avec `input()` et `sys.stdin`
 * `Fonction` Finalisation des imports projet pour les modules workspace, les modules voisins et racine d'une entrée imbriquée, et les imports relatifs au package
 * `Correction` Décodage de la source en UTF-8 strict avant exécution afin qu'un encoding cookie non UTF-8 ne contourne plus le contrat
