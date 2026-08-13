@@ -267,8 +267,9 @@ pluginManagement {
             val intelliJIdea = object : Platform(
                 name = "IntelliJIdea", vendor = "Jetbrains",
                 // @Reference AGP Upgrade Assistant integrated within JetBrains IntelliJ IDEA.
-                // @Updated by SuperMonster003 on Aug 20, 2025. (Manual)
+                // @Updated by OpenAI Codex on Aug 13, 2026. (Manual)
                 agpVersionMap = mapOf(
+                    "2026.2" to "9.1.0",
                     "2025.2.2" to "8.12.0",
                     "2025.2.1" to "8.11.1",
                     "2025.1" to "8.10.1",

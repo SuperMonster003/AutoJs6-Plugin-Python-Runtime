@@ -103,11 +103,15 @@ flag also remains blocked. This exception lets Gradle create review inputs; it
 does not make the generated metadata trusted and does not admit an APK.
 
 The completed bootstrap established an important boundary: `app/gradle.lockfile`
-contains the ordinary Gradle dependencies, but contains no
-`com.chaquo.python*` coordinate. Chaquopy's plugin resolves the packaged runtime
-separately. The candidate tool therefore requires a non-empty generated Gradle
-lockfile and records its SHA-256 as ordinary-lock evidence, while rejecting any
-attempt to treat that file as the runtime inventory source.
+contains the application and test variant compile/runtime dependencies, but
+contains no `com.chaquo.python*` coordinate. AGP-owned tool configurations such
+as Lint, UTP, AAPT2 and Kotlin compiler classpaths are deliberately excluded
+because the settings selector may choose different compatible AGP versions for
+the IDE and command line; those downloaded artifacts remain covered by strict
+SHA-256 dependency verification. Chaquopy's plugin resolves the packaged
+runtime separately. The candidate tool therefore requires a non-empty generated
+Gradle lockfile and records its SHA-256 as ordinary-lock evidence, while
+rejecting any attempt to treat that file as the runtime inventory source.
 
 The runtime candidate is an exact nine-file contract sourced from
 `gradle/verification-metadata.xml` and matching cache bytes:

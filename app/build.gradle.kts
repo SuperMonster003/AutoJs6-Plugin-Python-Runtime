@@ -194,6 +194,8 @@ require(runtimeSupplyLockFile.isFile) {
     "Missing runtime supply lock: ${runtimeSupplyLockFile.relativeTo(rootProject.projectDir)}"
 }
 val runtimeSupplyLock = runtimeSupplyLockFile.loadUniqueLock()
+// This records the reviewed runtime-inventory bootstrap environment. The AGP
+// used by the current build is selected independently in settings.gradle.kts.
 val expectedRuntimeSupply = mapOf(
     "format" to "2",
     "android.gradle.plugin.version" to "9.2.1",
@@ -530,8 +532,19 @@ dependencies {
     testImplementation(libs.junit)
 }
 
+// IntelliJ resolves imported dependencies from Configuration.copy() instances.
+// A copy inherits the source locking flag but has a different name and therefore
+// no lock state in app/gradle.lockfile. Keep IDE model import unlocked: artifact
+// bytes are still covered by dependency verification, while real Gradle builds
+// continue to enforce strict locks on application/test classpaths.
+val isIdeaSync = System.getProperty("idea.sync.active").toBoolean()
+configurations.configureEach {
+    if (!isIdeaSync && (name.endsWith("CompileClasspath") || name.endsWith("RuntimeClasspath"))) {
+        resolutionStrategy.activateDependencyLocking()
+    }
+}
+
 dependencyLocking {
-    lockAllConfigurations()
     lockMode = LockMode.STRICT
 }
 

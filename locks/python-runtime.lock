@@ -4,6 +4,7 @@
 # refuses to configure until this is promoted to RESOLVED with the complete,
 # audited per-artifact inventory described in locks/README.md.
 format=2
+# Reviewed runtime-inventory bootstrap environment; not the current-build AGP selector.
 android.gradle.plugin.version=9.2.1
 chaquopy.plugin.version=17.0.0
 chaquopy.license=MIT
