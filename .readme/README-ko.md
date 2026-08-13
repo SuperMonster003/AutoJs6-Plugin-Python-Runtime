@@ -46,6 +46,7 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 ******
 
 - UTF-8 Python 소스 스냅샷 하나를 `__main__`으로 실행합니다.
+- `input()`에 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 받습니다. 실시간 prompt/reply 상호작용은 제공하지 않습니다.
 - stdout과 stderr 순서를 유지하고 제한된 chunk를 credit으로 전달합니다.
 - `SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.
 - 프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.
@@ -87,7 +88,7 @@ engine: python
 protocol: 1.0-1.1
 ```
 
-독립 SOURCE, 선택적인 제한 workspace archive 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. stdin snapshot은 비활성 상태이며 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.
+독립 SOURCE, 선택적인 제한 workspace archive, 최대 1 MiB의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. stdin은 실시간 상호작용 채널이 아니며 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.
 
 ******
 
@@ -98,8 +99,8 @@ protocol: 1.0-1.1
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.1.0
-release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=11 commit with the exact Host 6.8.0/5275 lock
+release target: 0.2.0-alpha.1
+release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,7 +134,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-- stdin snapshot, workspace 쓰기, online pip 및 wheel 다운로드를 지원하지 않습니다.
+- 실시간 대화형 stdin은 제공하지 않으며 최대 1 MiB의 유한한 사전 제공 snapshot만 지원합니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.
 - UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.
 - 실시간 AutoJs6 capability broker는 없습니다. 첫 API는 실행 시작 시 동결된 app/device/execution/project snapshot과 plugin-private workspace의 제한된 읽기 전용 접근만 사용합니다.
 - 32비트 Android와 임의의 native wheel은 보장하지 않습니다.
@@ -154,6 +155,18 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 ### 변경 이력
 
 ******
+
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `안내` 0.1 이후 U1 source alpha. 실시간 stdin interaction은 제공하지 않으며 E3 기기 승인은 아직 대기 중
+* `추가` 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 추가하여 `input()`과 `sys.stdin`에 결정적 입력과 EOF 제공
+* `추가` workspace module, 중첩 entry의 sibling/root module 및 package-relative import를 지원하도록 project import semantics 완성
+* `수정` 실행 전에 source를 strict UTF-8로 decode하여 비 UTF-8 encoding cookie가 contract를 우회하지 못하도록 수정
+* `개선` 실행마다 독립 `__main__`을 사용하고 stdin/stdout/stderr, argv, cwd, `sys.path`, module 및 importer cache 상태 복원
+* `개선` open 후 start되지 않은 session에 5초 lease를 적용하고 만료 시 input, descriptor 및 단일 session slot 해제
+* `개선` Host 측 discovery에만 의존하지 않고 Provider Binder 경계에서 최소 Host versionCode 5275 강제
 
 # v0.1.0
 
@@ -217,7 +230,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Maven의 Chaquopy 17.0.0과 CPython 3.13.9를 lock하고 stdlib만 package합니다. release gate는 의존성 metadata, native library, 16 KB page, NOTICE, SM003 signer 및 배포 APK 세 개를 exact identity에 대해 확인합니다.
+Maven의 Chaquopy 17.0.0과 CPython 3.13.9를 lock하고 stdlib만 package합니다. release gate는 의존성 metadata, native library, NOTICE, SM003 signer 및 배포 APK 세 개를 exact identity에 대해 확인합니다. 16 KB page 호환성은 현재 전용 gate가 없으며 검증되었다고 주장하지 않습니다.
 
 ******
 

@@ -46,6 +46,7 @@ Python Runtime — независимый provider протокола Python V1.
 ******
 
 - Выполнение одного UTF-8 снимка Python как `__main__`.
+- Для `input()` принимается конечный заранее переданный stdin snapshot размером до 1 MiB; интерактивного prompt/reply в реальном времени нет.
 - Сохранение порядка stdout и stderr с передачей ограниченных chunks по credits.
 - Возврат `SystemExit`, синтаксических и runtime ошибок с ограниченным структурированным traceback.
 - Один активный сеанс на процесс без очереди provider.
@@ -87,7 +88,7 @@ engine: python
 protocol: 1.0-1.1
 ```
 
-Принимаются отдельный SOURCE, необязательный ограниченный workspace archive и read-only snapshot возможностей хоста протокола 1.1; stdin snapshot остается выключенным. Context, Binder, объекты хоста и callback sink не внедряются.
+Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до 1 MiB и read-only snapshot возможностей хоста протокола 1.1. Stdin не является интерактивным каналом реального времени; Context, Binder, объекты хоста и callback sink не внедряются.
 
 ******
 
@@ -98,8 +99,8 @@ protocol: 1.0-1.1
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.1.0
-release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=11 commit with the exact Host 6.8.0/5275 lock
+release target: 0.2.0-alpha.1
+release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,7 +134,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
-- Нет stdin snapshot, записи в workspace, online pip и загрузки wheels.
+- Нет интерактивного stdin в реальном времени; поддерживается только конечный заранее переданный snapshot до 1 MiB. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.
 - Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.
 - Нет realtime AutoJs6 capability broker; первые API используют только замороженный при запуске snapshot app/device/execution/project и ограниченное read-only чтение private workspace плагина.
 - 32-разрядный Android и произвольные native wheels не гарантируются.
@@ -154,6 +155,18 @@ Runtime Chaquopy предназначен только для доверенны
 ### История версий
 
 ******
+
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `Примечание` Alpha исходников U1 после 0.1; интерактивный stdin в реальном времени недоступен, приемка E3 на устройстве еще не выполнена
+* `Добавлено` Добавлен конечный заранее предоставленный snapshot stdin до 1 MiB для детерминированного ввода и EOF через `input()` и `sys.stdin`
+* `Добавлено` Завершена семантика project import для модулей workspace, соседних и корневых модулей вложенной точки входа и package-relative imports
+* `Исправлено` Исходник декодируется как strict UTF-8 до выполнения, поэтому encoding cookie с иной кодировкой больше не обходит контракт
+* `Улучшено` Каждый запуск получает отдельный `__main__` с восстановлением stdin/stdout/stderr, argv, cwd, `sys.path`, состояния modules и importer cache
+* `Улучшено` Для открытого, но не запущенного session действует lease 5 секунд, после чего освобождаются inputs, descriptors и единственный session slot
+* `Улучшено` Минимальный Host versionCode 5275 проверяется на Binder-границе Provider, а не только при discovery со стороны Host
 
 # v0.1.0
 
@@ -217,7 +230,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Runtime фиксирует Chaquopy 17.0.0 и CPython 3.13.9 из Maven и включает только stdlib. Release gate проверяет metadata, native libraries, 16 KB page, NOTICE, signer SM003 и три распространяемых APK относительно exact identity.
+Runtime фиксирует Chaquopy 17.0.0 и CPython 3.13.9 из Maven и включает только stdlib. Release gate проверяет metadata, native libraries, NOTICE, signer SM003 и три распространяемых APK относительно exact identity; для совместимости с 16 KB page сейчас нет отдельного gate, поэтому она не заявляется как проверенная.
 
 ******
 

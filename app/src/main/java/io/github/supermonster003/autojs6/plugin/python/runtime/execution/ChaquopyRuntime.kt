@@ -29,6 +29,7 @@ internal class ChaquopyRuntime(context: Context) {
         request: PythonExecutionRequest,
         workspaceRoot: File? = null,
         hostCapabilitySnapshot: ByteArray? = null,
+        stdinSnapshot: ByteArray? = null,
     ): PythonRunOutcome {
         val python = ensureStarted()
         val bootstrap = python.getModule("autojs6_runtime.bootstrap")
@@ -42,6 +43,7 @@ internal class ChaquopyRuntime(context: Context) {
                 request.maxOutputChunkBytes,
                 request.maxOutputChunks,
                 hostCapabilitySnapshot ?: EMPTY_CAPABILITY_SNAPSHOT,
+                stdinSnapshot ?: EMPTY_STDIN_SNAPSHOT,
             )
         } else {
             bootstrap.callAttr(
@@ -54,6 +56,7 @@ internal class ChaquopyRuntime(context: Context) {
                 request.maxOutputChunkBytes,
                 request.maxOutputChunks,
                 hostCapabilitySnapshot ?: EMPTY_CAPABILITY_SNAPSHOT,
+                stdinSnapshot ?: EMPTY_STDIN_SNAPSHOT,
             )
         }
         return try {
@@ -166,5 +169,6 @@ internal class ChaquopyRuntime(context: Context) {
         const val MAX_EXCEPTION_TYPE_BYTES = 1024
         const val MAX_EXCEPTION_MESSAGE_BYTES = 4096
         val EMPTY_CAPABILITY_SNAPSHOT = ByteArray(0)
+        val EMPTY_STDIN_SNAPSHOT = ByteArray(0)
     }
 }

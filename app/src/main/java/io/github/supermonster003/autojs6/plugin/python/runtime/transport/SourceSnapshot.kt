@@ -23,6 +23,7 @@ internal class SourceSnapshot private constructor(
             descriptor: ParcelFileDescriptor,
             maximumLengthBytes: Long,
             shouldStop: () -> Boolean,
+            requireUtf8Source: Boolean = false,
         ): SourceSnapshot {
             require(reference.declaredLengthBytes in 0L..maximumLengthBytes) {
                 "Source exceeds the provider limit"
@@ -50,6 +51,7 @@ internal class SourceSnapshot private constructor(
                 require(digest.digest().contentEquals(reference.sha256.toByteArray())) {
                     "Source digest does not match"
                 }
+                if (requireUtf8Source) Utf8SourcePolicy.requireValid(output)
                 return SourceSnapshot(output)
             } catch (error: Throwable) {
                 output.fill(0)

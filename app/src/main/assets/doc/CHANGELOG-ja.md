@@ -4,6 +4,18 @@
 
 ******
 
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `注記` 0.1 後の U1 source alpha. live stdin interaction は未提供で, E3 端末受け入れは未実施
+* `追加` 最大 1 MiB の有限な事前提供 stdin snapshot を追加し, `input()` と `sys.stdin` に決定的な入力と EOF を提供
+* `追加` workspace module, nested entry の sibling/root module, package-relative import に対応して project import semantics を完成
+* `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止
+* `改善` 実行ごとに独立した `__main__` を使用し, stdin/stdout/stderr, argv, cwd, `sys.path`, module, importer cache の状態を復元
+* `改善` open 後に start されない session に 5 秒 lease を適用し, 期限後に input, descriptor, 単一 session slot を解放
+* `改善` Host 側 discovery だけに依存せず, Provider の Binder 境界で最低 Host versionCode 5275 を強制
+
 # v0.1.0
 
 ###### 2026/08/12

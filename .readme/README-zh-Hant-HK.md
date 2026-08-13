@@ -46,6 +46,7 @@ Python Runtime 是獨立的 Python 協議 V1 provider. 宿主將單一 Python �
 ******
 
 - 將一個 UTF-8 Python 原始碼快照作為 `__main__` 執行.
+- 為 `input()` 接收最大 1 MiB 的有限預置 stdin snapshot; 不提供即時互動 prompt/reply.
 - 按原始次序收集 stdout 和 stderr, 再透過有界 chunk 與 credit 傳送.
 - 傳回 `SystemExit`, 語法錯誤和執行階段例外, 包括有界結構化 traceback.
 - 同一執行環境程序只允許一個使用中工作階段, provider 端不排隊.
@@ -87,7 +88,7 @@ engine: python
 protocol: 1.0-1.1
 ```
 
-外掛程式接收獨立 SOURCE, 可選的有界 workspace archive, 以及協議 1.1 的唯讀宿主能力快照; stdin snapshot 仍關閉. 外掛程式不會向指令碼注入 Context, Binder, 宿主執行環境物件或 callback sink.
+外掛程式接收獨立 SOURCE, 可選的有界 workspace archive, 最大 1 MiB 的有限預置 stdin snapshot, 以及協議 1.1 的唯讀宿主能力快照. stdin 並非即時互動通道; 外掛程式不會向指令碼注入 Context, Binder, 宿主執行環境物件或 callback sink.
 
 ******
 
@@ -98,8 +99,8 @@ protocol: 1.0-1.1
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.1.0
-release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=11 commit with the exact Host 6.8.0/5275 lock
+release target: 0.2.0-alpha.1
+release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,7 +134,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-- 不支援 stdin snapshot, workspace 寫回, 線上 pip 或執行階段下載 wheel.
+- 不提供即時互動 stdin; 只支援最大 1 MiB 的有限預置 snapshot. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.
 - 不提供 UI 指令碼, 除錯器, REPL 或任意宿主 Java 物件存取.
 - 不提供即時 AutoJs6 能力 broker; 首批 API 只使用執行開始時凍結的 app/device/execution/project 快照及外掛程式私有 workspace 的有界唯讀檔案介面.
 - 不聲明 32 位元 Android 支援, 亦不保證任何第三方 native wheel 可用.
@@ -154,6 +155,18 @@ R6-P2/P3 的本機 RC 及集中裝置證據保留為歷史記錄. 本次 clean V
 ### 版本記錄
 
 ******
+
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `提示` 0.1 之後的 U1 原始碼 alpha; 不提供即時 stdin 互動, E3 裝置驗收仍待執行
+* `新增` 新增最大 1 MiB 的有限預先提供 stdin snapshot, 為 `input()` 及 `sys.stdin` 提供確定輸入和 EOF
+* `新增` 完善專案 import 語義, 支援 workspace 模組, 巢狀入口同層及根模組與 package-relative import
+* `修正` 執行前以 strict UTF-8 解碼原始碼, 非 UTF-8 encoding cookie 不再繞過合約
+* `改善` 每次執行使用獨立 `__main__`, 並還原 stdin/stdout/stderr, argv, cwd, `sys.path`, module 及 importer cache 狀態
+* `改善` 為已開啟但未 start 的 session 加入 5 秒 lease, 到期釋放輸入, descriptor 及單一工作階段佔位
+* `改善` Provider 在 Binder 傳入邊界強制最低 Host versionCode 5275, 不再只依賴 Host 端探索檢查
 
 # v0.1.0
 
@@ -217,7 +230,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-執行環境透過 Maven 鎖定 Chaquopy 17.0.0 及 CPython 3.13.9, 並只封裝 stdlib. Release gate 按精確身分核對相依性資料, native 程式庫, 16 KB page, NOTICE, SM003 signer 及三種發行 APK.
+執行環境透過 Maven 鎖定 Chaquopy 17.0.0 及 CPython 3.13.9, 並只封裝 stdlib. Release gate 按精確身分核對相依性資料, native 程式庫, NOTICE, SM003 signer 及三種發行 APK; 16 KB page 相容性目前沒有專用 gate, 不作已核驗聲明.
 
 ******
 

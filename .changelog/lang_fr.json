@@ -5,6 +5,24 @@
   "changelog_label_improvement": "Amélioration",
   "changelog_label_dependency": "Dépendance",
   "$data": {
+    "v0.2.0-alpha.1": {
+      "released_date": "2026/08/13",
+      "hint": [
+        "Alpha source U1 postérieure à 0.1; aucune interaction stdin en direct et acceptation appareil E3 encore en attente"
+      ],
+      "feature": [
+        "Ajout d'un snapshot stdin fini et préfourni de 1 MiB au plus pour une entrée et une EOF déterministes avec `input()` et `sys.stdin`",
+        "Finalisation des imports projet pour les modules workspace, les modules voisins et racine d'une entrée imbriquée, et les imports relatifs au package"
+      ],
+      "fix": [
+        "Décodage de la source en UTF-8 strict avant exécution afin qu'un encoding cookie non UTF-8 ne contourne plus le contrat"
+      ],
+      "improvement": [
+        "Utilisation d'un `__main__` indépendant par exécution et restauration de stdin/stdout/stderr, argv, cwd, `sys.path`, des modules et du cache d'importeurs",
+        "Application d'un lease de 5 secondes à une session ouverte mais jamais démarrée, puis libération des entrées, descriptors et de l'emplacement de session unique",
+        "Application du Host versionCode minimal 5275 à la frontière Binder du Provider au lieu de dépendre uniquement de la découverte côté Host"
+      ]
+    },
     "v0.1.0": {
       "released_date": "2026/08/12",
       "hint": [

@@ -46,6 +46,7 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 ******
 
 - تنفيذ لقطة مصدر Python بترميز UTF-8 كـ `__main__`.
+- قبول stdin snapshot محدود ومقدم مسبقا بحجم أقصاه 1 MiB للدالة `input()`؛ لا يتوفر تفاعل prompt/reply مباشر.
 - حفظ ترتيب stdout وstderr ثم إرسال chunks محدودة باستخدام credits.
 - إرجاع `SystemExit` وأخطاء الصياغة والتنفيذ مع traceback منظم ومحدود.
 - السماح بجلسة نشطة واحدة لكل عملية دون طابور لدى provider.
@@ -87,7 +88,7 @@ engine: python
 protocol: 1.0-1.1
 ```
 
-تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1؛ يظل stdin snapshot معطلا ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.
+تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه 1 MiB وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. لا يمثل stdin قناة تفاعل مباشر؛ ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.
 
 ******
 
@@ -98,8 +99,8 @@ protocol: 1.0-1.1
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.1.0
-release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=11 commit with the exact Host 6.8.0/5275 lock
+release target: 0.2.0-alpha.1
+release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,7 +134,7 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
-- لا تدعم stdin snapshot أو الكتابة إلى workspace أو pip عبر الإنترنت أو تنزيل wheels.
+- لا يوجد stdin تفاعلي مباشر؛ يدعم فقط snapshot محدودا ومقدما مسبقا حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
 - لا توجد نصوص UI أو debugger أو REPL أو صلاحية عشوائية لكائنات Java في المضيف.
 - لا يوجد AutoJs6 capability broker آني؛ تستخدم أول API فقط snapshot ‏app/device/execution/project المجمد عند بدء التنفيذ وقراءة محدودة من workspace الخاص بالإضافة.
 - لا يضمن Android ‏32-bit أو أي native wheel خارجي.
@@ -154,6 +155,18 @@ runtime/security/release owner: SuperMonster003
 ### سجل الإصدارات
 
 ******
+
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `ملاحظة` إصدار alpha لمصادر U1 بعد 0.1؛ لا يتوفر تفاعل stdin مباشر وما زال قبول E3 على الجهاز قيد الانتظار
+* `إضافة` إضافة snapshot محدود ومقدم مسبقا لـ stdin بحجم أقصى 1 MiB لتوفير input وEOF حتميين عبر `input()` و`sys.stdin`
+* `إضافة` إكمال دلالات project import لوحدات workspace ووحدات sibling/root لنقطة دخول متداخلة وعمليات package-relative import
+* `إصلاح` فك source بترميز strict UTF-8 قبل التنفيذ لمنع encoding cookie بترميز آخر من تجاوز العقد
+* `تحسين` استخدام `__main__` مستقل لكل تنفيذ واستعادة حالات stdin/stdout/stderr وargv وcwd و`sys.path` وmodule وimporter cache
+* `تحسين` تطبيق lease مدته 5 ثوان على session مفتوحة لم تبدأ ثم تحرير inputs وdescriptors وموضع session الوحيد
+* `تحسين` فرض الحد الأدنى Host versionCode 5275 عند حد Binder الخاص بـ Provider بدلا من الاعتماد فقط على discovery من Host
 
 # v0.1.0
 
@@ -217,7 +230,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-تقفل البيئة Chaquopy 17.0.0 وCPython 3.13.9 من Maven وتحزم stdlib فقط. يفحص release gate ‏metadata والمكتبات الأصلية وصفحات 16 KB وNOTICE وsigner ‏SM003 وملفات APK الثلاثة مقابل الهوية الدقيقة.
+تقفل البيئة Chaquopy 17.0.0 وCPython 3.13.9 من Maven وتحزم stdlib فقط. يفحص release gate ‏metadata والمكتبات الأصلية وNOTICE وsigner ‏SM003 وملفات APK الثلاثة مقابل الهوية الدقيقة؛ لا يوجد حاليا gate مخصص لتوافق صفحات 16 KB ولا يدعى أنه تم التحقق منه.
 
 ******
 

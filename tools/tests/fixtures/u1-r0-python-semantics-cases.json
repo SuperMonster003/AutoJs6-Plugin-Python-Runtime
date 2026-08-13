@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "track": "U1",
+  "phase": "R0",
+  "targetRuntime": {
+    "implementation": "CPython",
+    "pythonVersion": "3.13.9",
+    "sourceEncodingTarget": "STRICT_UTF8_OPTIONAL_BOM"
+  },
+  "evidenceBoundary": {
+    "level": "PORTABLE_CPYTHON_ONLY",
+    "androidCompiled": false,
+    "binderExecuted": false,
+    "deviceVerified": false,
+    "published": false
+  },
+  "cases": [
+    {
+      "id": "source.syntax.core-grammar",
+      "category": "syntax",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "Representative functions, decorator, class, comprehension, pattern matching and f-string execute through the bootstrap.",
+      "execution": {
+        "kind": "SOURCE",
+        "entryPoint": "main.py",
+        "arguments": [],
+        "source": "def identity(function):\n    return function\n\nclass Counter:\n    def __init__(self, values):\n        self.values = values\n\n@identity\ndef classify(counter):\n    match sum(counter.values):\n        case 14:\n            return f'ready:{len(counter.values)}'\n        case _:\n            return 'unexpected'\n\nprint(classify(Counter([value * value for value in range(1, 4)])))\n"
+      },
+      "expected": {
+        "status": "completed",
+        "exitCode": 0,
+        "stdout": "ready:3\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "source.syntax.asyncio-run",
+      "category": "syntax",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "Async functions are supported under an ordinary asyncio.run entry, without top-level-await claims.",
+      "execution": {
+        "kind": "SOURCE",
+        "entryPoint": "main.py",
+        "arguments": [],
+        "source": "import asyncio\n\nasync def answer():\n    await asyncio.sleep(0)\n    return 42\n\nprint(asyncio.run(answer()))\n"
+      },
+      "expected": {
+        "status": "completed",
+        "exitCode": 0,
+        "stdout": "42\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "source.import.portable-stdlib",
+      "category": "import",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "Portable evidence covers representative pure standard-library imports only, not Android packaging.",
+      "execution": {
+        "kind": "SOURCE",
+        "entryPoint": "main.py",
+        "arguments": [],
+        "source": "import json\nfrom decimal import Decimal\nfrom pathlib import PurePosixPath\nprint(json.dumps({'n': 3}, separators=(',', ':')), Decimal('1.5') + Decimal('2.5'), PurePosixPath('a') / 'b')\n"
+      },
+      "expected": {
+        "status": "completed",
+        "exitCode": 0,
+        "stdout": "{\"n\":3} 4.0 a/b\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "source.execution.main-and-argv",
+      "category": "execution-state",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "File-mode globals and bounded arguments have an exact portable result.",
+      "execution": {
+        "kind": "SOURCE",
+        "entryPoint": "main.py",
+        "arguments": [
+          "first",
+          "second"
+        ],
+        "source": "import sys\nprint(__name__, __file__, '|'.join(sys.argv))\n"
+      },
+      "expected": {
+        "status": "completed",
+        "exitCode": 0,
+        "stdout": "__main__ main.py main.py|first|second\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "source.error.syntax",
+      "category": "error",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "Syntax errors remain structured failures with no output requirement.",
+      "execution": {
+        "kind": "SOURCE",
+        "entryPoint": "main.py",
+        "arguments": [],
+        "source": "if True print('broken')\n"
+      },
+      "expected": {
+        "status": "failed",
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "",
+        "exceptionType": "SyntaxError"
+      }
+    },
+    {
+      "id": "project.import.entry-sibling-and-root",
+      "category": "import",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "An explicit project supplies entry-directory and workspace-root imports without exposing a Host path.",
+      "execution": {
+        "kind": "PROJECT",
+        "entryPoint": "src/main.py",
+        "arguments": [],
+        "files": {
+          "src/main.py": "import helper\nimport root_helper\nfrom pathlib import Path\nprint(helper.VALUE, root_helper.VALUE, Path('data.txt').read_text(encoding='utf-8'))\n",
+          "src/helper.py": "VALUE = 'sibling'\n",
+          "root_helper.py": "VALUE = 'root'\n",
+          "data.txt": "relative"
+        }
+      },
+      "expected": {
+        "status": "completed",
+        "exitCode": 0,
+        "stdout": "sibling root relative\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "project.import.regular-namespace-dynamic",
+      "category": "import",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "Regular packages, namespace packages and dynamic imports share the bounded project roots.",
+      "execution": {
+        "kind": "PROJECT",
+        "entryPoint": "main.py",
+        "arguments": [],
+        "files": {
+          "main.py": "from importlib import import_module\nfrom pkg import LABEL\nfrom namespace.child import VALUE\nprint(LABEL, VALUE, import_module('pkg.dynamic').NUMBER)\n",
+          "pkg/__init__.py": "LABEL = 'package'\n",
+          "pkg/dynamic.py": "NUMBER = 7\n",
+          "namespace/child.py": "VALUE = 'namespace'\n"
+        }
+      },
+      "expected": {
+        "status": "completed",
+        "exitCode": 0,
+        "stdout": "package namespace 7\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "source.encoding.strict-utf8",
+      "category": "admission",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "The bootstrap rejects a conflicting non-UTF-8 cookie before compilation; Provider admission separately validates exact bytes.",
+      "execution": {
+        "kind": "SOURCE",
+        "entryPoint": "main.py",
+        "arguments": [],
+        "source": "# coding: latin-1\nprint('must not execute')\n"
+      },
+      "expected": {
+        "status": "failed",
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "",
+        "exceptionType": "ValueError"
+      }
+    },
+    {
+      "id": "stdin.snapshot.input",
+      "category": "stdin",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "A finite UTF-8 snapshot drives input(prompt), multiple lines and deterministic EOF without process stdin.",
+      "execution": {
+        "kind": "SOURCE",
+        "entryPoint": "main.py",
+        "arguments": [],
+        "stdin": "Ada\n42\n",
+        "source": "name = input('name>')\nnumber = input('number>')\nprint(name, int(number) + 1)\n"
+      },
+      "expected": {
+        "status": "completed",
+        "exitCode": 0,
+        "stdout": "name>number>Ada 43\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "project.entry.module-relative-import",
+      "category": "import",
+      "currentClaim": "VERIFIED_PORTABLE",
+      "targetPhase": "R1",
+      "rationale": "A nested project entry receives its normalized package context and can import a package sibling relatively.",
+      "execution": {
+        "kind": "PROJECT",
+        "entryPoint": "pkg/main.py",
+        "arguments": [],
+        "files": {
+          "pkg/__init__.py": "",
+          "pkg/main.py": "from .helper import VALUE\nprint(VALUE, __package__)\n",
+          "pkg/helper.py": "VALUE = 'relative'\n"
+        }
+      },
+      "expected": {
+        "status": "completed",
+        "exitCode": 0,
+        "stdout": "relative pkg\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "package.third-party.offline-pack",
+      "category": "dependency",
+      "currentClaim": "UNSUPPORTED",
+      "targetPhase": "R3",
+      "rationale": "The released runtime is stdlib-only and never performs online pip or runtime downloads.",
+      "execution": {
+        "kind": "NONE"
+      },
+      "expected": null
+    }
+  ]
+}

@@ -43,6 +43,8 @@ __pycache__/
 !/tools/tests/
 !/tools/tests/**
 !/tools/verify-r2-static.ps1
+!/tools/verify-u1-r0-python-usability.ps1
+!/tools/verify-u1-r1-core-semantics.ps1
 !/tools/verify-r6-release-source.ps1
 !/tools/verify-r6-stable-release.ps1
 !/tools/write-r6-rc-provenance.ps1

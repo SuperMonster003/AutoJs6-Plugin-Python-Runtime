@@ -5,6 +5,24 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "相依項目",
   "$data": {
+    "v0.2.0-alpha.1": {
+      "released_date": "2026/08/13",
+      "hint": [
+        "0.1 之後的 U1 原始碼 alpha; 不提供即時 stdin 互動, E3 裝置驗收仍待執行"
+      ],
+      "feature": [
+        "新增最大 1 MiB 的有限預先提供 stdin snapshot, 為 `input()` 及 `sys.stdin` 提供確定輸入和 EOF",
+        "完善專案 import 語義, 支援 workspace 模組, 巢狀入口同層及根模組與 package-relative import"
+      ],
+      "fix": [
+        "執行前以 strict UTF-8 解碼原始碼, 非 UTF-8 encoding cookie 不再繞過合約"
+      ],
+      "improvement": [
+        "每次執行使用獨立 `__main__`, 並還原 stdin/stdout/stderr, argv, cwd, `sys.path`, module 及 importer cache 狀態",
+        "為已開啟但未 start 的 session 加入 5 秒 lease, 到期釋放輸入, descriptor 及單一工作階段佔位",
+        "Provider 在 Binder 傳入邊界強制最低 Host versionCode 5275, 不再只依賴 Host 端探索檢查"
+      ]
+    },
     "v0.1.0": {
       "released_date": "2026/08/12",
       "hint": [

@@ -4,6 +4,18 @@
 
 ******
 
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `안내` 0.1 이후 U1 source alpha. 실시간 stdin interaction은 제공하지 않으며 E3 기기 승인은 아직 대기 중
+* `추가` 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 추가하여 `input()`과 `sys.stdin`에 결정적 입력과 EOF 제공
+* `추가` workspace module, 중첩 entry의 sibling/root module 및 package-relative import를 지원하도록 project import semantics 완성
+* `수정` 실행 전에 source를 strict UTF-8로 decode하여 비 UTF-8 encoding cookie가 contract를 우회하지 못하도록 수정
+* `개선` 실행마다 독립 `__main__`을 사용하고 stdin/stdout/stderr, argv, cwd, `sys.path`, module 및 importer cache 상태 복원
+* `개선` open 후 start되지 않은 session에 5초 lease를 적용하고 만료 시 input, descriptor 및 단일 session slot 해제
+* `개선` Host 측 discovery에만 의존하지 않고 Provider Binder 경계에서 최소 Host versionCode 5275 강제
+
 # v0.1.0
 
 ###### 2026/08/12

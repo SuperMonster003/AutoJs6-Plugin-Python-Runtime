@@ -250,6 +250,20 @@ class PythonRuntimePluginService : Service() {
                     session.forceClose()
                     throw DeadObjectException()
                 }
+                if (!session.armStartLease()) {
+                    session.forceClose()
+                    reject(
+                        safeAdmission,
+                        PythonExecutionError(
+                            requestId = requestId,
+                            code = PythonErrorCode.SESSION_OPEN_FAILED,
+                            phase = PythonFailurePhase.SESSION_OPEN,
+                            message = "Python session start lease could not be armed",
+                            retryableBeforeDispatch = true,
+                        ),
+                    )
+                    return
+                }
                 try {
                     safeAdmission.onOpened(session)
                     unadmittedSession = null

@@ -4,6 +4,18 @@
 
 ******
 
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `提示` 0.1 后的 U1 源码 alpha; 不提供实时 stdin 交互, E3 设备验收尚待执行
+* `新增` 新增最大 1 MiB 的有限预置 stdin snapshot, 为 `input()` 与 `sys.stdin` 提供确定性输入和 EOF
+* `新增` 完善项目导入语义, 支持 workspace 模块, 嵌套入口同级与根模块以及 package-relative import
+* `修复` 执行前按 strict UTF-8 解码源码, 非 UTF-8 encoding cookie 不再绕过契约
+* `优化` 每次执行使用独立 `__main__`, 并恢复 stdin/stdout/stderr, argv, cwd, `sys.path`, module 与 importer cache 状态
+* `优化` 为已打开但未 start 的 session 增加 5 秒 lease, 到期释放输入, descriptor 与单会话占位
+* `优化` Provider 在 Binder 入站强制最低 Host versionCode 5275, 不再只依赖 Host 侧发现检查
+
 # v0.1.0
 
 ###### 2026/08/12

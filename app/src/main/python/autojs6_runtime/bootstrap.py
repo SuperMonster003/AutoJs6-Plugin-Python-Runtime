@@ -7,11 +7,15 @@ remain the effective isolation mechanism for the R2 POC.
 
 from __future__ import annotations
 
+import io
+import keyword
 import linecache
 import os
+import re
 import sys
 import traceback as traceback_module
 from dataclasses import dataclass
+from types import ModuleType
 from typing import Any
 
 from autojs6._context import _install_execution_context, _reset_execution_context
@@ -19,6 +23,14 @@ from autojs6._context import _install_execution_context, _reset_execution_contex
 
 class _OutputLimitExceeded(BaseException):
     pass
+
+
+_MAX_STDIN_BYTES = 1024 * 1024
+_SOURCE_CODING_COOKIE = re.compile(
+    r"^[\t\f ]*#.*?coding[:=][\t ]*([-_.a-zA-Z0-9]+)",
+    re.IGNORECASE,
+)
+_UTF8_CODING_NAMES = frozenset(("utf8", "utf-8", "utf-8-sig"))
 
 
 @dataclass
@@ -89,6 +101,79 @@ def _bounded_exit_code(code: Any, stderr: _CaptureText) -> int:
         return int(code)
     stderr.write(f"{code}\n")
     return 1
+
+
+def _decode_source(source_input: Any) -> str:
+    """Decode the protocol source snapshot without honoring non-UTF-8 cookies."""
+    source = bytes(source_input).decode("utf-8-sig", "strict")
+    if "\x00" in source:
+        raise ValueError("Python source contains a NUL byte")
+    for line in source.splitlines()[:2]:
+        match = _SOURCE_CODING_COOKIE.match(line)
+        if match is None:
+            continue
+        encoding = match.group(1).lower().replace("_", "-")
+        if encoding not in _UTF8_CODING_NAMES:
+            raise ValueError("Python source declares a non-UTF-8 encoding")
+    return source
+
+
+def _stdin_snapshot(stdin_input: Any) -> io.TextIOWrapper:
+    payload = bytes(stdin_input)
+    if len(payload) > _MAX_STDIN_BYTES:
+        raise ValueError("Python stdin snapshot exceeds the protocol limit")
+    return io.TextIOWrapper(
+        io.BytesIO(payload),
+        encoding="utf-8",
+        errors="strict",
+        newline=None,
+    )
+
+
+def _entry_package(logical_entry: str, workspace_root: str | None) -> str | None:
+    if workspace_root is None:
+        return None
+    parent_segments = logical_entry.split("/")[:-1]
+    if not parent_segments or any(
+        not segment.isidentifier() or keyword.iskeyword(segment)
+        for segment in parent_segments
+    ):
+        return None
+    return ".".join(parent_segments)
+
+
+def _restore_modules(
+    original: dict[str, Any],
+    snapshot: dict[str, Any],
+    workspace_root: str | None,
+) -> None:
+    sys.modules = original
+    for name, value in snapshot.items():
+        original[name] = value
+    for name in tuple(set(original) - set(snapshot)):
+        module_file = getattr(original.get(name), "__file__", None)
+        if name == "__main__" or (
+            isinstance(module_file, str)
+            and _project_relative(module_file, workspace_root) is not None
+        ):
+            original.pop(name, None)
+
+
+def _restore_importer_cache(
+    original: dict[Any, Any],
+    snapshot: dict[Any, Any],
+    workspace_root: str | None,
+) -> None:
+    sys.path_importer_cache = original
+    for path, value in snapshot.items():
+        original[path] = value
+    for path in tuple(set(original) - set(snapshot)):
+        try:
+            within_workspace = _is_within_workspace(os.fspath(path), workspace_root)
+        except TypeError:
+            within_workspace = False
+        if within_workspace:
+            original.pop(path, None)
 
 
 def _safe_relative_leaf(prefix: str, filename: str) -> str:
@@ -182,6 +267,7 @@ def _run_source(
     maximum_output_chunks: int,
     workspace_root: str | None,
     host_capability_snapshot_input: Any,
+    stdin_input: Any,
 ) -> dict[str, Any]:
     records: list[tuple[str, bytes]] = []
     budget = _OutputBudget(
@@ -191,21 +277,35 @@ def _run_source(
     )
     stdout = _CaptureText("stdout", budget, records)
     stderr = _CaptureText("stderr", budget, records)
-    previous_stdout, previous_stderr, previous_argv = sys.stdout, sys.stderr, sys.argv
-    previous_cwd: str | None = None
-    previous_sys_path: list[Any] | None = None
-    previous_modules: set[str] | None = None
+    stdin: io.TextIOWrapper | None = None
+    previous_stdin, previous_stdout, previous_stderr, previous_argv = (
+        sys.stdin,
+        sys.stdout,
+        sys.stderr,
+        sys.argv,
+    )
+    previous_cwd = os.getcwd()
+    previous_sys_path_object = sys.path
+    previous_sys_path = list(previous_sys_path_object)
+    previous_modules_object = sys.modules
+    previous_modules = dict(previous_modules_object)
+    previous_importer_cache_object = sys.path_importer_cache
+    previous_importer_cache = dict(previous_importer_cache_object)
     capability_token: Any = None
-    globals_dict = {
+    main_module = ModuleType("__main__")
+    globals_dict = main_module.__dict__
+    globals_dict.update({
         "__name__": "__main__",
         "__file__": logical_entry,
-        "__package__": None,
+        "__package__": _entry_package(logical_entry, workspace_root),
         "__cached__": None,
         "__builtins__": __builtins__,
-    }
+    })
     try:
-        source = bytes(source_input)
+        source = _decode_source(source_input)
         source_input = None
+        stdin = _stdin_snapshot(stdin_input)
+        stdin_input = None
         host_capability_snapshot = bytes(host_capability_snapshot_input)
         host_capability_snapshot_input = None
         if workspace_root is not None:
@@ -215,9 +315,6 @@ def _run_source(
             entry_file = os.path.realpath(os.path.join(workspace_root, *logical_entry.split("/")))
             if os.path.commonpath((workspace_root, entry_file)) != workspace_root or not os.path.isfile(entry_file):
                 raise ValueError("Python project entry point is unavailable")
-            previous_cwd = os.getcwd()
-            previous_sys_path = list(sys.path)
-            previous_modules = set(sys.modules)
             entry_directory = os.path.dirname(entry_file)
             project_paths = [entry_directory]
             if entry_directory != workspace_root:
@@ -236,8 +333,9 @@ def _run_source(
             sys.path[:] = [*project_paths, *retained_sys_path]
         capability_token = _install_execution_context(host_capability_snapshot, workspace_root)
         host_capability_snapshot = None
-        sys.stdout, sys.stderr = stdout, stderr
+        sys.stdin, sys.stdout, sys.stderr = stdin, stdout, stderr
         sys.argv = [logical_entry, *list(arguments)]
+        sys.modules["__main__"] = main_module
         code = compile(source, logical_entry, "exec", dont_inherit=True)
         try:
             exec(code, globals_dict, globals_dict)
@@ -273,19 +371,26 @@ def _run_source(
     finally:
         if capability_token is not None:
             _reset_execution_context(capability_token)
-        sys.stdout, sys.stderr, sys.argv = previous_stdout, previous_stderr, previous_argv
-        if previous_sys_path is not None:
-            sys.path[:] = previous_sys_path
-            for cache_path in tuple(sys.path_importer_cache):
-                if _is_within_workspace(os.fspath(cache_path), workspace_root):
-                    sys.path_importer_cache.pop(cache_path, None)
-        if previous_modules is not None:
-            for module_name in tuple(set(sys.modules) - previous_modules):
-                module_file = getattr(sys.modules.get(module_name), "__file__", None)
-                if isinstance(module_file, str) and _project_relative(module_file, workspace_root) is not None:
-                    sys.modules.pop(module_name, None)
-        if previous_cwd is not None:
-            os.chdir(previous_cwd)
+        sys.stdin, sys.stdout, sys.stderr, sys.argv = (
+            previous_stdin,
+            previous_stdout,
+            previous_stderr,
+            previous_argv,
+        )
+        sys.path = previous_sys_path_object
+        previous_sys_path_object[:] = previous_sys_path
+        _restore_importer_cache(
+            previous_importer_cache_object,
+            previous_importer_cache,
+            workspace_root,
+        )
+        _restore_modules(previous_modules_object, previous_modules, workspace_root)
+        os.chdir(previous_cwd)
+        if stdin is not None:
+            try:
+                stdin.close()
+            except (OSError, ValueError):
+                pass
         linecache.clearcache()
         globals_dict.clear()
 
@@ -298,6 +403,7 @@ def run_source(
     maximum_output_chunk_bytes: int,
     maximum_output_chunks: int,
     host_capability_snapshot_input: Any = b"",
+    stdin_input: Any = b"",
 ) -> dict[str, Any]:
     return _run_source(
         source_input,
@@ -308,6 +414,7 @@ def run_source(
         maximum_output_chunks,
         None,
         host_capability_snapshot_input,
+        stdin_input,
     )
 
 
@@ -320,6 +427,7 @@ def run_project(
     maximum_output_chunk_bytes: int,
     maximum_output_chunks: int,
     host_capability_snapshot_input: Any = b"",
+    stdin_input: Any = b"",
 ) -> dict[str, Any]:
     return _run_source(
         source_input,
@@ -330,6 +438,7 @@ def run_project(
         maximum_output_chunks,
         workspace_root,
         host_capability_snapshot_input,
+        stdin_input,
     )
 
 

@@ -5,6 +5,24 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "اعتماد",
   "$data": {
+    "v0.2.0-alpha.1": {
+      "released_date": "2026/08/13",
+      "hint": [
+        "إصدار alpha لمصادر U1 بعد 0.1؛ لا يتوفر تفاعل stdin مباشر وما زال قبول E3 على الجهاز قيد الانتظار"
+      ],
+      "feature": [
+        "إضافة snapshot محدود ومقدم مسبقا لـ stdin بحجم أقصى 1 MiB لتوفير input وEOF حتميين عبر `input()` و`sys.stdin`",
+        "إكمال دلالات project import لوحدات workspace ووحدات sibling/root لنقطة دخول متداخلة وعمليات package-relative import"
+      ],
+      "fix": [
+        "فك source بترميز strict UTF-8 قبل التنفيذ لمنع encoding cookie بترميز آخر من تجاوز العقد"
+      ],
+      "improvement": [
+        "استخدام `__main__` مستقل لكل تنفيذ واستعادة حالات stdin/stdout/stderr وargv وcwd و`sys.path` وmodule وimporter cache",
+        "تطبيق lease مدته 5 ثوان على session مفتوحة لم تبدأ ثم تحرير inputs وdescriptors وموضع session الوحيد",
+        "فرض الحد الأدنى Host versionCode 5275 عند حد Binder الخاص بـ Provider بدلا من الاعتماد فقط على discovery من Host"
+      ]
+    },
     "v0.1.0": {
       "released_date": "2026/08/12",
       "hint": [

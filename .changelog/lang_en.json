@@ -5,6 +5,24 @@
   "changelog_label_improvement": "Improvement",
   "changelog_label_dependency": "Dependency",
   "$data": {
+    "v0.2.0-alpha.1": {
+      "released_date": "2026/08/13",
+      "hint": [
+        "Post-0.1 U1 source alpha; live stdin interaction is unavailable and E3 device acceptance remains pending"
+      ],
+      "feature": [
+        "Add a finite pre-supplied stdin snapshot of at most 1 MiB for deterministic `input()` and `sys.stdin` input and EOF",
+        "Complete project import semantics for workspace modules, nested-entry sibling and root modules, and package-relative imports"
+      ],
+      "fix": [
+        "Decode source as strict UTF-8 before execution so a non-UTF-8 encoding cookie cannot bypass the contract"
+      ],
+      "improvement": [
+        "Use an independent `__main__` per execution and restore stdin/stdout/stderr, argv, cwd, `sys.path`, module, and importer-cache state",
+        "Apply a 5-second lease to an opened session which is never started, then release its inputs, descriptors, and single-session slot",
+        "Enforce minimum Host versionCode 5275 at the Provider Binder boundary instead of relying only on Host-side discovery"
+      ]
+    },
     "v0.1.0": {
       "released_date": "2026/08/12",
       "hint": [

@@ -14,7 +14,14 @@ sys.path.insert(0, str(PYTHON_SOURCE))
 from autojs6_runtime.bootstrap import run_project, run_source  # noqa: E402
 
 
-def run(source: bytes, *, maximum_bytes: int = 4096, maximum_chunk: int = 32, maximum_chunks: int = 128):
+def run(
+    source: bytes,
+    *,
+    stdin: bytes = b"",
+    maximum_bytes: int = 4096,
+    maximum_chunk: int = 32,
+    maximum_chunks: int = 128,
+):
     return run_source(
         source,
         "main.py",
@@ -22,6 +29,8 @@ def run(source: bytes, *, maximum_bytes: int = 4096, maximum_chunk: int = 32, ma
         maximum_bytes,
         maximum_chunk,
         maximum_chunks,
+        b"",
+        stdin,
     )
 
 
@@ -81,12 +90,113 @@ class BootstrapTest(unittest.TestCase):
         self.assertEqual("output_limit", outcome["status"])
         self.assertEqual(3, len(outcome["output"]))
 
-    def test_stdio_and_argv_are_restored(self) -> None:
-        stdout, stderr, argv = sys.stdout, sys.stderr, sys.argv
-        run(b"print(__name__, __file__, *sys.argv)\n")
+    def test_input_prompt_reads_one_utf8_line(self) -> None:
+        outcome = run(
+            "name = input('名字: ')\nprint(f'你好, {name}!')\n".encode("utf-8"),
+            stdin="世界\n".encode("utf-8"),
+        )
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual("名字: 你好, 世界!\n".encode("utf-8"), b"".join(chunk for _, chunk in outcome["output"]))
+
+    def test_stdin_text_reads_multiple_lines_with_universal_newlines(self) -> None:
+        outcome = run(
+            b"import sys\nprint(repr(sys.stdin.readline()), repr(sys.stdin.readline()), repr(sys.stdin.read()))\n",
+            stdin="甲\r\n乙\r尾".encode("utf-8"),
+        )
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(
+            "'甲\\n' '乙\\n' '尾'\n".encode("utf-8"),
+            b"".join(chunk for _, chunk in outcome["output"]),
+        )
+
+    def test_stdin_readlines_and_final_line_without_newline(self) -> None:
+        outcome = run(
+            b"import sys\nprint([line.rstrip('\\n') for line in sys.stdin.readlines()])\n",
+            stdin="first\nsecond".encode("utf-8"),
+        )
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(
+            b"['first', 'second']\n",
+            b"".join(chunk for _, chunk in outcome["output"]),
+        )
+
+    def test_missing_stdin_is_deterministic_eof(self) -> None:
+        outcome = run(b"input('prompt>')\n")
+        self.assertEqual("failed", outcome["status"])
+        self.assertEqual("EOFError", outcome["exception_type"])
+        self.assertEqual(b"prompt>", b"".join(chunk for _, chunk in outcome["output"]))
+
+    def test_stdin_buffer_exposes_exact_snapshot_bytes(self) -> None:
+        outcome = run(
+            b"import sys\nprint(sys.stdin.buffer.read())\n",
+            stdin=b"raw\x00\xff\r\n",
+        )
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(b"b'raw\\x00\\xff\\r\\n'\n", b"".join(chunk for _, chunk in outcome["output"]))
+
+    def test_invalid_utf8_stdin_fails_on_text_decode(self) -> None:
+        outcome = run(b"import sys\nsys.stdin.read()\n", stdin=b"valid\xff")
+        self.assertEqual("failed", outcome["status"])
+        self.assertEqual("UnicodeDecodeError", outcome["exception_type"])
+
+    def test_source_requires_strict_utf8_even_with_encoding_cookie(self) -> None:
+        outcome = run(b"# coding: latin-1\nprint('caf\xe9')\n")
+        self.assertEqual("failed", outcome["status"])
+        self.assertEqual("UnicodeDecodeError", outcome["exception_type"])
+
+        conflicting_cookie = run(b"# coding: latin-1\nprint('ascii')\n")
+        self.assertEqual("failed", conflicting_cookie["status"])
+        self.assertEqual("ValueError", conflicting_cookie["exception_type"])
+
+        nul_source = run(b"print('before')\x00\n")
+        self.assertEqual("failed", nul_source["status"])
+        self.assertEqual("ValueError", nul_source["exception_type"])
+
+    def test_stdlib_import_and_import_main_see_the_execution_module(self) -> None:
+        outcome = run(
+            b"import json\n"
+            b"VALUE = 'execution-main'\n"
+            b"import __main__\n"
+            b"print(json.dumps({'value': __main__.VALUE}, sort_keys=True))\n"
+        )
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(b'{"value": "execution-main"}\n', b"".join(chunk for _, chunk in outcome["output"]))
+
+    def test_representative_stdlib_import_matrix(self) -> None:
+        outcome = run(
+            b"import asyncio, collections, datetime, decimal, fractions, importlib, json, math, pathlib, re\n"
+            b"print('stdlib-ok', math.isfinite(decimal.Decimal('1.0')))\n"
+        )
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(b"stdlib-ok True\n", b"".join(chunk for _, chunk in outcome["output"]))
+
+    def test_missing_third_party_package_is_standard_module_not_found(self) -> None:
+        outcome = run(b"import autojs6_u1_package_which_does_not_exist\n")
+        self.assertEqual("failed", outcome["status"])
+        self.assertEqual("ModuleNotFoundError", outcome["exception_type"])
+
+    def test_stdio_argv_and_import_state_are_restored(self) -> None:
+        stdin, stdout, stderr, argv = sys.stdin, sys.stdout, sys.stderr, sys.argv
+        path_object, path = sys.path, list(sys.path)
+        modules_object, modules = sys.modules, dict(sys.modules)
+        importer_cache_object, importer_cache = sys.path_importer_cache, dict(sys.path_importer_cache)
+        run(
+            b"import sys\n"
+            b"sys.path = ['poison']\n"
+            b"sys.modules = {'poison': object()}\n"
+            b"sys.path_importer_cache = {'poison': None}\n",
+            stdin=b"unused",
+        )
+        self.assertIs(stdin, sys.stdin)
         self.assertIs(stdout, sys.stdout)
         self.assertIs(stderr, sys.stderr)
         self.assertIs(argv, sys.argv)
+        self.assertIs(path_object, sys.path)
+        self.assertEqual(path, sys.path)
+        self.assertIs(modules_object, sys.modules)
+        self.assertEqual(modules, sys.modules)
+        self.assertIs(importer_cache_object, sys.path_importer_cache)
+        self.assertEqual(importer_cache, sys.path_importer_cache)
 
     def test_project_uses_private_root_for_imports_and_relative_files_then_restores_process_state(self) -> None:
         previous_cwd, previous_path = os.getcwd(), list(sys.path)
@@ -142,6 +252,57 @@ class BootstrapTest(unittest.TestCase):
 
         self.assertEqual("completed", outcome["status"])
         self.assertEqual(b"sibling root\n", b"".join(chunk for _, chunk in outcome["output"]))
+
+    def test_project_package_entry_supports_relative_import_and_cleans_module_cache(self) -> None:
+        previous_modules = dict(sys.modules)
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            source = b"from .helper import VALUE\nprint(VALUE, __package__)\n"
+            (root / "pkg").mkdir()
+            (root / "pkg" / "__init__.py").write_text("", encoding="utf-8")
+            (root / "pkg" / "main.py").write_bytes(source)
+            (root / "pkg" / "helper.py").write_text("VALUE = 'relative'\n", encoding="utf-8")
+
+            outcome = run_project(source, "pkg/main.py", str(root), [], 4096, 64, 128)
+
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(b"relative pkg\n", b"".join(chunk for _, chunk in outcome["output"]))
+        self.assertEqual(previous_modules, sys.modules)
+
+    def test_sequential_projects_do_not_reuse_same_named_module(self) -> None:
+        outputs: list[bytes] = []
+        for value in ("first", "second"):
+            with tempfile.TemporaryDirectory() as directory:
+                root = pathlib.Path(directory)
+                source = b"import shared_name\nprint(shared_name.VALUE)\n"
+                (root / "main.py").write_bytes(source)
+                (root / "shared_name.py").write_text(
+                    f"VALUE = {value!r}\n",
+                    encoding="utf-8",
+                )
+                outcome = run_project(source, "main.py", str(root), [], 4096, 64, 128)
+                self.assertEqual("completed", outcome["status"])
+                outputs.append(b"".join(chunk for _, chunk in outcome["output"]))
+        self.assertEqual([b"first\n", b"second\n"], outputs)
+
+    def test_project_reexport_and_circular_import(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            source = b"from pkg import exported\nprint(exported())\n"
+            (root / "main.py").write_bytes(source)
+            (root / "pkg").mkdir()
+            (root / "pkg" / "__init__.py").write_text(
+                "from .left import exported\n",
+                encoding="utf-8",
+            )
+            (root / "pkg" / "left.py").write_text(
+                "from . import right\ndef exported(): return 'cycle-' + right.VALUE\n",
+                encoding="utf-8",
+            )
+            (root / "pkg" / "right.py").write_text("VALUE = 'ok'\n", encoding="utf-8")
+            outcome = run_project(source, "main.py", str(root), [], 4096, 64, 128)
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(b"cycle-ok\n", b"".join(chunk for _, chunk in outcome["output"]))
 
 
 if __name__ == "__main__":

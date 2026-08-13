@@ -46,6 +46,7 @@ Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte t
 ******
 
 - Exécuter un instantané de source Python UTF-8 en tant que `__main__`.
+- Accepter pour `input()` un instantané stdin fini et préfourni de 1 MiB au maximum; aucune interaction prompt/réponse en temps réel n'est fournie.
 - Conserver l'ordre de stdout et stderr puis livrer des chunks bornés sous crédits.
 - Signaler `SystemExit`, les erreurs de syntaxe et les exceptions avec une traceback structurée bornée.
 - Autoriser une session active par processus sans file d'attente côté fournisseur.
@@ -87,7 +88,7 @@ engine: python
 protocol: 1.0-1.1
 ```
 
-Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facultative et le snapshot en lecture seule des capacités hôte du protocole 1.1; stdin snapshot reste désactivé. Aucun Context, Binder, objet d'exécution hôte ou callback sink n'est injecté.
+Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facultative, un snapshot stdin fini et préfourni de 1 MiB au maximum, et le snapshot en lecture seule des capacités hôte du protocole 1.1. Stdin n'est pas un canal interactif en temps réel; aucun Context, Binder, objet d'exécution hôte ou callback sink n'est injecté.
 
 ******
 
@@ -98,8 +99,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.1.0
-release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=11 commit with the exact Host 6.8.0/5275 lock
+release target: 0.2.0-alpha.1
+release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,7 +134,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 ******
 
-- Stdin snapshot, l'écriture dans le workspace, pip en ligne et les téléchargements de wheel sont indisponibles.
+- Stdin interactif en temps réel est indisponible; seul un snapshot fini et préfourni de 1 MiB au maximum est pris en charge. L'écriture dans le workspace, pip en ligne et les téléchargements de wheel restent indisponibles.
 - Aucun script UI, débogueur, REPL ou accès arbitraire aux objets Java de l'hôte.
 - Aucun broker AutoJs6 temps réel; les premières API utilisent seulement le snapshot app/device/execution/project gelé au démarrage et un accès borné en lecture seule au workspace privé du plug-in.
 - Le support Android 32 bits et les wheels natives tierces ne sont pas garantis.
@@ -154,6 +155,18 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 ### Historique des versions
 
 ******
+
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `Note` Alpha source U1 postérieure à 0.1; aucune interaction stdin en direct et acceptation appareil E3 encore en attente
+* `Fonction` Ajout d'un snapshot stdin fini et préfourni de 1 MiB au plus pour une entrée et une EOF déterministes avec `input()` et `sys.stdin`
+* `Fonction` Finalisation des imports projet pour les modules workspace, les modules voisins et racine d'une entrée imbriquée, et les imports relatifs au package
+* `Correction` Décodage de la source en UTF-8 strict avant exécution afin qu'un encoding cookie non UTF-8 ne contourne plus le contrat
+* `Amélioration` Utilisation d'un `__main__` indépendant par exécution et restauration de stdin/stdout/stderr, argv, cwd, `sys.path`, des modules et du cache d'importeurs
+* `Amélioration` Application d'un lease de 5 secondes à une session ouverte mais jamais démarrée, puis libération des entrées, descriptors et de l'emplacement de session unique
+* `Amélioration` Application du Host versionCode minimal 5275 à la frontière Binder du Provider au lieu de dépendre uniquement de la découverte côté Host
 
 # v0.1.0
 
@@ -217,7 +230,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Le runtime verrouille Chaquopy 17.0.0 et CPython 3.13.9 depuis Maven et n'empaquette que la stdlib. Le gate release vérifie métadonnées, bibliothèques natives, pages 16 KB, NOTICE, signer SM003 et les trois APK distribués par rapport à l'identité exacte.
+Le runtime verrouille Chaquopy 17.0.0 et CPython 3.13.9 depuis Maven et n'empaquette que la stdlib. Le gate release vérifie métadonnées, bibliothèques natives, NOTICE, signer SM003 et les trois APK distribués par rapport à l'identité exacte; la compatibilité des pages 16 KB n'a actuellement aucun gate dédié et n'est pas déclarée vérifiée.
 
 ******
 

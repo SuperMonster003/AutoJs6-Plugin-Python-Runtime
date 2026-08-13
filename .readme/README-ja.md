@@ -46,6 +46,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 ******
 
 - 1 つの UTF-8 Python ソースを `__main__` として実行します.
+- `input()` 用に最大 1 MiB の有限な事前供給 stdin snapshot を受け付けます. リアルタイムの prompt/reply 対話は提供しません.
 - stdout と stderr の順序を保ち, 上限付き chunk を credit で送信します.
 - `SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.
 - プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.
@@ -87,7 +88,7 @@ engine: python
 protocol: 1.0-1.1
 ```
 
-独立 SOURCE, 任意の上限付き workspace archive, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. stdin snapshot は無効のままで, Context, Binder, ホストオブジェクト, callback sink は注入しません.
+独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. stdin はリアルタイム対話チャネルではなく, Context, Binder, ホストオブジェクト, callback sink は注入しません.
 
 ******
 
@@ -98,8 +99,8 @@ protocol: 1.0-1.1
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.1.0
-release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=11 commit with the exact Host 6.8.0/5275 lock
+release target: 0.2.0-alpha.1
+release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,7 +134,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-- stdin snapshot, workspace への書き戻し, online pip, wheel ダウンロードは未対応です.
+- リアルタイム対話 stdin は未対応で, 最大 1 MiB の有限な事前供給 snapshot のみ対応します. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
 - UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.
 - リアルタイム AutoJs6 capability broker はありません. 最初の API は実行開始時に凍結した app/device/execution/project snapshot と plugin-private workspace の上限付き読み取り専用アクセスだけを使います.
 - 32 bit Android と任意の native wheel は保証しません.
@@ -154,6 +155,18 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 ### 更新履歴
 
 ******
+
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `注記` 0.1 後の U1 source alpha. live stdin interaction は未提供で, E3 端末受け入れは未実施
+* `追加` 最大 1 MiB の有限な事前提供 stdin snapshot を追加し, `input()` と `sys.stdin` に決定的な入力と EOF を提供
+* `追加` workspace module, nested entry の sibling/root module, package-relative import に対応して project import semantics を完成
+* `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止
+* `改善` 実行ごとに独立した `__main__` を使用し, stdin/stdout/stderr, argv, cwd, `sys.path`, module, importer cache の状態を復元
+* `改善` open 後に start されない session に 5 秒 lease を適用し, 期限後に input, descriptor, 単一 session slot を解放
+* `改善` Host 側 discovery だけに依存せず, Provider の Binder 境界で最低 Host versionCode 5275 を強制
 
 # v0.1.0
 
@@ -217,7 +230,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Maven の Chaquopy 17.0.0 と CPython 3.13.9 を lock し, stdlib のみを package します. release gate は依存 metadata, native library, 16 KB page, NOTICE, SM003 signer, 3 種の配布 APK を exact identity に対して確認します.
+Maven の Chaquopy 17.0.0 と CPython 3.13.9 を lock し, stdlib のみを package します. release gate は依存 metadata, native library, NOTICE, SM003 signer, 3 種の配布 APK を exact identity に対して確認します. 16 KB page 互換性には現在専用 gate がなく, 検証済みとは宣言しません.
 
 ******
 

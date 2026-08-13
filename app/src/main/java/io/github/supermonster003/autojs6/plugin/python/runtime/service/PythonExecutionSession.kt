@@ -12,6 +12,7 @@ import io.github.supermonster003.autojs6.plugin.python.runtime.security.HostCall
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.HostCapabilitySnapshot
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.OwnedParcelFileDescriptors
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.SourceSnapshot
+import io.github.supermonster003.autojs6.plugin.python.runtime.transport.StdinSnapshot
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.WorkspaceSnapshot
 import org.autojs.plugin.python.runtime.api.IPythonExecutionCallback
 import org.autojs.plugin.python.runtime.api.IPythonExecutionSession
@@ -71,6 +72,7 @@ internal class PythonExecutionSession(
     @Volatile private var terminalLeaseFuture: Future<*>? = null
     @Volatile private var encodedStarted: ByteArray? = null
     private val inputs = AtomicReference<ExecutionInputs?>()
+    private val startLease = SessionStartLease(scheduler, START_LEASE_MILLIS, ::startLeaseExpired)
 
     private var outstandingCredits = 0
     private var nextSequence = PythonRuntimeMetadata.FIRST_OUTPUT_SEQUENCE
@@ -99,6 +101,7 @@ internal class PythonExecutionSession(
         }
         synchronized(callbackOrder) {
             if (!state.compareAndSet(State.CREATED, State.STARTED)) return
+            startLease.disarm()
             dispatched.set(true)
             this.encodedStarted = encodedStarted
             if (state.get() != State.STARTED) return
@@ -198,6 +201,10 @@ internal class PythonExecutionSession(
         }
     }
 
+    fun armStartLease(): Boolean = synchronized(callbackOrder) {
+        state.get() == State.CREATED && startLease.arm()
+    }
+
     fun serviceDestroyed() {
         forceClose()
     }
@@ -211,6 +218,7 @@ internal class PythonExecutionSession(
     }
 
     private fun cleanupClosed() {
+        startLease.close()
         deadlineFuture?.cancel(false)
         terminalLeaseFuture?.cancel(false)
         workerFuture?.cancel(true)
@@ -256,16 +264,19 @@ internal class PythonExecutionSession(
             val executionInputs = checkNotNull(inputs.get())
             val source = executionInputs.source.copyBytes()
             val hostCapabilitySnapshot = executionInputs.hostCapabilities?.copyBytes()
+            val stdinSnapshot = executionInputs.stdin?.copyBytes()
             try {
                 runtime.execute(
                     source = source,
                     request = request,
                     workspaceRoot = executionInputs.workspace?.root,
                     hostCapabilitySnapshot = hostCapabilitySnapshot,
+                    stdinSnapshot = stdinSnapshot,
                 )
             } finally {
                 source.fill(0)
                 hostCapabilitySnapshot?.fill(0)
+                stdinSnapshot?.fill(0)
             }
         } catch (_: Exception) {
             if (!isStopped()) {
@@ -310,6 +321,7 @@ internal class PythonExecutionSession(
         var source: SourceSnapshot? = null
         var workspace: WorkspaceSnapshot? = null
         var hostCapabilities: HostCapabilitySnapshot? = null
+        var stdin: StdinSnapshot? = null
         try {
             try {
                 descriptors.consume(request.source) { descriptor ->
@@ -318,6 +330,7 @@ internal class PythonExecutionSession(
                         descriptor = descriptor,
                         maximumLengthBytes = PythonRuntimeMetadata.capabilities.limits.maxSourceBytes,
                         shouldStop = ::isStopped,
+                        requireUtf8Source = true,
                     )
                 }
             } catch (_: Exception) {
@@ -367,6 +380,29 @@ internal class PythonExecutionSession(
             }
             if (isStopped()) return null
 
+            request.stdin?.let { stdinReference ->
+                try {
+                    descriptors.consume(stdinReference) { descriptor ->
+                        stdin = StdinSnapshot.materialize(
+                            reference = stdinReference,
+                            descriptor = descriptor,
+                            maximumLengthBytes = PythonRuntimeMetadata.capabilities.limits.maxStdinBytes,
+                            shouldStop = ::isStopped,
+                        )
+                    }
+                } catch (_: Exception) {
+                    if (!isStopped()) {
+                        finishFailure(
+                            PythonErrorCode.STDIN_REJECTED,
+                            PythonFailurePhase.INPUT_VALIDATION,
+                            "Python stdin snapshot was rejected",
+                        )
+                    }
+                    return null
+                }
+            }
+            if (isStopped()) return null
+
             request.hostCapabilitySnapshot?.let { capabilityReference ->
                 try {
                     descriptors.consume(capabilityReference) { descriptor ->
@@ -394,14 +430,16 @@ internal class PythonExecutionSession(
             }
             descriptors.close()
             if (isStopped()) return null
-            return ExecutionInputs(checkNotNull(source), workspace, hostCapabilities).also {
+            return ExecutionInputs(checkNotNull(source), workspace, stdin, hostCapabilities).also {
                 source = null
                 workspace = null
+                stdin = null
                 hostCapabilities = null
             }
         } finally {
             descriptors.close()
             hostCapabilities?.close()
+            stdin?.close()
             workspace?.close()
             source?.close()
         }
@@ -560,6 +598,13 @@ internal class PythonExecutionSession(
         )
     }
 
+    private fun startLeaseExpired() {
+        synchronized(callbackOrder) {
+            if (!state.compareAndSet(State.CREATED, State.CLOSED)) return
+            cleanupClosed()
+        }
+    }
+
     private fun callbackDied() {
         synchronized(callbackOrder) {
             val previous = state.getAndSet(State.CLOSED)
@@ -643,15 +688,18 @@ internal class PythonExecutionSession(
 
     private companion object {
         const val TERMINAL_CLOSE_LEASE_MILLIS = 30_000L
+        const val START_LEASE_MILLIS = 5_000L
     }
 
     private class ExecutionInputs(
         val source: SourceSnapshot,
         val workspace: WorkspaceSnapshot?,
+        val stdin: StdinSnapshot?,
         val hostCapabilities: HostCapabilitySnapshot?,
     ) : AutoCloseable {
         override fun close() {
             runCatching { hostCapabilities?.close() }
+            runCatching { stdin?.close() }
             runCatching { workspace?.close() }
             runCatching { source.close() }
         }

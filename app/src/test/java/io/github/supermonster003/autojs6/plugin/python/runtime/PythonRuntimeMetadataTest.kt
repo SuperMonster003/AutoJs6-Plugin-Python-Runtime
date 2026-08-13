@@ -49,7 +49,7 @@ class PythonRuntimeMetadataTest {
         assertEquals("3.13.9", capabilities.pythonVersion)
         assertEquals(listOf("arm64-v8a", "x86_64"), capabilities.supportedAbis)
         assertTrue(capabilities.supportsWorkspaceArchive)
-        assertFalse(capabilities.supportsStdinSnapshot)
+        assertTrue(capabilities.supportsStdinSnapshot)
         assertTrue(capabilities.supportsStructuredTraceback)
         assertFalse(capabilities.supportsCooperativeCancellation)
         assertTrue(capabilities.supportsHostCapabilitySnapshot)
@@ -60,7 +60,7 @@ class PythonRuntimeMetadataTest {
                 maxWorkspaceArchiveBytes = 16L * 1024L * 1024L,
                 maxWorkspaceEntries = 1024,
                 maxWorkspaceUncompressedBytes = 32L * 1024L * 1024L,
-                maxStdinBytes = 0L,
+                maxStdinBytes = 1L * 1024L * 1024L,
                 maxOutputBytes = 4L * 1024L * 1024L,
                 maxOutputChunkBytes = 16 * 1024,
                 maxOutputChunks = 4096L,

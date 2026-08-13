@@ -30,15 +30,29 @@ internal class HostCallerVerifier(context: Context) {
         val packagesForUid = packageManager.getPackagesForUid(callingUid)?.toSet().orEmpty()
         val providerSigners = currentSignerDigests(providerPackageName)
         val hostSigners = currentSignerDigests(hostPackage)
+        val hostVersionCode = installedVersionCode(hostPackage)
         if (
             installedUid == null ||
             callingUid != installedUid ||
             hostPackage !in packagesForUid ||
+            !HostVersionPolicy.isAllowed(hostVersionCode, PythonRuntimeMetadata.runtimeInfo.minHostVersionCode) ||
             providerSigners.isEmpty() ||
             providerSigners != hostSigners
         ) {
             throw SecurityException("Caller is not the installed same-signer AutoJs6 host")
         }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun installedVersionCode(packageName: String): Long? = try {
+        val packageInfo = if (Build.VERSION.SDK_INT >= 33) {
+            packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0L))
+        } else {
+            packageManager.getPackageInfo(packageName, 0)
+        }
+        if (Build.VERSION.SDK_INT >= 28) packageInfo.longVersionCode else packageInfo.versionCode.toLong()
+    } catch (_: PackageManager.NameNotFoundException) {
+        null
     }
 
     @Suppress("DEPRECATION")
@@ -68,4 +82,12 @@ internal class HostCallerVerifier(context: Context) {
                 .joinToString(separator = "") { byte -> "%02x".format(byte.toInt() and 0xff) }
         }
     }
+}
+
+internal object HostVersionPolicy {
+    fun isAllowed(installedVersionCode: Long?, minimumVersionCode: Long?): Boolean =
+        installedVersionCode != null &&
+            minimumVersionCode != null &&
+            minimumVersionCode > 0L &&
+            installedVersionCode >= minimumVersionCode
 }

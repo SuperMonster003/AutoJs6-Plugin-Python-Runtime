@@ -46,6 +46,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 ******
 
 - 将一个 UTF-8 Python 源码快照作为 `__main__` 执行.
+- 为 `input()` 接收最大 1 MiB 的有限预置 stdin snapshot; 不提供实时交互式 prompt/reply.
 - 按原始顺序收集 stdout 和 stderr, 再通过有界 chunk 与 credit 传送.
 - 返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.
 - 同一运行时进程只允许一个活动会话, provider 侧不排队.
@@ -87,7 +88,7 @@ engine: python
 protocol: 1.0-1.1
 ```
 
-插件接收独立 SOURCE, 可选的有界 workspace archive 以及协议 1.1 的只读宿主能力快照; stdin snapshot 仍关闭. 插件不会向脚本注入 Context, Binder, 宿主运行时对象或 callback sink.
+插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. stdin 不是实时交互通道; 插件不会向脚本注入 Context, Binder, 宿主运行时对象或 callback sink.
 
 ******
 
@@ -98,8 +99,8 @@ protocol: 1.0-1.1
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.1.0
-release state: stable 0.1.0 source identity frozen by the clean VERSION_BUILD=11 commit with the exact Host 6.8.0/5275 lock
+release target: 0.2.0-alpha.1
+release state: post-0.1 U1 alpha source candidate; not published, E3 device acceptance pending, and prior 0.1.0 artifacts do not cover the current source
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,7 +134,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 ******
 
-- 不支持 stdin snapshot, workspace 写回, 在线 pip 或运行时下载 wheel.
+- 不提供实时交互式 stdin; 仅支持最大 1 MiB 的有限预置 snapshot. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.
 - 不提供 UI 脚本, 调试器, REPL 或任意宿主 Java 对象访问.
 - 不提供实时 AutoJs6 能力 broker; 首批 API 仅使用执行启动时冻结的 app/device/execution/project 快照和插件私有 workspace 的有界只读文件接口.
 - 不声明 32 位 Android 支持, 也不保证任意第三方 native wheel 可用.
@@ -154,6 +155,18 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 ### 版本历史
 
 ******
+
+# v0.2.0-alpha.1
+
+###### 2026/08/13
+
+* `提示` 0.1 后的 U1 源码 alpha; 不提供实时 stdin 交互, E3 设备验收尚待执行
+* `新增` 新增最大 1 MiB 的有限预置 stdin snapshot, 为 `input()` 与 `sys.stdin` 提供确定性输入和 EOF
+* `新增` 完善项目导入语义, 支持 workspace 模块, 嵌套入口同级与根模块以及 package-relative import
+* `修复` 执行前按 strict UTF-8 解码源码, 非 UTF-8 encoding cookie 不再绕过契约
+* `优化` 每次执行使用独立 `__main__`, 并恢复 stdin/stdout/stderr, argv, cwd, `sys.path`, module 与 importer cache 状态
+* `优化` 为已打开但未 start 的 session 增加 5 秒 lease, 到期释放输入, descriptor 与单会话占位
+* `优化` Provider 在 Binder 入站强制最低 Host versionCode 5275, 不再只依赖 Host 侧发现检查
 
 # v0.1.0
 
@@ -217,7 +230,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-运行时通过 Maven 锁定 Chaquopy 17.0.0 与 CPython 3.13.9, 仅打包 stdlib. Release gate 按精确身份核对依赖校验元数据, native 库, 16 KB page, NOTICE, SM003 signer 和三种发行 APK.
+运行时通过 Maven 锁定 Chaquopy 17.0.0 与 CPython 3.13.9, 仅打包 stdlib. Release gate 按精确身份核对依赖校验元数据, native 库, NOTICE, SM003 signer 和三种发行 APK; 16 KB page 兼容性当前没有专用 gate, 不作为已核验声明.
 
 ******
 

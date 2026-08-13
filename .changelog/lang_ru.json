@@ -5,6 +5,24 @@
   "changelog_label_improvement": "Улучшено",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v0.2.0-alpha.1": {
+      "released_date": "2026/08/13",
+      "hint": [
+        "Alpha исходников U1 после 0.1; интерактивный stdin в реальном времени недоступен, приемка E3 на устройстве еще не выполнена"
+      ],
+      "feature": [
+        "Добавлен конечный заранее предоставленный snapshot stdin до 1 MiB для детерминированного ввода и EOF через `input()` и `sys.stdin`",
+        "Завершена семантика project import для модулей workspace, соседних и корневых модулей вложенной точки входа и package-relative imports"
+      ],
+      "fix": [
+        "Исходник декодируется как strict UTF-8 до выполнения, поэтому encoding cookie с иной кодировкой больше не обходит контракт"
+      ],
+      "improvement": [
+        "Каждый запуск получает отдельный `__main__` с восстановлением stdin/stdout/stderr, argv, cwd, `sys.path`, состояния modules и importer cache",
+        "Для открытого, но не запущенного session действует lease 5 секунд, после чего освобождаются inputs, descriptors и единственный session slot",
+        "Минимальный Host versionCode 5275 проверяется на Binder-границе Provider, а не только при discovery со стороны Host"
+      ]
+    },
     "v0.1.0": {
       "released_date": "2026/08/12",
       "hint": [
