@@ -70,26 +70,42 @@
 - [x] [H] **控制台实时输出实现**: `PythonRuntimeClient.acceptOutput` 收到 chunk 后即时写入
   GlobalConsole (stdout→INFO, stderr→ERROR), stdout/stderr 各自使用增量 UTF-8 解码器保留
   跨 chunk 码点, 终态只排空截断尾字节, 不再重复输出。宿主提交: `b1b6b43d0`。
-- [ ] [H+P] **控制台实时输出真机验收**: 运行
-  `while True: print(i, flush=True); time.sleep(1)` 能逐秒看到输出。
+- [x] [H+P] **控制台实时输出真机验收**: 90 s 内每秒 `print(..., flush=True)` 一次,
+  第 3 个 tick 出现时执行尚未终止, `tick:0` 到 `tick:89` 与结尾标记均到达控制台。
 - [x] [P] **放宽执行超时**: `maxTimeoutMillis` 60 s → 30 min (宿主当前请求 5 min,
   双向取小后立即生效为 5 min)。
-- [ ] [H+P] **长时脚本真机验收**: 90 s 的脚本可以跑完。
-- [ ] [H] **超时可配置**: 执行超时纳入宿主设置或 project.json (`timeout` 字段),
-  上限对齐插件新值。
-- [ ] [H+P] **停止按钮真机冒烟**: 宿主停止运行中的 Python 脚本 → cancel → 插件进程重启,
-  紧接着再次运行同一脚本成功。出现问题修问题。
+- [x] [H+P] **长时脚本真机验收**: 配置 120 s 超时的 90 s 脚本完整运行并成功终止。
+- [x] [H] **超时可配置**: Python 项目 `project.json` 支持可选正整数 `timeout` 字段
+  (毫秒); 默认 5 min, 宿主上限 30 min, 并继续与插件能力上限取小。宿主提交:
+  `2f0f766e1`。
+- [x] [H+P] **停止按钮真机冒烟**: 宿主停止运行中的 Python 脚本 → cancel → 插件进程重启,
+  紧接着再次运行成功; 冒烟测试同时确认两次执行的插件 PID 不同。
 - [x] [H+P] **放宽输出上限**: 总输出 4 MiB → 16 MiB, chunk 数 4096 → 16384;
   插件 metadata 与宿主默认策略已对齐。
-- [ ] [H+P] **长日志真机验收**: 超过旧 4 MiB 阈值的 stdout/stderr 可持续输出并正常终止。
-- [ ] [H] **后台/定时任务冒烟**: 定时任务运行 .py 正常; 后台调用 `input()` 得到明确报错
-  (已实现, 确认文案可理解)。
+- [x] [H+P] **长日志真机验收**: 4.25 MiB stdout 完整计数, 尾标记到达控制台并正常终止。
+- [x] [H] **后台输入冒烟**: 无前台交互授权时调用 `input()` 在约 1 s 内以带 traceback 的
+  `EOFError` 结束, 不弹框、不挂起。
+- [ ] [H] **定时任务入口冒烟**: 由宿主定时任务调度器实际触发一个 .py 项目并正常终止。
 - [x] [P] **插件 manifest 增加 `INTERNET` 权限**: 解锁 Python 标准库
   `urllib.request`/`socket`/`http.client` 的直接联网能力, 零协议改动,
   立即满足 "脚本内发 HTTP 请求" 这一高频需求; 源 manifest 与合并/打包 manifest
   均已确认只声明一次该权限。
-- [ ] [P] **标准库联网真机验收**: `urllib.request.urlopen('https://...')` 在真机可用。
+- [x] [P] **标准库联网真机验收**: `urllib.request.urlopen('https://...')` 经 CPython SSL
+  栈读取 HTTPS 200 响应成功。
 - [ ] [H+P] 以上完成后发布 **0.2.0** (双 ABI + universal APK, 真机冒烟清单通过即发)。
+
+### 2026-08-23 M1 真机与模拟器冒烟记录
+
+- 物理设备: Sony XQ-AT72, API 31 / arm64-v8a / 4 KiB page; 补充模拟器:
+  API 37 / x86_64 / 16 KiB page。两者均使用 canonical AutoJs6 6.8.0
+  (`versionCode=5276`) + Python Runtime 0.2.0-alpha.1 (`versionCode=14`), 同一 SM003 签名。
+- 公共路径: `project.json` 严格准入 → `ScriptEngineService` → `PythonPluginScriptEngine` →
+  实际插件 Binder/PFD 会话 → `GlobalConsole`, 没有直接调用插件内部测试接口。
+- 两套环境均 PASS: 逐秒实时输出 + 90 s 长任务、4.25 MiB stdout、标准库 HTTPS、
+  停止后 PID 更新并立即重跑、无前台授权的 `input()` 明确 `EOFError`、
+  协议 1.4 结构化 JSON 与二进制产物回归。
+- 冒烟过程中修复了一个真实异常: 成功脚本未调用 `autojs6.result.set()` 时,
+  Python `None` 曾被 Chaquopy Map 解码误判为字段缺失; 插件提交 `cf516c7` 已修复。
 
 ******
 

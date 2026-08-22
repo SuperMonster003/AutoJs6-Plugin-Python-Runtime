@@ -1,7 +1,10 @@
 # Python execution semantics contract
 
 Status: cumulative U1-R0 through U1-R2 contract for the post-`0.1.0`
-usability track. Current R2 behavior is covered through E2 only.
+usability track. Historical R2 evidence remains covered through E2; the M1
+public Host path additionally passed an API 31 / arm64-v8a / 4 KiB-page
+physical-device smoke and an API 37 / x86_64 / 16 KiB-page emulator smoke on
+2026-08-23. Those smokes are not a release or device-matrix claim.
 
 This document distinguishes three facts which must not be collapsed:
 
@@ -43,6 +46,20 @@ milestones follow the lightweight validation convention in [`ROADMAP.md`](../../
 The Host and Provider must validate the exact SOURCE length and SHA-256. U1-R1
 adds strict text admission; it must not silently reinterpret Latin-1 or another
 encoding merely because a PEP 263 cookie is present.
+
+## Host project timeout admission
+
+The current Host accepts an optional `timeout` property in an admitted Python
+project's `project.json`. Its value is an exact positive JSON integer in
+milliseconds. Strings, booleans, null, zero, negative values, decimals and
+scientific notation are invalid project configuration. The Host default is
+5 minutes and the largest configured value is 30 minutes. At dispatch, the
+effective timeout is the smaller of the configured/default Host value and the
+Provider's advertised maximum; the current Plugin maximum is also 30 minutes.
+
+This property changes only the bounded execution deadline. It does not enable
+background UI, interactive stdin, replay, concurrency or an unbounded
+long-task mode. Standalone file launches continue to use the Host default.
 
 ## Execution globals and process state
 
@@ -267,6 +284,13 @@ sets at most one strict JSON-compatible value, serializes it deterministically,
 and enforces the negotiated UTF-8 byte bound before the terminal document is
 created. stdout that happens to contain JSON remains stdout; neither Plugin nor
 Host may parse it to manufacture a result.
+
+Calling `autojs6.result.set` is optional. A script which completes without
+calling it is a successful execution whose Host result has
+`structuredJson == null`; output artifacts remain independently optional. The
+Plugin's Chaquopy decoder therefore distinguishes a missing bootstrap field
+(an internal contract failure) from a present field whose Python value is
+`None`.
 
 `autojs6.artifacts.path` registers one normalized relative logical path and
 returns a writable location below the Plugin-private execution result root. The
