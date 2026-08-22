@@ -10,7 +10,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PYTHON_SOURCE = ROOT / "app" / "src" / "main" / "python"
 FIXTURE = ROOT / "tools" / "tests" / "fixtures" / "u1-r0-python-semantics-cases.json"
-ROADMAP = ROOT / "ROADMAP.md"
+ROADMAP = ROOT / "docs" / "legacy" / "ROADMAP-u1-en.md"
 CONTRACT = ROOT / "docs" / "python" / "PYTHON_SEMANTICS_CONTRACT.md"
 VERIFIER = ROOT / "tools" / "verify-u1-r0-python-usability.ps1"
 

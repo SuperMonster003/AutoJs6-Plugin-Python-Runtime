@@ -8,7 +8,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $fixtureRelative = 'tools/tests/fixtures/u1-r0-python-semantics-cases.json'
 $contractRelative = 'docs/python/PYTHON_SEMANTICS_CONTRACT.md'
-$roadmapRelative = 'ROADMAP.md'
+$roadmapRelative = 'docs/legacy/ROADMAP-u1-en.md'
 $reportRelative = 'build/reports/python/u1/r0-python-usability-gate.json'
 $fixturePath = Join-Path $repoRoot $fixtureRelative
 $contractPath = Join-Path $repoRoot $contractRelative

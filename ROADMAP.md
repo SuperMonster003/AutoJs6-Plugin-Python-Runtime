@@ -1,500 +1,238 @@
-# Python Runtime Plugin Roadmap
+# Python Runtime 插件 Roadmap
 
-Status: the immutable Plugin `0.1.0` release track is closed. Current work is
-the post-`0.1.0` Python Usability Track U1, organized as U1-R0 through U1-R6.
-U1 prioritizes ordinary Python semantics, `input()` and predictable `import`
-behavior before broader AutoJs6 capabilities.
+> 初衷: 让 AutoJs6 用户 "装上插件就能流畅运行 Python 脚本", 并逐步获得与 JS 脚本对等的
+> AutoJs6 自动化 API 能力。本 Roadmap 以用户可感知的能力为主线, 逐项可勾选、可落地。
+>
+> 开发哲学: **先让脚本跑起来, 快速迭代, 出现异常就修复异常。**
+> 不追求一次性完美方案, 不用无休止的测试与安全边界堆砌代码, 不把验证流程当作产品本体。
+> 协议既有的进程隔离、fail-closed、有界传输等骨架保持不变 (它们已被真机验证且不妨碍迭代),
+> 但**新能力不再以证据链流程为前置门槛**。
+>
+> 仓库标注: `[P]` = 本插件仓库; `[H]` = 宿主 AutoJs6 仓库 (D:\idea-projects\AutoJs6);
+> `[H+P]` = 双仓协同 (通常涉及协议 AAR 更新)。
+>
+> 历史 U1 路线图 (英文, 证据等级驱动) 已归档至
+> [docs/legacy/ROADMAP-u1-en.md](docs/legacy/ROADMAP-u1-en.md), 其既有结论与真机证据继续有效,
+> 但不再约束后续开发节奏。
 
-This roadmap is an executable gate specification. A checked source/static or
-portable-Python item never substitutes for Android compilation, Binder/PFD,
-APK/native, device-matrix or production-release evidence.
+******
 
-## Evidence levels
+## 基线: 当前已具备的能力 (截至 0.2.0-alpha.1, 均有代码与本地构建门禁支撑)
 
-| Level | Exact claim | Explicit non-claim |
+### 运行时与执行
+
+- [x] 独立插件 APK 与专用 `:python_runtime` 进程运行 CPython 3.13.9 (Chaquopy 17.0.0),
+  支持 arm64-v8a 与 x86_64, 宿主进程零 Python 加载。
+- [x] 单文件脚本执行 (file 模式): 严格 UTF-8 源码, 正确的 `__name__`/`__file__`/`sys.argv`,
+  独立 `__main__`, 执行后完整还原解释器状态 (modules/path/cwd/stdio/importer cache)。
+- [x] Python 项目执行: 项目打包为 workspace zip (归档 ≤16 MiB, 解压 ≤32 MiB, ≤1024 条目)
+  传入插件私有目录; 入口同级与项目根导入、常规/命名空间包、相对导入、循环导入均可用。
+- [x] module 入口模式 (`python -m` 语义, 协议 1.2): `runpy` 执行, 正确的
+  `__package__`/`__spec__`/`sys.path[0]` —— 插件侧完整, 宿主暂未暴露入口 (见 M2)。
+- [x] 完整 CPython 标准库随包可用; 缺失的第三方包按标准语义抛 `ModuleNotFoundError`。
+- [x] stdin 快照 (≤1 MiB, 协议 1.1): 支撑 `input()` 与 `sys.stdin.read*()` 的确定性输入
+  —— 插件侧完整, 宿主暂无写入 UI (见 M2)。
+- [x] 前台交互式 `input()` (协议 1.3): 快照 EOF 后经宿主 MaterialDialog 弹框继续输入,
+  后台启动立即报错而非挂起。
+- [x] 执行期流式输出协议 (chunk + credit 背压, 协议 1.1): 插件在脚本运行期间逐块发送
+  stdout/stderr —— 宿主目前累积到终态才一次性刷出 (M1 修复)。
+- [x] 结构化 JSON 结果 (`autojs6.result.set`, ≤64 KiB) 与输出产物
+  (`autojs6.artifacts.path`, ≤16 个 / 合计 ≤8 MiB, SHA-256 校验, 协议 1.4)
+  —— 插件侧完整, 宿主收到后暂未展示 (见 M2)。
+- [x] 结构化 traceback: project/stdlib/package 来源分类, 行号与源码行, 不泄漏插件私有路径。
+- [x] 超时、取消、Binder death 均有确定性唯一终态; 取消模式为进程重启
+  (`PROCESS_RESTART_ONLY`); 已 dispatch 的请求绝不自动重放。
+- [x] 热插拔: 安装/重新启用插件后下一次执行即可用, 无需重启宿主; 缺失/禁用时提示安装,
+  绝不回落到其他引擎。
+
+### 宿主侧已接通入口
+
+- [x] 编辑器运行按钮、文件管理器单文件运行、Explorer 项目工具栏 Run、项目启动器、
+  定时任务、Intent (本地 file 路径)、脚本重启。
+- [x] `import autojs6` 只读 API: `app.snapshot()` / `device.snapshot()` /
+  `execution.snapshot()` / `project.read_text|read_bytes|exists` (项目执行时)。
+- [x] 单文件脚本 `ModuleNotFoundError` 时提示用户改用显式 Python 项目。
+
+### 真机与构建证据 (历史, 保持有效)
+
+- [x] R1 真机事务 PASS (API 31 / arm64-v8a): stdin PFD、真机 CPython `input()`、项目导入、
+  顺序会话隔离与清理。
+- [x] R2 功能门禁 (module entry / 流式输出 / 交互输入 / 结构化结果) 本地构建全绿。
+- [x] 0.1.0 稳定版已发布 (配对宿主 6.8.0 / versionCode 5275)。
+
+******
+
+## M1 —— 跑得爽: 体验补全 (目标版本 0.2.0)
+
+> 主题: 用户点击运行 .py 后的体验与 JS 脚本一致 —— 实时看到输出, 脚本能跑足够久,
+> 停止按钮可靠。全部为存量协议的收尾, 无协议变更, 风险低。
+
+- [ ] [H] **控制台实时输出**: `PythonRuntimeClient.acceptOutput` 收到 chunk 后即时写入
+  GlobalConsole (stdout→INFO, stderr→ERROR), 不再累积到终态。注意跨 chunk 的 UTF-8
+  码点拼接 (保留现有终态一次性解码作为兜底, 或按流做增量解码)。
+  验收: 运行 `while True: print(i); time.sleep(1)` 能逐秒看到输出。
+- [ ] [P] **放宽执行超时**: `maxTimeoutMillis` 60 s → 30 min (宿主当前请求 5 min,
+  双向取小后立即生效为 5 min)。验收: 90 s 的脚本可以跑完。
+- [ ] [H] **超时可配置**: 执行超时纳入宿主设置或 project.json (`timeout` 字段),
+  上限对齐插件新值。
+- [ ] [H+P] **停止按钮真机冒烟**: 宿主停止运行中的 Python 脚本 → cancel → 插件进程重启,
+  紧接着再次运行同一脚本成功。出现问题修问题。
+- [ ] [P] **放宽输出上限**: 总输出 4 MiB → 16 MiB, chunk 数 4096 → 16384
+  (长脚本日志场景; 宿主侧上限同步核对)。
+- [ ] [H] **后台/定时任务冒烟**: 定时任务运行 .py 正常; 后台调用 `input()` 得到明确报错
+  (已实现, 确认文案可理解)。
+- [ ] [P] **插件 manifest 增加 `INTERNET` 权限**: 解锁 Python 标准库
+  `urllib.request`/`socket`/`http.client` 的直接联网能力, 零协议改动,
+  立即满足 "脚本内发 HTTP 请求" 这一高频需求。
+  验收: `urllib.request.urlopen('https://...')` 在真机可用。
+- [ ] [H+P] 以上完成后发布 **0.2.0** (双 ABI + universal APK, 真机冒烟清单通过即发)。
+
+******
+
+## M2 —— 半成品收尾: 已实现协议的宿主入口 (目标版本 0.2.x)
+
+> 主题: 插件侧早已实现、但宿主没有入口或没有消费的通道, 逐个接通。全部为宿主侧改动。
+
+- [ ] [H] **module 入口模式暴露**: Python 项目 `project.json` 支持声明 module 入口
+  (如 `"entryMode": "module", "main": "pkg.main"`), 写入 `ENTRY_MODE_ARGUMENT`。
+  验收: 含相对导入的包项目以 module 语义运行成功。
+- [ ] [H] **stdin 快照入口**: `project.json` 支持 `"stdin"` 字段 (内联文本或文件路径),
+  写入 `STDIN_SNAPSHOT_ARGUMENT`; 单文件脚本暂不提供 UI (需求出现再加)。
+  验收: 依赖 `sys.stdin.read()` 的脚本以预置输入运行成功。
+- [ ] [H] **结构化结果展示**: 脚本终态后, 若存在 `structuredJson`, 在控制台以
+  `[result] {...}` 追加展示; artifacts 落盘到宿主可见目录
+  (如 `<脚本目录>/.python-artifacts/<执行id>/`) 并在控制台打印路径。
+  验收: `autojs6.result.set({...})` 与 `artifacts.path()` 的产物用户可见。
+- [ ] [H] **交互式 `input()` 多入口冒烟**: 编辑器运行与 Explorer 运行均可弹出输入框,
+  隐藏回显 (`getpass` 场景) 表现正确。
+- [ ] [H] **清理陈旧注释与文档漂移**: `PythonProjectLaunchPolicy` "workspace 未落地" 注释、
+  `R5_CAPABILITY_PREVIEW.md` 的退役 flag 描述等, 与代码事实对齐 (顺手项, 不阻塞)。
+
+******
+
+## M3 —— 兑现初衷: AutoJs6 API 实时能力 broker (目标版本 0.3.0 起)
+
+> 主题: 这是与 "兼容 AutoJs6 API 脚本" 初衷差距最大的一块: 目前 Python 只有 4 个只读快照,
+> 而 JS 有约 45 个模块。方案不必从零设计 —— 宿主已有两个现成参照:
+> Lua broker (机制完整: executionId 绑定、防重放、配额、唯一终态, 能力仅 2 项) 与
+> Node.js broker (能力面完整: 31 个模块)。Python 取两者之长:
+> **复用 Lua 的会话绑定机制, 逐批移植 Node 的能力面**。
+>
+> 原则: 每批能力做完即真机冒烟 + 示例脚本, 随即可发 alpha; 能力不可用时明确抛
+> `CapabilityUnavailableError`; 不做 default-off 灰度与逐能力证据报告。
+
+### 协议与骨架
+
+- [ ] [H+P] **协议 1.5: 双向能力通道**: 新增 `IPythonHostCapabilityBroker`
+  (`dispatch(requestBytes) -> resultBytes`, 纯数据 JSON, 绑定 executionId + 配额 + 超时),
+  随 openSession 传入插件; 终态后调用一律拒绝。
+  宿主重新生成三件 API AAR → 拷贝至插件 `libs/` → 更新 lock (一次性流程, 后续批次不再动协议)。
+- [ ] [P] **Python 同步调用层**: `autojs6._broker` 封装跨进程调用
+  (请求-响应, 阻塞式, 超时抛异常), 各能力模块在其上以普通函数暴露。
+- [ ] [H] **宿主 dispatcher**: 参照 `LuaHostCapabilityDispatcher` 实现
+  `PythonHostCapabilityDispatcher`, 按能力名路由到现有 runtime API 实现类。
+
+### 第一批: 低风险高频 (0.3.0)
+
+- [ ] [H+P] `autojs6.toast(text)` —— Toaster
+- [ ] [H+P] `autojs6.clip.get() / set(text)` —— 剪贴板
+- [ ] [H+P] `autojs6.app.launch(package) / launch_app(name) / open_url(url)` —— AppUtils
+- [ ] [H+P] `autojs6.device.info()` 动态查询 (电量/屏幕状态/亮度/音量, 区别于启动时快照)
+- [ ] [H+P] `autojs6.console.log/warn/error` 直写宿主控制台 (与 print 并存, 带级别)
+- [ ] [H+P] `autojs6.notice(text)` —— 通知
+- [ ] 示例脚本 + 真机冒烟, 发布 0.3.0-alpha
+
+### 第二批: 文件与对话框 (0.3.x)
+
+- [ ] [H+P] `autojs6.files.read/write/exists/list/...` —— 经宿主代理读写用户脚本目录
+  (以宿主已有存储权限为准, 路径策略沿用现有校验风格但不新增流程)
+- [ ] [H+P] `autojs6.dialogs.alert/confirm/prompt/select` —— 前台弹窗 (复用协议 1.3
+  的前台授权与回复通道模式)
+- [ ] [H+P] `autojs6.engines` 最小集: 当前引擎信息 / 停止自身 / 运行其他脚本
+- [ ] 发布 0.3.x alpha
+
+### 第三批: 自动化核心 (0.4.0)
+
+- [ ] [H+P] `autojs6.automator`: click/long_click/swipe/press/back/home 等显式动作
+  (经无障碍, 宿主权限已就绪)
+- [ ] [H+P] `autojs6.selector`: UI 树只读快照 + `find/click/set_text` 显式动作
+  (选择器与节点以纯数据跨界, 参照 Node 的做法)
+- [ ] [H+P] `autojs6.images.capture_screen()` 截图 (返回产物路径或字节),
+  `find_image/find_color` 找图找色
+- [ ] [H+P] `autojs6.ocr.recognize(image)` —— 复用宿主 OCR 引擎
+- [ ] 示例: 一个真实的 "打开应用 → 找控件 → 点击 → 截图断言" Python 自动化脚本
+- [ ] 发布 0.4.0
+
+### 后续批次 (需求驱动, 出现用例再排期)
+
+- [ ] [H+P] `shell` (root/shizuku)、`sensors`、`media`、`sqlite`、`storages`、
+  `floaty` 悬浮窗、`web` 等 —— 逐个按需移植, 不一次性批量接入。
+
+******
+
+## M4 —— 第三方 Python 包 (与 M3 并行推进)
+
+> 主题: stdlib-only 是 0.1.0 的发布策略而非产品终点。按成本从低到高三条路径推进,
+> 不做签名 pack manifest / SBOM 全家桶。
+
+- [ ] [P] **路径 A (零协议成本, 文档先行)**: 纯 Python 依赖直接放进项目目录随 workspace
+  打包 (`sys.path` 已含项目根, 天然可 import)。
+  配套放宽 workspace 限制: 条目 1024 → 8192, 归档 16 → 64 MiB, 解压 32 → 128 MiB。
+  验收: 项目内置 `requests` 源码目录 (含 urllib3 等依赖) 后 `import requests` 成功
+  (配合 M1 的 INTERNET 权限实测发请求)。
+- [ ] [P] **路径 B (构建期精选包)**: 评估在 `build.gradle.kts` `pip { install(...) }`
+  内置少量高频纯 Python 包 (候选: requests, charset_normalizer 等; 更新
+  `python-runtime.lock` 的 packages 政策键值与 NOTICE)。按 APK 体积与收益决策。
+- [ ] [P] **路径 C (native 包)**: 评估 Chaquopy 官方 wheel 源的 numpy/pillow/opencv
+  构建期打包可行性 (Chaquopy 提供预编译 Android wheel); 逐包实测, 能用即收录,
+  16 KB page 等兼容性问题出现时针对性修复。
+- [ ] [P] **路径 D (运行时安装, 可选进阶)**: 插件内 pip 安装到私有目录并纳入 `sys.path`
+  (需 INTERNET; 作为显式用户操作, 不做隐式解析)。有明确用户需求再启动。
+
+******
+
+## M5 —— 长任务与稳定性 (目标版本 0.5.x)
+
+- [ ] [H+P] **长任务模式**: 前台通知 + 心跳, 移除常规超时上限, 支持手动停止
+  (不是简单调大 60 s, 而是独立的运行档位)。
+- [ ] [P] **进程预热评估**: 实测 CPython 冷启动耗时; 若显著 (>1 s), 提供
+  "执行后保留进程" 选项 (放弃 per-execution 退休, 状态污染问题出现再修)。
+- [ ] [H+P] **并发执行**: 多脚本同时运行 (多会话或宿主侧排队, 按实现成本选择;
+  当前限制为全局单会话)。
+- [ ] [H] **异常修复通道**: 用户脚本报错场景收集 (issue 驱动), 每个真实异常配一个
+  回归脚本, 修复即关闭 —— 这是本项目唯一持续增长的 "测试集"。
+
+******
+
+## M6 —— 版本节奏与验证约定
+
+### 版本规划
+
+| 版本 | 内容 | 状态 |
 | --- | --- | --- |
-| E0 `SOURCE_STATIC_ONLY` | Contract, manifest and static verifier agree | No CPython, Android or device execution |
-| E1 `PORTABLE_CPYTHON_ONLY` | Portable bootstrap cases passed on the recorded local Python | No Chaquopy, Binder or Android proof |
-| E2 `ANDROID_BUILD_ONLY` | Affected JVM tests, Android compile and APK packaging passed | No real Binder/CPython device execution |
-| E3 `BINDER_CPYTHON_DEVICE_PARTIAL` | Exact Host/Plugin artifacts executed on the recorded device cell | No unrecorded API/ABI coverage |
-| E4 `DEVICE_MATRIX_ROBUSTNESS` | Declared compatibility and recovery cells passed | No public-release fact |
-| E5 `PRODUCTION_RELEASE` | Independent public artifact verification and production receipt passed | No capability beyond the receipt |
-
-Development reports must record the Git HEAD, tracked-diff state and untracked
-paths. A dirty-tree report is `CURRENT_TREE_*` evidence and cannot authorize a
-release. Generated U1 reports live under `build/reports/python/u1/`; they never
-overwrite a `0.1.0` report.
-
-## Immutable `0.1.0` historical release
-
-- [x] Keep Python in an independently installed APK and dedicated
-  `:python_runtime` process. CPython, Chaquopy and Python native libraries never
-  load into the Host process.
-- [x] Keep `.py` fail-closed: an unavailable, disabled, incompatible or dead
-  provider never falls back to Rhino, RootAutomator or another legacy engine.
-- [x] Freeze Chaquopy `17.0.0`, CPython `3.13.9`, 64-bit
-  `arm64-v8a`/`x86_64`, stdlib-only and trusted-local/non-sandbox semantics.
-- [x] Freeze Plugin producer/tag commit
-  `4cc4187137e3c1060aa0444b482377afafb6a032` as `v0.1.0`, paired with Host
-  producer `2caddcb763b39f0bf450909742fa6ec4caba27a8` / `6.8.0` / `5275`.
-- [x] Preserve
-  `build/reports/python/r6-0.1.0-production-receipt.json` as the independent
-  E5 publication record. U1 work must not edit or relabel it.
-- [x] Preserve the historical API 31 arm64-v8a concentrated device evidence.
-  `x86_64` remains packaging-only in that receipt.
-
-### R6-P2: final source and Host-pair freeze (historical)
-
-The `0.1.0` source and exact Host API distribution were frozen before its
-artifact-producing commit. Existing RC receipts are historical and remain
-immutable; they cannot be promoted to U1 evidence. A complete API 24-36 by ABI matrix is not automatic
-for U1: expand device work only for a concrete
-compatibility, ABI, lifecycle or security risk. The production receipt, rather
-than mutable checklist prose, remains the authority for the old release.
-
-## U1 invariants and evidence policy
-
-- [x] Retain exact-component selection, UID/package/signer validation, one
-  active provider session, one terminal event, idempotent cancel/close, bounded
-  metadata/PFD transport and no replay after dispatch.
-- [x] Treat user-selected local Python as trusted for the Plugin UID, not as
-  hostile-code sandboxing. Chaquopy's Java bridge does not grant Host-process
-  objects or permissions.
-- [x] Do not publish a capability flag until Host negotiation, Provider
-  admission, bootstrap behavior, cleanup and negative cases are implemented.
-  The R1 stdin flag was enabled only after those source and E2 gates existed.
-- [x] Keep online pip, runtime wheel download and arbitrary Host Java-object
-  injection disabled throughout U1.
-- [x] Run Gradle invocations serially. Device commands require an explicitly
-  authorized serial and must verify package/process cleanup afterward; no
-  device command was run for R0/R1 E2.
-- [x] Reuse the existing protocol stdin field without changing shared API/AAR
-  sources. If a later phase changes shared protocol/API source, regenerate and
-  lock the exact release AAR distribution before Plugin release evidence is
-  collected.
-
-## U1-R0: capability truth and Python semantics contract
-
-Priority: complete. Scope: documentation, portable fixtures and a fail-closed
-gate only. R0 itself did not change runtime code or advertised capabilities;
-the later R1 implementation updated those capabilities.
-
-### Checklist
-
-- [x] Maintain `docs/python/PYTHON_SEMANTICS_CONTRACT.md` as the normative
-  current-versus-target contract for source encoding, execution globals,
-  stdin, imports, process-state restoration and unsupported behavior.
-- [x] Maintain the machine-readable fixture
-  `tools/tests/fixtures/u1-r0-python-semantics-cases.json` with unique case IDs,
-  current claims, target phases and exact expected portable outcomes.
-- [x] Cover ordinary syntax and builtins: literals, Unicode, operators,
-  branching, loops, functions, closures, comprehensions, generators, classes,
-  pattern matching, exceptions, context managers and `asyncio.run()`.
-- [x] Cover execution state: `__name__`, `__file__`, `sys.argv`, cwd,
-  `sys.path`, stdout/stderr order, `SystemExit`, syntax/runtime exceptions and
-  state restoration.
-- [x] Classify imports as builtin/frozen, stdlib, workspace module, regular or
-  namespace package, third-party package, or Android-unavailable module.
-- [x] Record the implemented U1-R1 stdin capability as a finite, pre-supplied
-  snapshot with a 1 MiB maximum. Do not call it interactive input.
-- [x] Generate `build/reports/python/u1/r0-python-usability-gate.json` with the
-  actual local Python version, case counts, source identity and explicit false
-  Android/device/publication claims.
-- [x] Keep the U1-R0 verifier read-only with respect to tracked source; its only
-  output is the ignored generated report.
-
-### Commands
-
-```powershell
-Set-Location D:\idea-projects\AutoJs6-Plugin-Python-Runtime
-$env:PYTHONDONTWRITEBYTECODE = '1'
-python -B -m unittest tools.tests.test_u1_r0_python_usability_source -v
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-u1-r0-python-usability.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-r2-static.ps1
-git diff --check
-```
-
-### Evidence and exit condition
-
-- E0/E1: `build/reports/python/u1/r0-python-usability-gate.json`.
-- Exit: the contract, fixture, test and verifier agree; all executable fixture
-  cases pass; unsupported/planned cases are not executed or promoted; the
-  report says `androidCompiled=false`, `deviceVerified=false` and
-  `published=false`.
-
-### Blockers
-
-- No device is required. If local Python is not `3.13.9`, the report must keep
-  its actual version and remain portable evidence only.
-- A dirty tree does not block development verification, but its report cannot
-  become release evidence.
-
-## U1-R1: core Python semantics, `input()` and predictable imports
-
-Priority: highest. R1 first closes bounded static stdin and import semantics;
-true interactive prompt/reply belongs to R2.
-
-### R1-A: admission and lifecycle hardening
-
-- [x] Accept only strict UTF-8 Python source, with an optional UTF-8 BOM;
-  reject invalid UTF-8, NUL and a conflicting non-UTF-8 encoding cookie before
-  CPython dispatch.
-- [x] Start a 5-second Provider-side start lease when a session is opened. A
-  client which never calls `start()` has its session closed and its slot/PFDs
-  released without executing user code. Lease expiry does not retire the
-  runtime generation.
-- [x] Enforce the declared minimum Host versionCode at the Provider Binder
-  boundary in addition to normal Host discovery checks.
-- [x] Restore `sys.stdin`, stdout, stderr, argv, path, cwd, importer cache and
-  project modules on success, exception, output limit, cancel and timeout.
-- [x] Prove in portable/JVM tests that two sequential workspaces with the same
-  module name cannot reuse
-  the previous workspace module.
-
-### R1-B: bounded stdin snapshot and `input()`
-
-- [x] Activate the already-declared optional `STDIN` PFD only after validating
-  kind, unique descriptor index, declared length, exact EOF, SHA-256,
-  reliable-pipe error and Provider maximum.
-- [x] Start with a Provider maximum of 1 MiB; raise it only with a
-  concrete use case and evidence.
-- [x] Install an execution-local UTF-8 text stdin over the verified bytes.
-  `input(prompt)` writes the prompt to stdout and consumes LF/CRLF, Unicode,
-  multiple lines and a final line without newline with ordinary CPython
-  semantics.
-- [x] Support `sys.stdin.read()`, `readline()`, `readlines()` and
-  `sys.stdin.buffer.read()` with bounded snapshot behavior.
-- [x] An omitted or empty snapshot produces immediate EOF/`EOFError`; it never
-  reads the Plugin process stdin or blocks indefinitely.
-- [x] Advertise `supportsStdinSnapshot=true` and nonzero `maxStdinBytes` only
-  after the Provider, Host client, negotiation, tests and cleanup paths exist.
-- [x] Add an immutable Host execution option which snapshots stdin bytes into
-  a private PFD. Existing ordinary launches default to empty stdin and never
-  display surprise UI.
-- [x] Keep the current public-launch limitation explicit: no public Host launch
-  surface provides the snapshot yet, so label the
-  result `TRANSPORT_AVAILABLE_UI_NOT_AVAILABLE`, not complete user-facing
-  `input()` support.
-
-### R1-C: `import xxx` and basic-language matrix
-
-- [x] Execute the R0 syntax/builtin matrix through the updated bootstrap and
-  retain exact expected output or exception checks.
-- [x] Verify representative stdlib import semantics with the portable
-  bootstrap matrix.
-- [x] Verify the packaged CPython stdlib on an authorized device/API cell,
-  including `json`, `pathlib`, `re`, `math`, `datetime`, `collections`,
-  `decimal`, `fractions`, `asyncio` and `importlib`; report
-  platform/native-dependent modules separately.
-- [x] Verify in portable/JVM tests project entry-sibling, project-root,
-  regular-package, namespace-package, re-export, circular and dynamic
-  `importlib` imports.
-- [x] Preserve explicit Python-project context when its admitted entry is run
-  from Project Launcher, Explorer or Editor.
-- [x] Do not implicitly snapshot an arbitrary standalone script's parent
-  directory.
-- [x] Add a safe missing-adjacent-module hint which directs the user to an
-  explicit Python project without leaking private paths.
-- [x] Keep third-party imports standard and deterministic: an absent package
-  raises `ModuleNotFoundError`; no online pip or hidden fallback occurs.
-- [x] Keep file-mode `__package__` semantics truthful and derive normalized
-  package context for a nested entry in an explicitly admitted project, so
-  ordinary relative imports work without widening the workspace. Explicit
-  module-entry mode remains R2 work.
-
-### Commands
-
-```powershell
-Set-Location D:\idea-projects\AutoJs6-Plugin-Python-Runtime
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-u1-r1-core-semantics.ps1
-git diff --check
-```
-
-The verifier runs the portable unittest discovery and Plugin
-`:app:testDebugUnitTest :app:assembleDebug`. If Host integration source changes,
-pass the Host repository so the same gate also runs its three required tasks:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass `
-  -File .\tools\verify-u1-r1-core-semantics.ps1 `
-  -HostRepository D:\idea-projects\AutoJs6
-```
-
-The E3 transaction is a separate, opt-in, non-soak gate. It requires both
-repositories to be clean and pinned to exact commits, an already-passing E1/E2
-functional report, exact APK hashes, one explicit serial, a frozen user list
-and two current-run authorization switches. The runner installs only when all
-three packages are absent for every frozen user and globally; it snapshots and
-rechecks every installed APK, then uninstalls only runner-owned bytes in reverse
-order. The offline verifier alone may write the canonical report.
-
-```powershell
-if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'U1-R1 E3 requires PowerShell 7+' }
-$plugin = 'D:\idea-projects\AutoJs6-Plugin-Python-Runtime'
-$hostRepo = 'D:\idea-projects\AutoJs6'
-$adb = 'E:\.android\sdk\platform-tools\adb.exe'
-$aapt2 = 'E:\.android\sdk\build-tools\37.0.0\aapt2.exe'
-$apksigner = 'E:\.android\sdk\build-tools\37.0.0\apksigner.bat'
-$signer = '31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213'
-
-Set-Location $plugin
-& .\tools\verify-u1-r1-core-semantics.ps1 `
-  -HostRepository $hostRepo
-
-Set-Location $hostRepo
-.\gradlew.bat --console=plain `
-  :app:assembleAppDebug :app:assembleAppDebugAndroidTest
-
-Set-Location $plugin
-$hostCommit = (git -C $hostRepo rev-parse HEAD).Trim()
-$pluginCommit = (git rev-parse HEAD).Trim()
-$gate = (Resolve-Path .\build\reports\python\u1\r1-core-semantics-gate.json).Path
-$fixture = (Resolve-Path .\tools\tests\fixtures\u1-r1-device-observation-contract.json).Path
-$hostApk = (Resolve-Path "$hostRepo\app\build\outputs\apk\app\debug\autojs6-v6.8.0-arm64-v8a.apk").Path
-$testApk = (Resolve-Path "$hostRepo\app\build\outputs\apk\androidTest\app\debug\app-app-debug-androidTest.apk").Path
-$pluginApk = (Resolve-Path .\app\build\outputs\apk\debug\autojs6-plugin-python-runtime-v0.2.0-alpha.1-arm64-v8a.apk).Path
-$gateSha = (Get-FileHash -Algorithm SHA256 $gate).Hash.ToLowerInvariant()
-$fixtureSha = (Get-FileHash -Algorithm SHA256 $fixture).Hash.ToLowerInvariant()
-$hostSha = (Get-FileHash -Algorithm SHA256 $hostApk).Hash.ToLowerInvariant()
-$testSha = (Get-FileHash -Algorithm SHA256 $testApk).Hash.ToLowerInvariant()
-$pluginSha = (Get-FileHash -Algorithm SHA256 $pluginApk).Hash.ToLowerInvariant()
-$stamp = [DateTimeOffset]::UtcNow.ToString('yyyyMMddTHHmmssZ')
-$raw = Join-Path $plugin "build\reports\python\u1\r1-binder-cpython-device-run-$stamp-QV710AF65F-$($hostCommit.Substring(0,12))-$($pluginCommit.Substring(0,12)).json"
-
-& .\tools\device\run-u1-r1-binder-cpython-device.ps1 `
-  -Serial QV710AF65F -ExpectedApi 31 -ExpectedAbi arm64-v8a `
-  -ExpectedUserIds @(0, 10) `
-  -HostRepository $hostRepo -PluginRepository $plugin `
-  -ExpectedHostCommit $hostCommit -ExpectedPluginCommit $pluginCommit `
-  -FunctionalGate $gate -FunctionalGateSha256 $gateSha `
-  -ObservationFixture $fixture -ObservationFixtureSha256 $fixtureSha `
-  -HostApk $hostApk -HostSha256 $hostSha `
-  -HostTestApk $testApk -HostTestSha256 $testSha `
-  -PluginApk $pluginApk -PluginSha256 $pluginSha `
-  -ExpectedSignerSha256 $signer `
-  -AdbPath $adb -Aapt2Path $aapt2 -ApkSignerPath $apksigner `
-  -Output $raw -ConfirmNoActiveSoak -ConfirmDeviceMutation
-
-$rawSha = (Get-FileHash -Algorithm SHA256 $raw).Hash.ToLowerInvariant()
-& .\tools\verify-u1-r1-binder-cpython-device.ps1 `
-  -RawReport $raw -RawReportSha256 $rawSha `
-  -ExpectedSerial QV710AF65F -ExpectedApi 31 -ExpectedAbi arm64-v8a `
-  -ExpectedUserIds @(0, 10) `
-  -HostRepository $hostRepo -PluginRepository $plugin `
-  -ExpectedHostCommit $hostCommit -ExpectedPluginCommit $pluginCommit `
-  -FunctionalGate $gate -FunctionalGateSha256 $gateSha `
-  -ObservationFixture $fixture -ObservationFixtureSha256 $fixtureSha `
-  -HostApk $hostApk -HostSha256 $hostSha `
-  -HostTestApk $testApk -HostTestSha256 $testSha `
-  -PluginApk $pluginApk -PluginSha256 $pluginSha `
-  -ExpectedSignerSha256 $signer `
-  -AdbPath $adb -Aapt2Path $aapt2 -ApkSignerPath $apksigner
-```
-
-### Evidence and exit condition
-
-- E1/E2 aggregate:
-  `build/reports/python/u1/r1-core-semantics-gate.json`. It records each
-  command, output digest, Plugin/optional Host source identity and explicit
-  false Binder/device/release claims.
-- E3: `build/reports/python/u1/r1-binder-cpython-device.json`, generated only
-  by an authorized exact-device runner.
-- Current status: E1 portable/JVM and E2 Android build gates are complete. E3
-  is complete only when the canonical report above says `PASS` and binds the
-  exact clean Host/Plugin commits, three APK hashes, signer, observation
-  contract and restored device state. The accepted cell is intentionally only
-  QV710AF65F / API 31 / arm64-v8a; it is not an x86_64 run, device matrix,
-  production receipt, published artifact or release authorization.
-- Functional exit: all R1 source/portable/Android-build gates pass and flags
-  truthfully match implementation. Acceptance exit: exact Host/Plugin APKs
-  prove stdin PFD, real CPython `input()`, project imports, sequential-session
-  isolation and cleanup on an authorized device.
-
-### Blockers
-
-- Static stdin is not real-time interaction. Do not extend the existing AIDL
-  merely to activate its already-declared stdin field; a prompt/reply callback
-  in R2 requires protocol-minor, golden-wire, AAR and Host-lock work.
-- Local CPython and APK packaging cannot close the E3 acceptance box. A raw
-  device run also cannot close it until the offline verifier reproduces all
-  bindings and writes the canonical `PASS` report.
-
-## U1-R2: module entry, live I/O and structured results
-
-### Checklist
-
-- [ ] Add explicit `entryMode=file|module`; module mode uses a normalized dotted
-  name and correct `__package__`, `__spec__`, `sys.path[0]` and package-relative
-  imports. File mode remains ordinary script execution.
-- [ ] Move stdout/stderr credit and backpressure into execution time, preserving
-  ordered partial output before cancel/timeout and forbidding output after the
-  terminal event.
-- [ ] If interactive `input()` is added, use execution-scoped typed prompt IDs,
-  size/deadline/echo policy and one reply; background launches fail immediately
-  without opening UI.
-- [ ] Bind input waits to cancellation, timeout, Binder death and generation
-  retirement.
-- [ ] Add bounded structured JSON results and optional output artifacts with
-  count, path, size and SHA-256 limits. Never infer a result from stdout text.
-
-### Commands and evidence
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-u1-r2-module-io.ps1
-.\gradlew.bat --console=plain :app:testDebugUnitTest
-.\gradlew.bat --console=plain :app:assembleDebug
-```
-
-- E0/E2: `build/reports/python/u1/r2-module-io-contract.json`.
-- E3: `build/reports/python/u1/r2-module-io-device.json`.
-- Exit: file/module semantics are distinct; each published I/O/result capability
-  has positive, limit, cancel, timeout, death and cleanup evidence.
-- Blocker: no `Context`, Binder, Host callback object or arbitrary `Bundle` may
-  be injected into Python. Interactive UI requires an explicit Host design.
-
-## U1-R3: offline dependency packs
-
-### Checklist
-
-- [ ] Define a signed, immutable package-pack manifest: package/version,
-  Python/ABI tags, file digests, signer, license, SBOM and source URL.
-- [ ] Keep online pip, runtime downloads and implicit index resolution disabled.
-- [ ] Implement pure-Python wheels first; verify packages, submodules,
-  resources and metadata without polluting another execution environment.
-- [ ] Reject tampered, conflicting, unpinned, oversized or incompatible packs
-  before user code starts.
-- [ ] Gate native wheels separately for CPython 3.13 ABI, each Android ABI,
-  16 KiB page compatibility, crash/OOM behavior and license obligations.
-- [ ] Load package native code only in the Plugin process.
-
-### Commands, evidence, exit and blockers
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-u1-r3-offline-packages.ps1
-.\gradlew.bat --console=plain :app:testDebugUnitTest
-.\gradlew.bat --console=plain :app:assembleDebug
-```
-
-- E0/E2: `build/reports/python/u1/r3-package-pack-contract.json`.
-- E3: `build/reports/python/u1/r3-pure-python-import-device.json`.
-- E4: `build/reports/python/u1/r3-native-wheel-matrix.json`, only if native
-  wheels are actually promoted.
-- Exit: at least one pinned pure-Python pack imports reproducibly offline and
-  all negative admission cases fail closed. Native wheels are an independent
-  sub-gate, not a disguised pure-Python success.
-- Blocker: missing license/SBOM, wheel-tag drift or unverified native ABI/page
-  compatibility prevents that pack from being advertised.
-
-## U1-R4: explicit AutoJs6 capability broker
-
-### Checklist
-
-- [x] Retain the `0.1.0` immutable read-only
-  `autojs6.app/device/execution/project` snapshot API.
-- [ ] Define a versioned execution-scoped capability catalog. Every operation
-  has a grant, pure-data request/result schema, timeout, quota and error code.
-- [ ] Add lower-risk capabilities first: clipboard, app query/explicit Intent,
-  bounded file selection and bounded network proxy.
-- [ ] Split UI automation into read-only tree snapshots and explicit actions;
-  selectors and nodes cross the boundary only as bounded data.
-- [ ] Bind each call to execution ID, Provider UID and terminal state. Reject
-  calls after terminal and prevent background execution from borrowing a
-  foreground grant.
-- [ ] Keep unavailable capabilities fail-closed; never recover Host privileges
-  through Chaquopy's Plugin-local Java bridge.
-
-### Commands, evidence, exit and blockers
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-u1-r4-capability-broker.ps1
-```
-
-- E0/E2: `build/reports/python/u1/r4-capability-catalog.json`.
-- E3: one independently named device report per promoted capability.
-- Exit: at least one new capability completes Host/Plugin/device flow; every
-  unfinished entry remains `promoted=false` and default-off.
-- Blocker: a capability that cannot be bounded, identity-bound, timed out or
-  cancelled cannot enter the public catalog.
-
-## U1-R5: long jobs, recovery and compatibility
-
-### Checklist
-
-- [ ] Add a separate long-job mode with foreground notification, heartbeat,
-  lease, one terminal event and process-level cancellation; do not simply
-  increase the ordinary 60-second timeout.
-- [ ] Exercise callback stalls, blocking FDs, native blocking, storage
-  exhaustion, Plugin crash/OOM and Host death.
-- [ ] Prove no orphan session, descriptor, workspace, package, process or
-  unrecoverable slot remains after every terminal path.
-- [ ] Cover the minimum Android boundary, a current Android arm64 16 KiB cell
-  and an x86_64 runtime cell for the exact candidate artifacts.
-- [ ] Add pressure or soak only for an identified risk; diagnostics and shorter
-  runs remain clearly labeled and cannot replace a formal failed gate.
-
-### Commands, evidence, exit and blockers
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\verify-u1-r5-robustness-evidence.ps1
-```
-
-- E4: `build/reports/python/u1/r5-device-matrix.json` and
-  `build/reports/python/u1/r5-recovery.json`.
-- Exit: every capability selected for the next stable release has
-  risk-proportional compatibility and clean-recovery evidence bound to exact
-  Host/Plugin/APK/signer/device identities.
-- Blocker: a protected or active-soak device cannot be touched without explicit
-  authorization. An alternate-device diagnostic does not replace its named
-  formal cell.
-
-## U1-R6: source freeze, release and independent receipt
-
-### Checklist
-
-- [ ] Freeze the actually completed U1 capability set. Incomplete features stay
-  capability-false and do not silently become release requirements.
-- [ ] Freeze Plugin version, minimum Host version, protocol/AAR identity,
-  signer, dependency locks, notices and SBOM on clean source trees.
-- [ ] If Host/shared API changed, regenerate and consume the exact release AAR
-  distribution before building Plugin release APKs.
-- [ ] Build arm64-v8a, x86_64 and universal APKs; inspect permission, signer,
-  native inventory, 16 KiB properties, notices and dependency hashes.
-- [ ] Run a concentrated exact-artifact E3/E4 suite covering U1-R1 stdin/import,
-  U1-R2 I/O/results and every promoted package/capability plus
-  cancel/timeout/death/rebind/cleanup.
-- [ ] Generate pre-publication provenance with `published=false`.
-- [ ] Push the exact source/tag, publish only approved assets, independently
-  download them and verify remote commit, signer, size and SHA-256.
-- [ ] Generate a new production receipt containing the release URL/time, tag
-  commit, Host pair, AAR manifest, asset hashes, device/ABI coverage, owners and
-  explicit limitations. Never overwrite the `0.1.0` receipt.
-
-### Commands and evidence
-
-R6 must add version-specific source, artifact, concentrated-device and stable
-release verifiers modeled after the existing `verify-r6-*` tools. Their exact
-commands and output names are frozen before the release candidate is built.
-
-- E2: new release-source and APK/native reports.
-- E3/E4: new exact-artifact concentrated acceptance reports.
-- E5: a new versioned production receipt under
-  `build/reports/python/u1/`, independently reproduced from public assets.
-- Exit: only the independent receipt establishes `published=true` and stable
-  completion.
-- Blocker: any dirty source, stale AAR lock, mismatched signer/hash, missing
-  cleanup proof or failed formal evidence keeps release authorization false.
-
-## Immediate deployment order
-
-1. [x] U1-R0 documentation, fixture, portable tests and generated E0/E1 gate
-   are complete.
-2. [x] U1-R1 source, portable/JVM and Android-build work is complete through
-   E2, including lifecycle/encoding, bounded stdin transport/bootstrap, Host
-   option and the portable import matrix.
-3. [x] Capture exact-artifact E3 evidence for packaged CPython through the
-   frozen short-running non-soak transaction on QV710AF65F / API 31 /
-   arm64-v8a; the canonical report is the authority for this checkbox.
-4. Keep R1 functional completion separate from device-evidence freshness. R2
-   design may proceed after E2, but U1-R6 cannot promote R1 without E3.
-5. Commit Plugin and any changed Host repository separately; each repository
-   must end the implementation session clean while preserving unrelated work.
+| 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
+| 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
+| 0.3.x | M3 broker 骨架 + 第一二批能力 | 计划 |
+| 0.4.0 | M3 自动化核心 + M4 第三方包路径 A/B | 计划 |
+| 0.5.x | M5 长任务/并发/预热 | 计划 |
+| 1.0.0 | 能力面稳定, API 冻结 | 计划 |
+
+### 轻量验证约定 (代替证据等级流程)
+
+- 本地快速回归 (离线, 避免外网 Cloudflare 超时):
+  ```powershell
+  $env:PYTHONDONTWRITEBYTECODE = '1'
+  python -B -m unittest tools.tests.test_bootstrap -v
+  .\gradlew.bat --offline --console=plain :app:testDebugUnitTest :app:assembleDebug
+  ```
+- 发版前: 真机冒烟清单 (约 10 项手动操作, 覆盖当版新能力 + 停止/重启/热插拔),
+  通过即发布。
+- 历史 U1 证据工具 (`tools/verify-u1-*`, `tools/device/*`) 与报告继续保留可用,
+  供需要时复核, 但**不再作为任何版本的发布前置**。
+- 新能力的验证方式: 一个示例脚本在真机跑通即视为完成; 后续异常按 M5 异常修复通道处理。
+
+### 双仓协同约定
+
+- 协议/AAR 变更 (仅 M3 骨架与 M5 长任务涉及): 宿主生成三件 release AAR →
+  拷贝至插件 `libs/` → 更新 `locks/host-api-aars.lock` → 双仓分别提交。
+- 其余批次均为单仓独立改动, 互不阻塞。

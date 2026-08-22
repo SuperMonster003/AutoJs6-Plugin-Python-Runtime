@@ -6,7 +6,7 @@ import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 VERIFIER = ROOT / "tools" / "verify-u1-r1-core-semantics.ps1"
-ROADMAP = ROOT / "ROADMAP.md"
+ROADMAP = ROOT / "docs" / "legacy" / "ROADMAP-u1-en.md"
 GITIGNORE = ROOT / ".gitignore"
 
 

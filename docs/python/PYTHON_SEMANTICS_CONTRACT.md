@@ -23,8 +23,10 @@ not prove Chaquopy packaging or Android execution.
 | `PLANNED_U1_R2` | Deliberately deferred because it requires module-entry or live-I/O protocol work. |
 | `OUT_OF_SCOPE` | Not promised by the current usability track or requires an independent admission model. |
 
-A portable result may advance a case only to `VERIFIED_PORTABLE`. Android and
-device promotion require the evidence levels defined in `ROADMAP.md`.
+A portable result may advance a historical U1 case only to `VERIFIED_PORTABLE`.
+The former Android/device promotion levels are preserved in
+[`docs/legacy/ROADMAP-u1-en.md`](../legacy/ROADMAP-u1-en.md); current product
+milestones follow the lightweight validation convention in [`ROADMAP.md`](../../ROADMAP.md).
 
 ## Runtime and source contract
 
