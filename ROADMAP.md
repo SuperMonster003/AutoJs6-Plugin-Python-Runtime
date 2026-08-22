@@ -35,7 +35,7 @@
 - [x] 前台交互式 `input()` (协议 1.3): 快照 EOF 后经宿主 MaterialDialog 弹框继续输入,
   后台启动立即报错而非挂起。
 - [x] 执行期流式输出协议 (chunk + credit 背压, 协议 1.1): 插件在脚本运行期间逐块发送
-  stdout/stderr —— 宿主目前累积到终态才一次性刷出 (M1 修复)。
+  stdout/stderr, 宿主按流增量解码 UTF-8 并即时写入控制台。
 - [x] 结构化 JSON 结果 (`autojs6.result.set`, ≤64 KiB) 与输出产物
   (`autojs6.artifacts.path`, ≤16 个 / 合计 ≤8 MiB, SHA-256 校验, 协议 1.4)
   —— 插件侧完整, 宿主收到后暂未展示 (见 M2)。
@@ -67,24 +67,28 @@
 > 主题: 用户点击运行 .py 后的体验与 JS 脚本一致 —— 实时看到输出, 脚本能跑足够久,
 > 停止按钮可靠。全部为存量协议的收尾, 无协议变更, 风险低。
 
-- [ ] [H] **控制台实时输出**: `PythonRuntimeClient.acceptOutput` 收到 chunk 后即时写入
-  GlobalConsole (stdout→INFO, stderr→ERROR), 不再累积到终态。注意跨 chunk 的 UTF-8
-  码点拼接 (保留现有终态一次性解码作为兜底, 或按流做增量解码)。
-  验收: 运行 `while True: print(i); time.sleep(1)` 能逐秒看到输出。
-- [ ] [P] **放宽执行超时**: `maxTimeoutMillis` 60 s → 30 min (宿主当前请求 5 min,
-  双向取小后立即生效为 5 min)。验收: 90 s 的脚本可以跑完。
+- [x] [H] **控制台实时输出实现**: `PythonRuntimeClient.acceptOutput` 收到 chunk 后即时写入
+  GlobalConsole (stdout→INFO, stderr→ERROR), stdout/stderr 各自使用增量 UTF-8 解码器保留
+  跨 chunk 码点, 终态只排空截断尾字节, 不再重复输出。宿主提交: `b1b6b43d0`。
+- [ ] [H+P] **控制台实时输出真机验收**: 运行
+  `while True: print(i, flush=True); time.sleep(1)` 能逐秒看到输出。
+- [x] [P] **放宽执行超时**: `maxTimeoutMillis` 60 s → 30 min (宿主当前请求 5 min,
+  双向取小后立即生效为 5 min)。
+- [ ] [H+P] **长时脚本真机验收**: 90 s 的脚本可以跑完。
 - [ ] [H] **超时可配置**: 执行超时纳入宿主设置或 project.json (`timeout` 字段),
   上限对齐插件新值。
 - [ ] [H+P] **停止按钮真机冒烟**: 宿主停止运行中的 Python 脚本 → cancel → 插件进程重启,
   紧接着再次运行同一脚本成功。出现问题修问题。
-- [ ] [P] **放宽输出上限**: 总输出 4 MiB → 16 MiB, chunk 数 4096 → 16384
-  (长脚本日志场景; 宿主侧上限同步核对)。
+- [x] [H+P] **放宽输出上限**: 总输出 4 MiB → 16 MiB, chunk 数 4096 → 16384;
+  插件 metadata 与宿主默认策略已对齐。
+- [ ] [H+P] **长日志真机验收**: 超过旧 4 MiB 阈值的 stdout/stderr 可持续输出并正常终止。
 - [ ] [H] **后台/定时任务冒烟**: 定时任务运行 .py 正常; 后台调用 `input()` 得到明确报错
   (已实现, 确认文案可理解)。
-- [ ] [P] **插件 manifest 增加 `INTERNET` 权限**: 解锁 Python 标准库
+- [x] [P] **插件 manifest 增加 `INTERNET` 权限**: 解锁 Python 标准库
   `urllib.request`/`socket`/`http.client` 的直接联网能力, 零协议改动,
-  立即满足 "脚本内发 HTTP 请求" 这一高频需求。
-  验收: `urllib.request.urlopen('https://...')` 在真机可用。
+  立即满足 "脚本内发 HTTP 请求" 这一高频需求; 源 manifest 与合并/打包 manifest
+  均已确认只声明一次该权限。
+- [ ] [P] **标准库联网真机验收**: `urllib.request.urlopen('https://...')` 在真机可用。
 - [ ] [H+P] 以上完成后发布 **0.2.0** (双 ABI + universal APK, 真机冒烟清单通过即发)。
 
 ******
