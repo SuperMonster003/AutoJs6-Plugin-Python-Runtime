@@ -1,10 +1,23 @@
 package io.github.supermonster003.autojs6.plugin.python.runtime.transport
 
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Test
 
 class WorkspaceArchivePolicyTest {
+    @Test
+    fun requestEntryModeSelectsTheExactMaterializedSourcePath() {
+        assertEquals(
+            "pkg/main.py",
+            workspaceSourceEntryPoint("pkg/main.py", PythonEntryMode.FILE),
+        )
+        assertEquals(
+            "pkg/main.py",
+            workspaceSourceEntryPoint("pkg.main", PythonEntryMode.MODULE),
+        )
+    }
+
     @Test
     fun normalizedRelativeFilesAndDirectoriesAreAccepted() {
         assertEquals(

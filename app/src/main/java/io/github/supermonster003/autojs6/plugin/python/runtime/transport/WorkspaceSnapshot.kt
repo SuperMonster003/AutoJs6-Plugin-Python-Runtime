@@ -4,7 +4,9 @@ import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonPayloadReference
+import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.Closeable
@@ -39,6 +41,7 @@ internal class WorkspaceSnapshot private constructor(
             sourceReference: PythonPayloadReference,
             sourceBytes: ByteArray,
             entryPoint: String,
+            entryMode: PythonEntryMode,
             workspaceParent: File,
             maximumArchiveBytes: Long,
             maximumEntries: Int,
@@ -74,7 +77,8 @@ internal class WorkspaceSnapshot private constructor(
                         maximumEntries,
                     )
                     require(root.mkdir()) { "Workspace root could not be created" }
-                    val policy = WorkspaceArchivePathPolicy(entryPoint)
+                    val sourceEntryPoint = workspaceSourceEntryPoint(entryPoint, entryMode)
+                    val policy = WorkspaceArchivePathPolicy(sourceEntryPoint)
                     val extractedEntryCount = extractArchive(
                         archive = verified.requireFile(),
                         root = root,
@@ -86,7 +90,7 @@ internal class WorkspaceSnapshot private constructor(
                     require(extractedEntryCount == centralEntryCount) {
                         "Workspace ZIP local and central entry counts differ"
                     }
-                    writeSourceEntry(root, entryPoint, sourceBytes, shouldStop)
+                    writeSourceEntry(root, sourceEntryPoint, sourceBytes, shouldStop)
                 }
                 check(!shouldStop()) { "Workspace staging was cancelled" }
                 return WorkspaceSnapshot(container, root)
@@ -208,6 +212,12 @@ internal class WorkspaceSnapshot private constructor(
         private const val ROOT_NAME = "root"
     }
 }
+
+internal fun workspaceSourceEntryPoint(entryPoint: String, entryMode: PythonEntryMode): String =
+    when (entryMode) {
+        PythonEntryMode.FILE -> entryPoint
+        PythonEntryMode.MODULE -> PythonRuntimeValidation.fileEntryPointForModuleName(entryPoint)
+    }
 
 internal data class WorkspaceArchiveEntryPath(
     val logicalPath: String,

@@ -6,11 +6,18 @@ import android.os.SystemClock
 import io.github.supermonster003.autojs6.plugin.python.runtime.PythonRuntimeMetadata
 import io.github.supermonster003.autojs6.plugin.python.runtime.execution.BufferedOutputRecord
 import io.github.supermonster003.autojs6.plugin.python.runtime.execution.ChaquopyRuntime
+import io.github.supermonster003.autojs6.plugin.python.runtime.execution.PythonInputDeliveryException
+import io.github.supermonster003.autojs6.plugin.python.runtime.execution.PythonInputLimitExceededException
+import io.github.supermonster003.autojs6.plugin.python.runtime.execution.PythonInputTimeoutException
+import io.github.supermonster003.autojs6.plugin.python.runtime.execution.PythonOutputDeliveryException
+import io.github.supermonster003.autojs6.plugin.python.runtime.execution.PythonOutputLimitExceededException
 import io.github.supermonster003.autojs6.plugin.python.runtime.execution.PythonRunOutcome
 import io.github.supermonster003.autojs6.plugin.python.runtime.process.ProcessRetirement
 import io.github.supermonster003.autojs6.plugin.python.runtime.security.HostCallerVerifier
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.HostCapabilitySnapshot
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.OwnedParcelFileDescriptors
+import io.github.supermonster003.autojs6.plugin.python.runtime.transport.OutputArtifactWorkspace
+import io.github.supermonster003.autojs6.plugin.python.runtime.transport.PreparedOutputArtifacts
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.SourceSnapshot
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.StdinSnapshot
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.WorkspaceSnapshot
@@ -24,6 +31,10 @@ import org.autojs.plugin.python.runtime.api.PythonExecutionError
 import org.autojs.plugin.python.runtime.api.PythonExecutionRequest
 import org.autojs.plugin.python.runtime.api.PythonExecutionResult
 import org.autojs.plugin.python.runtime.api.PythonFailurePhase
+import org.autojs.plugin.python.runtime.api.PythonInputEcho
+import org.autojs.plugin.python.runtime.api.PythonInputPrompt
+import org.autojs.plugin.python.runtime.api.PythonInputReply
+import org.autojs.plugin.python.runtime.api.PythonPromptId
 import org.autojs.plugin.python.runtime.api.PythonOutputChunk
 import org.autojs.plugin.python.runtime.api.PythonOutputStream
 import org.autojs.plugin.python.runtime.api.PythonRuntimeCodec
@@ -80,6 +91,9 @@ internal class PythonExecutionSession(
     private var stderrBytes = 0L
     private var stdoutChunks = 0L
     private var stderrChunks = 0L
+    private var pendingInput: PendingInput? = null
+    private var nextInputPromptId = 1L
+    private var inputPromptCount = 0
 
     override fun start() {
         callerVerifier.enforceSessionOwner(ownerUid)
@@ -144,6 +158,39 @@ internal class PythonExecutionSession(
                 invalid = true
             } else {
                 outstandingCredits += count
+                signal.notifyAll()
+            }
+        }
+        if (invalid) hardRetire()
+    }
+
+    override fun replyInput(reply: ByteArray?) {
+        callerVerifier.enforceSessionOwner(ownerUid)
+        val decoded = try {
+            PythonRuntimeCodec.decodeInputReply(
+                requireNotNull(reply) { "Python input reply is null" },
+            )
+        } catch (_: RuntimeException) {
+            hardRetire()
+            return
+        }
+        var invalid = false
+        synchronized(signal) {
+            if (state.get() == State.TERMINAL || state.get() == State.CLOSED) return
+            val pending = pendingInput
+            if (
+                state.get() != State.STARTED ||
+                pending == null ||
+                pending.reply != null ||
+                decoded.requestId != request.requestId ||
+                decoded.promptId != pending.prompt.promptId ||
+                decoded.value?.toByteArray(Charsets.UTF_8)?.size?.let {
+                    it > pending.prompt.maxReplyBytes
+                } == true
+            ) {
+                invalid = true
+            } else {
+                pending.reply = decoded
                 signal.notifyAll()
             }
         }
@@ -224,7 +271,10 @@ internal class PythonExecutionSession(
         workerFuture?.cancel(true)
         descriptors.close()
         inputs.getAndSet(null)?.close()
-        synchronized(signal) { signal.notifyAll() }
+        synchronized(signal) {
+            pendingInput = null
+            signal.notifyAll()
+        }
         unlinkCallbackDeaths()
         releaseOnce()
     }
@@ -260,60 +310,156 @@ internal class PythonExecutionSession(
         }
         if (isStopped()) return
 
-        val outcome = try {
-            val executionInputs = checkNotNull(inputs.get())
-            val source = executionInputs.source.copyBytes()
-            val hostCapabilitySnapshot = executionInputs.hostCapabilities?.copyBytes()
-            val stdinSnapshot = executionInputs.stdin?.copyBytes()
-            try {
-                runtime.execute(
-                    source = source,
-                    request = request,
-                    workspaceRoot = executionInputs.workspace?.root,
-                    hostCapabilitySnapshot = hostCapabilitySnapshot,
-                    stdinSnapshot = stdinSnapshot,
-                )
-            } finally {
-                source.fill(0)
-                hostCapabilitySnapshot?.fill(0)
-                stdinSnapshot?.fill(0)
-            }
+        val outputArtifactWorkspace = try {
+            request.resultPolicy
+                ?.takeIf { it.maxArtifacts > 0 }
+                ?.let {
+                    OutputArtifactWorkspace.create(
+                        runtime.outputArtifactParentDirectory,
+                        request.requestId,
+                    )
+                }
         } catch (_: Exception) {
             if (!isStopped()) {
-                finishFailure(PythonErrorCode.INTERNAL, PythonFailurePhase.EXECUTION, "Python bootstrap failed")
-            }
-            return
-        }
-        inputs.getAndSet(null)?.close()
-        if (isStopped()) return
-
-        try {
-            outcome.output.forEach(::emitOutput)
-        } catch (_: InterruptedException) {
-            Thread.currentThread().interrupt()
-            return
-        } catch (_: Exception) {
-            if (!isStopped()) {
-                finishFailure(PythonErrorCode.INTERNAL, PythonFailurePhase.OUTPUT, "Python output delivery failed")
-            }
-            return
-        }
-        if (isStopped()) return
-
-        when (outcome) {
-            is PythonRunOutcome.Completed -> runCatching { finishResult(outcome.exitCode) }
-            is PythonRunOutcome.Failed -> runCatching { finishPythonException(outcome) }
-            is PythonRunOutcome.OutputLimitExceeded -> runCatching {
                 finishFailure(
-                    PythonErrorCode.OUTPUT_LIMIT_EXCEEDED,
-                    PythonFailurePhase.OUTPUT,
-                    "Python output exceeded the negotiated limit",
+                    PythonErrorCode.STORAGE_EXHAUSTED,
+                    PythonFailurePhase.RESULT,
+                    "Python output artifact workspace could not be created",
                 )
             }
-        }.onFailure {
-            if (state.get() == State.STARTED) {
-                finishFailure(PythonErrorCode.INTERNAL, PythonFailurePhase.EXECUTION, "Python outcome encoding failed")
+            return
+        }
+        try {
+            val outcome = try {
+                val executionInputs = checkNotNull(inputs.get())
+                val source = executionInputs.source.copyBytes()
+                val hostCapabilitySnapshot = executionInputs.hostCapabilities?.copyBytes()
+                val stdinSnapshot = executionInputs.stdin?.copyBytes()
+                try {
+                    runtime.execute(
+                        source = source,
+                        request = request,
+                        workspaceRoot = executionInputs.workspace?.root,
+                        hostCapabilitySnapshot = hostCapabilitySnapshot,
+                        stdinSnapshot = stdinSnapshot,
+                        onOutput = ::emitOutput,
+                        onInput = request.interactiveInput?.let { ::requestInput },
+                        outputArtifactRoot = outputArtifactWorkspace?.root,
+                    )
+                } finally {
+                    source.fill(0)
+                    hostCapabilitySnapshot?.fill(0)
+                    stdinSnapshot?.fill(0)
+                }
+            } catch (_: InterruptedException) {
+                Thread.currentThread().interrupt()
+                return
+            } catch (_: PythonOutputLimitExceededException) {
+                if (!isStopped()) {
+                    finishFailure(
+                        PythonErrorCode.OUTPUT_LIMIT_EXCEEDED,
+                        PythonFailurePhase.OUTPUT,
+                        "Python output exceeded the negotiated limit",
+                    )
+                }
+                return
+            } catch (_: PythonOutputDeliveryException) {
+                if (!isStopped()) {
+                    finishFailure(
+                        PythonErrorCode.INTERNAL,
+                        PythonFailurePhase.OUTPUT,
+                        "Python output delivery failed",
+                    )
+                }
+                return
+            } catch (_: PythonInputTimeoutException) {
+                if (!isStopped()) {
+                    finishFailure(
+                        PythonErrorCode.INPUT_TIMEOUT,
+                        PythonFailurePhase.INTERACTIVE_INPUT,
+                        "Python interactive input reply timed out",
+                    )
+                }
+                return
+            } catch (_: PythonInputLimitExceededException) {
+                if (!isStopped()) {
+                    finishFailure(
+                        PythonErrorCode.INPUT_LIMIT_EXCEEDED,
+                        PythonFailurePhase.INTERACTIVE_INPUT,
+                        "Python interactive input exceeded the negotiated limit",
+                    )
+                }
+                return
+            } catch (_: PythonInputDeliveryException) {
+                if (!isStopped()) {
+                    finishFailure(
+                        PythonErrorCode.INTERNAL,
+                        PythonFailurePhase.INTERACTIVE_INPUT,
+                        "Python interactive input delivery failed",
+                    )
+                }
+                return
+            } catch (_: Exception) {
+                if (!isStopped()) {
+                    finishFailure(
+                        PythonErrorCode.INTERNAL,
+                        PythonFailurePhase.EXECUTION,
+                        "Python bootstrap failed",
+                    )
+                }
+                return
             }
+            inputs.getAndSet(null)?.close()
+            if (isStopped()) return
+
+            when (outcome) {
+                is PythonRunOutcome.Completed -> runCatching {
+                    val prepared = if (outputArtifactWorkspace == null) {
+                        require(outcome.artifactPaths.isEmpty()) {
+                            "Python bootstrap returned artifacts without a negotiated output workspace"
+                        }
+                        null
+                    } else {
+                        outputArtifactWorkspace.prepare(
+                            paths = outcome.artifactPaths,
+                            policy = checkNotNull(request.resultPolicy),
+                            shouldStop = ::isStopped,
+                        )
+                    }
+                    try {
+                        finishResult(outcome, prepared)
+                    } catch (error: Throwable) {
+                        prepared?.close()
+                        throw error
+                    }
+                }
+                is PythonRunOutcome.Failed -> runCatching { finishPythonException(outcome) }
+                is PythonRunOutcome.OutputLimitExceeded -> runCatching {
+                    finishFailure(
+                        PythonErrorCode.OUTPUT_LIMIT_EXCEEDED,
+                        PythonFailurePhase.OUTPUT,
+                        "Python output exceeded the negotiated limit",
+                    )
+                }
+                PythonRunOutcome.Stopped -> runCatching {
+                    finishFailure(
+                        PythonErrorCode.INTERNAL,
+                        PythonFailurePhase.OUTPUT,
+                        "Python output stopped without a session terminal",
+                        retireProcess = true,
+                    )
+                }
+            }.onFailure {
+                if (state.get() == State.STARTED) {
+                    finishFailure(
+                        PythonErrorCode.OUTPUT_ARTIFACT_REJECTED,
+                        PythonFailurePhase.RESULT,
+                        "Python explicit result or output artifact was rejected",
+                    )
+                }
+            }
+        } finally {
+            outputArtifactWorkspace?.close()
         }
     }
 
@@ -357,6 +503,7 @@ internal class PythonExecutionSession(
                                 sourceReference = request.source,
                                 sourceBytes = sourceBytes,
                                 entryPoint = request.entryPoint,
+                                entryMode = request.entryMode,
                                 workspaceParent = runtime.workspaceParentDirectory,
                                 maximumArchiveBytes = limits.maxWorkspaceArchiveBytes,
                                 maximumEntries = limits.maxWorkspaceEntries,
@@ -494,6 +641,14 @@ internal class PythonExecutionSession(
         require(record.bytes.isNotEmpty() && record.bytes.size <= request.maxOutputChunkBytes) {
             "Python bootstrap output chunk violates the negotiated size"
         }
+        val totalBytes = stdoutBytes + stderrBytes
+        val totalChunks = stdoutChunks + stderrChunks
+        if (
+            totalBytes > request.maxOutputBytes - record.bytes.size.toLong() ||
+            totalChunks >= request.maxOutputChunks
+        ) {
+            throw PythonOutputLimitExceededException()
+        }
         val sequence = awaitCredit() ?: throw InterruptedException("Python output delivery stopped")
         val chunk = PythonOutputChunk(request.requestId, sequence, record.stream, record.bytes)
             .also(PythonRuntimeValidation::validateOutputChunk)
@@ -514,8 +669,59 @@ internal class PythonExecutionSession(
                 stderrChunks++
             }
         }
-        require(stdoutBytes + stderrBytes <= request.maxOutputBytes)
-        require(stdoutChunks + stderrChunks <= request.maxOutputChunks)
+    }
+
+    private fun requestInput(promptText: String, echo: PythonInputEcho): PythonInputReply {
+        val inputPolicy = checkNotNull(request.interactiveInput) {
+            "Python bootstrap requested interactive input without authorization"
+        }
+        val pending = synchronized(signal) {
+            if (state.get() != State.STARTED || Thread.currentThread().isInterrupted) {
+                throw InterruptedException("Python interactive input stopped")
+            }
+            if (inputPromptCount >= inputPolicy.maxPrompts) {
+                throw PythonInputLimitExceededException()
+            }
+            if (promptText.toByteArray(Charsets.UTF_8).size > inputPolicy.maxPromptBytes) {
+                throw PythonInputLimitExceededException()
+            }
+            if (pendingInput != null || nextInputPromptId == Long.MAX_VALUE) {
+                throw PythonInputLimitExceededException()
+            }
+            val prompt = PythonInputPrompt(
+                requestId = request.requestId,
+                promptId = PythonPromptId.fromLong(nextInputPromptId),
+                text = promptText,
+                echo = echo,
+                maxReplyBytes = inputPolicy.maxReplyBytes,
+                replyTimeoutMillis = inputPolicy.replyTimeoutMillis,
+            ).also(PythonRuntimeValidation::validateInputPrompt)
+            PendingInput(prompt).also {
+                pendingInput = it
+                inputPromptCount++
+                nextInputPromptId++
+            }
+        }
+        try {
+            val encoded = PythonRuntimeCodec.encodeInputPrompt(pending.prompt)
+            dispatchInputPromptAndWait { executionCallback.onInputPrompt(encoded) }
+            val deadline = SystemClock.elapsedRealtime() + pending.prompt.replyTimeoutMillis
+            return synchronized(signal) {
+                while (state.get() == State.STARTED && pending.reply == null) {
+                    val remaining = deadline - SystemClock.elapsedRealtime()
+                    if (remaining <= 0L) throw PythonInputTimeoutException()
+                    signal.wait(minOf(remaining, INPUT_WAIT_POLL_MILLIS))
+                }
+                if (state.get() != State.STARTED || Thread.currentThread().isInterrupted) {
+                    throw InterruptedException("Python interactive input stopped")
+                }
+                pending.reply ?: throw PythonInputTimeoutException()
+            }
+        } finally {
+            synchronized(signal) {
+                if (pendingInput === pending) pendingInput = null
+            }
+        }
     }
 
     private fun awaitCredit(): Long? = synchronized(signal) {
@@ -526,18 +732,42 @@ internal class PythonExecutionSession(
         nextSequence - 1L
     }
 
-    private fun finishResult(exitCode: Int) {
+    private fun finishResult(
+        outcome: PythonRunOutcome.Completed,
+        prepared: PreparedOutputArtifacts?,
+    ) {
         val result = PythonExecutionResult(
             requestId = request.requestId,
-            exitCode = exitCode,
+            exitCode = outcome.exitCode,
             elapsedMillis = elapsedMillis(),
             stdoutBytes = stdoutBytes,
             stderrBytes = stderrBytes,
             stdoutChunks = stdoutChunks,
             stderrChunks = stderrChunks,
-        ).also(PythonRuntimeValidation::validateResult)
+            structuredJson = outcome.structuredJson,
+            outputArtifacts = prepared?.artifacts.orEmpty(),
+        ).also {
+            PythonRuntimeValidation.validateResultAgainstPolicy(
+                it,
+                request.resultPolicy,
+                prepared?.descriptors?.size ?: 0,
+            )
+        }
         val encoded = PythonRuntimeCodec.encodeExecutionResult(result)
-        finishTerminal { executionCallback.onResult(encoded, emptyArray()) }
+        if (prepared == null) {
+            finishTerminal { executionCallback.onResult(encoded, emptyArray()) }
+        } else {
+            finishTerminal(
+                onUndelivered = prepared::close,
+                callback = {
+                    try {
+                        executionCallback.onResult(encoded, prepared.descriptors)
+                    } finally {
+                        prepared.close()
+                    }
+                },
+            )
+        }
     }
 
     private fun finishPythonException(outcome: PythonRunOutcome.Failed) {
@@ -572,14 +802,30 @@ internal class PythonExecutionSession(
         finishTerminal(retireProcess) { executionCallback.onFailed(encoded) }
     }
 
-    private fun finishTerminal(retireProcess: Boolean = false, callback: () -> Unit) {
+    private fun finishTerminal(
+        retireProcess: Boolean = false,
+        onUndelivered: () -> Unit = {},
+        callback: () -> Unit,
+    ) {
         synchronized(callbackOrder) {
-            if (!state.compareAndSet(State.STARTED, State.TERMINAL)) return
+            if (!state.compareAndSet(State.STARTED, State.TERMINAL)) {
+                onUndelivered()
+                return
+            }
             deadlineFuture?.cancel(false)
             descriptors.close()
             inputs.getAndSet(null)?.close()
-            synchronized(signal) { signal.notifyAll() }
-            callbackLane.dispatch(callback, onFailure = { hardRetire() })
+            synchronized(signal) {
+                pendingInput = null
+                signal.notifyAll()
+            }
+            callbackLane.dispatch(
+                callback,
+                onFailure = {
+                    onUndelivered()
+                    hardRetire()
+                },
+            )
             if (retireProcess) {
                 retirement.retireAfterCallbackDrain()
                 forceClose()
@@ -626,7 +872,10 @@ internal class PythonExecutionSession(
         deadlineFuture?.cancel(false)
         descriptors.close()
         inputs.getAndSet(null)?.close()
-        synchronized(signal) { signal.notifyAll() }
+        synchronized(signal) {
+            pendingInput = null
+            signal.notifyAll()
+        }
         callbackLane.dispatch(
             callback = { executionCallback.onCancelled(encoded) },
             onFailure = { if (retireProcess) hardRetire() else forceClose() },
@@ -639,11 +888,17 @@ internal class PythonExecutionSession(
         }
     }
 
-    private fun dispatchOutputAndWait(callback: () -> Unit) {
+    private fun dispatchOutputAndWait(callback: () -> Unit) =
+        dispatchSessionCallbackAndWait("Python output delivery stopped", callback)
+
+    private fun dispatchInputPromptAndWait(callback: () -> Unit) =
+        dispatchSessionCallbackAndWait("Python interactive input delivery stopped", callback)
+
+    private fun dispatchSessionCallbackAndWait(stoppedMessage: String, callback: () -> Unit) {
         val done = CountDownLatch(1)
         val failure = AtomicReference<Throwable?>()
         synchronized(callbackOrder) {
-            if (state.get() != State.STARTED) throw InterruptedException("Python output delivery stopped")
+            if (state.get() != State.STARTED) throw InterruptedException(stoppedMessage)
             callbackLane.dispatch(
                 callback = {
                     try {
@@ -689,6 +944,7 @@ internal class PythonExecutionSession(
     private companion object {
         const val TERMINAL_CLOSE_LEASE_MILLIS = 30_000L
         const val START_LEASE_MILLIS = 5_000L
+        const val INPUT_WAIT_POLL_MILLIS = 100L
     }
 
     private class ExecutionInputs(
@@ -704,4 +960,9 @@ internal class PythonExecutionSession(
             runCatching { source.close() }
         }
     }
+
+    private class PendingInput(
+        val prompt: PythonInputPrompt,
+        var reply: PythonInputReply? = null,
+    )
 }

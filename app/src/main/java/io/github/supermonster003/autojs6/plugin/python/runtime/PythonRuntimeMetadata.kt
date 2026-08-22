@@ -52,6 +52,10 @@ internal object PythonRuntimeMetadata {
             supportsCooperativeCancellation = false,
             cancellationMode = PythonCancellationMode.PROCESS_RESTART_ONLY,
             supportsHostCapabilitySnapshot = true,
+            supportsModuleEntry = true,
+            supportsInteractiveInput = true,
+            supportsStructuredJsonResult = true,
+            supportsOutputArtifacts = true,
             limits = PythonRuntimeResourceLimits(
                 maxSourceBytes = 4L * 1024L * 1024L,
                 maxWorkspaceArchiveBytes = 16L * 1024L * 1024L,
@@ -65,6 +69,15 @@ internal object PythonRuntimeMetadata {
                 maxTimeoutMillis = 60_000L,
                 maxConcurrentSessions = 1,
                 maxHostCapabilitySnapshotBytes = PythonRuntimeContract.MAX_HOST_CAPABILITY_SNAPSHOT_BYTES,
+                maxInputPromptBytes = 4 * 1024,
+                maxInputReplyBytes = 64 * 1024,
+                maxInputPrompts = 128,
+                maxInputWaitMillis = 60_000L,
+                maxStructuredJsonBytes = 64 * 1024,
+                maxOutputArtifacts = 16,
+                maxOutputArtifactPathBytes = 1024,
+                maxOutputArtifactBytes = 4L * 1024L * 1024L,
+                maxTotalOutputArtifactBytes = 8L * 1024L * 1024L,
             ),
         ).also { PythonRuntimeValidation.validateCapabilitiesAgainstInfo(it, runtimeInfo) }
     }

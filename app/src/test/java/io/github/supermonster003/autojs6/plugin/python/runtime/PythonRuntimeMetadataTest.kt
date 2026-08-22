@@ -42,7 +42,7 @@ class PythonRuntimeMetadataTest {
     }
 
     @Test
-    fun capabilitiesAdvertiseExactR5SnapshotSurfaceAndLimits() {
+    fun capabilitiesAdvertiseExactR2StructuredResultSurfaceAndLimits() {
         val capabilities = PythonRuntimeMetadata.capabilities
 
         assertEquals(PythonImplementation.CPYTHON, capabilities.implementation)
@@ -53,6 +53,10 @@ class PythonRuntimeMetadataTest {
         assertTrue(capabilities.supportsStructuredTraceback)
         assertFalse(capabilities.supportsCooperativeCancellation)
         assertTrue(capabilities.supportsHostCapabilitySnapshot)
+        assertTrue(capabilities.supportsModuleEntry)
+        assertTrue(capabilities.supportsInteractiveInput)
+        assertTrue(capabilities.supportsStructuredJsonResult)
+        assertTrue(capabilities.supportsOutputArtifacts)
         assertEquals(PythonCancellationMode.PROCESS_RESTART_ONLY, capabilities.cancellationMode)
         assertEquals(
             PythonRuntimeResourceLimits(
@@ -68,6 +72,15 @@ class PythonRuntimeMetadataTest {
                 maxTimeoutMillis = 60_000L,
                 maxConcurrentSessions = 1,
                 maxHostCapabilitySnapshotBytes = PythonRuntimeContract.MAX_HOST_CAPABILITY_SNAPSHOT_BYTES,
+                maxInputPromptBytes = 4 * 1024,
+                maxInputReplyBytes = 64 * 1024,
+                maxInputPrompts = 128,
+                maxInputWaitMillis = 60_000L,
+                maxStructuredJsonBytes = 64 * 1024,
+                maxOutputArtifacts = 16,
+                maxOutputArtifactPathBytes = 1024,
+                maxOutputArtifactBytes = 4L * 1024L * 1024L,
+                maxTotalOutputArtifactBytes = 8L * 1024L * 1024L,
             ),
             capabilities.limits,
         )

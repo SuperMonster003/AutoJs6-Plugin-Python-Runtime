@@ -17,9 +17,34 @@ class ProjectReadLimitError(AutoJs6Error):
     """A project file exceeds the per-call read limit."""
 
 
+class ResultAlreadySetError(AutoJs6Error):
+    """The one explicit structured result slot was already populated."""
+
+
+class ResultSerializationError(AutoJs6Error, TypeError):
+    """A value cannot be represented as strict finite JSON."""
+
+
+class ResultLimitError(AutoJs6Error):
+    """The encoded structured result exceeds its execution-scoped byte limit."""
+
+
+class ArtifactPathError(AutoJs6Error, ValueError):
+    """An output artifact path is unsafe or not normalized."""
+
+
+class ArtifactLimitError(AutoJs6Error):
+    """An output artifact declaration exceeds an execution-scoped limit."""
+
+
 __all__ = (
     "AutoJs6Error",
     "CapabilityUnavailableError",
     "ProjectPathError",
     "ProjectReadLimitError",
+    "ResultAlreadySetError",
+    "ResultSerializationError",
+    "ResultLimitError",
+    "ArtifactPathError",
+    "ArtifactLimitError",
 )

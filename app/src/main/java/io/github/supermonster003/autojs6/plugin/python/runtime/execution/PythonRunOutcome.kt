@@ -13,6 +13,8 @@ internal sealed interface PythonRunOutcome {
 
     data class Completed(
         val exitCode: Int,
+        val structuredJson: String?,
+        val artifactPaths: List<String>,
         override val output: List<BufferedOutputRecord>,
     ) : PythonRunOutcome
 
@@ -26,4 +28,8 @@ internal sealed interface PythonRunOutcome {
     data class OutputLimitExceeded(
         override val output: List<BufferedOutputRecord>,
     ) : PythonRunOutcome
+
+    data object Stopped : PythonRunOutcome {
+        override val output: List<BufferedOutputRecord> = emptyList()
+    }
 }

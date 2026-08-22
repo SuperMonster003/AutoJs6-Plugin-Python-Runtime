@@ -5,12 +5,22 @@ from __future__ import annotations
 import contextvars
 import copy
 import json
+import math
 import os
+import re
+import unicodedata
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
-from .errors import CapabilityUnavailableError
+from .errors import (
+    ArtifactLimitError,
+    ArtifactPathError,
+    CapabilityUnavailableError,
+    ResultAlreadySetError,
+    ResultLimitError,
+    ResultSerializationError,
+)
 
 
 _MAX_SNAPSHOT_BYTES = 64 * 1024
@@ -27,6 +37,19 @@ _KNOWN_GRANTS = frozenset(
 class _ExecutionContext:
     document: dict[str, Any] | None
     project_root: str | None
+    result_state: _ExecutionResultState | None
+
+
+@dataclass
+class _ExecutionResultState:
+    output_root: str | None
+    max_structured_json_bytes: int
+    max_artifacts: int
+    max_artifact_path_bytes: int
+    structured_json: str | None = None
+    structured_json_set: bool = False
+    artifact_paths: list[str] = field(default_factory=list)
+    artifact_path_set: set[str] = field(default_factory=set)
 
 
 _ACTIVE: contextvars.ContextVar[_ExecutionContext | None] = contextvars.ContextVar(
@@ -38,6 +61,10 @@ _ACTIVE: contextvars.ContextVar[_ExecutionContext | None] = contextvars.ContextV
 def _install_execution_context(
     encoded_snapshot: bytes,
     project_root: str | None,
+    output_root: str | None = None,
+    max_structured_json_bytes: int = 0,
+    max_artifacts: int = 0,
+    max_artifact_path_bytes: int = 0,
 ) -> contextvars.Token[_ExecutionContext | None]:
     document = _decode_snapshot(encoded_snapshot) if encoded_snapshot else None
     normalized_root = os.path.realpath(os.fspath(project_root)) if project_root is not None else None
@@ -45,7 +72,19 @@ def _install_execution_context(
         declared_project = document["execution"]["project"]
         if declared_project != (normalized_root is not None):
             raise ValueError("Host capability project availability does not match the runtime workspace")
-    return _ACTIVE.set(_ExecutionContext(document=document, project_root=normalized_root))
+    result_state = _create_result_state(
+        output_root,
+        max_structured_json_bytes,
+        max_artifacts,
+        max_artifact_path_bytes,
+    )
+    return _ACTIVE.set(
+        _ExecutionContext(
+            document=document,
+            project_root=normalized_root,
+            result_state=result_state,
+        )
+    )
 
 
 def _reset_execution_context(token: contextvars.Token[_ExecutionContext | None]) -> None:
@@ -78,6 +117,160 @@ def _project_context() -> _ExecutionContext:
     if context.project_root is None or not context.document["execution"]["project"]:
         raise CapabilityUnavailableError("Project files are unavailable for this Python execution")
     return context
+
+
+def _set_structured_result(value: Any) -> None:
+    state = _require_result_state("Structured JSON results")
+    if state.max_structured_json_bytes <= 0:
+        raise CapabilityUnavailableError(
+            "Structured JSON results are unavailable for this Python execution"
+        )
+    if state.structured_json_set:
+        raise ResultAlreadySetError("The structured JSON result was already set")
+    try:
+        _require_json_value(value, set(), 0)
+        encoded = json.dumps(
+            value,
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        size = len(encoded.encode("utf-8", "strict"))
+    except (TypeError, ValueError, UnicodeError, RecursionError) as error:
+        raise ResultSerializationError(
+            "Structured result must contain only finite JSON-compatible values"
+        ) from error
+    if size > state.max_structured_json_bytes:
+        raise ResultLimitError(
+            "Structured JSON result exceeds the execution byte limit"
+        )
+    state.structured_json = encoded
+    state.structured_json_set = True
+
+
+def _register_artifact_path(value: str) -> str:
+    state = _require_result_state("Output artifacts")
+    if state.max_artifacts <= 0 or state.output_root is None:
+        raise CapabilityUnavailableError(
+            "Output artifacts are unavailable for this Python execution"
+        )
+    relative = _artifact_relative_path(value, state.max_artifact_path_bytes)
+    if relative not in state.artifact_path_set:
+        if len(state.artifact_paths) >= state.max_artifacts:
+            raise ArtifactLimitError("Output artifact count exceeds the execution limit")
+        state.artifact_path_set.add(relative)
+        state.artifact_paths.append(relative)
+    target = os.path.join(state.output_root, *relative.split("/"))
+    parent = os.path.dirname(target)
+    os.makedirs(parent, mode=0o700, exist_ok=True)
+    if os.path.commonpath((state.output_root, os.path.realpath(parent))) != state.output_root:
+        raise ArtifactPathError("Output artifact parent escapes the private output root")
+    return target
+
+
+def _execution_result_snapshot() -> tuple[str | None, tuple[str, ...]]:
+    context = _ACTIVE.get()
+    if context is None or context.result_state is None:
+        return None, ()
+    state = context.result_state
+    return state.structured_json, tuple(state.artifact_paths)
+
+
+def _create_result_state(
+    output_root: str | None,
+    max_structured_json_bytes: int,
+    max_artifacts: int,
+    max_artifact_path_bytes: int,
+) -> _ExecutionResultState | None:
+    for value, label in (
+        (max_structured_json_bytes, "structured JSON byte limit"),
+        (max_artifacts, "artifact count limit"),
+        (max_artifact_path_bytes, "artifact path byte limit"),
+    ):
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise ValueError(f"Python result {label} is invalid")
+    if max_structured_json_bytes == 0 and max_artifacts == 0:
+        if output_root is not None or max_artifact_path_bytes != 0:
+            raise ValueError("Disabled Python results must not carry output state")
+        return None
+    if max_artifacts == 0:
+        if output_root is not None or max_artifact_path_bytes != 0:
+            raise ValueError("Disabled output artifacts must use zero path state")
+        normalized_output_root = None
+    else:
+        if output_root is None or max_artifact_path_bytes <= 0:
+            raise ValueError("Output artifacts require a private output root and path limit")
+        normalized_output_root = os.path.realpath(os.fspath(output_root))
+        if not os.path.isdir(normalized_output_root) or os.path.islink(output_root):
+            raise ValueError("Python output artifact root is unavailable")
+    return _ExecutionResultState(
+        output_root=normalized_output_root,
+        max_structured_json_bytes=max_structured_json_bytes,
+        max_artifacts=max_artifacts,
+        max_artifact_path_bytes=max_artifact_path_bytes,
+    )
+
+
+def _require_result_state(label: str) -> _ExecutionResultState:
+    context = _ACTIVE.get()
+    if context is None or context.result_state is None:
+        raise CapabilityUnavailableError(
+            f"{label} are unavailable for this Python execution"
+        )
+    return context.result_state
+
+
+def _artifact_relative_path(value: str, maximum_bytes: int) -> str:
+    if not isinstance(value, str) or not value:
+        raise ArtifactPathError("Output artifact path must be a non-empty string")
+    try:
+        encoded = value.encode("utf-8", "strict")
+    except UnicodeError as error:
+        raise ArtifactPathError("Output artifact path is not valid Unicode") from error
+    if len(encoded) > maximum_bytes:
+        raise ArtifactLimitError("Output artifact path exceeds the execution byte limit")
+    if (
+        unicodedata.normalize("NFC", value) != value
+        or value.startswith("/")
+        or re.match(r"^[A-Za-z]:", value)
+        or "\\" in value
+        or any(ord(character) < 0x20 or ord(character) == 0x7F for character in value)
+    ):
+        raise ArtifactPathError("Output artifact path is not a normalized relative path")
+    segments = value.split("/")
+    if any(not segment or segment in (".", "..") for segment in segments):
+        raise ArtifactPathError("Output artifact path contains an unsafe segment")
+    return value
+
+
+def _require_json_value(value: Any, active: set[int], depth: int) -> None:
+    if depth > 64:
+        raise ValueError("Structured result nesting is too deep")
+    if value is None or isinstance(value, (str, bool, int)):
+        return
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("Structured result contains a non-finite number")
+        return
+    if isinstance(value, (list, tuple, dict)):
+        identity = id(value)
+        if identity in active:
+            raise ValueError("Structured result contains a cycle")
+        active.add(identity)
+        try:
+            if isinstance(value, dict):
+                if any(not isinstance(key, str) for key in value):
+                    raise TypeError("Structured result object keys must be strings")
+                for item in value.values():
+                    _require_json_value(item, active, depth + 1)
+            else:
+                for item in value:
+                    _require_json_value(item, active, depth + 1)
+        finally:
+            active.remove(identity)
+        return
+    raise TypeError("Structured result contains an unsupported value")
 
 
 def _decode_snapshot(encoded: bytes) -> dict[str, Any]:

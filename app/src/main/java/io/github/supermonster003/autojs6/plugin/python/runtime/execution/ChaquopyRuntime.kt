@@ -4,7 +4,10 @@ import android.content.Context
 import com.chaquo.python.PyObject
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
+import org.autojs.plugin.python.runtime.api.PythonEntryMode
 import org.autojs.plugin.python.runtime.api.PythonExecutionRequest
+import org.autojs.plugin.python.runtime.api.PythonInputEcho
+import org.autojs.plugin.python.runtime.api.PythonInputReply
 import org.autojs.plugin.python.runtime.api.PythonOutputStream
 import org.autojs.plugin.python.runtime.api.PythonTracebackFrame
 import org.autojs.plugin.python.runtime.api.PythonTracebackOrigin
@@ -19,6 +22,7 @@ internal class ChaquopyRuntime(context: Context) {
     private val applicationContext = context.applicationContext
     private val startLock = Any()
     val workspaceParentDirectory = File(applicationContext.cacheDir, "python-runtime-workspaces")
+    val outputArtifactParentDirectory = File(applicationContext.cacheDir, "python-runtime-results")
 
     fun prepare() {
         ensureStarted()
@@ -30,9 +34,14 @@ internal class ChaquopyRuntime(context: Context) {
         workspaceRoot: File? = null,
         hostCapabilitySnapshot: ByteArray? = null,
         stdinSnapshot: ByteArray? = null,
+        onOutput: (BufferedOutputRecord) -> Unit,
+        onInput: ((String, PythonInputEcho) -> PythonInputReply)? = null,
+        outputArtifactRoot: File? = null,
     ): PythonRunOutcome {
         val python = ensureStarted()
         val bootstrap = python.getModule("autojs6_runtime.bootstrap")
+        val outputSink = ChaquopyOutputSink(onOutput)
+        val inputBridge = onInput?.let(::ChaquopyInputBridge)
         val result = if (workspaceRoot == null) {
             bootstrap.callAttr(
                 "run_source",
@@ -44,6 +53,12 @@ internal class ChaquopyRuntime(context: Context) {
                 request.maxOutputChunks,
                 hostCapabilitySnapshot ?: EMPTY_CAPABILITY_SNAPSHOT,
                 stdinSnapshot ?: EMPTY_STDIN_SNAPSHOT,
+                outputSink,
+                inputBridge,
+                outputArtifactRoot?.absolutePath,
+                request.resultPolicy?.maxStructuredJsonBytes ?: 0,
+                request.resultPolicy?.maxArtifacts ?: 0,
+                request.resultPolicy?.maxArtifactPathBytes ?: 0,
             )
         } else {
             bootstrap.callAttr(
@@ -57,10 +72,23 @@ internal class ChaquopyRuntime(context: Context) {
                 request.maxOutputChunks,
                 hostCapabilitySnapshot ?: EMPTY_CAPABILITY_SNAPSHOT,
                 stdinSnapshot ?: EMPTY_STDIN_SNAPSHOT,
+                outputSink,
+                request.entryMode.bootstrapName(),
+                inputBridge,
+                outputArtifactRoot?.absolutePath,
+                request.resultPolicy?.maxStructuredJsonBytes ?: 0,
+                request.resultPolicy?.maxArtifacts ?: 0,
+                request.resultPolicy?.maxArtifactPathBytes ?: 0,
             )
         }
         return try {
-            decodeOutcome(result)
+            inputBridge?.rethrowFailure()
+            outputSink.rethrowFailure()
+            decodeOutcome(result).also { outcome ->
+                require(outcome.output.isEmpty()) {
+                    "Python streaming bootstrap returned buffered output"
+                }
+            }
         } finally {
             result.close()
         }
@@ -76,6 +104,8 @@ internal class ChaquopyRuntime(context: Context) {
         return when (required(result, "status").toString()) {
             "completed" -> PythonRunOutcome.Completed(
                 exitCode = required(result, "exit_code").toInt(),
+                structuredJson = required(result, "structured_json").toJava(String::class.java),
+                artifactPaths = required(result, "artifact_paths").asList().map(PyObject::toString),
                 output = output,
             )
             "failed" -> PythonRunOutcome.Failed(
@@ -94,6 +124,7 @@ internal class ChaquopyRuntime(context: Context) {
                 output = output,
             )
             "output_limit" -> PythonRunOutcome.OutputLimitExceeded(output)
+            "stopped" -> PythonRunOutcome.Stopped
             else -> error("Python bootstrap returned an unknown outcome")
         }
     }
@@ -171,4 +202,9 @@ internal class ChaquopyRuntime(context: Context) {
         val EMPTY_CAPABILITY_SNAPSHOT = ByteArray(0)
         val EMPTY_STDIN_SNAPSHOT = ByteArray(0)
     }
+}
+
+private fun PythonEntryMode.bootstrapName(): String = when (this) {
+    PythonEntryMode.FILE -> "file"
+    PythonEntryMode.MODULE -> "module"
 }

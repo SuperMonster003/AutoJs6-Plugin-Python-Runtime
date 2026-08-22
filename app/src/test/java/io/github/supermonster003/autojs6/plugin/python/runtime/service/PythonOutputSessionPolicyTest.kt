@@ -134,6 +134,28 @@ class PythonOutputSessionPolicyTest {
         assertEquals(EmitEvent.IGNORED_AFTER_TERMINAL, model.emit(1))
     }
 
+    @Test
+    fun acceptedPartialOutputPrecedesCancellationAndNothingFollows() {
+        val model = outputModel(maxBytes = 4L, maxChunks = 4L)
+
+        assertTrue(model.grant(2))
+        assertEquals(EmitEvent.EMITTED, model.emit(1))
+        assertTrue(model.finish(Terminal.CANCELLED))
+        assertEquals(EmitEvent.IGNORED_AFTER_TERMINAL, model.emit(1))
+        assertEquals(listOf("output", "terminal:CANCELLED"), model.events)
+    }
+
+    @Test
+    fun acceptedPartialOutputPrecedesTimeoutFailureAndNothingFollows() {
+        val model = outputModel(maxBytes = 4L, maxChunks = 4L)
+
+        assertTrue(model.grant(2))
+        assertEquals(EmitEvent.EMITTED, model.emit(1))
+        assertTrue(model.finish(Terminal.FAILURE))
+        assertEquals(EmitEvent.IGNORED_AFTER_TERMINAL, model.emit(1))
+        assertEquals(listOf("output", "terminal:FAILURE"), model.events)
+    }
+
     private fun request(
         maxOutputBytes: Long,
         maxOutputChunkBytes: Int,
@@ -189,6 +211,7 @@ class PythonOutputSessionPolicyTest {
             private set
         var terminalCount: Int = 0
             private set
+        val events = mutableListOf<String>()
 
         fun grant(count: Int): Boolean {
             if (terminal != null || count <= 0 || outstandingCredits > maxCredits - count) return false
@@ -207,6 +230,7 @@ class PythonOutputSessionPolicyTest {
             outstandingCredits--
             outputBytes += sizeBytes
             outputChunks++
+            events += "output"
             return EmitEvent.EMITTED
         }
 
@@ -214,6 +238,7 @@ class PythonOutputSessionPolicyTest {
             if (terminal != null) return false
             terminal = candidate
             terminalCount++
+            events += "terminal:$candidate"
             return true
         }
     }
