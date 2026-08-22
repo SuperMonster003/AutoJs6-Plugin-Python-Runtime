@@ -28,6 +28,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("1.0-1.4", common["protocol_version"])
         self.assertEqual("64 KiB", common["max_structured_json_bytes"])
         self.assertEqual("16", common["max_output_artifacts"])
+        self.assertEqual("16 MiB", common["max_output_bytes"])
+        self.assertEqual("16384", common["max_output_chunks"])
+        self.assertEqual("30 min", common["max_timeout"])
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
@@ -56,6 +59,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "{{ max_total_output_artifact_bytes }}",
                 ):
                     self.assertIn(placeholder, result_limits[0])
+                network_limits = [item for item in source["security_limits"] if "INTERNET" in item]
+                self.assertEqual(1, len(network_limits))
+                self.assertIn("pip", network_limits[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["unsupported_capabilities"][0])
                 self.assertIn("`sys.stdin`", source["unsupported_capabilities"][0])
                 self.assertIn("16 KB", source["p_build_architecture"])
@@ -79,6 +85,12 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("`sys.stdin`", protocol_13[0])
                 self.assertIn("SHA-256", protocol_14[0])
                 self.assertIn("stdout", protocol_14[0])
+                network_changes = [item for item in current["improvement"] if "INTERNET" in item]
+                limit_changes = [item for item in current["improvement"] if "16 MiB" in item]
+                self.assertEqual(1, len(network_changes))
+                self.assertEqual(1, len(limit_changes))
+                self.assertIn("pip", network_changes[0])
+                self.assertIn("16384", limit_changes[0])
 
     def test_generated_readmes_contain_no_unresolved_or_stale_stdin_claim(self) -> None:
         stale_fragments = (
@@ -98,6 +110,10 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("1 MiB", body)
                 self.assertIn("1.0-1.4", body)
                 self.assertIn("64 KiB", body)
+                self.assertIn("16 MiB", body)
+                self.assertIn("16384", body)
+                self.assertIn("30 min", body)
+                self.assertIn("INTERNET", body)
                 self.assertIn("SHA-256", body)
                 self.assertNotIn("{{", body)
                 lowered = body.lower()

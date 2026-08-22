@@ -123,13 +123,13 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-- Source is capped at 4 MiB, total output at 4 MiB, each output chunk at 16 KiB, and output count at 4096 chunks.
-- Request timeout is capped at 60 s, with one active session per process and no provider-side queue.
+- Source is capped at 4 MiB, total output at 16 MiB, each output chunk at 16 KiB, and output count at 16384 chunks.
+- Request timeout is capped at 30 min, with one active session per process and no provider-side queue.
 - SOURCE descriptors adopt complete Binder receiver-side PFD ownership, preserve reliable-pipe error channels, and close at terminal or session close.
 - Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.
 - Structured JSON is capped at 64 KiB; at most 16 artifacts are accepted with 1024 UTF-8 bytes paths, 4 MiB per file, 8 MiB aggregate, and Host verification of exact length, EOF, and SHA-256.
 - Cancellation uses process restart rather than CPython-level cooperation; native extensions and blocking calls still require later Android validation.
-- The stdlib-only policy forbids online pip and third-party Python packages. The merged APK permission set remains a build-gate check.
+- The plugin grants `INTERNET` for script-initiated standard-library networking; online pip, automatic code downloads, and runtime third-party package installation remain unsupported.
 
 ******
 
@@ -170,6 +170,8 @@ The R6-P2/P3 local RC and concentrated device evidence remain historical. This c
 * `Feature` Add protocol 1.3 foreground-only bounded prompt/reply for built-in `input()` after finite snapshot EOF; background launches never open input UI and direct `sys.stdin` stays finite
 * `Feature` Add protocol 1.4 explicit strict JSON results and optional output artifacts bounded by count, normalized path, per-file/aggregate size, exact PFD references, and SHA-256, without ever inferring a result from stdout
 * `Fix` Decode source as strict UTF-8 before execution so a non-UTF-8 encoding cookie cannot bypass the contract
+* `Improvement` Grant `INTERNET` so trusted scripts can use standard-library network clients directly, while online pip and automatic code downloads remain disabled
+* `Improvement` Raise the provider execution ceiling to 30 minutes and bounded output to 16 MiB / 16384 chunks
 * `Improvement` Move bounded stdout/stderr chunks and credit backpressure into script execution, preserving ordered partial output before terminal and forbidding output afterward
 * `Improvement` Use an independent `__main__` per execution and restore stdin/stdout/stderr, argv, cwd, `sys.path`, module, and importer-cache state
 * `Improvement` Apply a 5-second lease to an opened session which is never started, then release its inputs, descriptors, and single-session slot

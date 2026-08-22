@@ -36,7 +36,7 @@
     "输出在执行期间按 credit 逐 chunk 发送; credit 耗尽会暂停脚本, 已接受的输出先于唯一终态, 终态后禁止输出.",
     "结构化 JSON 最大 {{ max_structured_json_bytes }}; 输出 artifact 最多 {{ max_output_artifacts }} 个, 路径最大 {{ max_output_artifact_path_bytes }}, 单个最大 {{ max_output_artifact_bytes }}, 合计最大 {{ max_total_output_artifact_bytes }}, Host 必须核对精确长度、EOF 与 SHA-256.",
     "取消模式为进程重启, 不是 CPython 级协作取消; 原生扩展或阻塞调用仍需后续 Android 验证.",
-    "stdlib-only 策略禁止在线 pip 和第三方 Python 包, 合并后的 APK 权限仍须由构建门禁复核."
+    "插件已授予 `INTERNET` 以支持脚本通过标准库直接联网; 仍不支持在线 pip、自动下载代码或运行时安装第三方包."
   ],
   "h3_unsupported": "未声明的能力",
   "unsupported_capabilities": [

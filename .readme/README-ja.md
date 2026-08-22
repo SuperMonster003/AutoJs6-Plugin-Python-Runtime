@@ -123,13 +123,13 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-- ソースは 4 MiB, 総出力は 4 MiB, 1 chunk は 16 KiB, chunk 数は 4096 が上限です.
-- timeout は最大 60 s, 同時セッションは 1, provider キューはありません.
+- ソースは 4 MiB, 総出力は 16 MiB, 1 chunk は 16 KiB, chunk 数は 16384 が上限です.
+- timeout は最大 30 min, 同時セッションは 1, provider キューはありません.
 - Binder 受信側の完全な PFD を所有し, 終端または close 時に閉じます.
 - 出力は実行中に credit ごとに chunk 単位で送信します. credit 枯渇時はスクリプトを停止し, 受理済み出力は唯一の terminal より前に置かれ, terminal 後の出力は禁止されます.
 - 構造化 JSON は 64 KiB, artifact は最大 16 個, path は 1024 UTF-8 bytes, 1 file は 4 MiB, 合計は 8 MiB が上限で, Host が正確な長さ, EOF, SHA-256 を検証します.
 - キャンセルはプロセス再起動方式です. native extension とブロッキング呼び出しは Android 検証が必要です.
-- stdlib-only で online pip と第三者パッケージを禁止します. 結合 APK の権限はビルド時に検査します.
+- `INTERNET` 権限によりスクリプトは標準ライブラリのネットワーク機能を直接利用できますが、online pip、自動コードダウンロード、実行時の第三者パッケージ導入は引き続き非対応です.
 
 ******
 
@@ -170,6 +170,8 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 * `追加` プロトコル 1.3 で有限 snapshot の EOF 後の組み込み `input()` に foreground 限定の上限付き prompt/reply を追加し, background 起動では入力 UI を開かず, 直接の `sys.stdin` は有限のままにする
 * `追加` プロトコル 1.4 で明示的な厳密 JSON result と任意 output artifact を追加し, count, normalized path, file/aggregate size, exact PFD reference, SHA-256 を制限して stdout から result を推測しない
 * `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止
+* `改善` `INTERNET` を付与して信頼済みスクリプトが標準ライブラリのネットワーククライアントを直接利用できるようにし、online pip と自動コードダウンロードは引き続き無効化
+* `改善` Provider の実行上限を 30 分、有界出力を 16 MiB / 16384 chunks に拡大
 * `改善` 上限付き stdout/stderr chunk と credit backpressure をスクリプト実行中へ移し, terminal 前の順序付き部分出力を保持して terminal 後の出力を禁止
 * `改善` 実行ごとに独立した `__main__` を使用し, stdin/stdout/stderr, argv, cwd, `sys.path`, module, importer cache の状態を復元
 * `改善` open 後に start されない session に 5 秒 lease を適用し, 期限後に input, descriptor, 単一 session slot を解放

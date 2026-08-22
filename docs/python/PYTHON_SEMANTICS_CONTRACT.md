@@ -227,8 +227,11 @@ imports without widening the admitted workspace.
 
 `0.1.0` is stdlib-only. An absent third-party package raises ordinary
 `ModuleNotFoundError`. No import failure may trigger online pip, a runtime
-download or another engine. U1-R3 defines separately signed offline package
-packs, pure-Python first and native wheels behind independent ABI gates.
+download or another engine. Starting with `0.2.0`, stdlib modules may make
+script-initiated network connections because the plugin declares Android's
+normal `INTERNET` permission; that permission does not install packages or
+fetch code automatically. U1-R3 defines separately signed offline package packs,
+pure-Python first and native wheels behind independent ABI gates.
 
 ## Files, Java bridge and isolation
 

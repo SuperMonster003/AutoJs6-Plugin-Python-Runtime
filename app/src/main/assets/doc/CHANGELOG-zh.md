@@ -15,6 +15,8 @@
 * `新增` 新增协议 1.3: 有限 snapshot 到达 EOF 后, 仅前台内置 `input()` 使用有界 prompt/reply; 后台启动绝不打开输入 UI, 直接 `sys.stdin` 始终有限
 * `新增` 新增协议 1.4 显式严格 JSON 结果与可选输出 artifact, 对数量、规范化路径、单个/合计大小、精确 PFD 引用及 SHA-256 设限, 且绝不从 stdout 推断结果
 * `修复` 执行前按 strict UTF-8 解码源码, 非 UTF-8 encoding cookie 不再绕过契约
+* `优化` 授予 `INTERNET`, 让可信脚本可直接使用标准库网络客户端, 同时仍禁用在线 pip 与自动代码下载
+* `优化` 将 Provider 执行上限提高到 30 分钟, 有界输出提高到 16 MiB / 16384 个 chunk
 * `优化` 将 stdout/stderr 的有界 chunk 与 credit 背压前移到脚本执行期间, 保留终态前的有序部分输出并禁止终态后输出
 * `优化` 每次执行使用独立 `__main__`, 并恢复 stdin/stdout/stderr, argv, cwd, `sys.path`, module 与 importer cache 状态
 * `优化` 为已打开但未 start 的 session 增加 5 秒 lease, 到期释放输入, descriptor 与单会话占位

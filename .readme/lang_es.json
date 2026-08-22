@@ -36,7 +36,7 @@
     "La salida se entrega chunk a chunk con créditos durante la ejecución; al agotarse se pausa el script, la salida aceptada precede al único terminal y se prohíbe toda salida posterior.",
     "El JSON estructurado se limita a {{ max_structured_json_bytes }}; se admiten hasta {{ max_output_artifacts }} artefactos con rutas de {{ max_output_artifact_path_bytes }}, {{ max_output_artifact_bytes }} por archivo, {{ max_total_output_artifact_bytes }} en total y verificación Host de longitud exacta, EOF y SHA-256.",
     "La cancelación reinicia el proceso; las extensiones nativas y llamadas bloqueantes requieren validación Android posterior.",
-    "La política stdlib-only prohíbe pip en línea y paquetes Python de terceros. Los permisos del APK combinado aún deben verificarse."
+    "El permiso `INTERNET` permite que los scripts usen directamente los clientes de red de la biblioteca estándar; pip en línea, la descarga automática de código y la instalación de paquetes de terceros en ejecución siguen sin admitirse."
   ],
   "h3_unsupported": "Capacidades no declaradas",
   "unsupported_capabilities": [

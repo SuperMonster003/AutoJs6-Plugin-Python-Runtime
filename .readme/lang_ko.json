@@ -36,7 +36,7 @@
     "출력은 실행 중 credit에 따라 chunk 단위로 전달됩니다. credit 소진 시 스크립트가 일시 중지되고, 수락된 출력은 유일한 terminal보다 먼저 전달되며 terminal 이후 출력은 금지됩니다.",
     "구조화 JSON은 {{ max_structured_json_bytes }}, artifact는 최대 {{ max_output_artifacts }}개, path는 {{ max_output_artifact_path_bytes }}, file당 {{ max_output_artifact_bytes }}, 합계 {{ max_total_output_artifact_bytes }}로 제한하며 Host가 정확한 길이, EOF 및 SHA-256을 검증합니다.",
     "취소는 프로세스 재시작 방식입니다. native extension과 blocking 호출은 Android 검증이 필요합니다.",
-    "stdlib-only 정책으로 online pip와 타사 Python 패키지를 금지합니다. 병합 APK 권한은 빌드 때 확인해야 합니다."
+    "`INTERNET` 권한으로 스크립트가 표준 라이브러리 네트워크 기능을 직접 사용할 수 있지만, online pip, 자동 코드 다운로드, 런타임 타사 패키지 설치는 계속 지원하지 않습니다."
   ],
   "h3_unsupported": "선언하지 않은 기능",
   "unsupported_capabilities": [

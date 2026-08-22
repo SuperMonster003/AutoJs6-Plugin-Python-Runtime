@@ -123,13 +123,13 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-- 原始碼最大 4 MiB, 總輸出最大 4 MiB, 每個輸出 chunk 最大 16 KiB, 最多 4096 個 chunk.
-- 要求逾時最大 60 s, 同一程序最多一個作用中工作階段, provider 端不排隊.
+- 原始碼最大 4 MiB, 總輸出最大 16 MiB, 每個輸出 chunk 最大 16 KiB, 最多 16384 個 chunk.
+- 要求逾時最大 30 min, 同一程序最多一個作用中工作階段, provider 端不排隊.
 - SOURCE 描述元採用 Binder 接收端完整 PFD 所有權, 保留 reliable-pipe 錯誤通道, 並於終態或關閉時釋放.
 - 輸出在執行期間依 credit 逐 chunk 傳送; credit 耗盡會暫停腳本, 已接受的輸出先於唯一終態, 終態後禁止輸出.
 - 結構化 JSON 最大 64 KiB; 輸出 artifact 最多 16 個, 路徑最大 1024 UTF-8 bytes, 單個最大 4 MiB, 合計最大 8 MiB, Host 必須核對精確長度、EOF 與 SHA-256.
 - 取消模式為程序重啟, 而非 CPython 級協作取消; 原生擴充套件或阻塞呼叫仍需後續 Android 驗證.
-- stdlib-only 政策禁止線上 pip 與第三方 Python 套件, 合併後的 APK 權限仍須由建置閘門複核.
+- 外掛已授予 `INTERNET` 以支援腳本透過標準函式庫直接連線; 仍不支援線上 pip、自動下載程式碼或執行期安裝第三方套件.
 
 ******
 
@@ -170,6 +170,8 @@ R6-P2/P3 的本機 RC 與集中裝置證據保留為歷史記錄. 本次 clean V
 * `新增` 新增協定 1.3: 有限 snapshot 到達 EOF 後, 僅前景內建 `input()` 使用有界 prompt/reply; 背景啟動絕不開啟輸入 UI, 直接 `sys.stdin` 始終有限
 * `新增` 新增協定 1.4 明確嚴格 JSON 結果與可選輸出 artifact, 對數量、正規化路徑、單個/合計大小、精確 PFD 引用與 SHA-256 設限, 且絕不從 stdout 推斷結果
 * `修正` 執行前以 strict UTF-8 解碼原始碼, 非 UTF-8 encoding cookie 不再繞過契約
+* `改善` 授予 `INTERNET`, 讓可信腳本可直接使用標準函式庫網路用戶端, 同時仍停用線上 pip 與自動程式碼下載
+* `改善` 將 Provider 執行上限提高至 30 分鐘, 有界輸出提高至 16 MiB / 16384 個 chunk
 * `改善` 將 stdout/stderr 的有界 chunk 與 credit 背壓前移到腳本執行期間, 保留終態前的有序部分輸出並禁止終態後輸出
 * `改善` 每次執行使用獨立 `__main__`, 並還原 stdin/stdout/stderr, argv, cwd, `sys.path`, module 與 importer cache 狀態
 * `改善` 為已開啟但未 start 的 session 加入 5 秒 lease, 到期釋放輸入, descriptor 與單一工作階段占位

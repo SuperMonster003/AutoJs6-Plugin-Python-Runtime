@@ -123,13 +123,13 @@ El runtime Chaquopy es solo para scripts locales de confianza, no un sandbox de 
 
 ******
 
-- El código se limita a 4 MiB, la salida total a 4 MiB, cada chunk a 16 KiB y el total a 4096 chunks.
-- El timeout máximo es 60 s, con una sesión activa y sin cola del proveedor.
+- El código se limita a 4 MiB, la salida total a 16 MiB, cada chunk a 16 KiB y el total a 16384 chunks.
+- El timeout máximo es 30 min, con una sesión activa y sin cola del proveedor.
 - Se adopta la propiedad de los PFD completos recibidos por Binder y se cierran al terminar o cerrar la sesión.
 - La salida se entrega chunk a chunk con créditos durante la ejecución; al agotarse se pausa el script, la salida aceptada precede al único terminal y se prohíbe toda salida posterior.
 - El JSON estructurado se limita a 64 KiB; se admiten hasta 16 artefactos con rutas de 1024 UTF-8 bytes, 4 MiB por archivo, 8 MiB en total y verificación Host de longitud exacta, EOF y SHA-256.
 - La cancelación reinicia el proceso; las extensiones nativas y llamadas bloqueantes requieren validación Android posterior.
-- La política stdlib-only prohíbe pip en línea y paquetes Python de terceros. Los permisos del APK combinado aún deben verificarse.
+- El permiso `INTERNET` permite que los scripts usen directamente los clientes de red de la biblioteca estándar; pip en línea, la descarga automática de código y la instalación de paquetes de terceros en ejecución siguen sin admitirse.
 
 ******
 
@@ -170,6 +170,8 @@ La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 permanecen his
 * `Función` Añade con el protocolo 1.3 prompt/respuesta acotado y solo en primer plano para el `input()` integrado tras el EOF del snapshot finito; los inicios en segundo plano nunca abren UI de entrada y `sys.stdin` directo sigue finito
 * `Función` Añade con el protocolo 1.4 resultados JSON estrictos explícitos y artefactos opcionales acotados por cantidad, ruta normalizada, tamaño por archivo/total, referencias PFD exactas y SHA-256, sin inferir nunca un resultado desde stdout
 * `Corrección` Decodifica el código como UTF-8 estricto antes de ejecutarlo para que un encoding cookie no UTF-8 no eluda el contrato
+* `Mejora` Conceder `INTERNET` para que los scripts de confianza usen directamente los clientes de red de la biblioteca estándar, manteniendo desactivados pip en línea y la descarga automática de código
+* `Mejora` Elevar el límite de ejecución del Provider a 30 minutos y la salida acotada a 16 MiB / 16384 chunks
 * `Mejora` Traslada los chunks acotados de stdout/stderr y la contrapresión por créditos a la ejecución del script, conservando la salida parcial ordenada antes del terminal y prohibiéndola después
 * `Mejora` Usa un `__main__` independiente por ejecución y restaura stdin/stdout/stderr, argv, cwd, `sys.path`, módulos y caché de importadores
 * `Mejora` Aplica un lease de 5 segundos a una sesión abierta que nunca inicia y luego libera entradas, descriptors y el único slot de sesión

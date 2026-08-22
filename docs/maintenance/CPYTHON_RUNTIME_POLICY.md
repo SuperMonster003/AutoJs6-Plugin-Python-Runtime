@@ -129,12 +129,15 @@ safe, the provider remains unavailable.
 
 Python input is user-selected local code and must be treated as trusted for the
 permissions and APIs reachable by the plugin UID. The separate APK UID/process,
-zero-permission source manifest, bounded Binder/PFD contract and frozen Host
+single normal `INTERNET` permission, bounded Binder/PFD contract and frozen Host
 capability snapshot reduce Host exposure, but Chaquopy exposes a Java bridge.
-They do **not** make hostile Python a security sandbox.
+They do **not** make hostile Python a security sandbox. Starting with `0.2.0`,
+trusted scripts may create outbound connections through `urllib.request`,
+`socket`, `http.client` and other standard-library clients; this includes access
+to destinations reachable from the device, such as the local network.
 
-Do not add network-fetched code, runtime package installation, arbitrary Host
-objects, Binder handles, Android `Context`, shell, accessibility or live UI
-capabilities without a new threat-model decision. Any expansion requires an
-explicit protocol capability, default-off admission, notice/lock review and
-fresh security evidence.
+The `INTERNET` permission authorizes script-initiated networking only. The
+runtime must not automatically fetch code, resolve missing imports online,
+install packages, run online `pip`, or download wheels. Do not add arbitrary
+Host objects, Binder handles, Android `Context`, shell, accessibility or live UI
+capabilities without a new threat-model decision.

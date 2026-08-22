@@ -21,6 +21,8 @@
         "执行前按 strict UTF-8 解码源码, 非 UTF-8 encoding cookie 不再绕过契约"
       ],
       "improvement": [
+        "授予 `INTERNET`, 让可信脚本可直接使用标准库网络客户端, 同时仍禁用在线 pip 与自动代码下载",
+        "将 Provider 执行上限提高到 30 分钟, 有界输出提高到 16 MiB / 16384 个 chunk",
         "将 stdout/stderr 的有界 chunk 与 credit 背压前移到脚本执行期间, 保留终态前的有序部分输出并禁止终态后输出",
         "每次执行使用独立 `__main__`, 并恢复 stdin/stdout/stderr, argv, cwd, `sys.path`, module 与 importer cache 状态",
         "为已打开但未 start 的 session 增加 5 秒 lease, 到期释放输入, descriptor 与单会话占位",

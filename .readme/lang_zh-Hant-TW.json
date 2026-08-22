@@ -36,7 +36,7 @@
     "輸出在執行期間依 credit 逐 chunk 傳送; credit 耗盡會暫停腳本, 已接受的輸出先於唯一終態, 終態後禁止輸出.",
     "結構化 JSON 最大 {{ max_structured_json_bytes }}; 輸出 artifact 最多 {{ max_output_artifacts }} 個, 路徑最大 {{ max_output_artifact_path_bytes }}, 單個最大 {{ max_output_artifact_bytes }}, 合計最大 {{ max_total_output_artifact_bytes }}, Host 必須核對精確長度、EOF 與 SHA-256.",
     "取消模式為程序重啟, 而非 CPython 級協作取消; 原生擴充套件或阻塞呼叫仍需後續 Android 驗證.",
-    "stdlib-only 政策禁止線上 pip 與第三方 Python 套件, 合併後的 APK 權限仍須由建置閘門複核."
+    "外掛已授予 `INTERNET` 以支援腳本透過標準函式庫直接連線; 仍不支援線上 pip、自動下載程式碼或執行期安裝第三方套件."
   ],
   "h3_unsupported": "未宣告的能力",
   "unsupported_capabilities": [

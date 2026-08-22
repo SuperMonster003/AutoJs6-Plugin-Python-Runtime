@@ -15,6 +15,8 @@
 * `추가` 프로토콜 1.3에서 유한 snapshot EOF 뒤 내장 `input()`에 foreground 전용 제한 prompt/reply를 추가하고, background 실행은 입력 UI를 열지 않으며 직접 `sys.stdin`은 유한하게 유지
 * `추가` 프로토콜 1.4에서 명시적 엄격 JSON 결과와 선택적 output artifact를 추가하고 count, normalized path, file/aggregate size, exact PFD reference 및 SHA-256을 제한하며 stdout에서 결과를 추론하지 않음
 * `수정` 실행 전에 source를 strict UTF-8로 decode하여 비 UTF-8 encoding cookie가 contract를 우회하지 못하도록 수정
+* `개선` 신뢰된 스크립트가 표준 라이브러리 네트워크 클라이언트를 직접 사용하도록 `INTERNET` 권한을 부여하되 online pip와 자동 코드 다운로드는 계속 비활성화
+* `개선` Provider 실행 상한을 30분, 제한 출력 상한을 16 MiB / 16384 chunks로 확대
 * `개선` 제한된 stdout/stderr chunk와 credit backpressure를 스크립트 실행 중으로 이동해 terminal 전의 순서 있는 부분 출력을 보존하고 이후 출력을 금지
 * `개선` 실행마다 독립 `__main__`을 사용하고 stdin/stdout/stderr, argv, cwd, `sys.path`, module 및 importer cache 상태 복원
 * `개선` open 후 start되지 않은 session에 5초 lease를 적용하고 만료 시 input, descriptor 및 단일 session slot 해제

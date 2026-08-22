@@ -123,13 +123,13 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-- 소스는 4 MiB, 전체 출력은 4 MiB, chunk는 16 KiB, 개수는 4096로 제한합니다.
-- timeout은 최대 60 s, 활성 세션은 하나이며 provider 큐가 없습니다.
+- 소스는 4 MiB, 전체 출력은 16 MiB, chunk는 16 KiB, 개수는 16384로 제한합니다.
+- timeout은 최대 30 min, 활성 세션은 하나이며 provider 큐가 없습니다.
 - Binder 수신 측의 완전한 PFD 소유권을 채택하고 종료 또는 close 시 닫습니다.
 - 출력은 실행 중 credit에 따라 chunk 단위로 전달됩니다. credit 소진 시 스크립트가 일시 중지되고, 수락된 출력은 유일한 terminal보다 먼저 전달되며 terminal 이후 출력은 금지됩니다.
 - 구조화 JSON은 64 KiB, artifact는 최대 16개, path는 1024 UTF-8 bytes, file당 4 MiB, 합계 8 MiB로 제한하며 Host가 정확한 길이, EOF 및 SHA-256을 검증합니다.
 - 취소는 프로세스 재시작 방식입니다. native extension과 blocking 호출은 Android 검증이 필요합니다.
-- stdlib-only 정책으로 online pip와 타사 Python 패키지를 금지합니다. 병합 APK 권한은 빌드 때 확인해야 합니다.
+- `INTERNET` 권한으로 스크립트가 표준 라이브러리 네트워크 기능을 직접 사용할 수 있지만, online pip, 자동 코드 다운로드, 런타임 타사 패키지 설치는 계속 지원하지 않습니다.
 
 ******
 
@@ -170,6 +170,8 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 * `추가` 프로토콜 1.3에서 유한 snapshot EOF 뒤 내장 `input()`에 foreground 전용 제한 prompt/reply를 추가하고, background 실행은 입력 UI를 열지 않으며 직접 `sys.stdin`은 유한하게 유지
 * `추가` 프로토콜 1.4에서 명시적 엄격 JSON 결과와 선택적 output artifact를 추가하고 count, normalized path, file/aggregate size, exact PFD reference 및 SHA-256을 제한하며 stdout에서 결과를 추론하지 않음
 * `수정` 실행 전에 source를 strict UTF-8로 decode하여 비 UTF-8 encoding cookie가 contract를 우회하지 못하도록 수정
+* `개선` 신뢰된 스크립트가 표준 라이브러리 네트워크 클라이언트를 직접 사용하도록 `INTERNET` 권한을 부여하되 online pip와 자동 코드 다운로드는 계속 비활성화
+* `개선` Provider 실행 상한을 30분, 제한 출력 상한을 16 MiB / 16384 chunks로 확대
 * `개선` 제한된 stdout/stderr chunk와 credit backpressure를 스크립트 실행 중으로 이동해 terminal 전의 순서 있는 부분 출력을 보존하고 이후 출력을 금지
 * `개선` 실행마다 독립 `__main__`을 사용하고 stdin/stdout/stderr, argv, cwd, `sys.path`, module 및 importer cache 상태 복원
 * `개선` open 후 start되지 않은 session에 5초 lease를 적용하고 만료 시 input, descriptor 및 단일 session slot 해제

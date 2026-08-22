@@ -15,6 +15,8 @@
 * `追加` プロトコル 1.3 で有限 snapshot の EOF 後の組み込み `input()` に foreground 限定の上限付き prompt/reply を追加し, background 起動では入力 UI を開かず, 直接の `sys.stdin` は有限のままにする
 * `追加` プロトコル 1.4 で明示的な厳密 JSON result と任意 output artifact を追加し, count, normalized path, file/aggregate size, exact PFD reference, SHA-256 を制限して stdout から result を推測しない
 * `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止
+* `改善` `INTERNET` を付与して信頼済みスクリプトが標準ライブラリのネットワーククライアントを直接利用できるようにし、online pip と自動コードダウンロードは引き続き無効化
+* `改善` Provider の実行上限を 30 分、有界出力を 16 MiB / 16384 chunks に拡大
 * `改善` 上限付き stdout/stderr chunk と credit backpressure をスクリプト実行中へ移し, terminal 前の順序付き部分出力を保持して terminal 後の出力を禁止
 * `改善` 実行ごとに独立した `__main__` を使用し, stdin/stdout/stderr, argv, cwd, `sys.path`, module, importer cache の状態を復元
 * `改善` open 後に start されない session に 5 秒 lease を適用し, 期限後に input, descriptor, 単一 session slot を解放

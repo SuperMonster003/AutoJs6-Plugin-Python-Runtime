@@ -123,13 +123,13 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 ******
 
-- La source est limitée à 4 MiB, la sortie totale à 4 MiB, chaque chunk à 16 KiB et le nombre de chunks à 4096.
-- Le délai maximal est 60 s, avec une session active et aucune file côté fournisseur.
+- La source est limitée à 4 MiB, la sortie totale à 16 MiB, chaque chunk à 16 KiB et le nombre de chunks à 16384.
+- Le délai maximal est 30 min, avec une session active et aucune file côté fournisseur.
 - Les PFD complets reçus par Binder sont possédés puis fermés à l'état terminal ou à la fermeture.
 - La sortie est livrée chunk par chunk sous crédits pendant l'exécution; l'épuisement des crédits suspend le script, toute sortie acceptée précède l'unique état terminal et aucune sortie n'est permise après celui-ci.
 - Le JSON structuré est limité à 64 KiB; au plus 16 artefacts sont admis avec des chemins de 1024 UTF-8 bytes, 4 MiB par fichier, 8 MiB au total et une vérification hôte de la longueur exacte, de l'EOF et du SHA-256.
 - L'annulation redémarre le processus; les extensions natives et appels bloquants restent à valider sur Android.
-- La politique stdlib-only interdit pip en ligne et les paquets Python tiers. Les permissions de l'APK fusionné restent à vérifier.
+- L'autorisation `INTERNET` permet aux scripts d'utiliser directement les clients réseau de la bibliothèque standard; pip en ligne, le téléchargement automatique de code et l'installation de paquets tiers à l'exécution restent non pris en charge.
 
 ******
 
@@ -170,6 +170,8 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 * `Fonction` Ajout avec le protocole 1.3 d'un prompt/réponse borné, réservé au premier plan, pour le `input()` intégré après l'EOF du snapshot fini; les lancements en arrière-plan n'ouvrent jamais d'interface de saisie et `sys.stdin` direct reste fini
 * `Fonction` Ajout avec le protocole 1.4 de résultats JSON stricts explicites et d'artefacts facultatifs bornés par nombre, chemin normalisé, taille par fichier/totale, références PFD exactes et SHA-256, sans jamais déduire un résultat de stdout
 * `Correction` Décodage de la source en UTF-8 strict avant exécution afin qu'un encoding cookie non UTF-8 ne contourne plus le contrat
+* `Amélioration` Accorder `INTERNET` afin que les scripts de confiance utilisent directement les clients réseau de la bibliothèque standard, tout en maintenant pip en ligne et le téléchargement automatique de code désactivés
+* `Amélioration` Porter la limite d'exécution du Provider à 30 minutes et la sortie bornée à 16 MiB / 16384 chunks
 * `Amélioration` Déplacement des chunks stdout/stderr bornés et de la contre-pression par crédits dans l'exécution du script, avec conservation de la sortie partielle ordonnée avant l'état terminal et interdiction après celui-ci
 * `Amélioration` Utilisation d'un `__main__` indépendant par exécution et restauration de stdin/stdout/stderr, argv, cwd, `sys.path`, des modules et du cache d'importeurs
 * `Amélioration` Application d'un lease de 5 secondes à une session ouverte mais jamais démarrée, puis libération des entrées, descriptors et de l'emplacement de session unique

@@ -15,6 +15,8 @@
 * `Función` Añade con el protocolo 1.3 prompt/respuesta acotado y solo en primer plano para el `input()` integrado tras el EOF del snapshot finito; los inicios en segundo plano nunca abren UI de entrada y `sys.stdin` directo sigue finito
 * `Función` Añade con el protocolo 1.4 resultados JSON estrictos explícitos y artefactos opcionales acotados por cantidad, ruta normalizada, tamaño por archivo/total, referencias PFD exactas y SHA-256, sin inferir nunca un resultado desde stdout
 * `Corrección` Decodifica el código como UTF-8 estricto antes de ejecutarlo para que un encoding cookie no UTF-8 no eluda el contrato
+* `Mejora` Conceder `INTERNET` para que los scripts de confianza usen directamente los clientes de red de la biblioteca estándar, manteniendo desactivados pip en línea y la descarga automática de código
+* `Mejora` Elevar el límite de ejecución del Provider a 30 minutos y la salida acotada a 16 MiB / 16384 chunks
 * `Mejora` Traslada los chunks acotados de stdout/stderr y la contrapresión por créditos a la ejecución del script, conservando la salida parcial ordenada antes del terminal y prohibiéndola después
 * `Mejora` Usa un `__main__` independiente por ejecución y restaura stdin/stdout/stderr, argv, cwd, `sys.path`, módulos y caché de importadores
 * `Mejora` Aplica un lease de 5 segundos a una sesión abierta que nunca inicia y luego libera entradas, descriptors y el único slot de sesión

@@ -24,14 +24,14 @@
   "output_format": "ordered bounded stdout/stderr chunks, explicit strict JSON, and SHA-256-manifested output artifacts",
   "max_source_bytes": "4 MiB",
   "max_stdin_bytes": "1 MiB",
-  "max_output_bytes": "4 MiB",
+  "max_output_bytes": "16 MiB",
   "max_output_chunk_bytes": "16 KiB",
-  "max_output_chunks": "4096",
+  "max_output_chunks": "16384",
   "max_structured_json_bytes": "64 KiB",
   "max_output_artifacts": "16",
   "max_output_artifact_path_bytes": "1024 UTF-8 bytes",
   "max_output_artifact_bytes": "4 MiB",
   "max_total_output_artifact_bytes": "8 MiB",
-  "max_timeout": "60 s",
+  "max_timeout": "30 min",
   "local_aars": "common-plugin-api.aar\nprotocol-wire-api.aar\npython-runtime-api.aar"
 }

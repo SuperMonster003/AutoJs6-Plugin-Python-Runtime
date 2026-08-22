@@ -15,6 +15,8 @@
 * `新增` 新增協定 1.3: 有限 snapshot 到達 EOF 後, 僅前景內建 `input()` 使用有界 prompt/reply; 背景啟動絕不開啟輸入 UI, 直接 `sys.stdin` 始終有限
 * `新增` 新增協定 1.4 明確嚴格 JSON 結果與可選輸出 artifact, 對數量、正規化路徑、單個/合計大小、精確 PFD 引用與 SHA-256 設限, 且絕不從 stdout 推斷結果
 * `修正` 執行前以 strict UTF-8 解碼原始碼, 非 UTF-8 encoding cookie 不再繞過契約
+* `改善` 授予 `INTERNET`, 讓可信腳本可直接使用標準函式庫網路用戶端, 同時仍停用線上 pip 與自動程式碼下載
+* `改善` 將 Provider 執行上限提高至 30 分鐘, 有界輸出提高至 16 MiB / 16384 個 chunk
 * `改善` 將 stdout/stderr 的有界 chunk 與 credit 背壓前移到腳本執行期間, 保留終態前的有序部分輸出並禁止終態後輸出
 * `改善` 每次執行使用獨立 `__main__`, 並還原 stdin/stdout/stderr, argv, cwd, `sys.path`, module 與 importer cache 狀態
 * `改善` 為已開啟但未 start 的 session 加入 5 秒 lease, 到期釋放輸入, descriptor 與單一工作階段占位

@@ -218,8 +218,9 @@ Assert-True ($manifest -match 'android:name="\.service\.PythonRuntimePluginServi
 Assert-True ($manifest -match 'android:name="org\.autojs\.plugin\.python\.RUNTIME"') 'Binder action drifted'
 Assert-True ($manifest -match 'android:value="org\.autojs\.python\.runtime\.cpython"') 'Provider ID drifted'
 Assert-True ($manifest -match 'android:permission="org\.autojs\.permission\.PLUGIN"') 'Signature permission guard is missing'
-Assert-True ($manifest -notmatch '<uses-permission\b') 'The untrusted runtime APK must request no Android permissions'
-Assert-True ($manifest -notmatch 'android\.permission\.INTERNET') 'Internet permission is forbidden in R2'
+$manifestPermissions = [regex]::Matches($manifest, '<uses-permission\b')
+Assert-True ($manifestPermissions.Count -eq 1) 'The runtime APK must request exactly one Android permission'
+Assert-True ($manifest -match '<uses-permission\s+android:name="android\.permission\.INTERNET"\s*/>') 'The standard-library networking permission is missing'
 Assert-True ($manifest -notmatch 'android:sharedUserId') 'A shared Android UID is forbidden'
 Assert-True ($manifest -notmatch 'com\.chaquo\.python\.android\.PyApplication') 'CPython must not start in the application/main process'
 
@@ -229,6 +230,9 @@ Assert-True ($metadataSource -match 'maxWorkspaceEntries\s*=\s*1024') 'Workspace
 Assert-True ($metadataSource -match 'maxWorkspaceUncompressedBytes\s*=\s*32L\s*\*\s*1024L\s*\*\s*1024L') 'Workspace expansion limit drifted'
 Assert-True ($metadataSource -match 'supportsStdinSnapshot\s*=\s*true') 'bounded stdin snapshot capability must be enabled'
 Assert-True ($metadataSource -match 'maxStdinBytes\s*=\s*1L\s*\*\s*1024L\s*\*\s*1024L') 'stdin snapshot limit must remain 1 MiB'
+Assert-True ($metadataSource -match 'maxOutputBytes\s*=\s*16L\s*\*\s*1024L\s*\*\s*1024L') 'Output byte limit must be 16 MiB'
+Assert-True ($metadataSource -match 'maxOutputChunks\s*=\s*16_384L') 'Output chunk-count limit must be 16384'
+Assert-True ($metadataSource -match 'maxTimeoutMillis\s*=\s*30L\s*\*\s*60L\s*\*\s*1_000L') 'Execution timeout limit must be 30 minutes'
 Assert-True ($metadataSource -match 'supportsCooperativeCancellation\s*=\s*false') 'Cooperative cancellation must not be claimed'
 Assert-True ($metadataSource -match 'PythonCancellationMode\.PROCESS_RESTART_ONLY') 'Cancellation mode must remain process restart only'
 Assert-True ($serviceSource -match 'callerVerifier\.enforceAllowedCaller\(\)') 'Provider Binder entry verification is absent'

@@ -36,7 +36,7 @@
     "Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.",
     "Structured JSON is capped at {{ max_structured_json_bytes }}; at most {{ max_output_artifacts }} artifacts are accepted with {{ max_output_artifact_path_bytes }} paths, {{ max_output_artifact_bytes }} per file, {{ max_total_output_artifact_bytes }} aggregate, and Host verification of exact length, EOF, and SHA-256.",
     "Cancellation uses process restart rather than CPython-level cooperation; native extensions and blocking calls still require later Android validation.",
-    "The stdlib-only policy forbids online pip and third-party Python packages. The merged APK permission set remains a build-gate check."
+    "The plugin grants `INTERNET` for script-initiated standard-library networking; online pip, automatic code downloads, and runtime third-party package installation remain unsupported."
   ],
   "h3_unsupported": "Undeclared capabilities",
   "unsupported_capabilities": [

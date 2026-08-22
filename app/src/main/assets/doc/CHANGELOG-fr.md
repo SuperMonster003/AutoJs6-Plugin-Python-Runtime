@@ -15,6 +15,8 @@
 * `Fonction` Ajout avec le protocole 1.3 d'un prompt/réponse borné, réservé au premier plan, pour le `input()` intégré après l'EOF du snapshot fini; les lancements en arrière-plan n'ouvrent jamais d'interface de saisie et `sys.stdin` direct reste fini
 * `Fonction` Ajout avec le protocole 1.4 de résultats JSON stricts explicites et d'artefacts facultatifs bornés par nombre, chemin normalisé, taille par fichier/totale, références PFD exactes et SHA-256, sans jamais déduire un résultat de stdout
 * `Correction` Décodage de la source en UTF-8 strict avant exécution afin qu'un encoding cookie non UTF-8 ne contourne plus le contrat
+* `Amélioration` Accorder `INTERNET` afin que les scripts de confiance utilisent directement les clients réseau de la bibliothèque standard, tout en maintenant pip en ligne et le téléchargement automatique de code désactivés
+* `Amélioration` Porter la limite d'exécution du Provider à 30 minutes et la sortie bornée à 16 MiB / 16384 chunks
 * `Amélioration` Déplacement des chunks stdout/stderr bornés et de la contre-pression par crédits dans l'exécution du script, avec conservation de la sortie partielle ordonnée avant l'état terminal et interdiction après celui-ci
 * `Amélioration` Utilisation d'un `__main__` indépendant par exécution et restauration de stdin/stdout/stderr, argv, cwd, `sys.path`, des modules et du cache d'importeurs
 * `Amélioration` Application d'un lease de 5 secondes à une session ouverte mais jamais démarrée, puis libération des entrées, descriptors et de l'emplacement de session unique

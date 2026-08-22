@@ -36,7 +36,7 @@
     "يرسل الخرج chunk بعد chunk بالـ credits أثناء التنفيذ؛ يوقف نفاد credits السكربت مؤقتا، ويسبق الخرج المقبول الحالة terminal الوحيدة، ويمنع الخرج بعدها.",
     "يحد JSON المنظم عند {{ max_structured_json_bytes }} وتقبل حتى {{ max_output_artifacts }} artifacts بمسار {{ max_output_artifact_path_bytes }} و{{ max_output_artifact_bytes }} لكل ملف و{{ max_total_output_artifact_bytes }} إجمالا مع تحقق Host من الطول الدقيق وEOF وSHA-256.",
     "يعيد الإلغاء تشغيل العملية؛ تتطلب native extensions والاستدعاءات الحاجبة تحقق Android لاحقا.",
-    "تحظر سياسة stdlib-only استخدام pip عبر الإنترنت وحزم Python الخارجية. ما زالت أذونات APK المدمج بحاجة للفحص."
+    "يسمح إذن `INTERNET` للنصوص باستخدام عملاء الشبكة في المكتبة القياسية مباشرة؛ ولا يزال pip عبر الإنترنت والتنزيل التلقائي للكود وتثبيت حزم الجهات الخارجية وقت التشغيل غير مدعوم."
   ],
   "h3_unsupported": "قدرات غير معلنة",
   "unsupported_capabilities": [

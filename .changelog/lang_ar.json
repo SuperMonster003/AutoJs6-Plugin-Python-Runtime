@@ -21,6 +21,8 @@
         "فك source بترميز strict UTF-8 قبل التنفيذ لمنع encoding cookie بترميز آخر من تجاوز العقد"
       ],
       "improvement": [
+        "منح `INTERNET` كي تستخدم النصوص الموثوقة عملاء شبكة المكتبة القياسية مباشرة مع إبقاء pip عبر الإنترنت والتنزيل التلقائي للكود معطلين",
+        "رفع حد تنفيذ Provider إلى 30 دقيقة والإخراج المحدود إلى 16 MiB / 16384 chunks",
         "نقل chunks المحدودة من stdout/stderr والضغط العكسي بالـ credits إلى أثناء تنفيذ السكربت، مع حفظ الخرج الجزئي المرتب قبل terminal ومنعه بعدها",
         "استخدام `__main__` مستقل لكل تنفيذ واستعادة حالات stdin/stdout/stderr وargv وcwd و`sys.path` وmodule وimporter cache",
         "تطبيق lease مدته 5 ثوان على session مفتوحة لم تبدأ ثم تحرير inputs وdescriptors وموضع session الوحيد",

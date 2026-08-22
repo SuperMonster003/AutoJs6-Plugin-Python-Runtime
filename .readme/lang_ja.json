@@ -36,7 +36,7 @@
     "出力は実行中に credit ごとに chunk 単位で送信します. credit 枯渇時はスクリプトを停止し, 受理済み出力は唯一の terminal より前に置かれ, terminal 後の出力は禁止されます.",
     "構造化 JSON は {{ max_structured_json_bytes }}, artifact は最大 {{ max_output_artifacts }} 個, path は {{ max_output_artifact_path_bytes }}, 1 file は {{ max_output_artifact_bytes }}, 合計は {{ max_total_output_artifact_bytes }} が上限で, Host が正確な長さ, EOF, SHA-256 を検証します.",
     "キャンセルはプロセス再起動方式です. native extension とブロッキング呼び出しは Android 検証が必要です.",
-    "stdlib-only で online pip と第三者パッケージを禁止します. 結合 APK の権限はビルド時に検査します."
+    "`INTERNET` 権限によりスクリプトは標準ライブラリのネットワーク機能を直接利用できますが、online pip、自動コードダウンロード、実行時の第三者パッケージ導入は引き続き非対応です."
   ],
   "h3_unsupported": "未宣言の機能",
   "unsupported_capabilities": [
