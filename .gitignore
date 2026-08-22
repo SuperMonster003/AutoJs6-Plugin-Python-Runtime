@@ -46,6 +46,11 @@ __pycache__/
 !/tools/verify-u1-r0-python-usability.ps1
 !/tools/verify-u1-r1-core-semantics.ps1
 !/tools/verify-u1-r1-binder-cpython-device.ps1
+!/tools/verify-u1-r2-module-io.ps1
+!/tools/verify-u1-r2-interactive-input.ps1
+!/tools/verify-u1-r2-structured-results.ps1
+!/tools/verify-u1-r2-binder-cpython-device.ps1
+!/tools/verify-u1-r2-e3-functional.ps1
 !/tools/verify-r6-release-source.ps1
 !/tools/verify-r6-stable-release.ps1
 !/tools/write-r6-rc-provenance.ps1

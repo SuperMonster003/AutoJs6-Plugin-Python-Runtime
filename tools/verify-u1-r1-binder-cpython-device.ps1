@@ -96,7 +96,10 @@ param(
 
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
-    [string] $ApkSignerPath
+    [string] $ApkSignerPath,
+
+    [ValidateSet('U1-R1', 'U1-R2')]
+    [string] $EvidenceProfile = 'U1-R1'
 )
 
 Set-StrictMode -Version Latest
@@ -106,15 +109,27 @@ $PSNativeCommandUseErrorActionPreference = $false
 $hostPackage = 'org.autojs.autojs6'
 $hostTestPackage = 'org.autojs.autojs6.test'
 $pluginPackage = 'io.github.supermonster003.autojs6.plugin.python.runtime'
-$rawScope = 'U1_R1_BINDER_CPYTHON_EXACT_DEVICE_CELL'
+$isR2Profile = $EvidenceProfile -ceq 'U1-R2'
+$phase = if ($isR2Profile) { 'R2' } else { 'R1' }
+$profileLabel = "U1-$phase"
+$rawScope = if ($isR2Profile) { 'U1_R2_BINDER_CPYTHON_EXACT_DEVICE_CELL' } else { 'U1_R1_BINDER_CPYTHON_EXACT_DEVICE_CELL' }
 $evidenceLevel = 'BINDER_CPYTHON_DEVICE_PARTIAL'
+$fixtureContract = if ($isR2Profile) { 'AUTOJS6_PYTHON_RUNTIME_U1_R2_DEVICE_OBSERVATIONS' } else { 'AUTOJS6_PYTHON_RUNTIME_U1_R1_DEVICE_OBSERVATIONS' }
+$fixtureRelativePath = if ($isR2Profile) { 'tools/tests/fixtures/u1-r2-device-observation-contract.json' } else { 'tools/tests/fixtures/u1-r1-device-observation-contract.json' }
+$functionalGateRole = if ($isR2Profile) { 'CURRENT_TREE_R2_E3_FUNCTIONAL_GATE' } else { 'CURRENT_TREE_FUNCTIONAL_GATE' }
+$functionalGateEvidenceLevels = if ($isR2Profile) {
+    @('PORTABLE_CPYTHON_ONLY', 'ANDROID_BUILD_ONLY', 'HOST_ANDROID_TEST_BUILD_ONLY')
+} else {
+    @('PORTABLE_CPYTHON_ONLY', 'ANDROID_BUILD_ONLY')
+}
+$canonicalRelativePath = if ($isR2Profile) { 'build/reports/python/u1/r2-binder-cpython-device.json' } else { 'build/reports/python/u1/r1-binder-cpython-device.json' }
 $maximumInstrumentationOutputBytes = 1MB
 $sha256Pattern = '^[0-9a-f]{64}$'
 $reservedInstrumentationArguments = @(
     'class', 'notClass', 'package', 'notPackage', 'annotation', 'notAnnotation',
     'size', 'numShards', 'shardIndex', 'log', 'debug', 'coverage'
 )
-$expectedObservationDefinitions = @(
+$r1ObservationDefinitions = @(
     [pscustomobject][ordered]@{
         id = 'public-semantics'
         selector = 'org.autojs.autojs.engine.PythonU1R1AcceptanceInstrumentationTest#publicScriptEngineRunsStdinStdlibRelativeImportsAndIsolatesSequentialWorkspaces'
@@ -146,12 +161,85 @@ $expectedObservationDefinitions = @(
         )
     }
 )
+$r2ObservationDefinitions = @(
+    [pscustomobject][ordered]@{
+        id = 'public-module-result-artifact'
+        selector = 'org.autojs.autojs.engine.PythonU1R2AcceptanceInstrumentationTest#publicModuleEngineReturnsExplicitJsonAndExactArtifactWithoutInferringStdout'
+        arguments = [ordered]@{ 'autojs.python.u1r2.public.enabled' = 'true' }
+        covered = @(
+            'REAL_CPYTHON_3_13_9',
+            'PUBLIC_ENGINE_MODULE_ENTRY',
+            'MODULE_RUNPY_METADATA_AND_RELATIVE_IMPORT',
+            'EXPLICIT_STRUCTURED_JSON_RESULT',
+            'OUTPUT_ARTIFACT_EXACT_LENGTH_EOF_SHA256_BYTES',
+            'HOST_OWNED_DEFENSIVE_ARTIFACT_BYTES',
+            'STDOUT_RESULT_INFERENCE_FORBIDDEN',
+            'ONE_STARTED_ONE_TERMINAL'
+        )
+    },
+    [pscustomobject][ordered]@{
+        id = 'binder-interactive-stream'
+        selector = 'org.autojs.autojs.core.plugin.python.PythonRuntimeU1R2BinderInstrumentationTest#interactivePromptReplyStreamsBeforeTerminalAndKeepsStdoutOutOfResult'
+        arguments = [ordered]@{ 'autojs.python.u1r2.binder.enabled' = 'true' }
+        covered = @(
+            'EXACT_COMPONENT_BIND',
+            'PINNED_PROVIDER_CALLBACK_UID',
+            'EXECUTION_TIME_ORDERED_STDOUT_BEFORE_PROMPT',
+            'TYPED_PROMPT_ID_POLICY',
+            'ONE_SHOT_BOUNDED_UTF8_REPLY',
+            'STDOUT_RESULT_INFERENCE_FORBIDDEN',
+            'ONE_STARTED_ONE_TERMINAL'
+        )
+    },
+    [pscustomobject][ordered]@{
+        id = 'binder-artifact-limit-recovery'
+        selector = 'org.autojs.autojs.core.plugin.python.PythonRuntimeU1R2BinderInstrumentationTest#oversizedArtifactPublishesNoPartialResultThenNextExactBindSucceeds'
+        arguments = [ordered]@{ 'autojs.python.u1r2.binder.enabled' = 'true' }
+        covered = @(
+            'RESULT_POLICY_PER_ARTIFACT_LIMIT',
+            'OUTPUT_ARTIFACT_REJECTED_RESULT_PHASE',
+            'NO_PARTIAL_RESULT_OR_DESCRIPTORS',
+            'NEXT_EXACT_BIND_SUCCEEDS',
+            'PINNED_PROVIDER_CALLBACK_UID',
+            'ONE_STARTED_ONE_TERMINAL'
+        )
+    },
+    [pscustomobject][ordered]@{
+        id = 'cancel-rebind'
+        selector = 'org.autojs.autojs.core.plugin.python.PythonRuntimeRealPluginCancelRebindDiagnosticTest#cancelAfterStartedKillsOldBinderThenExactRebindRunsFiniteRequestOnce'
+        arguments = [ordered]@{ 'autojs.python.r2.cancelRebind.enabled' = 'true' }
+        covered = @(
+            'CANCEL_AFTER_STARTED',
+            'TYPED_CANCELLATION',
+            'OLD_PROVIDER_BINDER_DEATH',
+            'NO_DISPATCH_REPLAY',
+            'EXACT_REBIND_NEW_RUNTIME_GENERATION',
+            'NEXT_FINITE_EXECUTION_SUCCEEDS',
+            'PINNED_PROVIDER_CALLBACK_UID'
+        )
+    },
+    [pscustomobject][ordered]@{
+        id = 'timeout-rebind'
+        selector = 'org.autojs.autojs.core.plugin.python.PythonRuntimeRealPluginTimeoutRebindDiagnosticTest#providerTimeoutFailsBeforeOldBinderDeathThenExactRebindRunsFiniteRequest'
+        arguments = [ordered]@{ 'autojs.python.r2.timeoutRebind.enabled' = 'true' }
+        covered = @(
+            'PROVIDER_EXECUTION_TIMEOUT',
+            'TYPED_TIMEOUT_BEFORE_BINDER_DEATH',
+            'NO_HOST_CANCEL',
+            'NO_DISPATCH_REPLAY',
+            'EXACT_REBIND_NEW_RUNTIME_GENERATION',
+            'NEXT_FINITE_EXECUTION_SUCCEEDS',
+            'PINNED_PROVIDER_CALLBACK_UID'
+        )
+    }
+)
+$expectedObservationDefinitions = if ($isR2Profile) { $r2ObservationDefinitions } else { $r1ObservationDefinitions }
 $expectedLimitations = @(
     'SINGLE_DEVICE_API_ABI_CELL',
     'NO_X86_64_DEVICE_EXECUTION',
     'NO_DEVICE_MATRIX',
     'NO_PUBLIC_RELEASE_VERIFICATION',
-    'NO_LIVE_INTERACTIVE_STDIN',
+    $(if ($isR2Profile) { 'NO_FOREGROUND_UI_AUTOMATION' } else { 'NO_LIVE_INTERACTIVE_STDIN' }),
     'TRUSTED_LOCAL_CODE_NOT_SANDBOX'
 )
 $git = (Get-Command git -CommandType Application -ErrorAction Stop).Source
@@ -292,10 +380,10 @@ function Assert-FunctionalGate([object] $Gate, [string] $ExpectedHost, [string] 
     Assert-ExactKeys $Gate @(
         'schema', 'track', 'phase', 'status', 'reportRole', 'startedAtUtc', 'completedAtUtc',
         'evidenceLevels', 'sourceIdentity', 'scope', 'localPython', 'steps', 'claims', 'error'
-    ) 'U1-R1 functional gate root'
-    Assert-True ([int] $Gate.schema -eq 1 -and [string] $Gate.track -ceq 'U1' -and [string] $Gate.phase -ceq 'R1') 'Functional gate identity differs'
-    Assert-True ([string] $Gate.status -ceq 'PASS' -and [string] $Gate.reportRole -ceq 'CURRENT_TREE_FUNCTIONAL_GATE') 'Functional gate did not produce the expected PASS role'
-    Assert-StringSequence @($Gate.evidenceLevels) @('PORTABLE_CPYTHON_ONLY', 'ANDROID_BUILD_ONLY') 'Functional gate evidence levels'
+    ) "$profileLabel functional gate root"
+    Assert-True ([int] $Gate.schema -eq 1 -and [string] $Gate.track -ceq 'U1' -and [string] $Gate.phase -ceq $phase) 'Functional gate identity differs'
+    Assert-True ([string] $Gate.status -ceq 'PASS' -and [string] $Gate.reportRole -ceq $functionalGateRole) 'Functional gate did not produce the expected PASS role'
+    Assert-StringSequence @($Gate.evidenceLevels) @($functionalGateEvidenceLevels) 'Functional gate evidence levels'
     Assert-ExactKeys $Gate.sourceIdentity @('plugin', 'host') 'Functional gate source identity'
     foreach ($definition in @(
         [pscustomobject]@{ Name = 'host'; Commit = $ExpectedHost },
@@ -330,13 +418,13 @@ function Assert-ArgumentObject([object] $Arguments, [string] $Label) {
 function Assert-ObservationFixture([object] $Fixture) {
     Assert-ExactKeys $Fixture @('schemaVersion', 'contract', 'track', 'phase', 'runnerComponent', 'instrumentationArguments', 'selectors') 'Observation fixture root'
     Assert-True ([int] $Fixture.schemaVersion -eq 1) 'Observation fixture schema differs'
-    Assert-True ([string] $Fixture.contract -ceq 'AUTOJS6_PYTHON_RUNTIME_U1_R1_DEVICE_OBSERVATIONS') 'Observation fixture contract differs'
-    Assert-True ([string] $Fixture.track -ceq 'U1' -and [string] $Fixture.phase -ceq 'R1') 'Observation fixture track/phase differs'
+    Assert-True ([string] $Fixture.contract -ceq $fixtureContract) 'Observation fixture contract differs'
+    Assert-True ([string] $Fixture.track -ceq 'U1' -and [string] $Fixture.phase -ceq $phase) 'Observation fixture track/phase differs'
     Assert-True ([string] $Fixture.runnerComponent -ceq "$hostTestPackage/androidx.test.runner.AndroidJUnitRunner") 'Observation fixture runner component differs'
     Assert-ArgumentObject $Fixture.instrumentationArguments 'Observation fixture global arguments'
     Assert-ExactKeys $Fixture.instrumentationArguments @() 'Observation fixture global arguments'
     $selectors = @($Fixture.selectors)
-    Assert-True ($selectors.Count -eq $expectedObservationDefinitions.Count) 'Observation fixture selector count differs from the frozen U1-R1 contract'
+    Assert-True ($selectors.Count -eq $expectedObservationDefinitions.Count) "Observation fixture selector count differs from the frozen $profileLabel contract"
     $ids = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $names = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     for ($index = 0; $index -lt $selectors.Count; $index++) {
@@ -444,21 +532,45 @@ function Assert-AbsentPackageState([object] $State, [string] $PackageName, [int[
 }
 
 function Assert-Claims([object] $Claims) {
-    $expected = [ordered]@{
-        portableTestsPassed = $true
-        androidCompiled = $true
-        apkPackaged = $true
-        binderExecuted = $true
-        packagedCpythonExecuted = $true
-        deviceVerified = $true
-        stdinVerified = $true
-        importsVerified = $true
-        sequentialIsolationVerified = $true
-        restorationVerified = $true
-        deviceMatrixVerified = $false
-        productionEvidence = $false
-        published = $false
-        releaseAuthorized = $false
+    $expected = if ($isR2Profile) {
+        [ordered]@{
+            portableTestsPassed = $true
+            androidCompiled = $true
+            apkPackaged = $true
+            binderExecuted = $true
+            packagedCpythonExecuted = $true
+            deviceVerified = $true
+            moduleEntryVerified = $true
+            executionTimeStreamingVerified = $true
+            interactiveInputVerified = $true
+            structuredJsonVerified = $true
+            outputArtifactsVerified = $true
+            resultLimitRecoveryVerified = $true
+            cancellationRecoveryVerified = $true
+            timeoutRecoveryVerified = $true
+            restorationVerified = $true
+            deviceMatrixVerified = $false
+            productionEvidence = $false
+            published = $false
+            releaseAuthorized = $false
+        }
+    } else {
+        [ordered]@{
+            portableTestsPassed = $true
+            androidCompiled = $true
+            apkPackaged = $true
+            binderExecuted = $true
+            packagedCpythonExecuted = $true
+            deviceVerified = $true
+            stdinVerified = $true
+            importsVerified = $true
+            sequentialIsolationVerified = $true
+            restorationVerified = $true
+            deviceMatrixVerified = $false
+            productionEvidence = $false
+            published = $false
+            releaseAuthorized = $false
+        }
     }
     Assert-ExactKeys $Claims @($expected.Keys) 'Raw device claims'
     foreach ($entry in $expected.GetEnumerator()) {
@@ -543,11 +655,13 @@ function Assert-Observation([object] $Record, [object] $Definition, [int] $Index
 function Write-NewCanonicalJson([string] $Path, [object] $Value) {
     $directory = [IO.Path]::GetDirectoryName($Path)
     [void] [IO.Directory]::CreateDirectory($directory)
-    Assert-True (-not (Test-Path -LiteralPath $Path)) 'Canonical U1-R1 device evidence already exists and will not be overwritten'
+    $alreadyExistsMessage = if ($isR2Profile) { 'Canonical U1-R2 device evidence already exists and will not be overwritten' } else { 'Canonical U1-R1 device evidence already exists and will not be overwritten' }
+    $concurrentMessage = if ($isR2Profile) { 'Canonical U1-R2 device evidence appeared concurrently and will not be overwritten' } else { 'Canonical U1-R1 device evidence appeared concurrently and will not be overwritten' }
+    Assert-True (-not (Test-Path -LiteralPath $Path)) $alreadyExistsMessage
     $temporary = Join-Path $directory ('.' + [IO.Path]::GetFileName($Path) + '.' + [Guid]::NewGuid().ToString('N') + '.tmp')
     try {
         [IO.File]::WriteAllText($temporary, (($Value | ConvertTo-Json -Depth 30) + "`n"), $utf8WithoutBom)
-        Assert-True (-not (Test-Path -LiteralPath $Path)) 'Canonical U1-R1 device evidence appeared concurrently and will not be overwritten'
+        Assert-True (-not (Test-Path -LiteralPath $Path)) $concurrentMessage
         [IO.File]::Move($temporary, $Path)
     } finally {
         if (Test-Path -LiteralPath $temporary -PathType Leaf) { Remove-Item -LiteralPath $temporary -Force }
@@ -565,20 +679,21 @@ $pluginIdentity = Get-RepositoryIdentity $PluginRepository $expectedPlugin 'Plug
 $scriptRepository = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot)).TrimEnd('\', '/')
 Assert-True ($pluginIdentity.repository.Equals($scriptRepository, [StringComparison]::OrdinalIgnoreCase)) 'PluginRepository differs from the repository containing this verifier'
 
-$rawPath = Resolve-ExistingFile $RawReport 'Raw U1-R1 device report'
+$rawPath = Resolve-ExistingFile $RawReport "Raw $profileLabel device report"
 $rawDigest = Normalize-Sha256 $RawReportSha256 'Raw report SHA-256'
 Assert-True ((Get-FileSha256 $rawPath) -ceq $rawDigest) 'Raw report SHA-256 mismatch'
-$functionalPath = Resolve-ExistingFile $FunctionalGate 'U1-R1 functional gate'
+$functionalPath = Resolve-ExistingFile $FunctionalGate "$profileLabel functional gate"
 $functionalDigest = Normalize-Sha256 $FunctionalGateSha256 'Functional gate SHA-256'
 Assert-True ((Get-FileSha256 $functionalPath) -ceq $functionalDigest) 'Functional gate SHA-256 mismatch'
-$functionalJson = Read-Json $functionalPath 'U1-R1 functional gate'
+$functionalJson = Read-Json $functionalPath "$profileLabel functional gate"
 Assert-FunctionalGate $functionalJson $expectedHost $expectedPlugin
-$fixturePath = Resolve-ExistingFile $ObservationFixture 'U1-R1 observation fixture'
+$fixturePath = Resolve-ExistingFile $ObservationFixture "$profileLabel observation fixture"
 $fixtureDigest = Normalize-Sha256 $ObservationFixtureSha256 'Observation fixture SHA-256'
-$canonicalFixturePath = [IO.Path]::GetFullPath((Join-Path $pluginIdentity.repository 'tools/tests/fixtures/u1-r1-device-observation-contract.json'))
-Assert-True ($fixturePath.Equals($canonicalFixturePath, [StringComparison]::OrdinalIgnoreCase)) 'Observation fixture must be the canonical tracked U1-R1 contract'
+$canonicalFixturePath = [IO.Path]::GetFullPath((Join-Path $pluginIdentity.repository $fixtureRelativePath))
+$canonicalFixtureMessage = if ($isR2Profile) { 'Observation fixture must be the canonical tracked U1-R2 contract' } else { 'Observation fixture must be the canonical tracked U1-R1 contract' }
+Assert-True ($fixturePath.Equals($canonicalFixturePath, [StringComparison]::OrdinalIgnoreCase)) $canonicalFixtureMessage
 Assert-True ((Get-FileSha256 $fixturePath) -ceq $fixtureDigest) 'Observation fixture SHA-256 mismatch'
-$fixture = Read-Json $fixturePath 'U1-R1 observation fixture'
+$fixture = Read-Json $fixturePath "$profileLabel observation fixture"
 Assert-ObservationFixture $fixture
 
 $script:resolvedAapt2 = Resolve-ExistingFile $Aapt2Path 'aapt2'
@@ -591,12 +706,12 @@ Assert-True ([IO.Path]::GetFileName($script:resolvedApkSigner) -in @('apksigner.
 $hostInfo = Inspect-Apk 'host' $HostApk (Normalize-Sha256 $HostSha256 'Host APK SHA-256') $hostPackage $true
 $testInfo = Inspect-Apk 'androidTest' $HostTestApk (Normalize-Sha256 $HostTestSha256 'Host test APK SHA-256') $hostTestPackage $false
 $pluginInfo = Inspect-Apk 'plugin' $PluginApk (Normalize-Sha256 $PluginSha256 'Plugin APK SHA-256') $pluginPackage $true
-$raw = Read-Json $rawPath 'Raw U1-R1 device report'
+$raw = Read-Json $rawPath "Raw $profileLabel device report"
 Assert-ExactKeys $raw @(
     'schemaVersion', 'createdAtUtc', 'status', 'scope', 'evidenceLevel', 'source',
     'functionalGate', 'observationContract', 'artifacts', 'tools', 'device', 'preflight',
     'observations', 'restoration', 'claims', 'limitations', 'error'
-) 'Raw U1-R1 device report root'
+) "Raw $profileLabel device report root"
 Assert-True ([int] $raw.schemaVersion -eq 1) 'Raw report schema differs'
 $null = Assert-DateTime $raw.createdAtUtc 'Raw report creation time'
 Assert-True ([string] $raw.status -ceq 'PASS' -and [string] $raw.scope -ceq $rawScope -and [string] $raw.evidenceLevel -ceq $evidenceLevel) 'Raw report status/scope/evidence level differs'
@@ -606,7 +721,7 @@ Assert-ExactKeys $raw.source @('host', 'plugin') 'Raw source binding'
 Assert-RepositoryRecord $raw.source.host $hostIdentity 'Raw Host source binding'
 Assert-RepositoryRecord $raw.source.plugin $pluginIdentity 'Raw Plugin source binding'
 Assert-FileBinding $raw.functionalGate $functionalPath $functionalDigest 'Raw functional gate binding' @('status', 'reportRole')
-Assert-True ([string] $raw.functionalGate.status -ceq 'PASS' -and [string] $raw.functionalGate.reportRole -ceq 'CURRENT_TREE_FUNCTIONAL_GATE') 'Raw functional gate claim differs'
+Assert-True ([string] $raw.functionalGate.status -ceq 'PASS' -and [string] $raw.functionalGate.reportRole -ceq $functionalGateRole) 'Raw functional gate claim differs'
 Assert-FileBinding $raw.observationContract $fixturePath $fixtureDigest 'Raw observation contract binding' @('schemaVersion')
 Assert-True ([int] $raw.observationContract.schemaVersion -eq 1) 'Raw observation contract schema differs'
 
@@ -697,7 +812,7 @@ foreach ($info in @($hostInfo, $testInfo, $pluginInfo)) {
     Assert-True ((Get-FileSha256 $info.path) -ceq $info.sha256) "$($info.role) APK changed during verification"
 }
 
-$canonicalPath = [IO.Path]::GetFullPath((Join-Path $pluginIdentity.repository 'build/reports/python/u1/r1-binder-cpython-device.json'))
+$canonicalPath = [IO.Path]::GetFullPath((Join-Path $pluginIdentity.repository $canonicalRelativePath))
 $canonicalRelative = $canonicalPath.Substring($pluginIdentity.repository.Length).TrimStart('\', '/').Replace('\', '/')
 $ignored = Invoke-NativeCapture $git @('-C', $pluginIdentity.repository, 'check-ignore', '--quiet', '--no-index', '--', $canonicalRelative) 'canonical output ignore-policy inspection'
 Assert-NativeSuccess $ignored 'Canonical output ignore-policy inspection'
@@ -731,7 +846,7 @@ $canonical = [pscustomobject][ordered]@{
 }
 Write-NewCanonicalJson $canonicalPath $canonical
 $canonicalSha = Get-FileSha256 $canonicalPath
-Write-Output 'U1_R1_DEVICE_EVIDENCE=BINDER_CPYTHON_DEVICE_PARTIAL'
+Write-Output "U1_$($phase)_DEVICE_EVIDENCE=BINDER_CPYTHON_DEVICE_PARTIAL"
 Write-Output "OUTPUT=$canonicalPath"
 Write-Output "OUTPUT_SHA256=$canonicalSha"
 Write-Output 'MATRIX_VERIFIED=false'

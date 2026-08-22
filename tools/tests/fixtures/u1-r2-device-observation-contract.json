@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "contract": "AUTOJS6_PYTHON_RUNTIME_U1_R2_DEVICE_OBSERVATIONS",
+  "track": "U1",
+  "phase": "R2",
+  "runnerComponent": "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner",
+  "instrumentationArguments": {},
+  "selectors": [
+    {
+      "id": "public-module-result-artifact",
+      "selector": "org.autojs.autojs.engine.PythonU1R2AcceptanceInstrumentationTest#publicModuleEngineReturnsExplicitJsonAndExactArtifactWithoutInferringStdout",
+      "arguments": {
+        "autojs.python.u1r2.public.enabled": "true"
+      },
+      "covered": [
+        "REAL_CPYTHON_3_13_9",
+        "PUBLIC_ENGINE_MODULE_ENTRY",
+        "MODULE_RUNPY_METADATA_AND_RELATIVE_IMPORT",
+        "EXPLICIT_STRUCTURED_JSON_RESULT",
+        "OUTPUT_ARTIFACT_EXACT_LENGTH_EOF_SHA256_BYTES",
+        "HOST_OWNED_DEFENSIVE_ARTIFACT_BYTES",
+        "STDOUT_RESULT_INFERENCE_FORBIDDEN",
+        "ONE_STARTED_ONE_TERMINAL"
+      ]
+    },
+    {
+      "id": "binder-interactive-stream",
+      "selector": "org.autojs.autojs.core.plugin.python.PythonRuntimeU1R2BinderInstrumentationTest#interactivePromptReplyStreamsBeforeTerminalAndKeepsStdoutOutOfResult",
+      "arguments": {
+        "autojs.python.u1r2.binder.enabled": "true"
+      },
+      "covered": [
+        "EXACT_COMPONENT_BIND",
+        "PINNED_PROVIDER_CALLBACK_UID",
+        "EXECUTION_TIME_ORDERED_STDOUT_BEFORE_PROMPT",
+        "TYPED_PROMPT_ID_POLICY",
+        "ONE_SHOT_BOUNDED_UTF8_REPLY",
+        "STDOUT_RESULT_INFERENCE_FORBIDDEN",
+        "ONE_STARTED_ONE_TERMINAL"
+      ]
+    },
+    {
+      "id": "binder-artifact-limit-recovery",
+      "selector": "org.autojs.autojs.core.plugin.python.PythonRuntimeU1R2BinderInstrumentationTest#oversizedArtifactPublishesNoPartialResultThenNextExactBindSucceeds",
+      "arguments": {
+        "autojs.python.u1r2.binder.enabled": "true"
+      },
+      "covered": [
+        "RESULT_POLICY_PER_ARTIFACT_LIMIT",
+        "OUTPUT_ARTIFACT_REJECTED_RESULT_PHASE",
+        "NO_PARTIAL_RESULT_OR_DESCRIPTORS",
+        "NEXT_EXACT_BIND_SUCCEEDS",
+        "PINNED_PROVIDER_CALLBACK_UID",
+        "ONE_STARTED_ONE_TERMINAL"
+      ]
+    },
+    {
+      "id": "cancel-rebind",
+      "selector": "org.autojs.autojs.core.plugin.python.PythonRuntimeRealPluginCancelRebindDiagnosticTest#cancelAfterStartedKillsOldBinderThenExactRebindRunsFiniteRequestOnce",
+      "arguments": {
+        "autojs.python.r2.cancelRebind.enabled": "true"
+      },
+      "covered": [
+        "CANCEL_AFTER_STARTED",
+        "TYPED_CANCELLATION",
+        "OLD_PROVIDER_BINDER_DEATH",
+        "NO_DISPATCH_REPLAY",
+        "EXACT_REBIND_NEW_RUNTIME_GENERATION",
+        "NEXT_FINITE_EXECUTION_SUCCEEDS",
+        "PINNED_PROVIDER_CALLBACK_UID"
+      ]
+    },
+    {
+      "id": "timeout-rebind",
+      "selector": "org.autojs.autojs.core.plugin.python.PythonRuntimeRealPluginTimeoutRebindDiagnosticTest#providerTimeoutFailsBeforeOldBinderDeathThenExactRebindRunsFiniteRequest",
+      "arguments": {
+        "autojs.python.r2.timeoutRebind.enabled": "true"
+      },
+      "covered": [
+        "PROVIDER_EXECUTION_TIMEOUT",
+        "TYPED_TIMEOUT_BEFORE_BINDER_DEATH",
+        "NO_HOST_CANCEL",
+        "NO_DISPATCH_REPLAY",
+        "EXACT_REBIND_NEW_RUNTIME_GENERATION",
+        "NEXT_FINITE_EXECUTION_SUCCEEDS",
+        "PINNED_PROVIDER_CALLBACK_UID"
+      ]
+    }
+  ]
+}

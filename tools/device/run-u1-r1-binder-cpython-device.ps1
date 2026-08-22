@@ -98,7 +98,10 @@ param(
     [switch] $ConfirmNoActiveSoak,
 
     [Parameter(Mandatory = $true)]
-    [switch] $ConfirmDeviceMutation
+    [switch] $ConfirmDeviceMutation,
+
+    [ValidateSet('U1-R1', 'U1-R2')]
+    [string] $EvidenceProfile = 'U1-R1'
 )
 
 Set-StrictMode -Version Latest
@@ -108,15 +111,27 @@ $PSNativeCommandUseErrorActionPreference = $false
 $hostPackage = 'org.autojs.autojs6'
 $hostTestPackage = 'org.autojs.autojs6.test'
 $pluginPackage = 'io.github.supermonster003.autojs6.plugin.python.runtime'
-$rawScope = 'U1_R1_BINDER_CPYTHON_EXACT_DEVICE_CELL'
+$isR2Profile = $EvidenceProfile -ceq 'U1-R2'
+$phase = if ($isR2Profile) { 'R2' } else { 'R1' }
+$profileLabel = "U1-$phase"
+$rawScope = if ($isR2Profile) { 'U1_R2_BINDER_CPYTHON_EXACT_DEVICE_CELL' } else { 'U1_R1_BINDER_CPYTHON_EXACT_DEVICE_CELL' }
 $evidenceLevel = 'BINDER_CPYTHON_DEVICE_PARTIAL'
+$fixtureContract = if ($isR2Profile) { 'AUTOJS6_PYTHON_RUNTIME_U1_R2_DEVICE_OBSERVATIONS' } else { 'AUTOJS6_PYTHON_RUNTIME_U1_R1_DEVICE_OBSERVATIONS' }
+$fixtureRelativePath = if ($isR2Profile) { 'tools/tests/fixtures/u1-r2-device-observation-contract.json' } else { 'tools/tests/fixtures/u1-r1-device-observation-contract.json' }
+$rawOutputPrefix = if ($isR2Profile) { 'r2-binder-cpython-device-run-' } else { 'r1-binder-cpython-device-run-' }
+$functionalGateRole = if ($isR2Profile) { 'CURRENT_TREE_R2_E3_FUNCTIONAL_GATE' } else { 'CURRENT_TREE_FUNCTIONAL_GATE' }
+$functionalGateEvidenceLevels = if ($isR2Profile) {
+    @('PORTABLE_CPYTHON_ONLY', 'ANDROID_BUILD_ONLY', 'HOST_ANDROID_TEST_BUILD_ONLY')
+} else {
+    @('PORTABLE_CPYTHON_ONLY', 'ANDROID_BUILD_ONLY')
+}
 $maximumInstrumentationOutputBytes = 1MB
 $sha256Pattern = '^[0-9a-f]{64}$'
 $reservedInstrumentationArguments = @(
     'class', 'notClass', 'package', 'notPackage', 'annotation', 'notAnnotation',
     'size', 'numShards', 'shardIndex', 'log', 'debug', 'coverage'
 )
-$expectedObservationDefinitions = @(
+$r1ObservationDefinitions = @(
     [pscustomobject][ordered]@{
         id = 'public-semantics'
         selector = 'org.autojs.autojs.engine.PythonU1R1AcceptanceInstrumentationTest#publicScriptEngineRunsStdinStdlibRelativeImportsAndIsolatesSequentialWorkspaces'
@@ -148,12 +163,85 @@ $expectedObservationDefinitions = @(
         )
     }
 )
+$r2ObservationDefinitions = @(
+    [pscustomobject][ordered]@{
+        id = 'public-module-result-artifact'
+        selector = 'org.autojs.autojs.engine.PythonU1R2AcceptanceInstrumentationTest#publicModuleEngineReturnsExplicitJsonAndExactArtifactWithoutInferringStdout'
+        arguments = [ordered]@{ 'autojs.python.u1r2.public.enabled' = 'true' }
+        covered = @(
+            'REAL_CPYTHON_3_13_9',
+            'PUBLIC_ENGINE_MODULE_ENTRY',
+            'MODULE_RUNPY_METADATA_AND_RELATIVE_IMPORT',
+            'EXPLICIT_STRUCTURED_JSON_RESULT',
+            'OUTPUT_ARTIFACT_EXACT_LENGTH_EOF_SHA256_BYTES',
+            'HOST_OWNED_DEFENSIVE_ARTIFACT_BYTES',
+            'STDOUT_RESULT_INFERENCE_FORBIDDEN',
+            'ONE_STARTED_ONE_TERMINAL'
+        )
+    },
+    [pscustomobject][ordered]@{
+        id = 'binder-interactive-stream'
+        selector = 'org.autojs.autojs.core.plugin.python.PythonRuntimeU1R2BinderInstrumentationTest#interactivePromptReplyStreamsBeforeTerminalAndKeepsStdoutOutOfResult'
+        arguments = [ordered]@{ 'autojs.python.u1r2.binder.enabled' = 'true' }
+        covered = @(
+            'EXACT_COMPONENT_BIND',
+            'PINNED_PROVIDER_CALLBACK_UID',
+            'EXECUTION_TIME_ORDERED_STDOUT_BEFORE_PROMPT',
+            'TYPED_PROMPT_ID_POLICY',
+            'ONE_SHOT_BOUNDED_UTF8_REPLY',
+            'STDOUT_RESULT_INFERENCE_FORBIDDEN',
+            'ONE_STARTED_ONE_TERMINAL'
+        )
+    },
+    [pscustomobject][ordered]@{
+        id = 'binder-artifact-limit-recovery'
+        selector = 'org.autojs.autojs.core.plugin.python.PythonRuntimeU1R2BinderInstrumentationTest#oversizedArtifactPublishesNoPartialResultThenNextExactBindSucceeds'
+        arguments = [ordered]@{ 'autojs.python.u1r2.binder.enabled' = 'true' }
+        covered = @(
+            'RESULT_POLICY_PER_ARTIFACT_LIMIT',
+            'OUTPUT_ARTIFACT_REJECTED_RESULT_PHASE',
+            'NO_PARTIAL_RESULT_OR_DESCRIPTORS',
+            'NEXT_EXACT_BIND_SUCCEEDS',
+            'PINNED_PROVIDER_CALLBACK_UID',
+            'ONE_STARTED_ONE_TERMINAL'
+        )
+    },
+    [pscustomobject][ordered]@{
+        id = 'cancel-rebind'
+        selector = 'org.autojs.autojs.core.plugin.python.PythonRuntimeRealPluginCancelRebindDiagnosticTest#cancelAfterStartedKillsOldBinderThenExactRebindRunsFiniteRequestOnce'
+        arguments = [ordered]@{ 'autojs.python.r2.cancelRebind.enabled' = 'true' }
+        covered = @(
+            'CANCEL_AFTER_STARTED',
+            'TYPED_CANCELLATION',
+            'OLD_PROVIDER_BINDER_DEATH',
+            'NO_DISPATCH_REPLAY',
+            'EXACT_REBIND_NEW_RUNTIME_GENERATION',
+            'NEXT_FINITE_EXECUTION_SUCCEEDS',
+            'PINNED_PROVIDER_CALLBACK_UID'
+        )
+    },
+    [pscustomobject][ordered]@{
+        id = 'timeout-rebind'
+        selector = 'org.autojs.autojs.core.plugin.python.PythonRuntimeRealPluginTimeoutRebindDiagnosticTest#providerTimeoutFailsBeforeOldBinderDeathThenExactRebindRunsFiniteRequest'
+        arguments = [ordered]@{ 'autojs.python.r2.timeoutRebind.enabled' = 'true' }
+        covered = @(
+            'PROVIDER_EXECUTION_TIMEOUT',
+            'TYPED_TIMEOUT_BEFORE_BINDER_DEATH',
+            'NO_HOST_CANCEL',
+            'NO_DISPATCH_REPLAY',
+            'EXACT_REBIND_NEW_RUNTIME_GENERATION',
+            'NEXT_FINITE_EXECUTION_SUCCEEDS',
+            'PINNED_PROVIDER_CALLBACK_UID'
+        )
+    }
+)
+$expectedObservationDefinitions = if ($isR2Profile) { $r2ObservationDefinitions } else { $r1ObservationDefinitions }
 $limitations = @(
     'SINGLE_DEVICE_API_ABI_CELL',
     'NO_X86_64_DEVICE_EXECUTION',
     'NO_DEVICE_MATRIX',
     'NO_PUBLIC_RELEASE_VERIFICATION',
-    'NO_LIVE_INTERACTIVE_STDIN',
+    $(if ($isR2Profile) { 'NO_FOREGROUND_UI_AUTOMATION' } else { 'NO_LIVE_INTERACTIVE_STDIN' }),
     'TRUSTED_LOCAL_CODE_NOT_SANDBOX'
 )
 $git = (Get-Command git -CommandType Application -ErrorAction Stop).Source
@@ -328,13 +416,13 @@ function Assert-FunctionalGate([object] $Gate, [string] $ExpectedHost, [string] 
     Assert-ExactKeys $Gate @(
         'schema', 'track', 'phase', 'status', 'reportRole', 'startedAtUtc', 'completedAtUtc',
         'evidenceLevels', 'sourceIdentity', 'scope', 'localPython', 'steps', 'claims', 'error'
-    ) 'U1-R1 functional gate root'
+    ) "$profileLabel functional gate root"
     Assert-True ([int] $Gate.schema -eq 1) 'Functional gate schema is not 1'
     Assert-True ([string] $Gate.track -ceq 'U1') 'Functional gate track is not U1'
-    Assert-True ([string] $Gate.phase -ceq 'R1') 'Functional gate phase is not R1'
+    Assert-True ([string] $Gate.phase -ceq $phase) "Functional gate phase is not $phase"
     Assert-True ([string] $Gate.status -ceq 'PASS') 'Functional gate did not pass'
-    Assert-True ([string] $Gate.reportRole -ceq 'CURRENT_TREE_FUNCTIONAL_GATE') 'Functional gate role differs'
-    Assert-StringSequence @($Gate.evidenceLevels) @('PORTABLE_CPYTHON_ONLY', 'ANDROID_BUILD_ONLY') 'Functional gate evidence levels'
+    Assert-True ([string] $Gate.reportRole -ceq $functionalGateRole) 'Functional gate role differs'
+    Assert-StringSequence @($Gate.evidenceLevels) @($functionalGateEvidenceLevels) 'Functional gate evidence levels'
     Assert-ExactKeys $Gate.sourceIdentity @('plugin', 'host') 'Functional gate source identity'
     foreach ($definition in @(
         [pscustomobject]@{ Name = 'host'; Commit = $ExpectedHost },
@@ -375,13 +463,13 @@ function Assert-ObservationFixture([object] $Fixture) {
         'instrumentationArguments', 'selectors'
     ) 'Observation fixture root'
     Assert-True ([int] $Fixture.schemaVersion -eq 1) 'Observation fixture schema is not 1'
-    Assert-True ([string] $Fixture.contract -ceq 'AUTOJS6_PYTHON_RUNTIME_U1_R1_DEVICE_OBSERVATIONS') 'Observation fixture contract differs'
-    Assert-True ([string] $Fixture.track -ceq 'U1' -and [string] $Fixture.phase -ceq 'R1') 'Observation fixture track/phase differs'
+    Assert-True ([string] $Fixture.contract -ceq $fixtureContract) 'Observation fixture contract differs'
+    Assert-True ([string] $Fixture.track -ceq 'U1' -and [string] $Fixture.phase -ceq $phase) 'Observation fixture track/phase differs'
     Assert-True ([string] $Fixture.runnerComponent -ceq "$hostTestPackage/androidx.test.runner.AndroidJUnitRunner") 'Observation fixture runner component differs'
     Assert-ArgumentObject $Fixture.instrumentationArguments 'Observation fixture global arguments'
     Assert-ExactKeys $Fixture.instrumentationArguments @() 'Observation fixture global arguments'
     $selectors = @($Fixture.selectors)
-    Assert-True ($selectors.Count -eq $expectedObservationDefinitions.Count) 'Observation fixture selector count differs from the frozen U1-R1 contract'
+    Assert-True ($selectors.Count -eq $expectedObservationDefinitions.Count) "Observation fixture selector count differs from the frozen $profileLabel contract"
     $ids = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $names = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     for ($index = 0; $index -lt $selectors.Count; $index++) {
@@ -769,7 +857,7 @@ function Resolve-NewRawOutput([string] $Path, [string] $Repository) {
     $reportsPrefix = $reportsRoot.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
     $fullPath = [IO.Path]::GetFullPath($Path)
     Assert-True ($fullPath.StartsWith($reportsPrefix, [StringComparison]::OrdinalIgnoreCase)) 'Raw output must be below build/reports/python/u1'
-    Assert-True ([IO.Path]::GetFileName($fullPath).StartsWith('r1-binder-cpython-device-run-', [StringComparison]::Ordinal)) 'Raw output filename must begin with r1-binder-cpython-device-run-'
+    Assert-True ([IO.Path]::GetFileName($fullPath).StartsWith($rawOutputPrefix, [StringComparison]::Ordinal)) "Raw output filename must begin with $rawOutputPrefix"
     Assert-True ([IO.Path]::GetExtension($fullPath) -ceq '.json') 'Raw output must use the .json extension'
     Assert-True (-not (Test-Path -LiteralPath $fullPath)) 'Raw output already exists and will not be overwritten'
     $relative = $fullPath.Substring($Repository.Length).TrimStart('\', '/').Replace('\', '/')
@@ -794,6 +882,29 @@ function Write-NewJson([string] $Path, [object] $Value) {
 }
 
 function New-Claims([bool] $DevicePass) {
+    if ($isR2Profile) {
+        return [pscustomobject][ordered]@{
+            portableTestsPassed = $true
+            androidCompiled = $true
+            apkPackaged = $true
+            binderExecuted = $DevicePass
+            packagedCpythonExecuted = $DevicePass
+            deviceVerified = $DevicePass
+            moduleEntryVerified = $DevicePass
+            executionTimeStreamingVerified = $DevicePass
+            interactiveInputVerified = $DevicePass
+            structuredJsonVerified = $DevicePass
+            outputArtifactsVerified = $DevicePass
+            resultLimitRecoveryVerified = $DevicePass
+            cancellationRecoveryVerified = $DevicePass
+            timeoutRecoveryVerified = $DevicePass
+            restorationVerified = $DevicePass
+            deviceMatrixVerified = $false
+            productionEvidence = $false
+            published = $false
+            releaseAuthorized = $false
+        }
+    }
     return [pscustomobject][ordered]@{
         portableTestsPassed = $true
         androidCompiled = $true
@@ -846,18 +957,19 @@ $scriptRepository = [IO.Path]::GetFullPath((Split-Path -Parent (Split-Path -Pare
 Assert-True ($pluginIdentity.repository.Equals($scriptRepository, [StringComparison]::OrdinalIgnoreCase)) 'PluginRepository differs from the repository containing this runner'
 $rawOutput = Resolve-NewRawOutput $Output $pluginIdentity.repository
 
-$functionalGatePath = Resolve-ExistingFile $FunctionalGate 'U1-R1 functional gate'
+$functionalGatePath = Resolve-ExistingFile $FunctionalGate "$profileLabel functional gate"
 $functionalGateDigest = Normalize-Sha256 $FunctionalGateSha256 'Functional gate SHA-256'
 Assert-True ((Get-FileSha256 $functionalGatePath) -ceq $functionalGateDigest) 'Functional gate SHA-256 mismatch'
-$functionalGateJson = Read-Json $functionalGatePath 'U1-R1 functional gate'
+$functionalGateJson = Read-Json $functionalGatePath "$profileLabel functional gate"
 Assert-FunctionalGate $functionalGateJson $expectedHost $expectedPlugin
 
-$fixturePath = Resolve-ExistingFile $ObservationFixture 'U1-R1 observation fixture'
+$fixturePath = Resolve-ExistingFile $ObservationFixture "$profileLabel observation fixture"
 $fixtureDigest = Normalize-Sha256 $ObservationFixtureSha256 'Observation fixture SHA-256'
-$canonicalFixturePath = [IO.Path]::GetFullPath((Join-Path $pluginIdentity.repository 'tools/tests/fixtures/u1-r1-device-observation-contract.json'))
-Assert-True ($fixturePath.Equals($canonicalFixturePath, [StringComparison]::OrdinalIgnoreCase)) 'Observation fixture must be the canonical tracked U1-R1 contract'
+$canonicalFixturePath = [IO.Path]::GetFullPath((Join-Path $pluginIdentity.repository $fixtureRelativePath))
+$canonicalFixtureMessage = if ($isR2Profile) { 'Observation fixture must be the canonical tracked U1-R2 contract' } else { 'Observation fixture must be the canonical tracked U1-R1 contract' }
+Assert-True ($fixturePath.Equals($canonicalFixturePath, [StringComparison]::OrdinalIgnoreCase)) $canonicalFixtureMessage
 Assert-True ((Get-FileSha256 $fixturePath) -ceq $fixtureDigest) 'Observation fixture SHA-256 mismatch'
-$fixture = Read-Json $fixturePath 'U1-R1 observation fixture'
+$fixture = Read-Json $fixturePath "$profileLabel observation fixture"
 Assert-ObservationFixture $fixture
 
 $hostInfo = Inspect-Apk -Role 'host' -Path $HostApk -ExpectedSha256 $HostSha256 -ExpectedPackage $hostPackage -RequireExactAbi $true
@@ -881,7 +993,7 @@ $tools = [pscustomobject][ordered]@{
     apkSigner = Get-ToolRecord $script:resolvedApkSigner @('version') 'apksigner'
 }
 
-$temporaryRoot = Join-Path ([IO.Path]::GetTempPath()) ('autojs6-python-u1-r1-e3-' + [Guid]::NewGuid().ToString('N'))
+$temporaryRoot = Join-Path ([IO.Path]::GetTempPath()) ("autojs6-python-u1-$($phase.ToLowerInvariant())-e3-" + [Guid]::NewGuid().ToString('N'))
 [void] [IO.Directory]::CreateDirectory($temporaryRoot)
 $contexts = @(
     New-ImmutableArtifactContext $hostInfo $temporaryRoot $true
@@ -1025,7 +1137,7 @@ $report = [pscustomobject][ordered]@{
         sizeBytes = [long] (Get-Item -LiteralPath $functionalGatePath).Length
         sha256 = $functionalGateDigest
         status = 'PASS'
-        reportRole = 'CURRENT_TREE_FUNCTIONAL_GATE'
+        reportRole = $functionalGateRole
     }
     observationContract = [pscustomobject][ordered]@{
         path = $fixturePath
@@ -1082,12 +1194,12 @@ $report = [pscustomobject][ordered]@{
 }
 Write-NewJson $rawOutput $report
 $rawSha256 = Get-FileSha256 $rawOutput
-Write-Output "U1_R1_DEVICE_RAW_STATUS=$status"
+Write-Output "U1_$($phase)_DEVICE_RAW_STATUS=$status"
 Write-Output "OUTPUT=$rawOutput"
 Write-Output "OUTPUT_SHA256=$rawSha256"
 if (-not $devicePass) {
     $detail = if ($restorationErrors.Count -gt 0) { [string]::Join("`n", $restorationErrors) } elseif ($null -ne $primaryFailure) { $primaryFailure.Message } else { 'Required observations did not pass' }
-    throw "U1-R1 device evidence did not pass: $status`n$detail"
+    throw "$profileLabel device evidence did not pass: $status`n$detail"
 }
 } finally {
     if ($deviceMutexOwned) {
