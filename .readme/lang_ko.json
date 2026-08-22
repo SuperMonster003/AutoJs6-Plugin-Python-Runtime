@@ -10,8 +10,10 @@
   "h3_functions": "기능",
   "features": [
     "UTF-8 Python 소스 스냅샷 하나를 `__main__`으로 실행합니다.",
-    "`input()`에 최대 {{ max_stdin_bytes }}의 유한한 사전 제공 stdin snapshot을 받습니다. 실시간 prompt/reply 상호작용은 제공하지 않습니다.",
-    "stdout과 stderr 순서를 유지하고 제한된 chunk를 credit으로 전달합니다.",
+    "최대 {{ max_stdin_bytes }}의 유한한 사전 제공 stdin snapshot을 받습니다. snapshot이 EOF에 도달한 뒤에는 명시적 foreground 실행에서 프로토콜 1.3의 제한된 prompt/reply로 내장 `input()`을 계속할 수 있습니다.",
+    "승인된 project에서 `entryMode=file|module`을 명시적으로 선택합니다. module mode는 표준 `runpy` metadata, project root의 `sys.path[0]` 및 package-relative import를 사용하고 file mode는 일반 script semantics를 유지합니다.",
+    "스크립트 실행 중 stdout/stderr의 원래 순서대로 제한된 chunk를 credit으로 전달하며, credit이 소진되면 실행에 backpressure를 적용합니다.",
+    "프로토콜 1.4에서 최대 {{ max_structured_json_bytes }}의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 {{ max_output_artifacts }}개 전달하며 stdout에서 결과를 추론하지 않습니다.",
     "`SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.",
     "프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.",
     "호스트 재시작이 필요 없습니다. 설치 또는 재활성화 후 다음 새 실행이 provider를 다시 검색하고 pin하며, 실행 중 Binder death는 해당 실행을 종료하고 자동 재실행하지 않습니다."
@@ -21,7 +23,7 @@
   "p_runtime_version_status": "빌드는 Python {{ python_line }}을 요청합니다. 동결된 로컬 RC 산출물과 정확한 기기 실행은 CPython {{ python_version_expected }}를 기록했습니다. 최종 0.1.0은 소스 동결 후 버전과 hash를 다시 검증해야 합니다.",
   "h3_plugin_interface": "플러그인 인터페이스",
   "p_plugin_interface": "호스트는 다음 식별자로 플러그인을 검색하고 호출합니다",
-  "p_plugin_scope": "독립 SOURCE, 선택적인 제한 workspace archive, 최대 {{ max_stdin_bytes }}의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. stdin은 실시간 상호작용 채널이 아니며 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.",
+  "p_plugin_scope": "독립 SOURCE, 선택적인 제한 workspace archive, 최대 {{ max_stdin_bytes }}의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. 프로토콜 1.2는 승인된 project에 명시적인 file/module entry negotiation을 추가합니다. 프로토콜 1.3은 snapshot EOF 뒤 내장 `input()`에 Host 소유의 foreground 전용 prompt/reply를 추가합니다. 프로토콜 1.4는 명시적 엄격 JSON과 선택적 SHA-256 manifest output artifact를 추가하며 stdout은 진단 텍스트로 유지되고 결과로 분석되지 않습니다. 직접 `sys.stdin`은 계속 유한하며 background 실행은 입력 UI를 열지 않고 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.",
   "h3_host_integration_status": "호스트 통합 상태",
   "p_host_integration_status": "0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.",
   "h3_security": "보안 및 개인정보",
@@ -31,13 +33,14 @@
     "소스는 {{ max_source_bytes }}, 전체 출력은 {{ max_output_bytes }}, chunk는 {{ max_output_chunk_bytes }}, 개수는 {{ max_output_chunks }}로 제한합니다.",
     "timeout은 최대 {{ max_timeout }}, 활성 세션은 하나이며 provider 큐가 없습니다.",
     "Binder 수신 측의 완전한 PFD 소유권을 채택하고 종료 또는 close 시 닫습니다.",
-    "출력은 먼저 제한된 메모리에 버퍼링한 뒤 credit으로 전송합니다. 실행 중 backpressure는 선언하지 않습니다.",
+    "출력은 실행 중 credit에 따라 chunk 단위로 전달됩니다. credit 소진 시 스크립트가 일시 중지되고, 수락된 출력은 유일한 terminal보다 먼저 전달되며 terminal 이후 출력은 금지됩니다.",
+    "구조화 JSON은 {{ max_structured_json_bytes }}, artifact는 최대 {{ max_output_artifacts }}개, path는 {{ max_output_artifact_path_bytes }}, file당 {{ max_output_artifact_bytes }}, 합계 {{ max_total_output_artifact_bytes }}로 제한하며 Host가 정확한 길이, EOF 및 SHA-256을 검증합니다.",
     "취소는 프로세스 재시작 방식입니다. native extension과 blocking 호출은 Android 검증이 필요합니다.",
     "stdlib-only 정책으로 online pip와 타사 Python 패키지를 금지합니다. 병합 APK 권한은 빌드 때 확인해야 합니다."
   ],
   "h3_unsupported": "선언하지 않은 기능",
   "unsupported_capabilities": [
-    "실시간 대화형 stdin은 제공하지 않으며 최대 {{ max_stdin_bytes }}의 유한한 사전 제공 snapshot만 지원합니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.",
+    "일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 {{ max_stdin_bytes }}의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.",
     "UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.",
     "실시간 AutoJs6 capability broker는 없습니다. 첫 API는 실행 시작 시 동결된 app/device/execution/project snapshot과 plugin-private workspace의 제한된 읽기 전용 접근만 사용합니다.",
     "32비트 Android와 임의의 native wheel은 보장하지 않습니다.",

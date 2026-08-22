@@ -46,8 +46,10 @@ Python Runtime 是獨立的 Python 協議 V1 provider. 宿主將單一 Python �
 ******
 
 - 將一個 UTF-8 Python 原始碼快照作為 `__main__` 執行.
-- 為 `input()` 接收最大 1 MiB 的有限預置 stdin snapshot; 不提供即時互動 prompt/reply.
-- 按原始次序收集 stdout 和 stderr, 再透過有界 chunk 與 credit 傳送.
+- 接收最大 1 MiB 的有限預置 stdin snapshot; snapshot 到達 EOF 後, 明確前台啟動可透過協議 1.3 的有界 prompt/reply 繼續內置 `input()`.
+- 為已准入項目明確選擇 `entryMode=file|module`; module 模式使用標準 `runpy` 元數據、項目根目錄 `sys.path[0]` 及 package-relative import, file 模式保留普通指令碼語義.
+- 在腳本執行期間按 stdout/stderr 原始次序透過有界 chunk 與 credit 傳送; credit 用盡會對執行施加背壓.
+- 透過協議 1.4 明確設定最大 64 KiB 的嚴格 JSON 結果, 並傳送最多 16 個具有路徑、大小及 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.
 - 傳回 `SystemExit`, 語法錯誤和執行階段例外, 包括有界結構化 traceback.
 - 同一執行環境程序只允許一個使用中工作階段, provider 端不排隊.
 - 宿主毋須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播.
@@ -62,7 +64,7 @@ Python Runtime 是獨立的 Python 協議 V1 provider. 宿主將單一 Python �
 
 ```text
 input: UTF-8 Python source snapshot
-output: ordered bounded stdout/stderr chunks and a structured terminal result
+output: ordered bounded stdout/stderr chunks, explicit strict JSON, and SHA-256-manifested output artifacts
 runtime: Chaquopy 17.0.0
 Python request: 3.13
 expected packaged Python: 3.13.9
@@ -85,10 +87,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.1
+protocol: 1.0-1.4
 ```
 
-外掛程式接收獨立 SOURCE, 可選的有界 workspace archive, 最大 1 MiB 的有限預置 stdin snapshot, 以及協議 1.1 的唯讀宿主能力快照. stdin 並非即時互動通道; 外掛程式不會向指令碼注入 Context, Binder, 宿主執行環境物件或 callback sink.
+外掛程式接收獨立 SOURCE, 可選的有界 workspace archive, 最大 1 MiB 的有限預置 stdin snapshot, 以及協議 1.1 的唯讀宿主能力快照. 協議 1.2 為已准入項目加入明確 file/module 入口協商. 協議 1.3 在 snapshot EOF 後為內置 `input()` 加入由 Host 持有且僅限前台的 prompt/reply. 協議 1.4 加入明確嚴格 JSON 結果及可選的 SHA-256 manifest 輸出 artifact, stdout 只供診斷且絕不解析為結果. 直接 `sys.stdin` 始終有限, 後台啟動絕不開啟輸入 UI, 外掛程式亦不會向指令碼注入 Context, Binder, 宿主執行環境物件或 callback sink.
 
 ******
 
@@ -100,7 +102,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
+release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -124,7 +126,8 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 - 原始碼最大 4 MiB, 總輸出最大 4 MiB, 每個輸出 chunk 最大 16 KiB, 最多 4096 個 chunk.
 - 要求逾時最大 60 s, 同一程序最多一個使用中工作階段, provider 端不排隊.
 - SOURCE 描述元採用 Binder 接收端完整 PFD 擁有權, 保留 reliable-pipe 錯誤通道, 並在終態或關閉時釋放.
-- 輸出目前先在外掛程式內有界緩衝, 再按 credit 傳送; 尚未聲明執行期間的串流背壓.
+- 輸出在執行期間按 credit 逐 chunk 傳送; credit 用盡會暫停腳本, 已接受的輸出先於唯一終態, 終態後禁止輸出.
+- 結構化 JSON 最大 64 KiB; 輸出 artifact 最多 16 個, 路徑最大 1024 UTF-8 bytes, 每個最大 4 MiB, 合計最大 8 MiB, Host 必須核對精確長度、EOF 及 SHA-256.
 - 取消模式是程序重啟, 而非 CPython 級協作取消; 原生擴充套件或阻塞呼叫仍需後續 Android 驗證.
 - stdlib-only 政策禁止線上 pip 及第三方 Python 套件, 合併後的 APK 權限仍須由建置閘門覆核.
 
@@ -134,7 +137,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-- 不提供即時互動 stdin; 只支援最大 1 MiB 的有限預置 snapshot. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.
+- 不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前台互動只適用於最大 1 MiB 的有限 snapshot 到達 EOF 後的內置 `input()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.
 - 不提供 UI 指令碼, 除錯器, REPL 或任意宿主 Java 物件存取.
 - 不提供即時 AutoJs6 能力 broker; 首批 API 只使用執行開始時凍結的 app/device/execution/project 快照及外掛程式私有 workspace 的有界唯讀檔案介面.
 - 不聲明 32 位元 Android 支援, 亦不保證任何第三方 native wheel 可用.
@@ -160,10 +163,14 @@ R6-P2/P3 的本機 RC 及集中裝置證據保留為歷史記錄. 本次 clean V
 
 ###### 2026/08/13
 
-* `提示` 0.1 之後的 U1 clean-source alpha 候選; 不提供即時 stdin 互動, U1-R1 E3 驗收僅由與 QV710AF65F/API 31/arm64 上 exact Host/Plugin artifacts 匹配的 canonical PASS report 表示, 不屬於裝置矩陣/發佈/公開證據
+* `提示` 0.1 之後的 U1 current-tree alpha 候選; U1-R2 module entry、live output、前台內置 input、明確結構化 JSON 及有界輸出 artifact 只完成至 E2, 後台啟動及直接 sys.stdin 仍非互動, R2 E3 尚未完成, 且這些目前樹結果不屬於裝置矩陣/發佈/公開證據
 * `新增` 新增最大 1 MiB 的有限預先提供 stdin snapshot, 為 `input()` 及 `sys.stdin` 提供確定輸入和 EOF
 * `新增` 完善專案 import 語義, 支援 workspace 模組, 巢狀入口同層及根模組與 package-relative import
+* `新增` 新增協議 1.2 明確 `entryMode=file|module`; module 執行透過 `runpy` 提供正確的 `__package__`、`__spec__`、項目根目錄 `sys.path[0]` 及相對 import, file 模式維持不變
+* `新增` 新增協議 1.3: 有限 snapshot 到達 EOF 後, 只有前台內置 `input()` 使用有界 prompt/reply; 後台啟動絕不開啟輸入 UI, 直接 `sys.stdin` 始終有限
+* `新增` 新增協議 1.4 明確嚴格 JSON 結果及可選輸出 artifact, 對數量、標準化路徑、每個/合計大小、精確 PFD 引用及 SHA-256 設限, 且絕不從 stdout 推斷結果
 * `修正` 執行前以 strict UTF-8 解碼原始碼, 非 UTF-8 encoding cookie 不再繞過合約
+* `改善` 將 stdout/stderr 的有界 chunk 與 credit 背壓前移到腳本執行期間, 保留終態前的有序部分輸出並禁止終態後輸出
 * `改善` 每次執行使用獨立 `__main__`, 並還原 stdin/stdout/stderr, argv, cwd, `sys.path`, module 及 importer cache 狀態
 * `改善` 為已開啟但未 start 的 session 加入 5 秒 lease, 到期釋放輸入, descriptor 及單一工作階段佔位
 * `改善` Provider 在 Binder 傳入邊界強制最低 Host versionCode 5275, 不再只依賴 Host 端探索檢查

@@ -8,16 +8,20 @@
     "v0.2.0-alpha.1": {
       "released_date": "2026/08/13",
       "hint": [
-        "0.1 之後的 U1 clean-source alpha 候選; 不提供即時 stdin 互動, U1-R1 E3 驗收僅由與 QV710AF65F/API 31/arm64 上 exact Host/Plugin artifacts 匹配的 canonical PASS report 表示, 不屬於裝置矩陣/發布/公開證據"
+        "0.1 之後的 U1 current-tree alpha 候選; U1-R2 module entry、live output、前景內建 input、明確結構化 JSON 與有界輸出 artifact 僅完成至 E2, 背景啟動與直接 sys.stdin 仍非互動, R2 E3 尚未完成, 且這些目前樹結果不屬於裝置矩陣/發布/公開證據"
       ],
       "feature": [
         "新增最大 1 MiB 的有限預先提供 stdin snapshot, 為 `input()` 與 `sys.stdin` 提供確定性輸入和 EOF",
-        "完善專案 import 語義, 支援 workspace 模組, 巢狀入口同層與根模組以及 package-relative import"
+        "完善專案 import 語義, 支援 workspace 模組, 巢狀入口同層與根模組以及 package-relative import",
+        "新增協定 1.2 明確 `entryMode=file|module`; module 執行透過 `runpy` 提供正確的 `__package__`、`__spec__`、專案根目錄 `sys.path[0]` 與相對 import, file 模式維持不變",
+        "新增協定 1.3: 有限 snapshot 到達 EOF 後, 僅前景內建 `input()` 使用有界 prompt/reply; 背景啟動絕不開啟輸入 UI, 直接 `sys.stdin` 始終有限",
+        "新增協定 1.4 明確嚴格 JSON 結果與可選輸出 artifact, 對數量、正規化路徑、單個/合計大小、精確 PFD 引用與 SHA-256 設限, 且絕不從 stdout 推斷結果"
       ],
       "fix": [
         "執行前以 strict UTF-8 解碼原始碼, 非 UTF-8 encoding cookie 不再繞過契約"
       ],
       "improvement": [
+        "將 stdout/stderr 的有界 chunk 與 credit 背壓前移到腳本執行期間, 保留終態前的有序部分輸出並禁止終態後輸出",
         "每次執行使用獨立 `__main__`, 並還原 stdin/stdout/stderr, argv, cwd, `sys.path`, module 與 importer cache 狀態",
         "為已開啟但未 start 的 session 加入 5 秒 lease, 到期釋放輸入, descriptor 與單一工作階段占位",
         "Provider 在 Binder 傳入邊界強制最低 Host versionCode 5275, 不再只依賴 Host 端探索檢查"

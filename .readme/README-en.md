@@ -46,8 +46,10 @@ Python Runtime is an independent provider for version 1 of the Python protocol. 
 ******
 
 - Execute one UTF-8 Python source snapshot as `__main__`.
-- Accept a finite pre-supplied stdin snapshot of at most 1 MiB for `input()`; no live prompt/reply interaction is provided.
-- Collect stdout and stderr in their original order, then deliver bounded chunks under credits.
+- Accept a finite pre-supplied stdin snapshot of at most 1 MiB; after it reaches EOF, an explicit foreground launch may continue the built-in `input()` through a bounded protocol 1.3 prompt/reply.
+- Select explicit `entryMode=file|module` for an admitted project; module mode uses standard `runpy` metadata, project-root `sys.path[0]`, and package-relative imports while file mode keeps ordinary script semantics.
+- Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.
+- Set an explicit strict JSON result of at most 64 KiB and transfer up to 16 optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.
 - Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.
 - Allow one active session in the runtime process with no provider-side queue.
 - Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed.
@@ -62,7 +64,7 @@ Protocol V1 currently declares the following scope:
 
 ```text
 input: UTF-8 Python source snapshot
-output: ordered bounded stdout/stderr chunks and a structured terminal result
+output: ordered bounded stdout/stderr chunks, explicit strict JSON, and SHA-256-manifested output artifacts
 runtime: Chaquopy 17.0.0
 Python request: 3.13
 expected packaged Python: 3.13.9
@@ -85,10 +87,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.1
+protocol: 1.0-1.4
 ```
 
-The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most 1 MiB, and the protocol 1.1 read-only host capability snapshot. Stdin is not a live interaction channel; no Context, Binder, host runtime object, or callback sink is injected into script globals.
+The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most 1 MiB, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Direct `sys.stdin` remains finite, background launches never open input UI, and no Context, Binder, host runtime object, or callback sink is injected into script globals.
 
 ******
 
@@ -100,7 +102,7 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
+release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -124,7 +126,8 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 - Source is capped at 4 MiB, total output at 4 MiB, each output chunk at 16 KiB, and output count at 4096 chunks.
 - Request timeout is capped at 60 s, with one active session per process and no provider-side queue.
 - SOURCE descriptors adopt complete Binder receiver-side PFD ownership, preserve reliable-pipe error channels, and close at terminal or session close.
-- Output is currently bounded in plugin memory before credit-backed delivery; execution-time streaming backpressure is not claimed.
+- Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.
+- Structured JSON is capped at 64 KiB; at most 16 artifacts are accepted with 1024 UTF-8 bytes paths, 4 MiB per file, 8 MiB aggregate, and Host verification of exact length, EOF, and SHA-256.
 - Cancellation uses process restart rather than CPython-level cooperation; native extensions and blocking calls still require later Android validation.
 - The stdlib-only policy forbids online pip and third-party Python packages. The merged APK permission set remains a build-gate check.
 
@@ -134,7 +137,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-- Live interactive stdin is unavailable; only a finite pre-supplied snapshot of at most 1 MiB is supported. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.
+- General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to the built-in `input()` after the finite snapshot of at most 1 MiB reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.
 - There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.
 - There is no live AutoJs6 capability broker; the first APIs use only the app/device/execution/project snapshot frozen at execution start and bounded read-only access to the plugin-private workspace.
 - 32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.
@@ -160,10 +163,14 @@ The R6-P2/P3 local RC and concentrated device evidence remain historical. This c
 
 ###### 2026/08/13
 
-* `Hint` Post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable, and U1-R1 E3 is represented only by a matching canonical PASS report for the exact Host/Plugin artifacts on QV710AF65F/API 31/arm64; this is not device-matrix, release, or public evidence
+* `Hint` Post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON, and bounded output artifacts are covered through E2 only; background launches and direct sys.stdin remain non-interactive, R2 E3 remains open, and these current-tree results are not device-matrix, release, or public evidence
 * `Feature` Add a finite pre-supplied stdin snapshot of at most 1 MiB for deterministic `input()` and `sys.stdin` input and EOF
 * `Feature` Complete project import semantics for workspace modules, nested-entry sibling and root modules, and package-relative imports
+* `Feature` Add protocol 1.2 explicit `entryMode=file|module`; module execution uses `runpy` with correct `__package__`, `__spec__`, project-root `sys.path[0]`, and relative imports while file mode remains unchanged
+* `Feature` Add protocol 1.3 foreground-only bounded prompt/reply for built-in `input()` after finite snapshot EOF; background launches never open input UI and direct `sys.stdin` stays finite
+* `Feature` Add protocol 1.4 explicit strict JSON results and optional output artifacts bounded by count, normalized path, per-file/aggregate size, exact PFD references, and SHA-256, without ever inferring a result from stdout
 * `Fix` Decode source as strict UTF-8 before execution so a non-UTF-8 encoding cookie cannot bypass the contract
+* `Improvement` Move bounded stdout/stderr chunks and credit backpressure into script execution, preserving ordered partial output before terminal and forbidding output afterward
 * `Improvement` Use an independent `__main__` per execution and restore stdin/stdout/stderr, argv, cwd, `sys.path`, module, and importer-cache state
 * `Improvement` Apply a 5-second lease to an opened session which is never started, then release its inputs, descriptors, and single-session slot
 * `Improvement` Enforce minimum Host versionCode 5275 at the Provider Binder boundary instead of relying only on Host-side discovery

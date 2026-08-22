@@ -1,6 +1,7 @@
 # Python execution semantics contract
 
-Status: U1-R0 contract for the post-`0.1.0` usability track.
+Status: cumulative U1-R0 through U1-R2 contract for the post-`0.1.0`
+usability track. Current R2 behavior is covered through E2 only.
 
 This document distinguishes three facts which must not be collapsed:
 
@@ -30,11 +31,12 @@ device promotion require the evidence levels defined in `ROADMAP.md`.
 | Property | `0.1.0` historical behavior | Current U1 contract |
 | --- | --- | --- |
 | Implementation | Chaquopy 17.0.0 / CPython 3.13.9 in the Plugin process | Preserve unless a later release explicitly freezes another identity |
-| Script mode | Source bytes compiled as a file-like `__main__` | Preserve file mode; add explicit module mode only in U1-R2 |
+| Script mode | Source bytes compiled as a file-like `__main__` | Protocol 1.2 keeps file mode as the default and adds an explicit, capability-gated module mode for admitted projects |
 | Source encoding | README declared UTF-8, while byte compilation could honor CPython encoding cookies | U1-R1 now accepts strict UTF-8 with optional UTF-8 BOM and rejects NUL, invalid UTF-8 and conflicting non-UTF-8 cookies before dispatch |
 | Python grammar | CPython grammar selected by the packaged 3.13 runtime | Ordinary Python 3.13 syntax is supported when its imports/platform dependencies are available |
 | Top-level await | Not enabled by ordinary `compile(..., "exec")` | Remains unsupported in file mode; use `asyncio.run()` |
 | Python 2 syntax | Unsupported | Remains unsupported |
+| Explicit result | No script-visible typed result API | Protocol 1.4 adds one strict bounded JSON value plus optional bounded, hash-manifested output artifacts; stdout is never parsed as a result |
 
 The Host and Provider must validate the exact SOURCE length and SHA-256. U1-R1
 adds strict text admission; it must not silently reinterpret Latin-1 or another
@@ -57,7 +59,38 @@ For file-mode execution:
 - a standalone SOURCE does not gain an implicit copy of its original parent
   directory.
 
-The bootstrap must restore stdout, stderr, stdin, argv, cwd and `sys.path` on
+For module-mode execution:
+
+- the execution must have an explicitly admitted project workspace and a
+  provider which advertises protocol 1.2 module-entry support;
+- the request entry point is a normalized dotted ASCII module name such as
+  `pkg.main`. Each segment must be a non-keyword Python identifier;
+  `pkg.__init__` is rejected as an ambiguous package target. The source uses
+  the exact lowercase `.py` suffix, and its directory/stem segments contain no
+  literal dots, keeping file/module mapping reversible;
+- the dotted name maps deterministically to the separately verified SOURCE
+  path (`pkg.main` to `pkg/main.py`), and the staged file must match those
+  SOURCE bytes exactly before user code starts;
+- `runpy.run_module(name, run_name="__main__", alter_sys=True)` supplies normal
+  module metadata: `__name__ == "__main__"`, `__package__ == "pkg"`, and
+  `__spec__.name == "pkg.main"` for the example above;
+- only the project root is prepended, so it is `sys.path[0]` and package-relative
+  imports follow normal module resolution. During execution, `__file__` and
+  `sys.argv[0]` are the Plugin-private staged module path as provided by
+  `runpy`; structured tracebacks still expose only logical project-relative
+  names;
+- any pre-existing interpreter modules in the target top-level namespace are
+  temporarily removed, the resolved module spec must point to the exact staged
+  entry file, and the original namespace is restored afterward. This prevents
+  a previously imported stdlib/package module from hijacking project module
+  entry in the long-lived runtime process.
+
+An absent entry-mode field decodes as file mode for backward compatibility.
+The module-mode field is required-for-reader on the wire, so a pre-1.2 reader
+rejects the request instead of silently running the dotted module name with
+file semantics.
+
+The bootstrap must restore `builtins.input`, stdout, stderr, stdin, argv, cwd and `sys.path` on
 every terminal path. Project modules and project importer-cache entries must
 not leak into a later execution. U1-R1 adds exact sequential-workspace tests
 for same-named modules.
@@ -108,8 +141,38 @@ evidence remain separate.
   process stdin and never waits for UI.
 - Always restore the previous `sys.stdin` reference at cleanup.
 
-This is finite pre-supplied input. A Host prompt/reply loop which can pause and
-request more input is interactive input and belongs to U1-R2.
+The snapshot path above is finite pre-supplied input. The foreground
+prompt/reply loop below is interactive input and remains a separate channel.
+
+### Current U1-R2 foreground interactive implementation
+
+- A live prompt/reply loop is authorized only by an opaque grant minted in an
+  explicit foreground user-gesture Host launch with a live `Activity`.
+  Background launches never open UI and keep the immediate-EOF behavior above.
+- Protocol 1.3 advertises `supportsInteractiveInput` and nonzero prompt, reply,
+  count and wait ceilings. An interactive request carries a narrower policy in
+  a required-for-reader field so a pre-1.3 reader fails closed.
+- The built-in `input()` consumes the finite snapshot first. Only after snapshot
+  EOF does it issue a typed prompt with an execution request ID, positive
+  monotonic prompt ID, bounded text, visible/hidden echo policy, reply byte
+  ceiling and monotonic deadline.
+- Exactly one matching `VALUE`, `EOF`, or `CANCELLED` reply is accepted.
+  `VALUE` permits an empty string; `EOF` raises `EOFError`; `CANCELLED` raises
+  `KeyboardInterrupt`. Duplicate, unsolicited, reordered, mismatched or
+  oversized replies fail closed.
+- `sys.stdin.read*()` and `sys.stdin.buffer` remain finite snapshot APIs and do
+  not invoke the live bridge. This feature is interactive built-in input, not
+  a claim of general live stdin.
+- Cancellation, execution timeout, callback Binder death, close, service
+  destruction and runtime-generation retirement clear the pending prompt and
+  wake the Plugin wait. Host terminal/connection/plugin-state paths interrupt
+  the separate bounded UI task and dismiss its dialog.
+- The original built-in and stdio/process state are restored on all terminal
+  paths. The Host dialog/controller never crosses Binder and the narrow
+  Plugin bridge is never placed in Python globals.
+
+The detailed wire and lifecycle rules are in
+`docs/python/U1_R2_INTERACTIVE_INPUT_PROTOCOL.md`.
 
 ## Import contract
 
@@ -150,8 +213,13 @@ A standalone/root file-mode `__main__` has no package context. For a nested
 entry inside an explicitly admitted project, U1-R1 derives only normalized
 identifier parent segments as `__package__`; this permits ordinary relative
 imports such as `from .helper import VALUE` without widening the workspace.
-`__spec__` remains `None`. U1-R2 may add a distinct `entryMode=module` backed by
-`runpy`; it must not silently replace the current file execution mode.
+`__spec__` remains `None` in file mode.
+
+U1-R2 adds the distinct `entryMode=module` behavior described above. It is
+selected explicitly, backed by `runpy`, and never silently replaces file mode.
+Module mode places only the project root at `sys.path[0]`, preserves standard
+package discovery and module metadata, and supports ordinary package-relative
+imports without widening the admitted workspace.
 
 ### Third-party dependencies
 
@@ -171,6 +239,46 @@ Chaquopy's Plugin-local Java bridge may exist, but the Host never sends
 `Context`, `ScriptRuntime`, Binder handles or arbitrary Java objects to Python.
 Future Host capabilities use versioned, bounded pure-data messages.
 
+The U1-R2 output path uses one Plugin-private execution sink with exactly a
+stream discriminator and immutable bytes. The object is held only by the
+bootstrap capture stream and is never installed in user globals. Each write is
+bounded before the sink call, then waits for Host-granted output credit and
+ordered callback completion before user execution continues. Cancellation,
+timeout, callback death and close wake the wait and reject the in-flight chunk;
+the serial callback lane guarantees that an already accepted output callback
+precedes the terminal callback and that no output is enqueued after terminal.
+This is execution-time transport backpressure, not a new Python capability or
+a general Java-object injection surface.
+
+The U1-R2 input path follows the same isolation rule. Its Plugin-private bridge
+exposes only one prompt/echo request method and typed reply markers. It contains
+no Android `Context`, Binder handle, Host callback or arbitrary Java object,
+and is held only by the execution-local replacement for `builtins.input`.
+
+## Explicit results and output artifacts
+
+Protocol 1.4 separates result data from diagnostic output. `autojs6.result.set`
+sets at most one strict JSON-compatible value, serializes it deterministically,
+and enforces the negotiated UTF-8 byte bound before the terminal document is
+created. stdout that happens to contain JSON remains stdout; neither Plugin nor
+Host may parse it to manufacture a result.
+
+`autojs6.artifacts.path` registers one normalized relative logical path and
+returns a writable location below the Plugin-private execution result root. The
+completed execution must resolve every registered path to a regular non-symlink
+file. Count, path, per-file and aggregate byte limits are negotiated in the
+request. The Plugin copies each admitted file to a private read-only snapshot,
+computes SHA-256, and sends only that snapshot through an exactly referenced
+read-only result PFD. The Host requires a regular file, exact declared length,
+immediate EOF and matching SHA-256 before exposing Host-owned immutable bytes.
+
+Result files are not project write-back. Failure, cancellation, timeout,
+output-limit, callback loss and result rejection publish neither a JSON result
+nor artifacts and close/delete all result-owned descriptors and roots. See
+`U1_R2_STRUCTURED_RESULTS_PROTOCOL.md` for the complete wire and ownership
+contract. This is still trusted-local execution rather than a hostile-code
+sandbox and does not expose Host objects to Python.
+
 ## Errors and traceback
 
 - Syntax and runtime failures have one structured terminal result.
@@ -180,6 +288,10 @@ Future Host capabilities use versioned, bounded pure-data messages.
   not expose Plugin-private absolute paths.
 - Output-limit, cancellation, timeout, Binder death and cleanup remain protocol
   failures with no automatic replay after user code may have started.
+- Interactive wait timeout and negotiated input-limit failures use stable
+  `INPUT_TIMEOUT`/`INPUT_LIMIT_EXCEEDED` codes in the `INTERACTIVE_INPUT` phase.
+- Explicit result or artifact admission failures use
+  `OUTPUT_ARTIFACT_REJECTED` in the `RESULT` phase and publish no partial result.
 
 ## U1-R0 machine-readable fixture
 

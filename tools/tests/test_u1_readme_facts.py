@@ -22,19 +22,63 @@ LANGUAGE_CODES = (
 
 
 class U1ReadmeFactsTest(unittest.TestCase):
-    def test_all_language_sources_describe_bounded_snapshot_and_page_gate_boundary(self) -> None:
+    def test_all_language_sources_describe_protocol_14_results_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
+        self.assertEqual("1.0-1.4", common["protocol_version"])
+        self.assertEqual("64 KiB", common["max_structured_json_bytes"])
+        self.assertEqual("16", common["max_output_artifacts"])
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
                     (README_DIR / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
                 self.assertIn("{{ max_stdin_bytes }}", source["features"][1])
+                self.assertIn("1.3", source["features"][1])
+                result_features = [item for item in source["features"] if "1.4" in item]
+                self.assertEqual(1, len(result_features))
+                self.assertIn("{{ max_structured_json_bytes }}", result_features[0])
+                self.assertIn("{{ max_output_artifacts }}", result_features[0])
+                self.assertIn("stdout", result_features[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
+                self.assertIn("1.3", source["p_plugin_scope"])
+                self.assertIn("1.4", source["p_plugin_scope"])
+                self.assertIn("SHA-256", source["p_plugin_scope"])
+                self.assertIn("stdout", source["p_plugin_scope"])
+                self.assertIn("`sys.stdin`", source["p_plugin_scope"])
+                result_limits = [item for item in source["security_limits"] if "SHA-256" in item]
+                self.assertEqual(1, len(result_limits))
+                for placeholder in (
+                    "{{ max_structured_json_bytes }}",
+                    "{{ max_output_artifacts }}",
+                    "{{ max_output_artifact_path_bytes }}",
+                    "{{ max_output_artifact_bytes }}",
+                    "{{ max_total_output_artifact_bytes }}",
+                ):
+                    self.assertIn(placeholder, result_limits[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["unsupported_capabilities"][0])
+                self.assertIn("`sys.stdin`", source["unsupported_capabilities"][0])
                 self.assertIn("16 KB", source["p_build_architecture"])
                 self.assertIn("gate", source["p_build_architecture"].lower())
+
+    def test_all_changelog_sources_record_protocol_13_and_14_scoped_features(self) -> None:
+        changelog_dir = ROOT / ".changelog"
+        for code in LANGUAGE_CODES:
+            with self.subTest(code=code):
+                source = json.loads(
+                    (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
+                )
+                current = source["$data"]["v0.2.0-alpha.1"]
+                self.assertIn("E2", current["hint"][0])
+                self.assertIn("R2 E3", current["hint"][0])
+                protocol_13 = [item for item in current["feature"] if "1.3" in item]
+                protocol_14 = [item for item in current["feature"] if "1.4" in item]
+                self.assertEqual(1, len(protocol_13))
+                self.assertEqual(1, len(protocol_14))
+                self.assertIn("`input()`", protocol_13[0])
+                self.assertIn("`sys.stdin`", protocol_13[0])
+                self.assertIn("SHA-256", protocol_14[0])
+                self.assertIn("stdout", protocol_14[0])
 
     def test_generated_readmes_contain_no_unresolved_or_stale_stdin_claim(self) -> None:
         stale_fragments = (
@@ -52,21 +96,32 @@ class U1ReadmeFactsTest(unittest.TestCase):
             with self.subTest(code=code):
                 body = (README_DIR / f"README-{code}.md").read_text(encoding="utf-8")
                 self.assertIn("1 MiB", body)
+                self.assertIn("1.0-1.4", body)
+                self.assertIn("64 KiB", body)
+                self.assertIn("SHA-256", body)
                 self.assertNotIn("{{", body)
                 lowered = body.lower()
                 for stale in stale_fragments:
                     self.assertNotIn(stale.lower(), lowered)
 
-    def test_primary_generated_readmes_state_no_live_input_and_no_page_gate(self) -> None:
+    def test_primary_generated_readmes_state_scoped_foreground_input_and_no_page_gate(self) -> None:
         simplified = (ROOT / "README.md").read_text(encoding="utf-8")
         english = (README_DIR / "README-en.md").read_text(encoding="utf-8")
         self.assertEqual(
             simplified,
             (README_DIR / "README-zh-Hans.md").read_text(encoding="utf-8"),
         )
-        self.assertIn("不提供实时交互式 stdin", simplified)
+        self.assertIn("协议 1.3 在快照 EOF 后为内置 `input()`", simplified)
+        self.assertIn("后台启动绝不打开输入 UI", simplified)
+        self.assertIn("直接 `sys.stdin` 始终有限", simplified)
+        self.assertIn("协议 1.4 增加显式严格 JSON 结果", simplified)
+        self.assertIn("绝不被解析为结果", simplified)
         self.assertIn("16 KB page 兼容性当前没有专用 gate", simplified)
-        self.assertIn("Live interactive stdin is unavailable", english)
+        self.assertIn("Protocol 1.3 adds Host-owned, foreground-only prompt/reply", english)
+        self.assertIn("background launches never open input UI", english)
+        self.assertIn("Direct `sys.stdin` remains finite", english)
+        self.assertIn("Protocol 1.4 adds explicit strict JSON", english)
+        self.assertIn("never parsed as a result", english)
         self.assertIn("16 KB page compatibility currently has no dedicated gate", english)
 
 

@@ -10,8 +10,10 @@
   "h3_functions": "功能",
   "features": [
     "將一個 UTF-8 Python 原始碼快照作為 `__main__` 執行.",
-    "為 `input()` 接收最大 {{ max_stdin_bytes }} 的有限預置 stdin snapshot; 不提供即時互動 prompt/reply.",
-    "按原始次序收集 stdout 和 stderr, 再透過有界 chunk 與 credit 傳送.",
+    "接收最大 {{ max_stdin_bytes }} 的有限預置 stdin snapshot; snapshot 到達 EOF 後, 明確前台啟動可透過協議 1.3 的有界 prompt/reply 繼續內置 `input()`.",
+    "為已准入項目明確選擇 `entryMode=file|module`; module 模式使用標準 `runpy` 元數據、項目根目錄 `sys.path[0]` 及 package-relative import, file 模式保留普通指令碼語義.",
+    "在腳本執行期間按 stdout/stderr 原始次序透過有界 chunk 與 credit 傳送; credit 用盡會對執行施加背壓.",
+    "透過協議 1.4 明確設定最大 {{ max_structured_json_bytes }} 的嚴格 JSON 結果, 並傳送最多 {{ max_output_artifacts }} 個具有路徑、大小及 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.",
     "傳回 `SystemExit`, 語法錯誤和執行階段例外, 包括有界結構化 traceback.",
     "同一執行環境程序只允許一個使用中工作階段, provider 端不排隊.",
     "宿主毋須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播."
@@ -21,7 +23,7 @@
   "p_runtime_version_status": "建置要求 Python {{ python_line }}. 已凍結的本機 RC 產物及精確裝置執行記錄為 CPython {{ python_version_expected }}; 最終 0.1.0 在原始碼凍結後仍須重新核對版本及雜湊.",
   "h3_plugin_interface": "外掛程式介面",
   "p_plugin_interface": "宿主透過以下識別資料探索及呼叫外掛程式",
-  "p_plugin_scope": "外掛程式接收獨立 SOURCE, 可選的有界 workspace archive, 最大 {{ max_stdin_bytes }} 的有限預置 stdin snapshot, 以及協議 1.1 的唯讀宿主能力快照. stdin 並非即時互動通道; 外掛程式不會向指令碼注入 Context, Binder, 宿主執行環境物件或 callback sink.",
+  "p_plugin_scope": "外掛程式接收獨立 SOURCE, 可選的有界 workspace archive, 最大 {{ max_stdin_bytes }} 的有限預置 stdin snapshot, 以及協議 1.1 的唯讀宿主能力快照. 協議 1.2 為已准入項目加入明確 file/module 入口協商. 協議 1.3 在 snapshot EOF 後為內置 `input()` 加入由 Host 持有且僅限前台的 prompt/reply. 協議 1.4 加入明確嚴格 JSON 結果及可選的 SHA-256 manifest 輸出 artifact, stdout 只供診斷且絕不解析為結果. 直接 `sys.stdin` 始終有限, 後台啟動絕不開啟輸入 UI, 外掛程式亦不會向指令碼注入 Context, Binder, 宿主執行環境物件或 callback sink.",
   "h3_host_integration_status": "宿主整合狀態",
   "p_host_integration_status": "0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.",
   "h3_security": "安全性與私隱",
@@ -31,13 +33,14 @@
     "原始碼最大 {{ max_source_bytes }}, 總輸出最大 {{ max_output_bytes }}, 每個輸出 chunk 最大 {{ max_output_chunk_bytes }}, 最多 {{ max_output_chunks }} 個 chunk.",
     "要求逾時最大 {{ max_timeout }}, 同一程序最多一個使用中工作階段, provider 端不排隊.",
     "SOURCE 描述元採用 Binder 接收端完整 PFD 擁有權, 保留 reliable-pipe 錯誤通道, 並在終態或關閉時釋放.",
-    "輸出目前先在外掛程式內有界緩衝, 再按 credit 傳送; 尚未聲明執行期間的串流背壓.",
+    "輸出在執行期間按 credit 逐 chunk 傳送; credit 用盡會暫停腳本, 已接受的輸出先於唯一終態, 終態後禁止輸出.",
+    "結構化 JSON 最大 {{ max_structured_json_bytes }}; 輸出 artifact 最多 {{ max_output_artifacts }} 個, 路徑最大 {{ max_output_artifact_path_bytes }}, 每個最大 {{ max_output_artifact_bytes }}, 合計最大 {{ max_total_output_artifact_bytes }}, Host 必須核對精確長度、EOF 及 SHA-256.",
     "取消模式是程序重啟, 而非 CPython 級協作取消; 原生擴充套件或阻塞呼叫仍需後續 Android 驗證.",
     "stdlib-only 政策禁止線上 pip 及第三方 Python 套件, 合併後的 APK 權限仍須由建置閘門覆核."
   ],
   "h3_unsupported": "未聲明的能力",
   "unsupported_capabilities": [
-    "不提供即時互動 stdin; 只支援最大 {{ max_stdin_bytes }} 的有限預置 snapshot. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.",
+    "不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前台互動只適用於最大 {{ max_stdin_bytes }} 的有限 snapshot 到達 EOF 後的內置 `input()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.",
     "不提供 UI 指令碼, 除錯器, REPL 或任意宿主 Java 物件存取.",
     "不提供即時 AutoJs6 能力 broker; 首批 API 只使用執行開始時凍結的 app/device/execution/project 快照及外掛程式私有 workspace 的有界唯讀檔案介面.",
     "不聲明 32 位元 Android 支援, 亦不保證任何第三方 native wheel 可用.",

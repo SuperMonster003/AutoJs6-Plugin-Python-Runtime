@@ -46,8 +46,10 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 ******
 
 - تنفيذ لقطة مصدر Python بترميز UTF-8 كـ `__main__`.
-- قبول stdin snapshot محدود ومقدم مسبقا بحجم أقصاه 1 MiB للدالة `input()`؛ لا يتوفر تفاعل prompt/reply مباشر.
-- حفظ ترتيب stdout وstderr ثم إرسال chunks محدودة باستخدام credits.
+- قبول stdin snapshot محدود ومقدم مسبقا بحجم أقصاه 1 MiB؛ وبعد وصوله إلى EOF يمكن لتشغيل صريح في foreground متابعة `input()` المضمنة عبر prompt/reply محدود في البروتوكول 1.3.
+- اختيار `entryMode=file|module` صراحة لمشروع مقبول؛ يستخدم وضع module بيانات `runpy` القياسية وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية للحزمة، بينما يحافظ وضع file على دلالات السكربت العادية.
+- إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.
+- تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه 64 KiB ونقل ما يصل إلى 16 من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.
 - إرجاع `SystemExit` وأخطاء الصياغة والتنفيذ مع traceback منظم ومحدود.
 - السماح بجلسة نشطة واحدة لكل عملية دون طابور لدى provider.
 - لا حاجة لإعادة تشغيل المضيف: يعيد التنفيذ الجديد التالي بعد التثبيت أو إعادة التفعيل اكتشاف provider وتثبيت هويته، بينما ينهي Binder death أثناء التشغيل ذلك التنفيذ دون إعادة تلقائية.
@@ -62,7 +64,7 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 
 ```text
 input: UTF-8 Python source snapshot
-output: ordered bounded stdout/stderr chunks and a structured terminal result
+output: ordered bounded stdout/stderr chunks, explicit strict JSON, and SHA-256-manifested output artifacts
 runtime: Chaquopy 17.0.0
 Python request: 3.13
 expected packaged Python: 3.13.9
@@ -85,10 +87,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.1
+protocol: 1.0-1.4
 ```
 
-تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه 1 MiB وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. لا يمثل stdin قناة تفاعل مباشر؛ ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.
+تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه 1 MiB وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. يضيف البروتوكول 1.2 تفاوضا صريحا على مدخل file/module للمشاريع المقبولة. يضيف البروتوكول 1.3 بعد EOF للـ snapshot تفاعل prompt/reply تملكه Host ومقصورا على `input()` المضمنة في foreground. يضيف البروتوكول 1.4 JSON صارما وصريحا وoutput artifacts اختيارية موصوفة بـ SHA-256؛ يبقى stdout للتشخيص ولا يحلل كنتيجة. يظل `sys.stdin` المباشر محدودا ولا تفتح عمليات background واجهة إدخال ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.
 
 ******
 
@@ -100,7 +102,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
+release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -124,7 +126,8 @@ runtime/security/release owner: SuperMonster003
 - حد المصدر 4 MiB والخرج الكلي 4 MiB وكل chunk ‏16 KiB وعددها 4096.
 - أقصى timeout هو 60 s مع جلسة واحدة ودون طابور provider.
 - تتملك العملية نسخ PFD الكاملة المستلمة عبر Binder وتغلقها عند النهاية أو close.
-- يخزن الخرج أولا بحدود ثم يرسل بالـ credits؛ لا يدعى وجود backpressure أثناء التنفيذ.
+- يرسل الخرج chunk بعد chunk بالـ credits أثناء التنفيذ؛ يوقف نفاد credits السكربت مؤقتا، ويسبق الخرج المقبول الحالة terminal الوحيدة، ويمنع الخرج بعدها.
+- يحد JSON المنظم عند 64 KiB وتقبل حتى 16 artifacts بمسار 1024 UTF-8 bytes و4 MiB لكل ملف و8 MiB إجمالا مع تحقق Host من الطول الدقيق وEOF وSHA-256.
 - يعيد الإلغاء تشغيل العملية؛ تتطلب native extensions والاستدعاءات الحاجبة تحقق Android لاحقا.
 - تحظر سياسة stdlib-only استخدام pip عبر الإنترنت وحزم Python الخارجية. ما زالت أذونات APK المدمج بحاجة للفحص.
 
@@ -134,7 +137,7 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
-- لا يوجد stdin تفاعلي مباشر؛ يدعم فقط snapshot محدودا ومقدما مسبقا حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
+- لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة بعد EOF للـ snapshot المحدود حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
 - لا توجد نصوص UI أو debugger أو REPL أو صلاحية عشوائية لكائنات Java في المضيف.
 - لا يوجد AutoJs6 capability broker آني؛ تستخدم أول API فقط snapshot ‏app/device/execution/project المجمد عند بدء التنفيذ وقراءة محدودة من workspace الخاص بالإضافة.
 - لا يضمن Android ‏32-bit أو أي native wheel خارجي.
@@ -160,10 +163,14 @@ runtime/security/release owner: SuperMonster003
 
 ###### 2026/08/13
 
-* `ملاحظة` مرشح alpha لمصادر U1 النظيفة بعد 0.1؛ لا يتوفر تفاعل stdin مباشر, ولا يمثل قبول U1-R1 E3 الا تقرير canonical PASS مطابقا لقطع Host/Plugin الدقيقة على QV710AF65F/API 31/arm64؛ وهذا ليس دليلا لمصفوفة اجهزة او اصدار او نشر عام
+* `ملاحظة` مرشح alpha لشجرة U1 الحالية بعد 0.1؛ تغطى module entry وlive output وinput المضمن في foreground وstructured JSON الصريح وoutput artifacts المحدودة في U1-R2 حتى E2 فقط؛ تظل عمليات background وsys.stdin المباشر غير تفاعلية ويبقى R2 E3 مفتوحا ولا تثبت نتائج الشجرة الحالية مصفوفة اجهزة او اصدارا او نشرا عاما
 * `إضافة` إضافة snapshot محدود ومقدم مسبقا لـ stdin بحجم أقصى 1 MiB لتوفير input وEOF حتميين عبر `input()` و`sys.stdin`
 * `إضافة` إكمال دلالات project import لوحدات workspace ووحدات sibling/root لنقطة دخول متداخلة وعمليات package-relative import
+* `إضافة` إضافة البروتوكول 1.2 مع `entryMode=file|module` الصريح؛ يستخدم تنفيذ module أداة `runpy` مع `__package__` و`__spec__` الصحيحين وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية، بينما يبقى وضع file دون تغيير
+* `إضافة` إضافة prompt/reply محدود في البروتوكول 1.3 ومقصور على foreground للدالة `input()` المضمنة بعد EOF للـ snapshot المحدود؛ لا تفتح عمليات background واجهة إدخال ويظل `sys.stdin` المباشر محدودا
+* `إضافة` إضافة نتائج JSON صارمة وصريحة وoutput artifacts اختيارية في البروتوكول 1.4 ضمن حدود العدد والمسار المنظم وحجم الملف/الإجمالي ومراجع PFD الدقيقة وSHA-256 دون استنتاج نتيجة من stdout
 * `إصلاح` فك source بترميز strict UTF-8 قبل التنفيذ لمنع encoding cookie بترميز آخر من تجاوز العقد
+* `تحسين` نقل chunks المحدودة من stdout/stderr والضغط العكسي بالـ credits إلى أثناء تنفيذ السكربت، مع حفظ الخرج الجزئي المرتب قبل terminal ومنعه بعدها
 * `تحسين` استخدام `__main__` مستقل لكل تنفيذ واستعادة حالات stdin/stdout/stderr وargv وcwd و`sys.path` وmodule وimporter cache
 * `تحسين` تطبيق lease مدته 5 ثوان على session مفتوحة لم تبدأ ثم تحرير inputs وdescriptors وموضع session الوحيد
 * `تحسين` فرض الحد الأدنى Host versionCode 5275 عند حد Binder الخاص بـ Provider بدلا من الاعتماد فقط على discovery من Host

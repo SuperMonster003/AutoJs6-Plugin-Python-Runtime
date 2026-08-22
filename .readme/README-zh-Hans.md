@@ -46,8 +46,10 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 ******
 
 - 将一个 UTF-8 Python 源码快照作为 `__main__` 执行.
-- 为 `input()` 接收最大 1 MiB 的有限预置 stdin snapshot; 不提供实时交互式 prompt/reply.
-- 按原始顺序收集 stdout 和 stderr, 再通过有界 chunk 与 credit 传送.
+- 接收最大 1 MiB 的有限预置 stdin snapshot; 快照到达 EOF 后, 显式前台启动可通过协议 1.3 的有界 prompt/reply 继续内置 `input()`.
+- 为已准入项目显式选择 `entryMode=file|module`; module 模式使用标准 `runpy` 元数据、项目根目录 `sys.path[0]` 与包相对导入, file 模式保持普通脚本语义.
+- 在脚本执行期间按 stdout/stderr 原始顺序通过有界 chunk 与 credit 传送; credit 耗尽会对执行施加背压.
+- 通过协议 1.4 显式设置最大 64 KiB 的严格 JSON 结果, 并传送最多 16 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.
 - 返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.
 - 同一运行时进程只允许一个活动会话, provider 侧不排队.
 - Host 无需重启; 安装或重新启用插件后下一次新执行会重新发现并 pin provider 身份, 在途 Binder death 会终止该执行且绝不自动重放.
@@ -62,7 +64,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 
 ```text
 input: UTF-8 Python source snapshot
-output: ordered bounded stdout/stderr chunks and a structured terminal result
+output: ordered bounded stdout/stderr chunks, explicit strict JSON, and SHA-256-manifested output artifacts
 runtime: Chaquopy 17.0.0
 Python request: 3.13
 expected packaged Python: 3.13.9
@@ -85,10 +87,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.1
+protocol: 1.0-1.4
 ```
 
-插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. stdin 不是实时交互通道; 插件不会向脚本注入 Context, Binder, 宿主运行时对象或 callback sink.
+插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. 协议 1.2 为已准入项目增加显式 file/module 入口协商. 协议 1.3 在快照 EOF 后为内置 `input()` 增加由 Host 持有且仅限前台的 prompt/reply. 协议 1.4 增加显式严格 JSON 结果与可选的 SHA-256 manifest 输出 artifact, stdout 仅用于诊断且绝不被解析为结果. 直接 `sys.stdin` 始终有限, 后台启动绝不打开输入 UI, 插件也不会向脚本注入 Context, Binder, 宿主运行时对象或 callback sink.
 
 ******
 
@@ -100,7 +102,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
+release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -124,7 +126,8 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 - 源码最大 4 MiB, 总输出最大 4 MiB, 单个输出 chunk 最大 16 KiB, 最多 4096 个 chunk.
 - 请求超时最大 60 s, 同一进程最多一个活动会话, provider 侧不排队.
 - SOURCE 描述符采用 Binder 接收端完整 PFD 所有权, 保留 reliable-pipe 错误通道, 并在终态或关闭时释放.
-- 输出当前先在插件内有界缓冲, 再按 credit 发送; 尚不声明执行期间的流式背压.
+- 输出在执行期间按 credit 逐 chunk 发送; credit 耗尽会暂停脚本, 已接受的输出先于唯一终态, 终态后禁止输出.
+- 结构化 JSON 最大 64 KiB; 输出 artifact 最多 16 个, 路径最大 1024 UTF-8 bytes, 单个最大 4 MiB, 合计最大 8 MiB, Host 必须核对精确长度、EOF 与 SHA-256.
 - 取消模式为进程重启, 不是 CPython 级协作取消; 原生扩展或阻塞调用仍需后续 Android 验证.
 - stdlib-only 策略禁止在线 pip 和第三方 Python 包, 合并后的 APK 权限仍须由构建门禁复核.
 
@@ -134,7 +137,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 ******
 
-- 不提供实时交互式 stdin; 仅支持最大 1 MiB 的有限预置 snapshot. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.
+- 不提供通用实时 stdin 或直接 `sys.stdin` callback streaming. 前台交互仅适用于最大 1 MiB 的有限 snapshot 到达 EOF 后的内置 `input()`. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.
 - 不提供 UI 脚本, 调试器, REPL 或任意宿主 Java 对象访问.
 - 不提供实时 AutoJs6 能力 broker; 首批 API 仅使用执行启动时冻结的 app/device/execution/project 快照和插件私有 workspace 的有界只读文件接口.
 - 不声明 32 位 Android 支持, 也不保证任意第三方 native wheel 可用.
@@ -160,10 +163,14 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 
 ###### 2026/08/13
 
-* `提示` 0.1 后的 U1 clean-source alpha 候选; 不提供实时 stdin 交互, U1-R1 E3 验收仅由与 QV710AF65F/API 31/arm64 上 exact Host/Plugin artifacts 匹配的 canonical PASS report 表示, 不属于设备矩阵/发布/公开证据
+* `提示` 0.1 后的 U1 current-tree alpha 候选; U1-R2 module entry、live output、前台内置 input、显式结构化 JSON 与有界输出 artifact 仅完成到 E2, 后台启动与直接 sys.stdin 仍非交互, R2 E3 仍未完成, 且这些当前树结果不属于设备矩阵/发布/公开证据
 * `新增` 新增最大 1 MiB 的有限预置 stdin snapshot, 为 `input()` 与 `sys.stdin` 提供确定性输入和 EOF
 * `新增` 完善项目导入语义, 支持 workspace 模块, 嵌套入口同级与根模块以及 package-relative import
+* `新增` 新增协议 1.2 显式 `entryMode=file|module`; module 执行通过 `runpy` 提供正确的 `__package__`、`__spec__`、项目根目录 `sys.path[0]` 与相对导入, file 模式保持不变
+* `新增` 新增协议 1.3: 有限 snapshot 到达 EOF 后, 仅前台内置 `input()` 使用有界 prompt/reply; 后台启动绝不打开输入 UI, 直接 `sys.stdin` 始终有限
+* `新增` 新增协议 1.4 显式严格 JSON 结果与可选输出 artifact, 对数量、规范化路径、单个/合计大小、精确 PFD 引用及 SHA-256 设限, 且绝不从 stdout 推断结果
 * `修复` 执行前按 strict UTF-8 解码源码, 非 UTF-8 encoding cookie 不再绕过契约
+* `优化` 将 stdout/stderr 的有界 chunk 与 credit 背压前移到脚本执行期间, 保留终态前的有序部分输出并禁止终态后输出
 * `优化` 每次执行使用独立 `__main__`, 并恢复 stdin/stdout/stderr, argv, cwd, `sys.path`, module 与 importer cache 状态
 * `优化` 为已打开但未 start 的 session 增加 5 秒 lease, 到期释放输入, descriptor 与单会话占位
 * `优化` Provider 在 Binder 入站强制最低 Host versionCode 5275, 不再只依赖 Host 侧发现检查

@@ -8,16 +8,20 @@
     "v0.2.0-alpha.1": {
       "released_date": "2026/08/13",
       "hint": [
-        "مرشح alpha لمصادر U1 النظيفة بعد 0.1؛ لا يتوفر تفاعل stdin مباشر, ولا يمثل قبول U1-R1 E3 الا تقرير canonical PASS مطابقا لقطع Host/Plugin الدقيقة على QV710AF65F/API 31/arm64؛ وهذا ليس دليلا لمصفوفة اجهزة او اصدار او نشر عام"
+        "مرشح alpha لشجرة U1 الحالية بعد 0.1؛ تغطى module entry وlive output وinput المضمن في foreground وstructured JSON الصريح وoutput artifacts المحدودة في U1-R2 حتى E2 فقط؛ تظل عمليات background وsys.stdin المباشر غير تفاعلية ويبقى R2 E3 مفتوحا ولا تثبت نتائج الشجرة الحالية مصفوفة اجهزة او اصدارا او نشرا عاما"
       ],
       "feature": [
         "إضافة snapshot محدود ومقدم مسبقا لـ stdin بحجم أقصى 1 MiB لتوفير input وEOF حتميين عبر `input()` و`sys.stdin`",
-        "إكمال دلالات project import لوحدات workspace ووحدات sibling/root لنقطة دخول متداخلة وعمليات package-relative import"
+        "إكمال دلالات project import لوحدات workspace ووحدات sibling/root لنقطة دخول متداخلة وعمليات package-relative import",
+        "إضافة البروتوكول 1.2 مع `entryMode=file|module` الصريح؛ يستخدم تنفيذ module أداة `runpy` مع `__package__` و`__spec__` الصحيحين وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية، بينما يبقى وضع file دون تغيير",
+        "إضافة prompt/reply محدود في البروتوكول 1.3 ومقصور على foreground للدالة `input()` المضمنة بعد EOF للـ snapshot المحدود؛ لا تفتح عمليات background واجهة إدخال ويظل `sys.stdin` المباشر محدودا",
+        "إضافة نتائج JSON صارمة وصريحة وoutput artifacts اختيارية في البروتوكول 1.4 ضمن حدود العدد والمسار المنظم وحجم الملف/الإجمالي ومراجع PFD الدقيقة وSHA-256 دون استنتاج نتيجة من stdout"
       ],
       "fix": [
         "فك source بترميز strict UTF-8 قبل التنفيذ لمنع encoding cookie بترميز آخر من تجاوز العقد"
       ],
       "improvement": [
+        "نقل chunks المحدودة من stdout/stderr والضغط العكسي بالـ credits إلى أثناء تنفيذ السكربت، مع حفظ الخرج الجزئي المرتب قبل terminal ومنعه بعدها",
         "استخدام `__main__` مستقل لكل تنفيذ واستعادة حالات stdin/stdout/stderr وargv وcwd و`sys.path` وmodule وimporter cache",
         "تطبيق lease مدته 5 ثوان على session مفتوحة لم تبدأ ثم تحرير inputs وdescriptors وموضع session الوحيد",
         "فرض الحد الأدنى Host versionCode 5275 عند حد Binder الخاص بـ Provider بدلا من الاعتماد فقط على discovery من Host"

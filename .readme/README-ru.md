@@ -46,8 +46,10 @@ Python Runtime — независимый provider протокола Python V1.
 ******
 
 - Выполнение одного UTF-8 снимка Python как `__main__`.
-- Для `input()` принимается конечный заранее переданный stdin snapshot размером до 1 MiB; интерактивного prompt/reply в реальном времени нет.
-- Сохранение порядка stdout и stderr с передачей ограниченных chunks по credits.
+- Принимается конечный заранее переданный stdin snapshot размером до 1 MiB; после его EOF явный запуск на переднем плане может продолжить встроенный `input()` через ограниченный prompt/reply протокола 1.3.
+- Явный выбор `entryMode=file|module` для допущенного проекта: режим module использует стандартные метаданные `runpy`, корень проекта в `sys.path[0]` и относительные импорты пакета, а режим file сохраняет обычную семантику скрипта.
+- Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.
+- Явное задание строгого JSON-результата до 64 KiB и передача до 16 необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.
 - Возврат `SystemExit`, синтаксических и runtime ошибок с ограниченным структурированным traceback.
 - Один активный сеанс на процесс без очереди provider.
 - Перезапуск хоста не нужен: следующая новая сессия после установки или повторного включения заново обнаруживает и фиксирует provider, а Binder death во время выполнения завершает его без автоматического повтора.
@@ -62,7 +64,7 @@ Python Runtime — независимый provider протокола Python V1.
 
 ```text
 input: UTF-8 Python source snapshot
-output: ordered bounded stdout/stderr chunks and a structured terminal result
+output: ordered bounded stdout/stderr chunks, explicit strict JSON, and SHA-256-manifested output artifacts
 runtime: Chaquopy 17.0.0
 Python request: 3.13
 expected packaged Python: 3.13.9
@@ -85,10 +87,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.1
+protocol: 1.0-1.4
 ```
 
-Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до 1 MiB и read-only snapshot возможностей хоста протокола 1.1. Stdin не является интерактивным каналом реального времени; Context, Binder, объекты хоста и callback sink не внедряются.
+Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до 1 MiB и read-only snapshot возможностей хоста протокола 1.1. Протокол 1.2 добавляет явное согласование входа file/module для допущенных проектов. Протокол 1.3 добавляет после EOF snapshot принадлежащий Host prompt/reply только для встроенного `input()` на переднем плане. Протокол 1.4 добавляет явный строгий JSON и необязательные output artifacts с манифестом SHA-256; stdout остается диагностикой и никогда не разбирается как результат. Прямой `sys.stdin` остается конечным, фоновые запуски никогда не открывают UI ввода, а Context, Binder, объекты хоста и callback sink не внедряются.
 
 ******
 
@@ -100,7 +102,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
+release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -124,7 +126,8 @@ Runtime Chaquopy предназначен только для доверенны
 - Источник ограничен 4 MiB, весь вывод 4 MiB, chunk 16 KiB, число chunks 4096.
 - Максимальный timeout 60 s, один активный сеанс и без очереди provider.
 - Полные PFD на стороне получателя Binder принимаются во владение и закрываются при завершении или close.
-- Вывод сначала ограниченно буферизуется, затем передается по credits; backpressure во время выполнения не заявлен.
+- Вывод передаётся по chunks и credits во время выполнения; при исчерпании credits скрипт приостанавливается, принятый вывод предшествует единственному terminal, а вывод после terminal запрещён.
+- Структурированный JSON ограничен 64 KiB; допускается до 16 artifacts с путем до 1024 UTF-8 bytes, 4 MiB на файл, 8 MiB суммарно и проверкой Host точной длины, EOF и SHA-256.
 - Отмена перезапускает процесс; native extensions и блокирующие вызовы требуют Android-проверки.
 - Политика stdlib-only запрещает online pip и сторонние пакеты. Разрешения объединенного APK еще нужно проверить.
 
@@ -134,7 +137,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
-- Нет интерактивного stdin в реальном времени; поддерживается только конечный заранее переданный snapshot до 1 MiB. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.
+- Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` после EOF конечного snapshot до 1 MiB. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.
 - Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.
 - Нет realtime AutoJs6 capability broker; первые API используют только замороженный при запуске snapshot app/device/execution/project и ограниченное read-only чтение private workspace плагина.
 - 32-разрядный Android и произвольные native wheels не гарантируются.
@@ -160,10 +163,14 @@ Runtime Chaquopy предназначен только для доверенны
 
 ###### 2026/08/13
 
-* `Примечание` Alpha-кандидат U1 с чистым состоянием исходников после 0.1; интерактивный stdin в реальном времени недоступен, а приемка U1-R1 E3 представлена только совпадающим каноническим отчетом PASS для точных артефактов Host/Plugin на QV710AF65F/API 31/arm64 и не является доказательством матрицы устройств, выпуска или публичной публикации
+* `Примечание` Alpha-кандидат U1 текущего дерева после 0.1; module entry, live output, встроенный input на переднем плане, явный structured JSON и ограниченные output artifacts U1-R2 покрыты только до E2; фоновые запуски и прямой sys.stdin остаются неинтерактивными, R2 E3 остается открытым, а результаты текущего дерева не доказывают матрицу устройств, выпуск или публикацию
 * `Добавлено` Добавлен конечный заранее предоставленный snapshot stdin до 1 MiB для детерминированного ввода и EOF через `input()` и `sys.stdin`
 * `Добавлено` Завершена семантика project import для модулей workspace, соседних и корневых модулей вложенной точки входа и package-relative imports
+* `Добавлено` Добавлен протокол 1.2 с явным `entryMode=file|module`; выполнение module использует `runpy` с корректными `__package__`, `__spec__`, корнем проекта в `sys.path[0]` и относительными импортами, а режим file не изменён
+* `Добавлено` В протокол 1.3 добавлен ограниченный prompt/reply только на переднем плане для встроенного `input()` после EOF конечного snapshot; фоновые запуски не открывают UI ввода, а прямой `sys.stdin` остается конечным
+* `Добавлено` В протокол 1.4 добавлены явные строгие JSON-результаты и необязательные output artifacts с ограничениями количества, нормализованного пути, размера файла/суммы, точных PFD-ссылок и SHA-256 без вывода результата из stdout
 * `Исправлено` Исходник декодируется как strict UTF-8 до выполнения, поэтому encoding cookie с иной кодировкой больше не обходит контракт
+* `Улучшено` Перенос ограниченных chunks stdout/stderr и backpressure по credits внутрь выполнения скрипта с сохранением упорядоченного частичного вывода до terminal и запретом после него
 * `Улучшено` Каждый запуск получает отдельный `__main__` с восстановлением stdin/stdout/stderr, argv, cwd, `sys.path`, состояния modules и importer cache
 * `Улучшено` Для открытого, но не запущенного session действует lease 5 секунд, после чего освобождаются inputs, descriptors и единственный session slot
 * `Улучшено` Минимальный Host versionCode 5275 проверяется на Binder-границе Provider, а не только при discovery со стороны Host

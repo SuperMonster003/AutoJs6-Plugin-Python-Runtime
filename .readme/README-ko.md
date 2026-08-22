@@ -46,8 +46,10 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 ******
 
 - UTF-8 Python 소스 스냅샷 하나를 `__main__`으로 실행합니다.
-- `input()`에 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 받습니다. 실시간 prompt/reply 상호작용은 제공하지 않습니다.
-- stdout과 stderr 순서를 유지하고 제한된 chunk를 credit으로 전달합니다.
+- 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 받습니다. snapshot이 EOF에 도달한 뒤에는 명시적 foreground 실행에서 프로토콜 1.3의 제한된 prompt/reply로 내장 `input()`을 계속할 수 있습니다.
+- 승인된 project에서 `entryMode=file|module`을 명시적으로 선택합니다. module mode는 표준 `runpy` metadata, project root의 `sys.path[0]` 및 package-relative import를 사용하고 file mode는 일반 script semantics를 유지합니다.
+- 스크립트 실행 중 stdout/stderr의 원래 순서대로 제한된 chunk를 credit으로 전달하며, credit이 소진되면 실행에 backpressure를 적용합니다.
+- 프로토콜 1.4에서 최대 64 KiB의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 16개 전달하며 stdout에서 결과를 추론하지 않습니다.
 - `SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.
 - 프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.
 - 호스트 재시작이 필요 없습니다. 설치 또는 재활성화 후 다음 새 실행이 provider를 다시 검색하고 pin하며, 실행 중 Binder death는 해당 실행을 종료하고 자동 재실행하지 않습니다.
@@ -62,7 +64,7 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 
 ```text
 input: UTF-8 Python source snapshot
-output: ordered bounded stdout/stderr chunks and a structured terminal result
+output: ordered bounded stdout/stderr chunks, explicit strict JSON, and SHA-256-manifested output artifacts
 runtime: Chaquopy 17.0.0
 Python request: 3.13
 expected packaged Python: 3.13.9
@@ -85,10 +87,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.1
+protocol: 1.0-1.4
 ```
 
-독립 SOURCE, 선택적인 제한 workspace archive, 최대 1 MiB의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. stdin은 실시간 상호작용 채널이 아니며 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.
+독립 SOURCE, 선택적인 제한 workspace archive, 최대 1 MiB의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. 프로토콜 1.2는 승인된 project에 명시적인 file/module entry negotiation을 추가합니다. 프로토콜 1.3은 snapshot EOF 뒤 내장 `input()`에 Host 소유의 foreground 전용 prompt/reply를 추가합니다. 프로토콜 1.4는 명시적 엄격 JSON과 선택적 SHA-256 manifest output artifact를 추가하며 stdout은 진단 텍스트로 유지되고 결과로 분석되지 않습니다. 직접 `sys.stdin`은 계속 유한하며 background 실행은 입력 UI를 열지 않고 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.
 
 ******
 
@@ -100,7 +102,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
+release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -124,7 +126,8 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 - 소스는 4 MiB, 전체 출력은 4 MiB, chunk는 16 KiB, 개수는 4096로 제한합니다.
 - timeout은 최대 60 s, 활성 세션은 하나이며 provider 큐가 없습니다.
 - Binder 수신 측의 완전한 PFD 소유권을 채택하고 종료 또는 close 시 닫습니다.
-- 출력은 먼저 제한된 메모리에 버퍼링한 뒤 credit으로 전송합니다. 실행 중 backpressure는 선언하지 않습니다.
+- 출력은 실행 중 credit에 따라 chunk 단위로 전달됩니다. credit 소진 시 스크립트가 일시 중지되고, 수락된 출력은 유일한 terminal보다 먼저 전달되며 terminal 이후 출력은 금지됩니다.
+- 구조화 JSON은 64 KiB, artifact는 최대 16개, path는 1024 UTF-8 bytes, file당 4 MiB, 합계 8 MiB로 제한하며 Host가 정확한 길이, EOF 및 SHA-256을 검증합니다.
 - 취소는 프로세스 재시작 방식입니다. native extension과 blocking 호출은 Android 검증이 필요합니다.
 - stdlib-only 정책으로 online pip와 타사 Python 패키지를 금지합니다. 병합 APK 권한은 빌드 때 확인해야 합니다.
 
@@ -134,7 +137,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-- 실시간 대화형 stdin은 제공하지 않으며 최대 1 MiB의 유한한 사전 제공 snapshot만 지원합니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.
+- 일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 1 MiB의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.
 - UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.
 - 실시간 AutoJs6 capability broker는 없습니다. 첫 API는 실행 시작 시 동결된 app/device/execution/project snapshot과 plugin-private workspace의 제한된 읽기 전용 접근만 사용합니다.
 - 32비트 Android와 임의의 native wheel은 보장하지 않습니다.
@@ -160,10 +163,14 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 
 ###### 2026/08/13
 
-* `안내` 0.1 이후 U1 clean-source alpha candidate. 실시간 stdin interaction은 제공하지 않으며, U1-R1 E3 승인은 QV710AF65F/API 31/arm64의 exact Host/Plugin artifacts와 일치하는 canonical PASS report로만 성립하고 device matrix/release/public 증거가 아님
+* `안내` 0.1 이후 U1 current-tree alpha candidate. U1-R2 module entry, live output, foreground 내장 input, 명시적 structured JSON 및 제한 output artifact는 E2까지만 완료되었습니다. background 실행과 직접 sys.stdin은 비대화형으로 유지되고 R2 E3는 아직 열려 있으며 current-tree 결과는 device matrix/release/public 증거가 아닙니다
 * `추가` 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 추가하여 `input()`과 `sys.stdin`에 결정적 입력과 EOF 제공
 * `추가` workspace module, 중첩 entry의 sibling/root module 및 package-relative import를 지원하도록 project import semantics 완성
+* `추가` 프로토콜 1.2의 명시적 `entryMode=file|module`을 추가하고 module 실행은 `runpy`로 올바른 `__package__`, `__spec__`, project root의 `sys.path[0]` 및 relative import를 사용하며 file mode는 변경하지 않음
+* `추가` 프로토콜 1.3에서 유한 snapshot EOF 뒤 내장 `input()`에 foreground 전용 제한 prompt/reply를 추가하고, background 실행은 입력 UI를 열지 않으며 직접 `sys.stdin`은 유한하게 유지
+* `추가` 프로토콜 1.4에서 명시적 엄격 JSON 결과와 선택적 output artifact를 추가하고 count, normalized path, file/aggregate size, exact PFD reference 및 SHA-256을 제한하며 stdout에서 결과를 추론하지 않음
 * `수정` 실행 전에 source를 strict UTF-8로 decode하여 비 UTF-8 encoding cookie가 contract를 우회하지 못하도록 수정
+* `개선` 제한된 stdout/stderr chunk와 credit backpressure를 스크립트 실행 중으로 이동해 terminal 전의 순서 있는 부분 출력을 보존하고 이후 출력을 금지
 * `개선` 실행마다 독립 `__main__`을 사용하고 stdin/stdout/stderr, argv, cwd, `sys.path`, module 및 importer cache 상태 복원
 * `개선` open 후 start되지 않은 session에 5초 lease를 적용하고 만료 시 input, descriptor 및 단일 session slot 해제
 * `개선` Host 측 discovery에만 의존하지 않고 Provider Binder 경계에서 최소 Host versionCode 5275 강제

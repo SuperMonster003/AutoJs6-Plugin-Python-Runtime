@@ -8,16 +8,20 @@
     "v0.2.0-alpha.1": {
       "released_date": "2026/08/13",
       "hint": [
-        "Post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable, and U1-R1 E3 is represented only by a matching canonical PASS report for the exact Host/Plugin artifacts on QV710AF65F/API 31/arm64; this is not device-matrix, release, or public evidence"
+        "Post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON, and bounded output artifacts are covered through E2 only; background launches and direct sys.stdin remain non-interactive, R2 E3 remains open, and these current-tree results are not device-matrix, release, or public evidence"
       ],
       "feature": [
         "Add a finite pre-supplied stdin snapshot of at most 1 MiB for deterministic `input()` and `sys.stdin` input and EOF",
-        "Complete project import semantics for workspace modules, nested-entry sibling and root modules, and package-relative imports"
+        "Complete project import semantics for workspace modules, nested-entry sibling and root modules, and package-relative imports",
+        "Add protocol 1.2 explicit `entryMode=file|module`; module execution uses `runpy` with correct `__package__`, `__spec__`, project-root `sys.path[0]`, and relative imports while file mode remains unchanged",
+        "Add protocol 1.3 foreground-only bounded prompt/reply for built-in `input()` after finite snapshot EOF; background launches never open input UI and direct `sys.stdin` stays finite",
+        "Add protocol 1.4 explicit strict JSON results and optional output artifacts bounded by count, normalized path, per-file/aggregate size, exact PFD references, and SHA-256, without ever inferring a result from stdout"
       ],
       "fix": [
         "Decode source as strict UTF-8 before execution so a non-UTF-8 encoding cookie cannot bypass the contract"
       ],
       "improvement": [
+        "Move bounded stdout/stderr chunks and credit backpressure into script execution, preserving ordered partial output before terminal and forbidding output afterward",
         "Use an independent `__main__` per execution and restore stdin/stdout/stderr, argv, cwd, `sys.path`, module, and importer-cache state",
         "Apply a 5-second lease to an opened session which is never started, then release its inputs, descriptors, and single-session slot",
         "Enforce minimum Host versionCode 5275 at the Provider Binder boundary instead of relying only on Host-side discovery"

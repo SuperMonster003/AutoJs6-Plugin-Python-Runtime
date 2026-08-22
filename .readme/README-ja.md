@@ -46,8 +46,10 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 ******
 
 - 1 つの UTF-8 Python ソースを `__main__` として実行します.
-- `input()` 用に最大 1 MiB の有限な事前供給 stdin snapshot を受け付けます. リアルタイムの prompt/reply 対話は提供しません.
-- stdout と stderr の順序を保ち, 上限付き chunk を credit で送信します.
+- 最大 1 MiB の有限な事前供給 stdin snapshot を受け付けます. snapshot が EOF に達した後は, 明示的な foreground 起動で protocol 1.3 の上限付き prompt/reply により組み込み `input()` を継続できます.
+- 許可済み project では `entryMode=file|module` を明示的に選択します. module mode は標準 `runpy` metadata, project root の `sys.path[0]`, package-relative import を使用し, file mode は通常の script semantics を維持します.
+- スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.
+- protocol 1.4 で最大 64 KiB の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 16 個転送します. stdout から result を推測しません.
 - `SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.
 - プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.
 - ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません.
@@ -62,7 +64,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 
 ```text
 input: UTF-8 Python source snapshot
-output: ordered bounded stdout/stderr chunks and a structured terminal result
+output: ordered bounded stdout/stderr chunks, explicit strict JSON, and SHA-256-manifested output artifacts
 runtime: Chaquopy 17.0.0
 Python request: 3.13
 expected packaged Python: 3.13.9
@@ -85,10 +87,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.1
+protocol: 1.0-1.4
 ```
 
-独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. stdin はリアルタイム対話チャネルではなく, Context, Binder, ホストオブジェクト, callback sink は注入しません.
+独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, Context, Binder, ホストオブジェクト, callback sink は注入しません.
 
 ******
 
@@ -100,7 +102,7 @@ protocol: 1.0-1.1
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 clean-source alpha candidate; live stdin interaction is unavailable; U1-R1 E3 exists only when a matching canonical PASS report binds the exact Host/Plugin artifacts tested on QV710AF65F/API 31/arm64; it is not published and does not establish device-matrix, release, or public evidence; prior 0.1.0 artifacts do not cover U1
+release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
 paired host: AutoJs6 6.8.0 / versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -124,7 +126,8 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 - ソースは 4 MiB, 総出力は 4 MiB, 1 chunk は 16 KiB, chunk 数は 4096 が上限です.
 - timeout は最大 60 s, 同時セッションは 1, provider キューはありません.
 - Binder 受信側の完全な PFD を所有し, 終端または close 時に閉じます.
-- 出力は先に上限付きでバッファし credit で送信します. 実行中の backpressure は未対応です.
+- 出力は実行中に credit ごとに chunk 単位で送信します. credit 枯渇時はスクリプトを停止し, 受理済み出力は唯一の terminal より前に置かれ, terminal 後の出力は禁止されます.
+- 構造化 JSON は 64 KiB, artifact は最大 16 個, path は 1024 UTF-8 bytes, 1 file は 4 MiB, 合計は 8 MiB が上限で, Host が正確な長さ, EOF, SHA-256 を検証します.
 - キャンセルはプロセス再起動方式です. native extension とブロッキング呼び出しは Android 検証が必要です.
 - stdlib-only で online pip と第三者パッケージを禁止します. 結合 APK の権限はビルド時に検査します.
 
@@ -134,7 +137,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-- リアルタイム対話 stdin は未対応で, 最大 1 MiB の有限な事前供給 snapshot のみ対応します. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
+- 汎用 live stdin と直接の `sys.stdin` callback streaming は未対応です. foreground 対話は最大 1 MiB の有限 snapshot が EOF に達した後の組み込み `input()` のみに適用されます. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
 - UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.
 - リアルタイム AutoJs6 capability broker はありません. 最初の API は実行開始時に凍結した app/device/execution/project snapshot と plugin-private workspace の上限付き読み取り専用アクセスだけを使います.
 - 32 bit Android と任意の native wheel は保証しません.
@@ -160,10 +163,14 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 
 ###### 2026/08/13
 
-* `注記` 0.1 後の U1 clean-source alpha candidate. live stdin interaction は未提供で, U1-R1 E3 は QV710AF65F/API 31/arm64 上の exact Host/Plugin artifacts に一致する canonical PASS report がある場合に限って成立し, device matrix/release/public evidence ではない
+* `注記` 0.1 後の U1 current-tree alpha candidate. U1-R2 の module entry, live output, foreground 組み込み input, 明示的 structured JSON, 上限付き output artifact は E2 までのみ完了しています. background 起動と直接の sys.stdin は非対話のままで, R2 E3 は未完了であり, current-tree の結果は device matrix/release/public evidence ではありません
 * `追加` 最大 1 MiB の有限な事前提供 stdin snapshot を追加し, `input()` と `sys.stdin` に決定的な入力と EOF を提供
 * `追加` workspace module, nested entry の sibling/root module, package-relative import に対応して project import semantics を完成
+* `追加` プロトコル 1.2 の明示的な `entryMode=file|module` を追加し, module 実行は `runpy` により正しい `__package__`, `__spec__`, project root の `sys.path[0]`, relative import を使用し, file mode は変更しない
+* `追加` プロトコル 1.3 で有限 snapshot の EOF 後の組み込み `input()` に foreground 限定の上限付き prompt/reply を追加し, background 起動では入力 UI を開かず, 直接の `sys.stdin` は有限のままにする
+* `追加` プロトコル 1.4 で明示的な厳密 JSON result と任意 output artifact を追加し, count, normalized path, file/aggregate size, exact PFD reference, SHA-256 を制限して stdout から result を推測しない
 * `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止
+* `改善` 上限付き stdout/stderr chunk と credit backpressure をスクリプト実行中へ移し, terminal 前の順序付き部分出力を保持して terminal 後の出力を禁止
 * `改善` 実行ごとに独立した `__main__` を使用し, stdin/stdout/stderr, argv, cwd, `sys.path`, module, importer cache の状態を復元
 * `改善` open 後に start されない session に 5 秒 lease を適用し, 期限後に input, descriptor, 単一 session slot を解放
 * `改善` Host 側 discovery だけに依存せず, Provider の Binder 境界で最低 Host versionCode 5275 を強制

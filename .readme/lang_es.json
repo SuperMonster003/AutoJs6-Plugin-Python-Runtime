@@ -10,8 +10,10 @@
   "h3_functions": "Funciones",
   "features": [
     "Ejecutar una instantánea UTF-8 como `__main__`.",
-    "Aceptar para `input()` un snapshot stdin finito y preproporcionado de hasta {{ max_stdin_bytes }}; no hay interacción prompt/respuesta en tiempo real.",
-    "Conservar el orden de stdout y stderr y entregar chunks acotados mediante créditos.",
+    "Aceptar un snapshot stdin finito y preproporcionado de hasta {{ max_stdin_bytes }}; tras su EOF, un inicio explícito en primer plano puede continuar el `input()` integrado mediante el prompt/respuesta acotado del protocolo 1.3.",
+    "Seleccionar explícitamente `entryMode=file|module` para un proyecto admitido; el modo module usa metadatos estándar de `runpy`, la raíz del proyecto en `sys.path[0]` e imports relativos al package, mientras el modo file conserva la semántica de script ordinaria.",
+    "Entregar durante la ejecución chunks acotados de stdout/stderr en su orden original; al agotarse los créditos se aplica contrapresión a la ejecución.",
+    "Establecer un resultado JSON estricto explícito de hasta {{ max_structured_json_bytes }} y transferir hasta {{ max_output_artifacts }} artefactos opcionales con límites de ruta, tamaño y SHA-256 del protocolo 1.4; nunca inferir un resultado desde stdout.",
     "Informar `SystemExit`, errores de sintaxis y excepciones con traceback estructurado y acotado.",
     "Permitir una sesión activa por proceso sin cola del proveedor.",
     "No requerir reinicio del host: la siguiente ejecución nueva tras instalar o reactivar redescubre y fija el provider; una muerte Binder en curso termina esa ejecución y nunca la repite automáticamente."
@@ -21,7 +23,7 @@
   "p_runtime_version_status": "La compilación solicita Python {{ python_line }}. Los artefactos RC locales congelados y la ejecución exacta en dispositivo registraron CPython {{ python_version_expected }}; la versión y los hashes finales de 0.1.0 deben revisarse tras congelar el código.",
   "h3_plugin_interface": "Interfaz del complemento",
   "p_plugin_interface": "El host descubre e invoca el complemento con las siguientes identidades",
-  "p_plugin_scope": "El complemento acepta una SOURCE independiente, un workspace archive acotado opcional, un snapshot stdin finito y preproporcionado de hasta {{ max_stdin_bytes }} y el snapshot de capacidades host de solo lectura del protocolo 1.1. Stdin no es un canal interactivo en tiempo real; no se inyectan Context, Binder, objetos del runtime host ni callback sinks.",
+  "p_plugin_scope": "El complemento acepta una SOURCE independiente, un workspace archive acotado opcional, un snapshot stdin finito y preproporcionado de hasta {{ max_stdin_bytes }} y el snapshot de capacidades host de solo lectura del protocolo 1.1. El protocolo 1.2 añade negociación explícita de entrada file/module para proyectos admitidos. El protocolo 1.3 añade, tras el EOF del snapshot, prompt/respuesta propiedad del Host y solo en primer plano para el `input()` integrado. El protocolo 1.4 añade JSON estricto explícito y artefactos opcionales manifestados con SHA-256; stdout sigue siendo diagnóstico y nunca se analiza como resultado. `sys.stdin` directo sigue siendo finito, los inicios en segundo plano nunca abren UI de entrada y no se inyectan Context, Binder, objetos del runtime host ni callback sinks.",
   "h3_host_integration_status": "Estado de integración con el host",
   "p_host_integration_status": "La versión 0.1.0 se empareja solo con AutoJs6 6.8.0, con el versionCode mínimo del Host 5275 congelado y aplicado; la revisión final y limpia del código fuente del Host y el manifiesto de distribución de los tres AAR están registrados en el lock. Cada ejecución nueva redescubre el provider; si falta o está desactivado pide instalar o activar sin fallback, y la instalación o reactivación no exige reiniciar el Host. La identidad del APK estable está vinculada a ese código fuente exacto del Plugin y al lock Host.",
   "h3_security": "Seguridad y privacidad",
@@ -31,13 +33,14 @@
     "El código se limita a {{ max_source_bytes }}, la salida total a {{ max_output_bytes }}, cada chunk a {{ max_output_chunk_bytes }} y el total a {{ max_output_chunks }} chunks.",
     "El timeout máximo es {{ max_timeout }}, con una sesión activa y sin cola del proveedor.",
     "Se adopta la propiedad de los PFD completos recibidos por Binder y se cierran al terminar o cerrar la sesión.",
-    "La salida se almacena primero con límites y después se envía con créditos; no se afirma backpressure durante la ejecución.",
+    "La salida se entrega chunk a chunk con créditos durante la ejecución; al agotarse se pausa el script, la salida aceptada precede al único terminal y se prohíbe toda salida posterior.",
+    "El JSON estructurado se limita a {{ max_structured_json_bytes }}; se admiten hasta {{ max_output_artifacts }} artefactos con rutas de {{ max_output_artifact_path_bytes }}, {{ max_output_artifact_bytes }} por archivo, {{ max_total_output_artifact_bytes }} en total y verificación Host de longitud exacta, EOF y SHA-256.",
     "La cancelación reinicia el proceso; las extensiones nativas y llamadas bloqueantes requieren validación Android posterior.",
     "La política stdlib-only prohíbe pip en línea y paquetes Python de terceros. Los permisos del APK combinado aún deben verificarse."
   ],
   "h3_unsupported": "Capacidades no declaradas",
   "unsupported_capabilities": [
-    "No hay stdin interactivo en tiempo real; solo se admite un snapshot finito y preproporcionado de hasta {{ max_stdin_bytes }}. La escritura de workspace, pip en línea y descarga de wheels siguen sin soporte.",
+    "No hay stdin general en vivo ni streaming callback de `sys.stdin` directo. La interacción en primer plano solo se aplica al `input()` integrado después del EOF del snapshot finito de hasta {{ max_stdin_bytes }}. La escritura de workspace, pip en línea y descarga de wheels siguen sin soporte.",
     "No hay scripts UI, depurador, REPL ni acceso arbitrario a objetos Java del host.",
     "No hay broker AutoJs6 en tiempo real; las primeras API solo usan el snapshot app/device/execution/project congelado al iniciar y acceso de lectura acotado al workspace privado del complemento.",
     "No se garantiza Android de 32 bits ni wheels nativas de terceros.",
