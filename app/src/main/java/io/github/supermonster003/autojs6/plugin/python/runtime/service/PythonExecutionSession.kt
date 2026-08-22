@@ -3,6 +3,7 @@ package io.github.supermonster003.autojs6.plugin.python.runtime.service
 import android.os.IBinder
 import android.os.RemoteException
 import android.os.SystemClock
+import android.util.Log
 import io.github.supermonster003.autojs6.plugin.python.runtime.PythonRuntimeMetadata
 import io.github.supermonster003.autojs6.plugin.python.runtime.execution.BufferedOutputRecord
 import io.github.supermonster003.autojs6.plugin.python.runtime.execution.ChaquopyRuntime
@@ -399,7 +400,8 @@ internal class PythonExecutionSession(
                     )
                 }
                 return
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                Log.e(TAG, "Python bootstrap failed", error)
                 if (!isStopped()) {
                     finishFailure(
                         PythonErrorCode.INTERNAL,
@@ -942,6 +944,7 @@ internal class PythonExecutionSession(
     private fun elapsedMillis(): Long = (SystemClock.elapsedRealtime() - createdAtMillis).coerceAtLeast(0L)
 
     private companion object {
+        const val TAG = "PythonExecutionSession"
         const val TERMINAL_CLOSE_LEASE_MILLIS = 30_000L
         const val START_LEASE_MILLIS = 5_000L
         const val INPUT_WAIT_POLL_MILLIS = 100L

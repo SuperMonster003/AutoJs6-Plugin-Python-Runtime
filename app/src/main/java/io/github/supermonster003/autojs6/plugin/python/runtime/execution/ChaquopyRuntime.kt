@@ -104,7 +104,7 @@ internal class ChaquopyRuntime(context: Context) {
         return when (required(result, "status").toString()) {
             "completed" -> PythonRunOutcome.Completed(
                 exitCode = required(result, "exit_code").toInt(),
-                structuredJson = required(result, "structured_json").toJava(String::class.java),
+                structuredJson = nullable(result, "structured_json")?.toJava(String::class.java),
                 artifactPaths = required(result, "artifact_paths").asList().map(PyObject::toString),
                 output = output,
             )
@@ -171,7 +171,14 @@ internal class ChaquopyRuntime(context: Context) {
     }
 
     private fun required(value: PyObject, key: String): PyObject =
-        requireNotNull(field(value, key)) { "Python bootstrap result is missing '$key'" }
+        requireNotNull(nullable(value, key)) { "Python bootstrap result field '$key' must not be null" }
+
+    private fun nullable(value: PyObject, key: String): PyObject? {
+        val fields = value.asMap()
+        val pythonKey = PyObject.fromJava(key)
+        require(fields.containsKey(pythonKey)) { "Python bootstrap result is missing '$key'" }
+        return fields[pythonKey]
+    }
 
     private fun field(value: PyObject, key: String): PyObject? =
         value.asMap()[PyObject.fromJava(key)]
