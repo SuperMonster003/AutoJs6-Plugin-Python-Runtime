@@ -42,6 +42,7 @@ __pycache__/
 !/tools/device/**
 !/tools/tests/
 !/tools/tests/**
+!/tools/runtime_lock_inventory_candidate.py
 !/tools/verify-r2-static.ps1
 !/tools/verify-u1-r0-python-usability.ps1
 !/tools/verify-u1-r1-core-semantics.ps1
