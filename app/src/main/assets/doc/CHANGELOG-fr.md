@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.5
+
+###### 2026/08/23
+
+* `Note` Cinquième candidat alpha M3 de l'arbre courant; la partie Host engines bornée du deuxième lot a passé l'acceptation ciblée sur deux appareils, sans revendiquer les capacités suivantes, la publication ni une matrice complète d'appareils
+* `Fonction` Ajout des API live `autojs6.engines.current/run/stop_self` pour les métadonnées du moteur courant sans chemin, le lancement asynchrone de scripts enfants Host non-Python et l'auto-arrêt déterministe
+* `Amélioration` Accepter uniquement les chemins enfants normalisés relatifs à la racine d'exécution et au plus 16 lancements réussis par exécution; Python imbriqué échoue avec `NESTED_PYTHON_NOT_ALLOWED`, tandis que `stop_self` annule par redémarrage du processus provider
+
 # v0.3.0-alpha.4
 
 ###### 2026/08/23

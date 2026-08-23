@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Improvement",
   "changelog_label_dependency": "Dependency",
   "$data": {
+    "v0.3.0-alpha.5": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "Fifth M3 current-tree alpha candidate; the bounded Host-engines portion of the second capability slice passed focused dual-device acceptance, while later capabilities, publication, and a complete device matrix remain outside this claim"
+      ],
+      "feature": [
+        "Add live `autojs6.engines.current/run/stop_self` APIs for path-free current-engine metadata, asynchronous non-Python Host child-script launch, and deterministic self-stop"
+      ],
+      "improvement": [
+        "Accept only normalized execution-root-relative child paths and at most 16 successful launches per execution; fail nested Python with stable `NESTED_PYTHON_NOT_ALLOWED`, while `stop_self` cancels through provider-process restart"
+      ]
+    },
     "v0.3.0-alpha.4": {
       "released_date": "2026/08/23",
       "hint": [

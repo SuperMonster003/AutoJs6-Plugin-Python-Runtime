@@ -50,7 +50,7 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 - اختيار `entryMode=file|module` صراحة لمشروع مقبول؛ يستخدم وضع module بيانات `runpy` القياسية وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية للحزمة، بينما يحافظ وضع file على دلالات السكربت العادية.
 - إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.
 - تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه 64 KiB ونقل ما يصل إلى 16 من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.
-- استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات و`files.read_text/write_text/exists/is_file/is_dir/list` المحدود و`dialogs.alert/confirm/prompt/select` المقصور على foreground مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
+- استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات و`files.read_text/write_text/exists/is_file/is_dir/list` المحدود و`dialogs.alert/confirm/prompt/select` المقصور على foreground و`engines.current/run/stop_self` مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
 - إرجاع `SystemExit` وأخطاء الصياغة والتنفيذ مع traceback منظم ومحدود.
 - السماح بجلسة نشطة واحدة لكل عملية دون طابور لدى provider.
 - لا حاجة لإعادة تشغيل المضيف: يعيد التنفيذ الجديد التالي بعد التثبيت أو إعادة التفعيل اكتشاف provider وتثبيت هويته، بينما ينهي Binder death أثناء التشغيل ذلك التنفيذ دون إعادة تلقائية.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.3.0-alpha.4
-release state: 0.3.0-alpha.4 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files and foreground-dialog portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.5
+release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ runtime/security/release owner: SuperMonster003
 - تتملك العملية نسخ PFD الكاملة المستلمة عبر Binder وتغلقها عند النهاية أو close.
 - يرسل الخرج chunk بعد chunk بالـ credits أثناء التنفيذ؛ يوقف نفاد credits السكربت مؤقتا، ويسبق الخرج المقبول الحالة terminal الوحيدة، ويمنع الخرج بعدها.
 - يحد JSON المنظم عند 64 KiB وتقبل حتى 16 artifacts بمسار 1024 UTF-8 bytes و4 MiB لكل ملف و8 MiB إجمالا مع تحقق Host من الطول الدقيق وEOF وSHA-256.
-- يسمح البروتوكول 1.5 بحد أقصى 1024 من استدعاءات Host لكل تنفيذ، ويحد كل request/response عند 64 KiB والنص عند 32 KiB وانتظار إجراء عادي على main thread عند 5 s. تستخدم Host files مسارات نسبية بحد 4 KiB ونص UTF-8 بحد 32 KiB وقوائم من 128 اسماً بحد 255 UTF-8 bytes لكل اسم. تحد حوارات foreground العنوان عند 256 UTF-8 bytes والمحتوى عند 4 KiB وdefault/reply لـ prompt عند 32 KiB وselect عند 64 عناصر، كل منها 1 KiB وبمجموع 32 KiB؛ ويمكن انتظار رد المستخدم حتى 5 min.
+- يسمح البروتوكول 1.5 بحد أقصى 1024 من استدعاءات Host لكل تنفيذ، ويحد كل request/response عند 64 KiB والنص عند 32 KiB وانتظار إجراء عادي على main thread عند 5 s. تستخدم Host files مسارات نسبية بحد 4 KiB ونص UTF-8 بحد 32 KiB وقوائم من 128 اسماً بحد 255 UTF-8 bytes لكل اسم. تحد حوارات foreground العنوان عند 256 UTF-8 bytes والمحتوى عند 4 KiB وdefault/reply لـ prompt عند 32 KiB وselect عند 64 عناصر، كل منها 1 KiB وبمجموع 32 KiB؛ ويمكن انتظار رد المستخدم حتى 5 min. يمكن لكل تنفيذ تشغيل ما يصل إلى 16 من نصوص Host الفرعية غير المكتوبة بلغة Python بشكل غير متزامن وضمن النطاق؛ تعيد Python المتداخلة `NESTED_PYTHON_NOT_ALLOWED` ويلغي `stop_self` التنفيذ بإعادة تشغيل العملية.
 - يعيد الإلغاء تشغيل العملية؛ تتطلب native extensions والاستدعاءات الحاجبة تحقق Android لاحقا.
 - يسمح إذن `INTERNET` للنصوص باستخدام عملاء الشبكة في المكتبة القياسية مباشرة؛ ولا يزال pip عبر الإنترنت والتنزيل التلقائي للكود وتثبيت حزم الجهات الخارجية وقت التشغيل غير مدعوم.
 
@@ -141,7 +141,7 @@ runtime/security/release owner: SuperMonster003
 
 - لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة و`getpass.getpass()` بعد EOF للـ snapshot المحدود حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
 - لا توجد نصوص UI أو debugger أو REPL أو صلاحية عشوائية لكائنات Java في المضيف.
-- يغطي broker المباشر أول مجموعة كاملة منخفضة المخاطر وHost files المحدودة وحوارات foreground؛ ولا تزال engines وaccessibility وscreenshot وOCR غير معلنة.
+- يغطي broker المباشر أول مجموعة كاملة منخفضة المخاطر وHost files المحدودة وحوارات foreground وengines المحدودة؛ ولا تزال accessibility وscreenshot وOCR غير معلنة.
 - لا يضمن Android ‏32-bit أو أي native wheel خارجي.
 - تتوفر للشجرة الحالية أدلة smoke على جهاز API 31 ‏arm64-v8a وعلى محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يقدم أي منهما كمصفوفة أجهزة كاملة أو كتأهيل release.
 
@@ -161,6 +161,14 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
+# v0.3.0-alpha.5
+
+###### 2026/08/23
+
+* `ملاحظة` مرشح alpha خامس من M3 للشجرة الحالية؛ اجتاز جزء Host engines المحدود من المجموعة الثانية قبولاً مركزاً على جهازين، ولا يشمل ذلك القدرات اللاحقة أو النشر أو مصفوفة أجهزة كاملة
+* `إضافة` إضافة واجهات live `autojs6.engines.current/run/stop_self` لبيانات المحرك الحالي من دون مسارات وتشغيل نصوص Host فرعية غير مكتوبة بلغة Python بشكل غير متزامن والإيقاف الذاتي الحتمي
+* `تحسين` قبول المسارات الفرعية النسبية المطبعة داخل جذر التنفيذ فقط وبحد أقصى 16 تشغيلاً ناجحاً لكل تنفيذ؛ تفشل Python المتداخلة بالرمز `NESTED_PYTHON_NOT_ALLOWED` ويلغي `stop_self` التنفيذ بإعادة تشغيل عملية provider
+
 # v0.3.0-alpha.4
 
 ###### 2026/08/23
@@ -176,14 +184,6 @@ runtime/security/release owner: SuperMonster003
 * `ملاحظة` مرشح alpha ثالث من M3 للشجرة الحالية؛ اجتاز الجزء المحدود من Host files في المجموعة الثانية قبولاً مركزاً على جهازين، ولا يشمل ذلك الحوارات أو engines أو القدرات اللاحقة أو النشر أو مصفوفة أجهزة كاملة
 * `إضافة` إضافة API مباشرة `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` للوصول المحدود إلى نص UTF-8 داخل جذر المشروع الحالي أو مجلد السكربت المستقل
 * `تحسين` رفض المسارات غير الآمنة أو الخارجة من الجذر، وتقييد النص والقوائم المباشرة، وإرجاع أخطاء ملفات مستقرة، وفصل جذر Host المباشر عن workspace snapshot المجمدة في Plugin
-
-# v0.3.0-alpha.2
-
-###### 2026/08/23
-
-* `ملاحظة` ثاني مرشح alpha من M3 للشجرة الحالية؛ اكتملت أول مجموعة قدرات Host منخفضة المخاطر، ولا يشمل هذا الادعاء الدفعات اللاحقة أو النشر أو مصفوفة أجهزة كاملة
-* `إضافة` إضافة بيانات البطارية/الشاشة/السطوع/الصوت المباشرة عبر `autojs6.device.info()` ومستويات وحدة تحكم Host عبر `autojs6.console.log/warn/error` وإشعارات `autojs6.notice`
-* `تحسين` التحقق الصارم من مخطط نتيجة device وإرجاع `PERMISSION_DENIED` ثابت عند نقص إذن الإشعارات من دون فتح الإعدادات أو تغيير أذونات الجهاز
 
 ##### المزيد من الإصدارات
 

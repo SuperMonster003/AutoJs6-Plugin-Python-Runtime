@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.5
+
+###### 2026/08/23
+
+* `안내` 다섯 번째 M3 current-tree alpha candidate입니다. 두 번째 batch의 제한된 Host engines가 두 device의 focused acceptance를 통과했지만 이후 capability, 공개 배포 및 전체 device matrix는 포함하지 않습니다
+* `추가` 경로 없는 현재 engine metadata, 비 Python Host child script 비동기 실행 및 결정적 self-stop을 제공하는 live `autojs6.engines.current/run/stop_self` API 추가
+* `개선` child 경로는 실행 root 상대 정규화 형식만 허용하고 실행당 성공 실행은 최대 16회; 중첩 Python은 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self`는 provider process restart로 취소
+
 # v0.3.0-alpha.4
 
 ###### 2026/08/23

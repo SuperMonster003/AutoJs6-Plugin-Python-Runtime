@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.3.0-alpha.4 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.3.0-alpha.5 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -58,6 +58,8 @@
   存在/类型检查及直接目录枚举; 严格相对路径与容量边界阻止越过执行根目录。
 - [x] 协议 1.5 前台 Host dialogs API: `alert/confirm/prompt/select`; 复用 Activity-backed
   前台授权, 后台与定时启动稳定返回 `INTERACTIVE_NOT_ALLOWED` 且不打开 UI。
+- [x] 协议 1.5 Host engines API: `current/run/stop_self`; 返回不含绝对路径的纯数据身份,
+  仅异步启动执行根内的非 Python Host 脚本, 并以进程重启确定性停止自身。
 - [x] 单文件脚本 `ModuleNotFoundError` 时提示用户改用显式 Python 项目。
 
 ### 真机与构建证据 (历史, 保持有效)
@@ -269,7 +271,12 @@
   后台稳定返回 `INTERACTIVE_NOT_ALLOWED`。宿主提交: `7788da650`、`108095b42`、
   `c7c9e9b05`、`f9eef7848`; 插件提交: `171cfa0`、`03e599b`。
 - [x] [P] Host dialogs 示例脚本 (`examples/python/m3_dialogs.py`)。
-- [ ] [H+P] `autojs6.engines` 最小集: 当前引擎信息 / 停止自身 / 运行其他脚本
+- [x] [H+P] `autojs6.engines.current/run/stop_self` 最小集: 不含绝对路径的当前引擎信息、
+  执行根目录内非 Python Host 子脚本异步启动及确定性停止自身; 每次执行最多成功启动
+  16 个子脚本, 嵌套 Python 稳定返回 `NESTED_PYTHON_NOT_ALLOWED`。宿主提交:
+  `3707d9318`、`0c4df640e`; 插件提交: `454fcd3`、`cd204f2`。
+- [x] [P] Host engines 示例脚本 (`examples/python/m3_engines.py` 与
+  `examples/python/m3_engines_child.js`)。
 - [ ] 发布 0.3.x alpha
 
 ### 2026-08-23 M3 Host files 验收记录
@@ -303,6 +310,26 @@
   arm64-v8a / 4 KiB page) 与 API 37 / x86_64 / 16 KiB page 模拟器分别用时 1.838 秒、
   8.295 秒; 后台用例分别用时 0.988 秒、0.936 秒。四次均为 `OK (1 test)`。
   APK 全部以同一 SM003 签名执行 `install -r -t`, 未卸载、未清数据, 已有定时任务状态保留。
+
+### 2026-08-23 M3 Host engines 验收记录
+
+- 宿主实现与 JVM/仪器测试由 `3707d9318`、`0c4df640e` 固定; 插件 façade、示例与便携
+  测试由 `454fcd3`、`cd204f2` 固定。三件 release AAR 经干净宿主
+  `0c4df640ed1a3e08cda72899d080f0ae01238df9` 的 distribution gate 重新生成并锁定;
+  Host 源指纹为 `6fd409c181514be7e0dc6859ab6855b0b3e3c24792c351960ddd23d4736b6b56`,
+  manifest SHA-256 为 `ce9c5fe48bab5c2ba6d645fb8d792976bfae2080976b0e608f71039b38df8d89`。
+- `engines.current()` 经真实公共引擎返回严格 schema、Host execution ID、相对入口、
+  project 标记与启动时间, 且结构化结果不含项目绝对路径。`engines.run("child.js")`
+  实际由 `ScriptEngineService` 异步运行项目内 JavaScript 并写出 Host 实时文件标记;
+  同项目 `nested.py` 被稳定拒绝为 `NESTED_PYTHON_NOT_ALLOWED`。
+- `engines.stop_self()` 前的实时 Host 文件写入成功, 调用后的语句没有执行; 验收比较前后
+  CPython PID 证明 provider 进程已退休, 紧接着的新 Python 项目成功运行。
+- `0.3.0-alpha.5` current tree 上, 上述两项在 Sony XQ-AT72 (`QV710AF65F`, API 31 /
+  arm64-v8a / 4 KiB page) 与 API 37 / x86_64 / 16 KiB page 模拟器分别合计用时
+  3.122 秒、4.566 秒, 均为 `OK (2 tests)`。完整首批、Host files 与后台 dialogs 的
+  4 项非交互回归分别用时 3.622 秒、12.982 秒, 均为 `OK (4 tests)`。
+- Host 5276、插件 alpha.5/45 与测试 APK 均以 SM003 签名执行 `adb install -r -t`;
+  未卸载、未清数据, 物理机既有定时任务状态保留。
 
 ### 第三批: 自动化核心 (0.4.0)
 
@@ -365,7 +392,7 @@
 | --- | --- | --- |
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
-| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架、完整第一批及第二批 files/dialogs 已完成) |
+| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架、完整第一批及第二批 files/dialogs/engines 已完成) |
 | 0.4.0 | M3 自动化核心 + M4 第三方包路径 A/B | 计划 |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |

@@ -14,7 +14,7 @@
     "為已准入項目明確選擇 `entryMode=file|module`; module 模式使用標準 `runpy` 元數據、項目根目錄 `sys.path[0]` 及 package-relative import, file 模式保留普通指令碼語義.",
     "在腳本執行期間按 stdout/stderr 原始次序透過有界 chunk 與 credit 傳送; credit 用盡會對執行施加背壓.",
     "透過協議 1.4 明確設定最大 {{ max_structured_json_bytes }} 的嚴格 JSON 結果, 並傳送最多 {{ max_output_artifacts }} 個具有路徑、大小及 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.",
-    "透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list` 及僅限前台的 `dialogs.alert/confirm/prompt/select`, 終態後自動撤銷.",
+    "透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、僅限前台的 `dialogs.alert/confirm/prompt/select` 及 `engines.current/run/stop_self`, 終態後自動撤銷.",
     "傳回 `SystemExit`, 語法錯誤和執行階段例外, 包括有界結構化 traceback.",
     "同一執行環境程序只允許一個使用中工作階段, provider 端不排隊.",
     "宿主毋須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播."
@@ -36,7 +36,7 @@
     "SOURCE 描述元採用 Binder 接收端完整 PFD 擁有權, 保留 reliable-pipe 錯誤通道, 並在終態或關閉時釋放.",
     "輸出在執行期間按 credit 逐 chunk 傳送; credit 用盡會暫停腳本, 已接受的輸出先於唯一終態, 終態後禁止輸出.",
     "結構化 JSON 最大 {{ max_structured_json_bytes }}; 輸出 artifact 最多 {{ max_output_artifacts }} 個, 路徑最大 {{ max_output_artifact_path_bytes }}, 每個最大 {{ max_output_artifact_bytes }}, 合計最大 {{ max_total_output_artifact_bytes }}, Host 必須核對精確長度、EOF 及 SHA-256.",
-    "協議 1.5 每次執行最多 {{ max_host_capability_calls }} 次 Host 呼叫, 每個要求/回應最大 {{ max_host_capability_message_bytes }}, 文字最大 {{ max_host_capability_text_bytes }}, 一般 Host 主線程動作最多等待 {{ host_capability_call_timeout }}. Host files 使用最大 {{ max_host_file_path_bytes }} 的相對路徑、最大 {{ max_host_file_text_bytes }} 的 UTF-8 文字, 每次最多列出 {{ max_host_file_entries }} 個名稱, 每個最大 {{ max_host_file_name_bytes }}. 前台對話框標題最大 {{ max_host_dialog_title_bytes }}, 內容最大 {{ max_host_dialog_text_bytes }}, prompt 預設值/回覆最大 {{ max_host_dialog_prompt_reply_bytes }}, select 最多 {{ max_host_dialog_items }} 項、每項最大 {{ max_host_dialog_item_bytes }}、合計最大 {{ max_host_dialog_total_item_bytes }}, 單次使用者回應最多等待 {{ host_dialog_wait_timeout }}.",
+    "協議 1.5 每次執行最多 {{ max_host_capability_calls }} 次 Host 呼叫, 每個要求/回應最大 {{ max_host_capability_message_bytes }}, 文字最大 {{ max_host_capability_text_bytes }}, 一般 Host 主線程動作最多等待 {{ host_capability_call_timeout }}. Host files 使用最大 {{ max_host_file_path_bytes }} 的相對路徑、最大 {{ max_host_file_text_bytes }} 的 UTF-8 文字, 每次最多列出 {{ max_host_file_entries }} 個名稱, 每個最大 {{ max_host_file_name_bytes }}. 前台對話框標題最大 {{ max_host_dialog_title_bytes }}, 內容最大 {{ max_host_dialog_text_bytes }}, prompt 預設值/回覆最大 {{ max_host_dialog_prompt_reply_bytes }}, select 最多 {{ max_host_dialog_items }} 項、每項最大 {{ max_host_dialog_item_bytes }}、合計最大 {{ max_host_dialog_total_item_bytes }}, 單次使用者回應最多等待 {{ host_dialog_wait_timeout }}. 每次執行最多成功非同步啟動 {{ max_host_engine_launches }} 個限定根目錄內的非 Python Host 子指令碼; 巢狀 Python 返回 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self` 透過程序重啟取消自身.",
     "取消模式是程序重啟, 而非 CPython 級協作取消; 原生擴充套件或阻塞呼叫仍需後續 Android 驗證.",
     "插件已授予 `INTERNET` 以支援腳本透過標準庫直接連線; 仍不支援線上 pip、自動下載程式碼或執行時安裝第三方套件."
   ],
@@ -44,7 +44,7 @@
   "unsupported_capabilities": [
     "不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前台互動只適用於最大 {{ max_stdin_bytes }} 的有限 snapshot 到達 EOF 後的內置 `input()` 與標準庫 `getpass.getpass()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.",
     "不提供 UI 指令碼, 除錯器, REPL 或任意宿主 Java 物件存取.",
-    "即時 broker 已涵蓋完整首批低風險能力、有界 Host files 及前台對話框; 引擎、無障礙、截圖及 OCR 仍未聲明.",
+    "即時 broker 已涵蓋完整首批低風險能力、有界 Host files、前台對話框及有界 engines; 無障礙、截圖及 OCR 仍未聲明.",
     "不聲明 32 位元 Android 支援, 亦不保證任何第三方 native wheel 可用.",
     "目前樹已有 API 31 arm64-v8a 真機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格."
   ],

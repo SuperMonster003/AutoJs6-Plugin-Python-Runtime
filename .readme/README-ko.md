@@ -50,7 +50,7 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 - 승인된 project에서 `entryMode=file|module`을 명시적으로 선택합니다. module mode는 표준 `runpy` metadata, project root의 `sys.path[0]` 및 package-relative import를 사용하고 file mode는 일반 script semantics를 유지합니다.
 - 스크립트 실행 중 stdout/stderr의 원래 순서대로 제한된 chunk를 credit으로 전달하며, credit이 소진되면 실행에 backpressure를 적용합니다.
 - 프로토콜 1.4에서 최대 64 KiB의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 16개 전달하며 stdout에서 결과를 추론하지 않습니다.
-- 실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, 권한 인식 `notice`, 제한된 `files.read_text/write_text/exists/is_file/is_dir/list` 및 foreground 전용 `dialogs.alert/confirm/prompt/select`를 실시간 호출하고 terminal에서 폐기합니다.
+- 실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, 권한 인식 `notice`, 제한된 `files.read_text/write_text/exists/is_file/is_dir/list`, foreground 전용 `dialogs.alert/confirm/prompt/select` 및 `engines.current/run/stop_self`를 실시간 호출하고 terminal에서 폐기합니다.
 - `SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.
 - 프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.
 - 호스트 재시작이 필요 없습니다. 설치 또는 재활성화 후 다음 새 실행이 provider를 다시 검색하고 pin하며, 실행 중 Binder death는 해당 실행을 종료하고 자동 재실행하지 않습니다.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.3.0-alpha.4
-release state: 0.3.0-alpha.4 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files and foreground-dialog portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.5
+release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 - Binder 수신 측의 완전한 PFD 소유권을 채택하고 종료 또는 close 시 닫습니다.
 - 출력은 실행 중 credit에 따라 chunk 단위로 전달됩니다. credit 소진 시 스크립트가 일시 중지되고, 수락된 출력은 유일한 terminal보다 먼저 전달되며 terminal 이후 출력은 금지됩니다.
 - 구조화 JSON은 64 KiB, artifact는 최대 16개, path는 1024 UTF-8 bytes, file당 4 MiB, 합계 8 MiB로 제한하며 Host가 정확한 길이, EOF 및 SHA-256을 검증합니다.
-- 프로토콜 1.5는 실행당 Host call을 최대 1024회, request/response를 각각 64 KiB, text를 32 KiB, 일반 Host main-thread action 대기를 5 s로 제한합니다. Host files는 4 KiB 상대 경로, 32 KiB UTF-8 text, 최대 128개 및 각 255 UTF-8 bytes의 이름으로 제한됩니다. Foreground dialog는 title 256 UTF-8 bytes, content 4 KiB, prompt default/reply 32 KiB, select 최대 64개·각 1 KiB·합계 32 KiB로 제한되며 사용자 응답을 최대 5 min 기다립니다.
+- 프로토콜 1.5는 실행당 Host call을 최대 1024회, request/response를 각각 64 KiB, text를 32 KiB, 일반 Host main-thread action 대기를 5 s로 제한합니다. Host files는 4 KiB 상대 경로, 32 KiB UTF-8 text, 최대 128개 및 각 255 UTF-8 bytes의 이름으로 제한됩니다. Foreground dialog는 title 256 UTF-8 bytes, content 4 KiB, prompt default/reply 32 KiB, select 최대 64개·각 1 KiB·합계 32 KiB로 제한되며 사용자 응답을 최대 5 min 기다립니다. 한 실행에서 범위가 제한된 비 Python Host child script를 비동기로 성공 실행할 수 있는 횟수는 16회이며, 중첩 Python은 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self`는 process restart 취소를 사용합니다.
 - 취소는 프로세스 재시작 방식입니다. native extension과 blocking 호출은 Android 검증이 필요합니다.
 - `INTERNET` 권한으로 스크립트가 표준 라이브러리 네트워크 기능을 직접 사용할 수 있지만, online pip, 자동 코드 다운로드, 런타임 타사 패키지 설치는 계속 지원하지 않습니다.
 
@@ -141,7 +141,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 - 일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 1 MiB의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`과 표준 라이브러리 `getpass.getpass()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.
 - UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.
-- live broker는 첫 저위험 기능 전체, 제한된 Host files 및 foreground dialogs를 제공합니다. engines, accessibility, screenshot 및 OCR은 아직 선언하지 않습니다.
+- live broker는 첫 저위험 기능 전체, 제한된 Host files, foreground dialogs 및 제한된 engines를 제공합니다. accessibility, screenshot 및 OCR은 아직 선언하지 않습니다.
 - 32비트 Android와 임의의 native wheel은 보장하지 않습니다.
 - 현재 tree에는 API 31 arm64-v8a 실제 기기 smoke evidence와 API 37 x86_64 16 KB page emulator smoke evidence가 있으며, 어느 쪽도 완전한 기기 matrix나 release qualification으로 제시하지 않습니다.
 
@@ -161,6 +161,14 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 
 ******
 
+# v0.3.0-alpha.5
+
+###### 2026/08/23
+
+* `안내` 다섯 번째 M3 current-tree alpha candidate입니다. 두 번째 batch의 제한된 Host engines가 두 device의 focused acceptance를 통과했지만 이후 capability, 공개 배포 및 전체 device matrix는 포함하지 않습니다
+* `추가` 경로 없는 현재 engine metadata, 비 Python Host child script 비동기 실행 및 결정적 self-stop을 제공하는 live `autojs6.engines.current/run/stop_self` API 추가
+* `개선` child 경로는 실행 root 상대 정규화 형식만 허용하고 실행당 성공 실행은 최대 16회; 중첩 Python은 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self`는 provider process restart로 취소
+
 # v0.3.0-alpha.4
 
 ###### 2026/08/23
@@ -176,14 +184,6 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 * `안내` 세 번째 M3 current-tree alpha candidate입니다. 두 번째 batch의 제한된 Host files가 두 device의 focused acceptance를 통과했지만 dialogs, engines, 이후 capability, 공개 배포 및 전체 device matrix는 포함하지 않습니다
 * `추가` 현재 project root 또는 standalone script directory 안에서 제한된 UTF-8 text access를 제공하는 live `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API 추가
 * `개선` 안전하지 않거나 root를 벗어나는 path를 거부하고 text와 direct listing을 제한하며 안정된 file error를 반환하고 live Host root와 고정된 Plugin workspace snapshot을 명확히 분리
-
-# v0.3.0-alpha.2
-
-###### 2026/08/23
-
-* `안내` 두 번째 M3 current-tree alpha candidate입니다. 첫 저위험 Host capability 전체를 구현했지만 이후 batch, 공개 배포 및 전체 device matrix는 이 선언에 포함하지 않습니다
-* `추가` live `autojs6.device.info()` 배터리/화면/밝기/볼륨 데이터, `autojs6.console.log/warn/error` Host console 레벨 및 `autojs6.notice` 알림 추가
-* `개선` device 결과 schema를 엄격히 검증하고 알림 권한 부족을 설정 화면이나 기기 권한 변경 없이 안정된 `PERMISSION_DENIED`로 반환
 
 ##### 다른 버전
 

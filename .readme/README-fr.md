@@ -50,7 +50,7 @@ Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte t
 - Sélectionner explicitement `entryMode=file|module` pour un projet admis; le mode module emploie les métadonnées standard de `runpy`, la racine du projet dans `sys.path[0]` et les imports relatifs au package, tandis que le mode file conserve la sémantique d'un script ordinaire.
 - Livrer pendant l'exécution des chunks stdout/stderr bornés dans leur ordre d'origine; l'épuisement des crédits applique une contre-pression à l'exécution.
 - Définir un résultat JSON strict explicite de 64 KiB au maximum et transférer jusqu'à 16 artefacts facultatifs sous les limites de chemin, taille et SHA-256 du protocole 1.4; ne jamais déduire un résultat de stdout.
-- Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible aux autorisations, `files.read_text/write_text/exists/is_file/is_dir/list` borné et `dialogs.alert/confirm/prompt/select` réservé au premier plan via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
+- Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible aux autorisations, `files.read_text/write_text/exists/is_file/is_dir/list` borné, `dialogs.alert/confirm/prompt/select` réservé au premier plan et `engines.current/run/stop_self` via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
 - Signaler `SystemExit`, les erreurs de syntaxe et les exceptions avec une traceback structurée bornée.
 - Autoriser une session active par processus sans file d'attente côté fournisseur.
 - Ne pas redémarrer l'hôte: la prochaine nouvelle exécution après installation ou réactivation redécouvre et épingle le provider; une mort Binder en cours termine cette exécution sans jamais la rejouer.
@@ -102,8 +102,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.3.0-alpha.4
-release state: 0.3.0-alpha.4 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files and foreground-dialog portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.5
+release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 - Les PFD complets reçus par Binder sont possédés puis fermés à l'état terminal ou à la fermeture.
 - La sortie est livrée chunk par chunk sous crédits pendant l'exécution; l'épuisement des crédits suspend le script, toute sortie acceptée précède l'unique état terminal et aucune sortie n'est permise après celui-ci.
 - Le JSON structuré est limité à 64 KiB; au plus 16 artefacts sont admis avec des chemins de 1024 UTF-8 bytes, 4 MiB par fichier, 8 MiB au total et une vérification hôte de la longueur exacte, de l'EOF et du SHA-256.
-- Le protocole 1.5 admet au plus 1024 appels hôte par exécution, limite chaque requête/réponse à 64 KiB, le texte à 32 KiB et l'attente d'une action ordinaire du thread principal Host à 5 s. Host files utilise des chemins relatifs de 4 KiB, du texte UTF-8 de 32 KiB et des listes d'au plus 128 noms de 255 UTF-8 bytes chacun. Les dialogues de premier plan limitent le titre à 256 UTF-8 bytes, le contenu à 4 KiB, les valeurs/réponses prompt à 32 KiB et les listes select à 64 éléments de 1 KiB chacun et 32 KiB au total; une réponse utilisateur peut attendre 5 min.
+- Le protocole 1.5 admet au plus 1024 appels hôte par exécution, limite chaque requête/réponse à 64 KiB, le texte à 32 KiB et l'attente d'une action ordinaire du thread principal Host à 5 s. Host files utilise des chemins relatifs de 4 KiB, du texte UTF-8 de 32 KiB et des listes d'au plus 128 noms de 255 UTF-8 bytes chacun. Les dialogues de premier plan limitent le titre à 256 UTF-8 bytes, le contenu à 4 KiB, les valeurs/réponses prompt à 32 KiB et les listes select à 64 éléments de 1 KiB chacun et 32 KiB au total; une réponse utilisateur peut attendre 5 min. Une exécution peut lancer avec succès au plus 16 scripts enfants Host non-Python asynchrones et bornés; Python imbriqué renvoie `NESTED_PYTHON_NOT_ALLOWED` et `stop_self` annule par redémarrage du processus.
 - L'annulation redémarre le processus; les extensions natives et appels bloquants restent à valider sur Android.
 - L'autorisation `INTERNET` permet aux scripts d'utiliser directement les clients réseau de la bibliothèque standard; pip en ligne, le téléchargement automatique de code et l'installation de paquets tiers à l'exécution restent non pris en charge.
 
@@ -141,7 +141,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 - Le stdin général en direct et le streaming callback de `sys.stdin` direct sont indisponibles. L'interaction au premier plan s'applique uniquement au `input()` intégré et à `getpass.getpass()` après l'EOF du snapshot fini de 1 MiB au maximum. L'écriture dans le workspace, pip en ligne et les téléchargements de wheel restent indisponibles.
 - Aucun script UI, débogueur, REPL ou accès arbitraire aux objets Java de l'hôte.
-- Le broker temps réel couvre le premier lot complet à faible risque, Host files borné et les dialogues de premier plan; engines, accessibilité, capture d'écran et OCR restent non déclarés.
+- Le broker temps réel couvre le premier lot complet à faible risque, Host files borné, les dialogues de premier plan et engines borné; accessibilité, capture d'écran et OCR restent non déclarés.
 - Le support Android 32 bits et les wheels natives tierces ne sont pas garantis.
 - L'arbre courant dispose d'un smoke sur appareil API 31 arm64-v8a et d'un smoke sur émulateur API 37 x86_64 à pages de 16 KB; aucun ne constitue une matrice complète d'appareils ni une qualification de release.
 
@@ -161,6 +161,14 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 
 ******
 
+# v0.3.0-alpha.5
+
+###### 2026/08/23
+
+* `Note` Cinquième candidat alpha M3 de l'arbre courant; la partie Host engines bornée du deuxième lot a passé l'acceptation ciblée sur deux appareils, sans revendiquer les capacités suivantes, la publication ni une matrice complète d'appareils
+* `Fonction` Ajout des API live `autojs6.engines.current/run/stop_self` pour les métadonnées du moteur courant sans chemin, le lancement asynchrone de scripts enfants Host non-Python et l'auto-arrêt déterministe
+* `Amélioration` Accepter uniquement les chemins enfants normalisés relatifs à la racine d'exécution et au plus 16 lancements réussis par exécution; Python imbriqué échoue avec `NESTED_PYTHON_NOT_ALLOWED`, tandis que `stop_self` annule par redémarrage du processus provider
+
 # v0.3.0-alpha.4
 
 ###### 2026/08/23
@@ -176,14 +184,6 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 * `Note` Troisième candidat alpha M3 de l'arbre courant; la partie Host files bornée du deuxième lot a passé l'acceptation ciblée sur deux appareils, sans revendiquer dialogues, engines, capacités suivantes, publication ni matrice complète d'appareils
 * `Fonction` Ajouter les API en direct `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` pour l'accès borné au texte UTF-8 dans la racine du projet courant ou le dossier du script autonome
 * `Amélioration` Refuser les chemins dangereux ou sortant de la racine, borner le texte et les listes directes, renvoyer des erreurs de fichier stables et distinguer la racine Host active du snapshot workspace Plugin figé
-
-# v0.3.0-alpha.2
-
-###### 2026/08/23
-
-* `Note` Deuxième candidat alpha M3 de l'arbre courant; le premier lot complet de capacités Host à faible risque est implémenté, sans revendiquer les lots suivants, la publication ni une matrice complète d'appareils
-* `Fonction` Ajouter les données batterie/écran/luminosité/volume en direct de `autojs6.device.info()`, les niveaux de console Host `autojs6.console.log/warn/error` et les notifications `autojs6.notice`
-* `Amélioration` Valider strictement le schéma device et renvoyer un `PERMISSION_DENIED` stable sans ouvrir les réglages ni modifier les autorisations de l'appareil
 
 ##### Autres versions
 

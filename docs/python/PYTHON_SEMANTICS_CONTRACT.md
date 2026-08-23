@@ -2,7 +2,8 @@
 
 Status: cumulative U1-R0 through U1-R2 contract plus the first M3 protocol 1.5
 Host capability slice and the bounded Host-files and foreground-dialog portions
-of its second slice.
+of its second slice, plus bounded current-engine/self-stop/non-Python child
+launch operations.
 Historical R2 evidence remains covered through E2; the M1/M2 public Host paths
 and focused M3 broker paths passed an API 31 / arm64-v8a / 4 KiB-page physical
 device and an API 37 / x86_64 / 16 KiB-page emulator on 2026-08-23. Those
@@ -337,7 +338,12 @@ The current public Python surface is:
 - `autojs6.dialogs.alert(text, *, title="AutoJs6 Python") -> None`;
 - `autojs6.dialogs.confirm(text, *, title="AutoJs6 Python") -> bool`;
 - `autojs6.dialogs.prompt(text, *, default="", title="AutoJs6 Python") -> str | None`;
-- `autojs6.dialogs.select(items, *, title="AutoJs6 Python") -> int | None`.
+- `autojs6.dialogs.select(items, *, title="AutoJs6 Python") -> int | None`;
+- `autojs6.engines.current() -> dict[str, object]` for path-free current Host
+  engine metadata;
+- `autojs6.engines.run(path) -> dict[str, object]` for an asynchronous scoped
+  non-Python Host child launch;
+- `autojs6.engines.stop_self() -> NoReturn` for deterministic Host cancellation.
 
 These are live Host operations, distinct from the detached launch-time
 `app.snapshot()` and `device.snapshot()` data. Every request is bound to the
@@ -376,8 +382,28 @@ Dialog titles are non-empty and at most 256 UTF-8 bytes; content is at most
 non-empty items, each at most 1 KiB and at most 32 KiB in aggregate. The Python
 facade rejects invalid values before dispatch, and the Host repeats the bounds.
 Cancellation closes the current Host dialog and wakes the blocked call. No view,
-Context, callback or Binder handle is exposed to Python. Engines, accessibility,
-screenshots and OCR remain planned rather than implied by the generic broker.
+Context, callback or Binder handle is exposed to Python.
+
+`engines.current()` returns one strict `autojs6-python-engine-info-v1` mapping
+with the current public Host execution ID, the `python` engine name, a bounded
+display source name, a normalized relative entry point, a project flag and the
+Host start time. It exposes neither the execution-root absolute path nor an
+engine/Java object. `engines.run(path)` accepts only the same normalized
+execution-root-relative path grammar as Host files, requires a canonical regular
+file inside that root, and delegates type selection to the ordinary Host launch
+resolver. It returns a strict `autojs6-python-engine-launch-v1` handle immediately
+after a non-Python child is submitted; the handle is not a completion result and
+does not grant control of the child.
+
+The provider still admits only one active Python session. Selecting a Python
+target from `engines.run` therefore raises `HostCapabilityError` with stable code
+`NESTED_PYTHON_NOT_ALLOWED`. One parent execution may successfully submit at
+most 16 child scripts; failed launch attempts do not consume the success quota,
+and the existing 1024-call quota remains independent. `engines.stop_self()`
+queues Host `forceStop`, which uses the existing process-restart-only cancellation
+mode. If the broker response wins the race, the Python facade raises
+`SystemExit(0)` before any following statement. Accessibility, screenshots and
+OCR remain planned rather than implied by the generic broker.
 
 The focused public Host acceptance invoked the six current method names through
 a real protocol 1.5 session on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a,
@@ -411,6 +437,17 @@ The paired background project required `INTERACTIVE_NOT_ALLOWED` without UI and
 passed in 0.988 and 0.936 seconds. All four runs reported `OK (1 test)`, used
 clean Host commit `f9eef784855f64da4ac0a9f33ad89688b3f3bd03`, and retained normal
 private-snapshot cleanup.
+
+The engines public-engine pair then checked the exact path-free current mapping,
+launched a project-local JavaScript child and observed its live Host marker,
+required `NESTED_PYTHON_NOT_ALLOWED` for a project-local `.py` target, and proved
+that `stop_self` prevented the following statement, changed the provider PID and
+allowed an immediate successful Python restart. On the `0.3.0-alpha.5` current
+tree paired to clean Host commit `0c4df640ed1a3e08cda72899d080f0ae01238df9`,
+the two tests passed together in 3.122 seconds on the physical device and 4.566
+seconds on the emulator. Four non-interactive first-slice/files/background-dialog
+regressions passed in 3.622 and 12.982 seconds. All runs reported `OK`; installs
+used `adb install -r -t` with the existing signer and retained application data.
 
 ## Files, Java bridge and isolation
 

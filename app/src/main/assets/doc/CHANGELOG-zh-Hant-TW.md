@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.5
+
+###### 2026/08/23
+
+* `提示` M3 第五個 current-tree alpha 候選; 第二批有界 Host engines 能力已通過雙裝置聚焦驗收, 後續能力、公開發行與完整裝置矩陣不在本項宣告範圍
+* `新增` 新增即時 `autojs6.engines.current/run/stop_self` API, 提供不含絕對路徑的目前引擎資訊、非 Python Host 子指令碼非同步啟動與確定性停止自身
+* `改善` 子指令碼僅接受執行根目錄內的正規化相對路徑且每次執行最多成功啟動 16 個; 巢狀 Python 穩定傳回 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self` 透過 provider 程序重啟取消目前執行
+
 # v0.3.0-alpha.4
 
 ###### 2026/08/23

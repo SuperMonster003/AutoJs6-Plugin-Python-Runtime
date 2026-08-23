@@ -24,11 +24,12 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.3.0-alpha.4", common["release_target"])
+        self.assertEqual("0.3.0-alpha.5", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("complete first low-risk", common["release_state"])
         self.assertIn("bounded Host-files", common["release_state"])
         self.assertIn("foreground-dialog", common["release_state"])
+        self.assertIn("engines", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
         self.assertEqual("1.0-1.5", common["protocol_version"])
         self.assertEqual("64 KiB", common["max_structured_json_bytes"])
@@ -51,6 +52,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("1 KiB", common["max_host_dialog_item_bytes"])
         self.assertEqual("32 KiB", common["max_host_dialog_total_item_bytes"])
         self.assertEqual("5 min", common["host_dialog_wait_timeout"])
+        self.assertEqual("16", common["max_host_engine_launches"])
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
@@ -77,6 +79,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     broker_features[0],
                 )
                 self.assertIn("`dialogs.alert/confirm/prompt/select`", broker_features[0])
+                self.assertIn("`engines.current/run/stop_self`", broker_features[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
                 self.assertIn("1.3", source["p_plugin_scope"])
                 self.assertIn("1.4", source["p_plugin_scope"])
@@ -114,6 +117,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "{{ max_host_dialog_item_bytes }}",
                     "{{ max_host_dialog_total_item_bytes }}",
                     "{{ host_dialog_wait_timeout }}",
+                    "{{ max_host_engine_launches }}",
                 ):
                     self.assertIn(placeholder, broker_limits[0])
                 network_limits = [item for item in source["security_limits"] if "INTERNET" in item]
@@ -126,6 +130,10 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     any("OCR" in item for item in source["unsupported_capabilities"]),
                     f"{code} does not bound the remaining broker surface",
                 )
+                self.assertTrue(
+                    any("engines" in item for item in source["unsupported_capabilities"]),
+                    f"{code} does not describe the bounded engines surface",
+                )
                 self.assertIn("16 KB", source["p_build_architecture"])
                 self.assertIn("gate", source["p_build_architecture"].lower())
 
@@ -136,6 +144,17 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                host_engines = source["$data"]["v0.3.0-alpha.5"]
+                self.assertEqual("2026/08/23", host_engines["released_date"])
+                self.assertEqual(1, len(host_engines["feature"]))
+                for method in ("current", "run", "stop_self"):
+                    self.assertIn(method, host_engines["feature"][0])
+                self.assertIn("16", host_engines["improvement"][0])
+                self.assertIn(
+                    "`NESTED_PYTHON_NOT_ALLOWED`",
+                    host_engines["improvement"][0],
+                )
+
                 host_dialogs = source["$data"]["v0.3.0-alpha.4"]
                 self.assertEqual("2026/08/23", host_dialogs["released_date"])
                 self.assertEqual(1, len(host_dialogs["feature"]))
@@ -226,6 +245,8 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("`toast`", body)
                 self.assertIn("autojs6.files.read_text", body)
                 self.assertIn("autojs6.dialogs.alert", body)
+                self.assertIn("autojs6.engines.current", body)
+                self.assertIn("NESTED_PYTHON_NOT_ALLOWED", body)
                 self.assertIn("INTERACTIVE_NOT_ALLOWED", body)
                 self.assertNotIn("{{", body)
                 lowered = body.lower()
@@ -248,6 +269,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`toast`", simplified)
         self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", simplified)
         self.assertIn("`dialogs.alert/confirm/prompt/select`", simplified)
+        self.assertIn("`engines.current/run/stop_self`", simplified)
         self.assertIn("`INTERACTIVE_NOT_ALLOWED`", simplified)
         self.assertIn("绝不被解析为结果", simplified)
         self.assertIn("API 37 x86_64 16 KB page 模拟器的聚焦冒烟", simplified)
@@ -261,6 +283,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`toast`", english)
         self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", english)
         self.assertIn("`dialogs.alert/confirm/prompt/select`", english)
+        self.assertIn("`engines.current/run/stop_self`", english)
         self.assertIn("`INTERACTIVE_NOT_ALLOWED`", english)
         self.assertIn("never parsed as a result", english)
         self.assertIn("API 37 x86_64 16 KB-page emulator smoke has passed", english)

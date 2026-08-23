@@ -50,7 +50,7 @@ Python Runtime — независимый provider протокола Python V1.
 - Явный выбор `entryMode=file|module` для допущенного проекта: режим module использует стандартные метаданные `runpy`, корень проекта в `sys.path[0]` и относительные импорты пакета, а режим file сохраняет обычную семантику скрипта.
 - Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.
 - Явное задание строгого JSON-результата до 64 KiB и передача до 16 необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.
-- Вызов live-операций `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, учитывающего разрешения `notice`, ограниченного `files.read_text/write_text/exists/is_file/is_dir/list` и доступного только на переднем плане `dialogs.alert/confirm/prompt/select` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.
+- Вызов live-операций `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, учитывающего разрешения `notice`, ограниченного `files.read_text/write_text/exists/is_file/is_dir/list`, доступного только на переднем плане `dialogs.alert/confirm/prompt/select` и `engines.current/run/stop_self` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.
 - Возврат `SystemExit`, синтаксических и runtime ошибок с ограниченным структурированным traceback.
 - Один активный сеанс на процесс без очереди provider.
 - Перезапуск хоста не нужен: следующая новая сессия после установки или повторного включения заново обнаруживает и фиксирует provider, а Binder death во время выполнения завершает его без автоматического повтора.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.3.0-alpha.4
-release state: 0.3.0-alpha.4 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files and foreground-dialog portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.5
+release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ Runtime Chaquopy предназначен только для доверенны
 - Полные PFD на стороне получателя Binder принимаются во владение и закрываются при завершении или close.
 - Вывод передаётся по chunks и credits во время выполнения; при исчерпании credits скрипт приостанавливается, принятый вывод предшествует единственному terminal, а вывод после terminal запрещён.
 - Структурированный JSON ограничен 64 KiB; допускается до 16 artifacts с путем до 1024 UTF-8 bytes, 4 MiB на файл, 8 MiB суммарно и проверкой Host точной длины, EOF и SHA-256.
-- Протокол 1.5 допускает до 1024 Host-вызовов на выполнение, ограничивает request/response значением 64 KiB, текст — 32 KiB, а ожидание обычного действия главного потока Host — 5 s. Host files использует относительные пути до 4 KiB, UTF-8 текст до 32 KiB и списки до 128 имён размером до 255 UTF-8 bytes каждое. Foreground-диалоги ограничивают заголовок 256 UTF-8 bytes, содержимое 4 KiB, default/reply prompt 32 KiB, а select — 64 элементами по 1 KiB и 32 KiB суммарно; ответ пользователя ожидается до 5 min.
+- Протокол 1.5 допускает до 1024 Host-вызовов на выполнение, ограничивает request/response значением 64 KiB, текст — 32 KiB, а ожидание обычного действия главного потока Host — 5 s. Host files использует относительные пути до 4 KiB, UTF-8 текст до 32 KiB и списки до 128 имён размером до 255 UTF-8 bytes каждое. Foreground-диалоги ограничивают заголовок 256 UTF-8 bytes, содержимое 4 KiB, default/reply prompt 32 KiB, а select — 64 элементами по 1 KiB и 32 KiB суммарно; ответ пользователя ожидается до 5 min. Одно выполнение может успешно асинхронно запустить до 16 ограниченных корнем дочерних Host-скриптов не на Python; вложенный Python возвращает `NESTED_PYTHON_NOT_ALLOWED`, а `stop_self` отменяет выполнение перезапуском процесса.
 - Отмена перезапускает процесс; native extensions и блокирующие вызовы требуют Android-проверки.
 - Разрешение `INTERNET` позволяет скриптам напрямую использовать сетевые клиенты стандартной библиотеки; online pip, автоматическая загрузка кода и установка сторонних пакетов во время выполнения по-прежнему не поддерживаются.
 
@@ -141,7 +141,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 - Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` и стандартному `getpass.getpass()` после EOF конечного snapshot до 1 MiB. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.
 - Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.
-- Live broker охватывает полный первый низкорисковый набор, ограниченный Host files и foreground dialogs; engines, accessibility, screenshot и OCR пока не заявлены.
+- Live broker охватывает полный первый низкорисковый набор, ограниченный Host files, foreground dialogs и ограниченный engines; accessibility, screenshot и OCR пока не заявлены.
 - 32-разрядный Android и произвольные native wheels не гарантируются.
 - Для текущего дерева есть smoke evidence на устройстве API 31 arm64-v8a и эмуляторе API 37 x86_64 со страницами 16 KB; это не выдается за полную матрицу устройств или release qualification.
 
@@ -161,6 +161,14 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
+# v0.3.0-alpha.5
+
+###### 2026/08/23
+
+* `Примечание` Пятый M3 current-tree alpha candidate: ограниченная часть Host engines второго набора прошла фокусную приёмку на двух устройствах; последующие возможности, публикация и полная матрица устройств не входят в это заявление
+* `Добавлено` Добавлены live API `autojs6.engines.current/run/stop_self` для метаданных текущего движка без путей, асинхронного запуска дочерних Host-скриптов не на Python и детерминированной самоостановки
+* `Улучшено` Принимаются только нормализованные пути относительно корня выполнения и до 16 успешных запусков за выполнение; вложенный Python завершается с `NESTED_PYTHON_NOT_ALLOWED`, а `stop_self` отменяет выполнение перезапуском процесса provider
+
 # v0.3.0-alpha.4
 
 ###### 2026/08/23
@@ -176,14 +184,6 @@ Runtime Chaquopy предназначен только для доверенны
 * `Примечание` Третий M3 current-tree alpha candidate: ограниченная часть Host files второго набора прошла фокусную приёмку на двух устройствах; dialogs, engines, последующие возможности, публикация и полная матрица устройств не входят в это заявление
 * `Добавлено` Добавлены live API `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` для ограниченного доступа к UTF-8 тексту в корне текущего проекта или каталоге отдельного скрипта
 * `Улучшено` Отклоняются небезопасные и выходящие за корень пути, ограничены текст и прямые списки, возвращаются стабильные файловые ошибки, а live Host root отделён от замороженного Plugin workspace snapshot
-
-# v0.3.0-alpha.2
-
-###### 2026/08/23
-
-* `Примечание` Второй M3 current-tree alpha candidate: полный первый низкорисковый набор Host capabilities реализован; последующие наборы, публикация и полная матрица устройств не входят в это заявление
-* `Добавлено` Добавлены live-данные батареи/экрана/яркости/громкости `autojs6.device.info()`, уровни Host console `autojs6.console.log/warn/error` и уведомления `autojs6.notice`
-* `Улучшено` Строго проверяется схема результата device, а нехватка разрешений уведомлений возвращает стабильный `PERMISSION_DENIED` без открытия настроек и изменения разрешений устройства
 
 ##### Другие версии
 

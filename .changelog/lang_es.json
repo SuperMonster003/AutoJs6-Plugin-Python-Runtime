@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Mejora",
   "changelog_label_dependency": "Dependencia",
   "$data": {
+    "v0.3.0-alpha.5": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "Quinto candidato alpha M3 del árbol actual; la parte acotada de Host engines de la segunda entrega superó la aceptación focalizada en dos dispositivos, sin afirmar capacidades posteriores, publicación ni una matriz completa de dispositivos"
+      ],
+      "feature": [
+        "Añadir las API en vivo `autojs6.engines.current/run/stop_self` para metadatos del motor actual sin rutas, lanzamiento asíncrono de scripts Host secundarios no Python y detención propia determinista"
+      ],
+      "improvement": [
+        "Aceptar solo rutas secundarias normalizadas relativas a la raíz de ejecución y hasta 16 lanzamientos exitosos por ejecución; Python anidado falla con `NESTED_PYTHON_NOT_ALLOWED`, mientras `stop_self` cancela reiniciando el proceso provider"
+      ]
+    },
     "v0.3.0-alpha.4": {
       "released_date": "2026/08/23",
       "hint": [

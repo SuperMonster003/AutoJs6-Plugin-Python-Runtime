@@ -3,8 +3,9 @@
 Status: implemented in the current Host and Plugin development trees. The first
 capability slice covers toast, clipboard, application launch/navigation, live
 device state, level-aware Host console output and permission-aware notices. The
-second slice now includes bounded execution-relative Host files plus
-foreground-only alert, confirmation, text-prompt and selection dialogs. Both
+second slice now includes bounded execution-relative Host files,
+foreground-only alert, confirmation, text-prompt and selection dialogs, and
+bounded current-engine/self-stop/non-Python child-launch operations. All three
 second-slice portions passed one API 31 arm64 physical-device smoke and one API
 37 x86_64 16 KiB-page emulator smoke on 2026-08-23. This document describes the
 reusable broker contract; it does not claim that later Roadmap capabilities, a
@@ -117,6 +118,8 @@ exact object defined by the selected capability.
 | One dialog content | 4 KiB UTF-8 |
 | One prompt default or reply | 32 KiB UTF-8 |
 | One selection list | 1-64 non-empty items, each at most 1 KiB and at most 32 KiB total |
+| Successful asynchronous child-script launches per execution | 16 |
+| One engine name / source name | 256 / 1024 UTF-8 bytes |
 | One ordinary Host main-thread action wait | 5 s |
 | One foreground dialog response wait | 5 min |
 
@@ -144,6 +147,8 @@ The Host dispatcher can return:
 | `PATH_TYPE_MISMATCH` | A file operation received a directory or vice versa |
 | `FILE_ENCODING_ERROR` | A Host file is not strict UTF-8 text |
 | `INTERACTIVE_NOT_ALLOWED` | A Host dialog was requested without a live foreground Activity-backed grant |
+| `NESTED_PYTHON_NOT_ALLOWED` | `engines.run` selected Python while the provider's one active session is occupied |
+| `ENGINE_LAUNCH_LIMIT_EXCEEDED` | The execution already launched 16 child Host scripts successfully |
 
 `CAPABILITY_UNAVAILABLE` and `BROKER_CLOSED` become
 `autojs6.CapabilityUnavailableError`. Other Host failures become
@@ -177,6 +182,9 @@ code. A dead Binder, closed private bridge or missing negotiated broker becomes
 | `autojs6.dialogs.confirm(text, *, title="AutoJs6 Python") -> bool` | `dialogs.confirm` | `{"title": title, "text": text}` | positive action is `true`; negative/dismissal is `false` |
 | `autojs6.dialogs.prompt(text, *, default="", title="AutoJs6 Python") -> str \| None` | `dialogs.prompt` | `{"title": title, "text": text, "default": default}` | entered text, or `null` on dismissal |
 | `autojs6.dialogs.select(items, *, title="AutoJs6 Python") -> int \| None` | `dialogs.select` | `{"title": title, "items": items}` | zero-based index, or `null` on dismissal |
+| `autojs6.engines.current() -> dict[str, object]` | `engines.current` | `{}` | strict current-engine identity without an absolute path |
+| `autojs6.engines.run(path) -> dict[str, object]` | `engines.run` | `{"path": path}` | strict asynchronous child-execution handle |
+| `autojs6.engines.stop_self() -> NoReturn` | `engines.stop_self` | `{}` | queues authoritative Host cancellation; never returns to following Python code |
 
 Package names must use ordinary dotted Android identifier segments. URLs must
 start with `http://` or `https://`. Empty toast/clipboard/console text is
@@ -235,12 +243,48 @@ facade validates every byte/count limit before dispatch while the Host validates
 it again. No dialog exposes a `Context`, view object, callback or raw Binder to
 Python.
 
+`engines.current()` returns exactly the
+`autojs6-python-engine-info-v1` shape: `id`, `engineName`, `sourceName`,
+`entryPoint`, `project`, and `startedAtMillis` plus the schema field. The engine
+name is `python`; the ID and start time identify the current public Host engine.
+`sourceName` is a bounded display name and `entryPoint` is a normalized relative
+project entry or standalone filename. Neither field contains the execution-root
+absolute path, and no Host engine or Java object crosses the broker.
+
+`engines.run(path)` accepts the same NFC-normalized, execution-root-relative
+path grammar as Host files and requires a canonical regular file inside that
+root. The ordinary Host launch resolver selects the script type, working
+directory and any project context, which must also remain inside the root. A
+non-Python script is submitted asynchronously through `ScriptEngineService`;
+the result is exactly the `autojs6-python-engine-launch-v1` shape with a
+non-negative execution `id`, bounded `engineName`/`sourceName`, and the original
+normalized relative `path`. It is a launch handle, not a completion result, and
+does not grant inspection, cancellation or mutation of another engine.
+
+The provider remains single-session, so a `.py` target cannot occupy a nested
+session while its caller is active and fails with
+`NESTED_PYTHON_NOT_ALLOWED`. Each parent execution may complete at most 16
+successful child launches; a launch which fails before returning a valid handle
+does not consume that success quota. The existing 1024-call and message limits
+still apply independently.
+
+`engines.stop_self()` queues `forceStop` on the Host main dispatcher. Host
+cancellation is authoritative and retires the provider process under the
+existing `PROCESS_RESTART_ONLY` mode. If the null broker response reaches
+Python before cancellation, the facade immediately raises `SystemExit(0)` so
+following user code still cannot execute. The next admitted Python execution
+rediscovers a fresh provider process. No API is implied for enumerating all
+engines, evaluating source text, launching an arbitrary absolute path, or
+stopping another execution.
+
 The launch-time `app.snapshot()` and `device.snapshot()` APIs remain detached
 immutable snapshots. The execution-private workspace visible to ordinary Python
 `open()` is still a frozen Plugin-side copy and is not mutated by
 `autojs6.files`. Conversely, `autojs6.files` observes the live bounded Host root;
 it does not grant arbitrary filesystem access, expose a general Java bridge, or
-add accessibility, screenshot or OCR APIs. Those remain separate Roadmap items.
+add accessibility, screenshot or OCR APIs. The bounded engines facade likewise
+does not expose Host runtime objects. Those remaining capabilities stay separate
+Roadmap items.
 
 ## Trust boundary
 
@@ -311,3 +355,22 @@ On the `0.3.0-alpha.4` current tree paired to clean Host commit
 background test passed in 0.988 and 0.936 seconds respectively. All four runs
 reported `OK (1 test)`. APKs were installed with replacement semantics under
 the existing SM003 identity; no package uninstall or app-data clear was used.
+
+`PythonU1R2AcceptanceInstrumentationTest#hostEnginesExposeSafeCurrentMetadataAndLaunchScopedJavaScript`
+launches an admitted Python project through the same public engine path. It
+checks the exact path-free current-engine shape, asynchronously launches a
+project-local JavaScript child which writes a live Host marker, validates the
+typed child handle, and requires `NESTED_PYTHON_NOT_ALLOWED` for an existing
+project-local `.py` target. The companion
+`hostEngineStopSelfRetiresProviderAndPreventsFollowingCode` test writes a marker
+before `stop_self`, proves the statement after it never runs, compares provider
+PIDs, and immediately executes another successful Python project.
+
+On the `0.3.0-alpha.5` current tree paired to clean Host commit
+`0c4df640ed1a3e08cda72899d080f0ae01238df9`, the two tests passed together in
+3.122 seconds on Sony XQ-AT72 and 4.566 seconds on the API 37 emulator. Four
+non-interactive regressions covering the complete first slice, Host files and
+background-dialog rejection then passed in 3.622 and 12.982 seconds. Every run
+reported `OK`; the ABI-specific APKs were installed with `adb install -r -t`
+under the existing SM003 identity without uninstalling packages or clearing app
+data.
