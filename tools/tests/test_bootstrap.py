@@ -525,6 +525,50 @@ class BootstrapTest(unittest.TestCase):
         self.assertEqual(previous_path, sys.path)
         self.assertNotIn("helper", sys.modules)
 
+    def test_project_local_package_imports_transitive_dependency_and_distribution_metadata(self) -> None:
+        previous_modules = dict(sys.modules)
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            source = (
+                b"from importlib.metadata import version\n"
+                b"import vendored_client\n"
+                b"print(vendored_client.fetch(), version('vendored-client'))\n"
+            )
+            (root / "main.py").write_bytes(source)
+            client = root / "vendored_client"
+            client.mkdir()
+            (client / "__init__.py").write_text(
+                "from vendored_transport import request\n"
+                "def fetch():\n"
+                "    return request()\n",
+                encoding="utf-8",
+            )
+            transport = root / "vendored_transport"
+            transport.mkdir()
+            (transport / "__init__.py").write_text(
+                "def request():\n"
+                "    return 'project-local-package'\n",
+                encoding="utf-8",
+            )
+            metadata = root / "vendored_client-1.2.3.dist-info"
+            metadata.mkdir()
+            (metadata / "METADATA").write_text(
+                "Metadata-Version: 2.1\nName: vendored-client\nVersion: 1.2.3\n",
+                encoding="utf-8",
+            )
+
+            outcome = run_project(source, "main.py", str(root), [], 4096, 64, 128)
+
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(
+            b"project-local-package 1.2.3\n",
+            b"".join(chunk for _, chunk in outcome["output"]),
+        )
+        for name, module in previous_modules.items():
+            self.assertIs(module, sys.modules.get(name))
+        self.assertNotIn("vendored_client", sys.modules)
+        self.assertNotIn("vendored_transport", sys.modules)
+
     def test_file_and_module_modes_have_distinct_main_metadata_and_path_zero(self) -> None:
         previous_modules = dict(sys.modules)
         previous_path = list(sys.path)

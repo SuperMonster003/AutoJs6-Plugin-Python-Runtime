@@ -62,9 +62,9 @@ class PythonRuntimeMetadataTest {
         assertEquals(
             PythonRuntimeResourceLimits(
                 maxSourceBytes = 4L * 1024L * 1024L,
-                maxWorkspaceArchiveBytes = 16L * 1024L * 1024L,
-                maxWorkspaceEntries = 1024,
-                maxWorkspaceUncompressedBytes = 32L * 1024L * 1024L,
+                maxWorkspaceArchiveBytes = 64L * 1024L * 1024L,
+                maxWorkspaceEntries = 8_192,
+                maxWorkspaceUncompressedBytes = 128L * 1024L * 1024L,
                 maxStdinBytes = 1L * 1024L * 1024L,
                 maxOutputBytes = 16L * 1024L * 1024L,
                 maxOutputChunkBytes = 16 * 1024,
