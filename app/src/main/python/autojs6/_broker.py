@@ -124,7 +124,13 @@ def _call(capability: str, arguments: dict[str, Any]) -> Any:
         return _decode_response(response_json, state.execution_id, call_id)
 
 
-def _require_text(value: Any, label: str, *, allow_empty: bool = True) -> str:
+def _require_text(
+    value: Any,
+    label: str,
+    *,
+    allow_empty: bool = True,
+    max_bytes: int = _MAX_TEXT_BYTES,
+) -> str:
     if not isinstance(value, str):
         raise TypeError(f"{label} must be text")
     if not allow_empty and not value:
@@ -133,8 +139,8 @@ def _require_text(value: Any, label: str, *, allow_empty: bool = True) -> str:
         size = len(value.encode("utf-8", "strict"))
     except UnicodeError as error:
         raise ValueError(f"{label} must be valid UTF-8 text") from error
-    if size > _MAX_TEXT_BYTES:
-        raise ValueError(f"{label} exceeds the {_MAX_TEXT_BYTES}-byte limit")
+    if size > max_bytes:
+        raise ValueError(f"{label} exceeds the {max_bytes}-byte limit")
     return value
 
 
@@ -152,6 +158,12 @@ def _expect_text(value: Any, capability: str) -> str:
 def _expect_boolean(value: Any, capability: str) -> bool:
     if not isinstance(value, bool):
         raise _protocol_error(f"{capability} returned a non-boolean value")
+    return value
+
+
+def _expect_object(value: Any, capability: str) -> dict[str, Any]:
+    if type(value) is not dict:
+        raise _protocol_error(f"{capability} returned a non-object value")
     return value
 
 
