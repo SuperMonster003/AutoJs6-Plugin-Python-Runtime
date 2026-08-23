@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.4
+
+###### 2026/08/24
+
+* `Nota` Cuarto candidato alpha de automatización M3 del árbol actual; la búsqueda acotada de color pasó en un emulador API 37 con accesibilidad y falló de forma cerrada en un dispositivo físico API 31 sin cambiar sus servicios; búsqueda por plantilla, OCR, publicación y matriz completa quedan fuera de esta declaración
+* `Función` Añadir `autojs6.images.find_color(color, *, region=None, threshold=0)` para enteros RGB estrictos o texto `#RRGGBB`, región acotada opcional y resultado coordenada o `None`
+* `Mejora` Capturar una nueva pantalla de accesibilidad Android 11+ por llamada, recorrerla en orden row-major determinista con umbral por canal de 0 a 255, validar `autojs6-python-color-match-v1` exacto y no transferir bytes ni handles de imagen a Python
+
 # v0.4.0-alpha.3
 
 ###### 2026/08/24

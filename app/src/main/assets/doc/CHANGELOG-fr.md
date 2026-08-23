@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.4
+
+###### 2026/08/24
+
+* `Note` Quatrième candidat alpha d'automatisation M3 de l'arbre actuel; la recherche de couleur bornée a réussi sur un émulateur API 37 avec accessibilité et échoué de façon fermée sur un appareil API 31 sans modifier ses services; recherche par modèle, OCR, publication et matrice complète restent hors de cette déclaration
+* `Fonction` Ajouter `autojs6.images.find_color(color, *, region=None, threshold=0)` pour un entier RGB strict ou un texte `#RRGGBB`, une région bornée facultative et un résultat coordonnée ou `None`
+* `Amélioration` Capturer un nouvel écran d'accessibilité Android 11+ par appel, le parcourir dans un ordre row-major déterministe avec un seuil par canal de 0 à 255, valider exactement `autojs6-python-color-match-v1` et ne transférer aucun octet ni handle d'image vers Python
+
 # v0.4.0-alpha.3
 
 ###### 2026/08/24

@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.4
+
+###### 2026/08/24
+
+* `Hint` Fourth M3 automation current-tree alpha candidate; bounded screen color search passed on an accessibility-enabled API 37 emulator and failed closed on an API 31 physical device without changing its accessibility services; template image matching, OCR, publication, and a complete device matrix remain outside this claim
+* `Feature` Add `autojs6.images.find_color(color, *, region=None, threshold=0)` for strict RGB integers or `#RRGGBB` text, an optional bounded region, and a coordinate-or-`None` result
+* `Improvement` Capture one fresh Android 11+ accessibility screenshot per call, scan it in deterministic row-major order with a per-channel threshold from 0 through 255, validate exact `autojs6-python-color-match-v1`, and transfer no image bytes or handles to Python
+
 # v0.4.0-alpha.3
 
 ###### 2026/08/24

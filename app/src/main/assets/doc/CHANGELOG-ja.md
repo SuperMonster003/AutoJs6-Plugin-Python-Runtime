@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.4
+
+###### 2026/08/24
+
+* `注記` 現行 tree の第 4 M3 automation alpha candidate; 有界 screen color search は accessibility 有効の API 37 emulator で成功し、API 31 実機では既存 service を変更せず fail-closed を確認; template image matching、OCR、公開、完全な device matrix は対象外
+* `追加` 厳密な RGB integer または `#RRGGBB` text、任意の有界 region、座標または `None` result を持つ `autojs6.images.find_color(color, *, region=None, threshold=0)` を追加
+* `改善` 呼び出しごとに新しい Android 11+ accessibility screenshot を 1 枚取得し、0..255 の channel 別 threshold で deterministic row-major 順に走査し、厳密な `autojs6-python-color-match-v1` を検証して image byte や handle を Python へ転送しない
+
 # v0.4.0-alpha.3
 
 ###### 2026/08/24

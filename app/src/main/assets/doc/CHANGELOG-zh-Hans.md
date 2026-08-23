@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.4
+
+###### 2026/08/24
+
+* `提示` 当前树第四个 M3 自动化 alpha 候选; 有界屏幕找色已在启用无障碍的 API 37 模拟器通过, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; 模板找图、OCR、发布及完整设备矩阵仍不在本次声明范围
+* `新增` 新增 `autojs6.images.find_color(color, *, region=None, threshold=0)`, 接受严格 RGB 整数或 `#RRGGBB` 文本、可选有界区域, 返回坐标或 `None`
+* `优化` 每次调用只捕获一张最新 Android 11+ 无障碍截图, 以确定性 row-major 顺序和 0..255 逐通道阈值扫描, 校验精确 `autojs6-python-color-match-v1`, 不向 Python 传输图像字节或句柄
+
 # v0.4.0-alpha.3
 
 ###### 2026/08/24

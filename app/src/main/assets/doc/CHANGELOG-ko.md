@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.4
+
+###### 2026/08/24
+
+* `안내` 현재 tree의 네 번째 M3 automation alpha candidate; 제한된 screen color search는 accessibility가 활성화된 API 37 emulator에서 통과하고 API 31 실제 기기에서는 기존 service를 변경하지 않고 fail-closed 통과; template image matching, OCR, 공개 및 전체 device matrix는 범위 밖
+* `추가` 엄격한 RGB integer 또는 `#RRGGBB` text, 선택적 제한 region, 좌표 또는 `None` 결과를 제공하는 `autojs6.images.find_color(color, *, region=None, threshold=0)` 추가
+* `개선` 호출마다 새 Android 11+ accessibility screenshot 한 장을 캡처하고 0..255 채널별 threshold로 deterministic row-major 순서로 스캔하며 정확한 `autojs6-python-color-match-v1`을 검증하고 image byte나 handle을 Python으로 전송하지 않음
+
 # v0.4.0-alpha.3
 
 ###### 2026/08/24

@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.4.0-alpha.3 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.4.0-alpha.4 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -63,6 +63,10 @@
   仅异步启动执行根内的非 Python Host 脚本, 并以进程重启确定性停止自身。
 - [x] 协议 1.5 Host automator 基础动作: `click/long_click/press/swipe/back/home`;
   严格限制坐标与持续时间, 返回平台实际布尔结果, 无障碍不可用时 fail closed 且不打开设置。
+- [x] 协议 1.5 Host selector/UI 树: 有界 `snapshot/find/click/set_text`, 节点引用绑定
+  单次执行并在失效后返回稳定类型化错误。
+- [x] 协议 1.5 Host images: Android 11+ 有界 `capture_screen` 与宿主内
+  `find_color`; 找色仅返回坐标/未命中, 不跨进程传输截图字节。
 - [x] 单文件脚本 `ModuleNotFoundError` 时提示用户改用显式 Python 项目。
 
 ### 真机与构建证据 (历史, 保持有效)
@@ -363,7 +367,17 @@
   插件实现/便携测试提交: `5e2f6ad`、`91824f6`。
 - [x] [P] 截图示例 (`examples/python/m3_capture_screen.py`) 与完整传输/资源/错误说明
   (`docs/python/HOST_IMAGES.md`)。
-- [ ] [H+P] `autojs6.images.find_image/find_color` 找图找色
+- [x] [H+P] `autojs6.images.find_color(color, *, region=None, threshold=0)` 有界找色:
+  接受 `0x000000..0xFFFFFF` 严格整数或精确 `#RRGGBB`, 可选 `(x, y, width, height)`
+  区域及 0..255 逐通道阈值。每次调用只捕获一张最新 Android 11+ 无障碍截图,
+  全程在宿主逐行扫描并按上到下、左到右返回首个绝对坐标, 穷尽未命中返回 `None`;
+  不向插件传输或保留截图/像素字节。宿主隔离分支实现/测试提交: `acfcb1dfb`、
+  `7235034f0`、`604ffc777`、`155b9e566`; 插件实现/便携测试提交:
+  `1e6836c`、`9d3c790`。
+- [x] [P] 找色示例 (`examples/python/m3_find_color.py`) 与区域/阈值/扫描顺序/错误说明
+  (`docs/python/HOST_IMAGES.md`)。
+- [ ] [H+P] `autojs6.images.find_image` 模板找图: 仍需定义模板字节上传、资源生命周期、
+  匹配算法/阈值及返回契约; 不与已完成的零图像传输找色混为一个门禁。
 - [ ] [H+P] `autojs6.ocr.recognize(image)` —— 复用宿主 OCR 引擎
 - [ ] 完整自动化示例: 一个真实的 "打开应用 → 找控件 → 点击 → 截图断言" Python 脚本
 - [ ] 发布 0.4.0
@@ -428,6 +442,25 @@
   `adb install --no-streaming -r -t`, 未卸载、未清数据。用户已确认 QV710AF65F
   定时任务成功, 本轮截图验收未修改其定时任务或无障碍配置。
 
+### 2026-08-24 M3 screen color search 验收记录
+
+- 宿主找色能力、逐行扫描算法/dispatcher 边界测试、受控颜色区域与公开 Python 引擎
+  instrumentation 由隔离分支提交 `acfcb1dfb`、`7235034f0`、`604ffc777`、
+  `155b9e566` 固定; 插件 façade 与聚焦便携测试由 `1e6836c`、`9d3c790` 固定。
+- API 37 / x86_64 / 16 KiB page 模拟器启用 AutoJs6 无障碍后, 公共 Python 项目以
+  受控目标 bounds 作为 region、逐通道阈值 2 调用 `images.find_color(0x123456, ...)`;
+  返回两元素坐标且严格落在受控 `#123456` 区域内, 不发布图像产物。用时 5.707 秒,
+  `OK (1 test)`。instrumentation 结束后已恢复 `accessibility_enabled=1`、唯一 AutoJs6
+  service、已绑定, `Binding services:{}` 与 `Crashed services:{}` 均为空。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 刻意不启用
+  AutoJs6 无障碍; 公共 Python 项目调用 `images.find_color(0x123456)` 时稳定得到
+  `CapabilityUnavailableError` 与精确消息, 用时 0.945 秒, `OK (1 test)`。运行前后
+  `accessibility_enabled=1`, 既有六个无障碍服务列表逐字一致且 AutoJs6 服务始终缺席,
+  `Binding services:{}` 与 `Crashed services:{}` 均为空。
+- Host 5276、插件 `0.4.0-alpha.4`/60 与测试 APK 均保持 SM003 signer; 仅采用
+  `adb install --no-streaming -r -t` 覆盖安装, 未卸载、未清数据。用户已确认
+  QV710AF65F 定时任务成功, 本轮找色验收未修改其定时任务或无障碍配置。
+
 ### 后续批次 (需求驱动, 出现用例再排期)
 
 - [ ] [H+P] `shell` (root/shizuku)、`sensors`、`media`、`sqlite`、`storages`、
@@ -490,7 +523,7 @@
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
-| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (基础 automator actions 已完成) |
+| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (automator/selector/截图/找色已完成) |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 

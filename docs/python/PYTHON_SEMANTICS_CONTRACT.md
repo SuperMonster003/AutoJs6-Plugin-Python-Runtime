@@ -503,14 +503,33 @@ opaque image ID is always released; replacement, release and broker terminal
 zero Host-retained bytes, while Python zeroes its mutable assembly buffer after
 copy/write or failure.
 
+`images.find_color(color, *, region=None, threshold=0)` takes one fresh Android
+11+ accessibility screenshot and performs the complete search inside the Host.
+`color` is a strict non-boolean integer from `0x000000` through `0xFFFFFF` or
+exact `#RRGGBB` text. `threshold` is a strict integer from 0 through 255 and is
+applied independently to the absolute red, green and blue channel differences;
+pixel alpha is ignored. An optional tuple/list `(x, y, width, height)` uses
+non-negative origins and positive sizes inside the fixed 8192-pixel dimension
+bound, and the Host also requires it to fit the captured screen.
+
+Search order is deterministic top-to-bottom then left-to-right. The first match
+returns an absolute `(x, y)` tuple and exhaustive absence returns `None`. The
+strict `autojs6-python-color-match-v1` result requires exact fields, a boolean
+found flag, canonical `-1/-1` miss coordinates, bounded hit coordinates and
+requested-region containment. No encoded screenshot, pixel row, image handle or
+Android object crosses into Python; the Host clears its bounded row buffer and
+recycles the screenshot in `finally`. Color search does not occupy or replace
+the one retained encoded-image slot used by `capture_screen`.
+
 Android/API or capture-service absence maps to `CapabilityUnavailableError` via
 `SCREEN_CAPTURE_UNAVAILABLE` or `ACCESSIBILITY_UNAVAILABLE`. Platform capture or
-encoding failure returns `SCREEN_CAPTURE_FAILED`, size overflow returns
+search/encoding failure returns `SCREEN_CAPTURE_FAILED`, size overflow returns
 `RESULT_LIMIT_EXCEEDED`, an unavailable execution-local handle returns
-`STALE_IMAGE`, and malformed transfer data returns `BROKER_PROTOCOL_ERROR`.
+`STALE_IMAGE`, and malformed transfer or color-match data returns
+`BROKER_PROTOCOL_ERROR`.
 Android image objects and callbacks never cross the process boundary. Mutable
-images, cropping, pixel access, `find_color`, `find_image` and OCR remain
-undeclared. The full transfer, error and artifact contract is documented in
+images, cropping, arbitrary pixel access, `find_image`, template upload and OCR
+remain undeclared. The full transfer, search, error and artifact contract is documented in
 `HOST_IMAGES.md`.
 
 Focused screen-capture acceptance exercised the public Python project engine
@@ -526,6 +545,20 @@ left the pre-existing six-service accessibility list byte-for-byte unchanged;
 that run completed in 0.866 seconds with `OK (1 test)`. Neither run uninstalled
 packages or cleared application data, and this is focused current-tree
 acceptance rather than a release claim.
+
+Focused color-search acceptance exercised the public Python project engine
+against Host 5276 and Plugin `0.4.0-alpha.4`/60. On the API 37 x86_64 16
+KiB-page emulator, an accessibility-enabled run searched only the controlled
+target bounds with per-channel threshold 2, found the `#123456` target inside
+that region, returned no image artifact, and completed in 5.707 seconds with
+`OK (1 test)`. On Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages),
+`images.find_color(0x123456)` failed closed with the exact
+`CapabilityUnavailableError` while the pre-existing six-service accessibility
+list remained byte-for-byte unchanged; it completed in 0.945 seconds with
+`OK (1 test)`. Neither run uninstalled packages or cleared application data.
+The emulator service was restored to enabled, bound, non-binding and non-crashed
+state after instrumentation; this remains focused current-tree acceptance rather
+than a release claim.
 
 Focused selector acceptance exercised the public Python project engine against
 the paired Host 5276 and Plugin `0.4.0-alpha.2`/54 builds. On the API 37 x86_64
