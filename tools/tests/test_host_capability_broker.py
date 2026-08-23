@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 PYTHON_SOURCE = ROOT / "app" / "src" / "main" / "python"
 sys.path.insert(0, str(PYTHON_SOURCE))
 
-from autojs6 import app, clip, console, device, notice, toast  # noqa: E402
+from autojs6 import app, clip, console, device, files, notice, toast  # noqa: E402
 from autojs6._broker import _install_execution_broker, _reset_execution_broker  # noqa: E402
 from autojs6.errors import (  # noqa: E402
     CapabilityUnavailableError,
@@ -40,6 +40,8 @@ class RecordingBroker:
         self.clipboard = ""
         self.failure: tuple[str, str] | None = None
         self.response_mutator = None
+        self.file_texts = {"seed.txt": "seed"}
+        self.file_directories = {".", "nested"}
 
     def dispatch(self, request_json: str) -> str:
         self.raw_requests.append(request_json)
@@ -66,6 +68,24 @@ class RecordingBroker:
                 value = True
             elif capability == "device.info":
                 value = DEVICE_INFO
+            elif capability == "files.read_text":
+                value = self.file_texts[arguments["path"]]
+            elif capability == "files.write_text":
+                self.file_texts[arguments["path"]] = arguments["text"]
+                value = None
+            elif capability == "files.exists":
+                value = (
+                    arguments["path"] in self.file_texts
+                    or arguments["path"] in self.file_directories
+                )
+            elif capability == "files.is_file":
+                value = arguments["path"] in self.file_texts
+            elif capability == "files.is_dir":
+                value = arguments["path"] in self.file_directories
+            elif capability == "files.list":
+                value = sorted(
+                    [*self.file_texts, *(entry for entry in self.file_directories if entry != ".")]
+                )
             elif capability in {
                 "toast.show",
                 "console.log",
@@ -194,6 +214,57 @@ class HostCapabilityBrokerTest(unittest.TestCase):
             )
             with self.assertRaises(HostCapabilityError) as captured:
                 device.info()
+            self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_host_files_are_execution_relative_bounded_and_strict(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            self.assertEqual("seed", files.read_text("seed.txt"))
+            self.assertIsNone(files.write_text("written.txt", "写入"))
+            self.assertTrue(files.exists("written.txt"))
+            self.assertTrue(files.is_file("written.txt"))
+            self.assertTrue(files.is_dir("."))
+            self.assertFalse(files.exists("missing.txt"))
+            self.assertEqual(
+                ["nested", "seed.txt", "written.txt"],
+                files.list(),
+            )
+            self.assertEqual("写入", broker.file_texts["written.txt"])
+
+            call_count = len(broker.calls)
+            for unsafe in ("", "../outside", "/absolute", "C:/absolute", "a\\b", "a//b"):
+                with self.subTest(unsafe=unsafe):
+                    with self.assertRaises(ValueError):
+                        files.exists(unsafe)
+            with self.assertRaises(ValueError):
+                files.write_text("too-large.txt", "x" * (files.MAX_TEXT_BYTES + 1))
+            self.assertEqual(call_count, len(broker.calls))
+        finally:
+            _reset_execution_broker(token)
+
+    def test_host_files_map_host_failures_and_reject_malformed_lists(self) -> None:
+        broker = RecordingBroker()
+        broker.failure = ("PATH_NOT_FOUND", "missing")
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                files.read_text("missing.txt")
+            self.assertEqual("PATH_NOT_FOUND", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+        malformed = RecordingBroker()
+        malformed.response_mutator = lambda response: response.__setitem__(
+            "value",
+            ["duplicate.txt", "duplicate.txt"],
+        )
+        token = _install_execution_broker(malformed, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                files.list()
             self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
         finally:
             _reset_execution_broker(token)
