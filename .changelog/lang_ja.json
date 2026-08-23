@@ -5,6 +5,18 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v0.4.0-alpha.5": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "現行 tree の第 5 M3 automation alpha candidate です. 有界 template matching は accessibility 有効の API 37 emulator で成功し、API 31 実機では accessibility service を変更せず fail-closed しました. OCR、公開、完全な device matrix はこの主張に含みません"
+      ],
+      "feature": [
+        "PNG/JPEG bytes、任意の有界 region、左上座標または `None` を扱う `autojs6.images.find_image(template, *, region=None, threshold=0)` を追加"
+      ],
+      "improvement": [
+        "実行ごとに最大 1 MiB の template 1 個を 24 KiB raw chunk と SHA-256 検証で upload し、各辺 2048 pixel 以下で decode、`autojs6-python-image-match-v1` の row-major 順で deterministic scan します. 完全 opaque pixel だけを対象、他を wildcard とし、OpenCV は不要で、必ず release と buffer の zero 化を行い、Android の 333 ms screenshot throttle だけを有界な 350 ms 待機後に retry します"
+      ]
+    },
     "v0.4.0-alpha.4": {
       "released_date": "2026/08/24",
       "hint": [

@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.5
+
+###### 2026/08/24
+
+* `Nota` Quinto candidato alpha de automatización M3 del árbol actual; la búsqueda acotada por plantilla pasó en un emulador API 37 con accesibilidad y falló de forma cerrada en un dispositivo físico API 31 sin cambiar sus servicios de accesibilidad; OCR, publicación y una matriz completa quedan fuera de esta afirmación
+* `Función` Añadir `autojs6.images.find_image(template, *, region=None, threshold=0)` para bytes PNG/JPEG, una región acotada opcional y un resultado de coordenada superior izquierda o `None`
+* `Mejora` Subir una plantilla por ejecución de hasta 1 MiB en bloques brutos de 24 KiB con verificación SHA-256, decodificar como máximo 2048 píxeles por lado, recorrer de forma determinista en row-major bajo `autojs6-python-image-match-v1`, usar píxeles totalmente opacos como participantes y los demás como comodines, no requerir OpenCV, siempre hacer release y borrar los búferes, y reintentar solo el límite Android de 333 ms tras una espera acotada de 350 ms
+
 # v0.4.0-alpha.4
 
 ###### 2026/08/24

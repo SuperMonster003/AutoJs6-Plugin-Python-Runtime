@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.5
+
+###### 2026/08/24
+
+* `Note` Cinquième candidat alpha d'automatisation M3 de l'arbre courant; la recherche bornée par modèle a réussi sur un émulateur API 37 avec accessibilité et a échoué de façon fermée sur un appareil physique API 31 sans modifier ses services d'accessibilité; OCR, publication et matrice complète restent hors de cette affirmation
+* `Fonction` Ajouter `autojs6.images.find_image(template, *, region=None, threshold=0)` pour des octets PNG/JPEG, une région bornée facultative et un résultat coordonnée supérieure gauche ou `None`
+* `Amélioration` Charger un modèle par exécution jusqu'à 1 MiB en blocs bruts de 24 KiB avec vérification SHA-256, décoder au plus 2048 pixels par côté, parcourir de façon déterministe en row-major sous `autojs6-python-image-match-v1`, faire participer les pixels totalement opaques et traiter les autres comme jokers, ne pas dépendre d'OpenCV, toujours release puis effacer les tampons, et ne réessayer que la limite Android de 333 ms après une attente bornée de 350 ms
+
 # v0.4.0-alpha.4
 
 ###### 2026/08/24

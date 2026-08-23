@@ -51,7 +51,7 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 - 승인된 project root에서 project-local pure-Python package와 `.dist-info` metadata를 import하며 online pip 또는 runtime install을 수행하지 않습니다.
 - 스크립트 실행 중 stdout/stderr의 원래 순서대로 제한된 chunk를 credit으로 전달하며, credit이 소진되면 실행에 backpressure를 적용합니다.
 - 프로토콜 1.4에서 최대 64 KiB의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 16개 전달하며 stdout에서 결과를 추론하지 않습니다.
-- 실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, 권한 인식 `notice`, 제한된 `files.read_text/write_text/exists/is_file/is_dir/list`, foreground 전용 `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, 제한된 `automator.click/long_click/press/swipe/back/home`, 제한된 `selector.snapshot/find/click/set_text`, `images.capture_screen` 및 `images.find_color`를 실시간 호출하고 terminal에서 폐기합니다.
+- 실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, 권한 인식 `notice`, 제한된 `files.read_text/write_text/exists/is_file/is_dir/list`, foreground 전용 `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, 제한된 `automator.click/long_click/press/swipe/back/home`, 제한된 `selector.snapshot/find/click/set_text`, `images.capture_screen`, `images.find_color` 및 `images.find_image`를 실시간 호출하고 terminal에서 폐기합니다.
 - `SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.
 - 프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.
 - 호스트 재시작이 필요 없습니다. 설치 또는 재활성화 후 다음 새 실행이 provider를 다시 검색하고 pin하며, 실행 중 Binder death는 해당 실행을 종료하고 자동 재실행하지 않습니다.
@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.4.0-alpha.4
-release state: 0.4.0-alpha.4 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, and one-shot RGB find_color passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; template image matching, OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.5
+release state: 0.4.0-alpha.5 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, and bounded PNG/JPEG find_image template matching passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -134,7 +134,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 - 프로토콜 1.5는 실행당 Host call을 최대 1024회, request/response를 각각 64 KiB, text를 32 KiB, 일반 Host main-thread action 대기를 5 s로 제한합니다. Host files는 4 KiB 상대 경로, 32 KiB UTF-8 text, 최대 128개 및 각 255 UTF-8 bytes의 이름으로 제한됩니다. Foreground dialog는 title 256 UTF-8 bytes, content 4 KiB, prompt default/reply 32 KiB, select 최대 64개·각 1 KiB·합계 32 KiB로 제한되며 사용자 응답을 최대 5 min 기다립니다. 한 실행에서 범위가 제한된 비 Python Host child script를 비동기로 성공 실행할 수 있는 횟수는 16회이며, 중첩 Python은 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self`는 process restart 취소를 사용합니다.
 - Automator 좌표는 0부터 1000000까지의 엄격한 정수이며 press와 swipe 지속 시간은 1 ms부터 4 s까지입니다. Host accessibility를 사용할 수 없으면 설정을 열지 않고 `CapabilityUnavailableError`를 발생시킵니다.
 - Selector snapshot은 최대 128개 node, 깊이 32, JSON 48 KiB를 허용합니다. find는 최대 1024개 node를 검색하고 node text는 256 Unicode code points, query text는 1024 UTF-8 bytes, set_text는 4 KiB, 실행별 보존 node reference는 128개로 제한됩니다. 불완전한 검색은 `SELECTOR_SCAN_LIMIT_EXCEEDED`, 오래된 reference는 `STALE_NODE`를 반환합니다.
-- Screen capture는 실행당 최대 1개 이미지를 보존하고 encoded data를 4 MiB, raw chunk를 32 KiB, 각 변을 8192 pixel, 총 면적을 16777216 pixel로 제한합니다. Python은 반환 전에 length, order, EOF, SHA-256 및 format signature를 검증합니다. accessibility/API를 사용할 수 없으면 `CapabilityUnavailableError`, 기타 안정 오류는 `SCREEN_CAPTURE_FAILED`, `RESULT_LIMIT_EXCEEDED`, `STALE_IMAGE`입니다. Color search는 새 screenshot을 row-major 순서로 스캔하고 선택적 제한 region과 채널별 최대 255 threshold를 사용하며 image byte를 전송하지 않고 좌표 또는 미검출만 반환합니다.
+- Screen capture는 실행당 최대 1개 이미지를 보존하고 encoded data를 4 MiB, raw chunk를 32 KiB, 각 변을 8192 pixel, 총 면적을 16777216 pixel로 제한합니다. Python은 반환 전에 length, order, EOF, SHA-256 및 format signature를 검증합니다. accessibility/API를 사용할 수 없으면 `CapabilityUnavailableError`, 기타 안정 오류는 `SCREEN_CAPTURE_FAILED`, `RESULT_LIMIT_EXCEEDED`, `STALE_IMAGE`입니다. Color search는 새 screenshot을 row-major 순서로 스캔하고 선택적 제한 region과 채널별 최대 255 threshold를 사용하며 image byte를 전송하지 않고 좌표 또는 미검출만 반환합니다. Template search는 실행당 최대 1개의 PNG/JPEG template을 보존하고 1 MiB, raw chunk 24 KiB, 각 변 2048, 면적 1048576, search region 4194304, comparison 16777216로 제한합니다. 완전 불투명 pixel만 참여하고 나머지는 wildcard이며 deterministic row-major로 스캔하고 terminal에서 buffer를 release하고 0으로 지웁니다.
 - 취소는 프로세스 재시작 방식입니다. native extension과 blocking 호출은 Android 검증이 필요합니다.
 - `INTERNET` 권한으로 스크립트가 표준 라이브러리 네트워크 기능을 직접 사용할 수 있지만, online pip, 자동 코드 다운로드, 런타임 타사 패키지 설치는 계속 지원하지 않습니다.
 
@@ -146,7 +146,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 - 일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 1 MiB의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`과 표준 라이브러리 `getpass.getpass()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.
 - UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.
-- live broker는 첫 저위험 기능 전체, 제한된 Host files, foreground dialogs, 제한된 engines, 명시적 좌표/global automator action, 제한된 selector/UI tree snapshot/action, 제한된 screen capture 및 `find_color`를 제공합니다. `find_image`, template upload 및 OCR은 아직 선언하지 않습니다.
+- live broker는 첫 저위험 기능 전체, 제한된 Host files, foreground dialogs, 제한된 engines, 명시적 좌표/global automator action, 제한된 selector/UI tree snapshot/action, 제한된 screen capture, `find_color` 및 `find_image`를 제공합니다. OCR, mutable image processing 및 multi-scale matching은 아직 선언하지 않습니다.
 - 32비트 Android와 임의의 native wheel은 보장하지 않습니다.
 - 현재 tree에는 API 31 arm64-v8a 실제 기기 smoke evidence와 API 37 x86_64 16 KB page emulator smoke evidence가 있으며, 어느 쪽도 완전한 기기 matrix나 release qualification으로 제시하지 않습니다.
 
@@ -156,7 +156,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-M4 Path A가 완료되었고 M3 automation은 이제 Host accessibility를 통한 제한된 좌표/global action, 제한된 selector/UI tree data plane, screen capture 및 one-shot RGB color search를 포함합니다. Template image matching, OCR 및 M4 build-time/native package path는 user value에 따라 진행하며, 과거 evidence tool은 계속 사용할 수 있지만 자동 release gate로 사용하지 않습니다.
+M4 Path A가 완료되었고 M3 automation은 이제 Host accessibility를 통한 제한된 좌표/global action, 제한된 selector/UI tree data plane, screen capture, one-shot RGB color search 및 제한된 PNG/JPEG template matching을 포함합니다. OCR 및 M4 build-time/native package path는 user value에 따라 진행하며, 과거 evidence tool은 계속 사용할 수 있지만 자동 release gate로 사용하지 않습니다.
 
 - [ROADMAP.md 보기](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -165,6 +165,14 @@ M4 Path A가 완료되었고 M3 automation은 이제 Host accessibility를 통�
 ### 변경 이력
 
 ******
+
+# v0.4.0-alpha.5
+
+###### 2026/08/24
+
+* `안내` 현재 tree의 다섯 번째 M3 automation alpha candidate입니다. 제한된 template matching은 accessibility가 활성화된 API 37 emulator에서 통과했고 API 31 실제 기기에서는 accessibility service를 바꾸지 않고 fail-closed했습니다. OCR, 공개 및 전체 device matrix는 이 주장에 포함하지 않습니다
+* `추가` PNG/JPEG bytes, 선택적 제한 region, 왼쪽 위 좌표 또는 `None` 결과를 위한 `autojs6.images.find_image(template, *, region=None, threshold=0)` 추가
+* `개선` 실행당 최대 1 MiB template 하나를 24 KiB raw chunk와 SHA-256 검증으로 업로드하고 변당 최대 2048 pixel로 decode하며 `autojs6-python-image-match-v1` 아래 deterministic row-major로 스캔합니다. 완전 불투명 pixel만 참여하고 나머지는 wildcard이며 OpenCV가 필요 없고 항상 release 후 buffer를 0으로 지우며 Android 333 ms screenshot throttle만 제한된 350 ms 대기 후 retry합니다
 
 # v0.4.0-alpha.4
 
@@ -181,14 +189,6 @@ M4 Path A가 완료되었고 M3 automation은 이제 Host accessibility를 통�
 * `안내` 현재 tree의 세 번째 M3 automation alpha candidate입니다. 제한된 Android 11+ screen-capture 전체 경로는 accessibility service를 활성화한 API 37 emulator에서 focused acceptance를 통과했고, fail-closed는 기존 accessibility service를 변경하지 않고 API 31 physical device에서 통과했습니다; image/color matching, OCR, publication 및 전체 device matrix는 이 선언에 포함하지 않습니다
 * `추가` 검증된 PNG/JPEG encoded bytes를 반환하거나 execution output artifact를 atomic하게 기록하고 게시하는 `autojs6.images.capture_screen`을 추가
 * `개선` 실행당 최대 1 capture를 보존하고 32 KiB raw chunk로 전송하며 encoded data를 4 MiB로 제한합니다. Python은 order, EOF, SHA-256 및 format signature를 검증하고 항상 release하며 Host는 replacement/release/terminal에서 zero 처리하고 service 활성화나 설정 열기 없이 안정 오류를 반환합니다
-
-# v0.4.0-alpha.2
-
-###### 2026/08/24
-
-* `안내` 현재 tree의 두 번째 M3 automation alpha candidate입니다. 제한된 selector/UI tree 전체 경로는 accessibility service를 활성화한 API 37 emulator에서 focused acceptance를 통과했고, fail-closed는 기존 accessibility service를 변경하지 않고 API 31 physical device에서 통과했습니다; screenshot, OCR, publication 및 전체 device matrix는 이 선언에 포함하지 않습니다
-* `추가` 분리된 accessibility tree data, AND 조합 first-match query 및 불투명한 execution-local node reference를 통한 명시적 action을 제공하는 live `autojs6.selector.snapshot/find/click/set_text` API 추가
-* `개선` Snapshot node, depth, payload, node text, selector scan size, query/set text 및 retained node를 제한; 불완전 scan은 `SELECTOR_SCAN_LIMIT_EXCEEDED`, stale reference는 `STALE_NODE`, accessibility 사용 불가는 설정을 열지 않고 `CapabilityUnavailableError`로 보고
 
 ##### 다른 버전
 

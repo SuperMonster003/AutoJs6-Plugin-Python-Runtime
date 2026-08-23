@@ -1,11 +1,12 @@
-# Host screen images and color search
+# Host screen images, color search, and template search
 
-`autojs6.images` exposes bounded screen capture and one-shot RGB color search
-through the AutoJs6 Host accessibility service. Capture transfers only validated
-PNG or JPEG bytes. Color search remains entirely in the Host and returns only a
-coordinate or a deterministic miss. Android `Bitmap`, `HardwareBuffer`,
-accessibility-service, callback, and Binder objects never cross into the Python
-process.
+`autojs6.images` exposes bounded screen capture, one-shot RGB color search, and
+one-shot PNG/JPEG template search through the AutoJs6 Host accessibility
+service. Capture transfers only validated PNG or JPEG bytes. Color search stays
+entirely in the Host. Template search uploads one bounded encoded template but
+keeps every screenshot and all decoded pixels in the Host. Android `Bitmap`,
+`HardwareBuffer`, accessibility-service, callback, and Binder objects never
+cross into the Python process.
 
 ## Prerequisite
 
@@ -29,6 +30,13 @@ images.capture_screen(
 
 images.find_color(
     color: int | str,
+    *,
+    region: tuple[int, int, int, int] | list[int] | None = None,
+    threshold: int = 0,
+) -> tuple[int, int] | None
+
+images.find_image(
+    template: bytes | bytearray | memoryview,
     *,
     region: tuple[int, int, int, int] | list[int] | None = None,
     threshold: int = 0,
@@ -84,6 +92,66 @@ row buffer, clears it before return, and recycles the fresh screenshot in
 `finally`. A color search neither consumes nor replaces the encoded image slot
 used by `capture_screen`.
 
+## Template search
+
+`find_image` accepts encoded PNG or JPEG data as `bytes`, `bytearray`, or a
+byte-oriented `memoryview`. It does not accept a filesystem path or an Android
+image object; ordinary project code can use `Path(...).read_bytes()` explicitly.
+Python recognizes the exact PNG/JPEG signature, copies the data into a mutable
+temporary buffer, verifies every upload response, and overwrites that buffer in
+`finally`.
+
+The optional region and `threshold` have the same shape and strict non-boolean
+integer rules as `find_color`. A hit is the absolute screen coordinate of the
+template's top-left corner. Candidates are considered top-to-bottom and then
+left-to-right, so the first result is deterministic. Exhaustive absence returns
+`None`.
+
+```python
+from pathlib import Path
+
+from autojs6 import images, result
+
+template = Path("fixtures/target.png").read_bytes()
+match = images.find_image(template, region=(0, 200, 1080, 1200), threshold=2)
+result.set({"match": None if match is None else list(match)})
+```
+
+The Host compares absolute red, green, and blue channel differences against the
+per-channel threshold. Only template pixels whose decoded alpha is exactly 255
+participate. Every other template pixel is a wildcard, and a template must have
+at least one fully opaque pixel. JPEG templates are fully opaque after decode.
+This alpha rule is deliberate and fixed; semi-transparent pixels are not
+blended against screenshot pixels.
+
+One execution retains at most one pending upload or decoded template. Beginning
+a replacement, explicit release, any upload/decode failure, or execution
+terminal clears the encoded upload and decoded pixel/offset buffers. Python
+releases every usable template ID in `finally`. A release failure is exposed
+when the search otherwise succeeded, but never masks the primary upload,
+capture, search, or protocol failure.
+
+Template transfer and matching are bounded as follows:
+
+- encoded PNG/JPEG data is 1 byte through 1 MiB;
+- raw upload chunks are ordered, contiguous, canonical Base64 representations
+  of at most 24 KiB, with every non-final chunk exactly 24 KiB;
+- the Host verifies the declared byte length and SHA-256 before decode;
+- decoded width and height are each at most 2048, and decoded area is at most
+  1,048,576 pixels;
+- the requested screenshot region is at most 4,194,304 pixels;
+- one search performs at most 16,777,216 bounded pixel comparisons, including
+  anchor prechecks; exceeding the budget fails rather than returning a false
+  miss.
+
+The Host decodes with Android `BitmapFactory`, uses a small deterministic set of
+opaque anchor pixels only as a rejection optimization, and then verifies every
+opaque pixel before reporting a hit. It does not require, load, or fall back to
+the AutoJs6 OpenCV plugin. The strict pure-data schemas are
+`autojs6-python-image-template-v1`,
+`autojs6-python-image-template-chunk-v1`, and
+`autojs6-python-image-match-v1`.
+
 ## Capture transfer and resource bounds
 
 - The Host retains at most one encoded screenshot for the current execution.
@@ -104,37 +172,58 @@ used by `capture_screen`.
   but never masks the primary transfer failure.
 - Python assembles the result in a mutable buffer and overwrites that buffer
   after copying the returned bytes, after writing the artifact, or on failure.
+- Template upload is independent of the retained encoded screenshot slot. It
+  uses one execution-local template slot, ordered 24 KiB raw chunks, a 1 MiB
+  encoded cap, SHA-256 verification, bounded Android decode, and explicit
+  release as described above.
 
 The normal protocol 1.5 limits of 1024 Host calls, 64 KiB per request/response,
 and 5 seconds per individual Host action still apply. Host capture itself has a
 single bounded four-second deadline; it does not loop indefinitely. A complete
-color search is one broker call and does not transfer screenshot bytes.
+color search is one broker call and does not transfer screenshot bytes. Template
+search additionally uses one begin call, one through 43 upload calls, one search
+call, and one release call.
+
+Android rejects accessibility screenshot requests made within 333 ms of the
+previous accepted request. When, and only when, the platform returns
+`ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT`, the Host waits 350 ms and retries
+within the same four-second deadline, for at most three total attempts. Other
+platform failures, interruption, deadline exhaustion, and unavailable services
+still fail closed immediately. This bounded policy makes consecutive
+`find_color`, `find_image`, and `capture_screen` calls deterministic without an
+unbounded polling loop.
 
 ## Errors
 
 - Invalid local argument types raise `TypeError`; unsupported formats, malformed
-  colors/regions, or out-of-range quality, coordinates, sizes, and thresholds
-  raise `ValueError` without a Host call.
+  image signatures/colors/regions, oversized templates, or out-of-range
+  quality, coordinates, sizes, and thresholds raise `ValueError` without a Host
+  call.
 - Android/API or accessibility absence uses `CapabilityUnavailableError` with
   stable Host codes `SCREEN_CAPTURE_UNAVAILABLE` or
   `ACCESSIBILITY_UNAVAILABLE`.
 - Platform capture, search, or encoding failure uses `HostCapabilityError` with
   `SCREEN_CAPTURE_FAILED`.
-- Image-size boundaries use `RESULT_LIMIT_EXCEEDED`; an unknown, replaced,
-  released, or terminal image reference uses `STALE_IMAGE`.
-- Any malformed descriptor, chunk, or color-match result is rejected as
-  `BROKER_PROTOCOL_ERROR`.
+- Image/template/region/comparison boundaries use `RESULT_LIMIT_EXCEEDED`; an
+  unknown, replaced, released, or terminal encoded-image reference uses
+  `STALE_IMAGE`, while the equivalent template condition uses `STALE_TEMPLATE`.
+- Invalid signatures, corrupt or unsupported Android decode results, dimension
+  inconsistencies, SHA-256 mismatch, or an all-wildcard template use
+  `INVALID_IMAGE_TEMPLATE`.
+- Any malformed descriptor, chunk acknowledgement, color match, or template
+  match result is rejected as `BROKER_PROTOCOL_ERROR`.
 
 ## Deliberate limits
 
 The module currently returns encoded bytes or an output artifact, not a mutable
 image object. It does not expose cropping, rotation, arbitrary pixel access,
-`find_image`, template upload, OCR, MediaProjection capture, or background
-service enablement. Those are separate Roadmap slices and are not implied by
-`capture_screen` or `find_color`.
+template creation from a retained capture, multi-scale/rotated matching, OCR,
+MediaProjection capture, or background service enablement. Those are separate
+Roadmap slices and are not implied by the current exact-size RGB matcher.
 
-See [`m3_capture_screen.py`](../../examples/python/m3_capture_screen.py) and
-[`m3_find_color.py`](../../examples/python/m3_find_color.py) for minimal
+See [`m3_capture_screen.py`](../../examples/python/m3_capture_screen.py),
+[`m3_find_color.py`](../../examples/python/m3_find_color.py), and
+[`m3_find_image.py`](../../examples/python/m3_find_image.py) for minimal
 examples, [`HOST_AUTOMATOR.md`](HOST_AUTOMATOR.md) and
 [`HOST_SELECTOR.md`](HOST_SELECTOR.md) for actions/UI data, and
 [`PYTHON_SEMANTICS_CONTRACT.md`](PYTHON_SEMANTICS_CONTRACT.md) for normative

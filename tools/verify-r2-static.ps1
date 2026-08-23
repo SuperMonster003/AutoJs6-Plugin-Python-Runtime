@@ -225,9 +225,9 @@ Assert-True ($manifest -notmatch 'android:sharedUserId') 'A shared Android UID i
 Assert-True ($manifest -notmatch 'com\.chaquo\.python\.android\.PyApplication') 'CPython must not start in the application/main process'
 
 Assert-True ($metadataSource -match 'supportsWorkspaceArchive\s*=\s*true') 'Verified project workspace transport must stay enabled'
-Assert-True ($metadataSource -match 'maxWorkspaceArchiveBytes\s*=\s*16L\s*\*\s*1024L\s*\*\s*1024L') 'Workspace archive limit drifted'
-Assert-True ($metadataSource -match 'maxWorkspaceEntries\s*=\s*1024') 'Workspace entry-count limit drifted'
-Assert-True ($metadataSource -match 'maxWorkspaceUncompressedBytes\s*=\s*32L\s*\*\s*1024L\s*\*\s*1024L') 'Workspace expansion limit drifted'
+Assert-True ($metadataSource -match 'maxWorkspaceArchiveBytes\s*=\s*64L\s*\*\s*1024L\s*\*\s*1024L') 'Workspace archive limit drifted'
+Assert-True ($metadataSource -match 'maxWorkspaceEntries\s*=\s*8_192') 'Workspace entry-count limit drifted'
+Assert-True ($metadataSource -match 'maxWorkspaceUncompressedBytes\s*=\s*128L\s*\*\s*1024L\s*\*\s*1024L') 'Workspace expansion limit drifted'
 Assert-True ($metadataSource -match 'supportsStdinSnapshot\s*=\s*true') 'bounded stdin snapshot capability must be enabled'
 Assert-True ($metadataSource -match 'maxStdinBytes\s*=\s*1L\s*\*\s*1024L\s*\*\s*1024L') 'stdin snapshot limit must remain 1 MiB'
 Assert-True ($metadataSource -match 'maxOutputBytes\s*=\s*16L\s*\*\s*1024L\s*\*\s*1024L') 'Output byte limit must be 16 MiB'

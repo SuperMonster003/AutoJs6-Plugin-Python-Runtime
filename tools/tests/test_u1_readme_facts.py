@@ -24,12 +24,13 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.4.0-alpha.4", common["release_target"])
+        self.assertEqual("0.4.0-alpha.5", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
         self.assertIn("selector/UI-tree", common["release_state"])
         self.assertIn("screen capture", common["release_state"])
         self.assertIn("find_color", common["release_state"])
+        self.assertIn("find_image", common["release_state"])
         self.assertIn("M4 Path A", common["release_state"])
         self.assertIn("project-local pure-Python", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
@@ -74,6 +75,13 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("8192", common["max_host_screen_dimension"])
         self.assertEqual("16777216", common["max_host_screen_pixels"])
         self.assertEqual("255", common["max_host_screen_color_threshold"])
+        self.assertEqual("1", common["max_host_image_templates"])
+        self.assertEqual("1 MiB", common["max_host_image_template_bytes"])
+        self.assertEqual("24 KiB", common["max_host_image_template_chunk_bytes"])
+        self.assertEqual("2048", common["max_host_image_template_dimension"])
+        self.assertEqual("1048576", common["max_host_image_template_pixels"])
+        self.assertEqual("4194304", common["max_host_image_match_region_pixels"])
+        self.assertEqual("16777216", common["max_host_image_match_comparisons"])
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
@@ -114,6 +122,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 )
                 self.assertIn("`images.capture_screen`", broker_features[0])
                 self.assertIn("`images.find_color`", broker_features[0])
+                self.assertIn("`images.find_image`", broker_features[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
                 self.assertIn("1.3", source["p_plugin_scope"])
                 self.assertIn("1.4", source["p_plugin_scope"])
@@ -198,6 +207,13 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "{{ max_host_screen_dimension }}",
                     "{{ max_host_screen_pixels }}",
                     "{{ max_host_screen_color_threshold }}",
+                    "{{ max_host_image_templates }}",
+                    "{{ max_host_image_template_bytes }}",
+                    "{{ max_host_image_template_chunk_bytes }}",
+                    "{{ max_host_image_template_dimension }}",
+                    "{{ max_host_image_template_pixels }}",
+                    "{{ max_host_image_match_region_pixels }}",
+                    "{{ max_host_image_match_comparisons }}",
                 ):
                     self.assertIn(placeholder, image_limits[0])
                 for error_code in (
@@ -237,10 +253,6 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     any("engines" in item for item in source["unsupported_capabilities"]),
                     f"{code} does not describe the bounded engines surface",
                 )
-                self.assertTrue(
-                    any("find_image" in item for item in source["unsupported_capabilities"]),
-                    f"{code} does not bound the remaining image surface",
-                )
                 self.assertIn("16 KB", source["p_build_architecture"])
                 self.assertIn("gate", source["p_build_architecture"].lower())
                 self.assertIn("M4", source["p_roadmap"])
@@ -252,6 +264,25 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                template_image = source["$data"]["v0.4.0-alpha.5"]
+                self.assertEqual("2026/08/24", template_image["released_date"])
+                self.assertEqual(1, len(template_image["feature"]))
+                self.assertIn("find_image", template_image["feature"][0])
+                self.assertIn("PNG/JPEG", template_image["feature"][0])
+                for boundary in (
+                    "1 MiB",
+                    "24 KiB",
+                    "SHA-256",
+                    "2048",
+                    "row-major",
+                    "autojs6-python-image-match-v1",
+                    "OpenCV",
+                    "release",
+                    "333 ms",
+                    "350 ms",
+                ):
+                    self.assertIn(boundary, template_image["improvement"][0])
+
                 screen_color = source["$data"]["v0.4.0-alpha.4"]
                 self.assertEqual("2026/08/24", screen_color["released_date"])
                 self.assertEqual(1, len(screen_color["feature"]))

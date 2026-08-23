@@ -9,6 +9,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples" / "python" / "m4_project_local_requests"
 GUIDE = ROOT / "docs" / "python" / "PROJECT_LOCAL_PACKAGES.md"
 SEMANTICS = ROOT / "docs" / "python" / "PYTHON_SEMANTICS_CONTRACT.md"
+STATIC_VERIFIER = ROOT / "tools" / "verify-r2-static.ps1"
 METADATA = (
     ROOT
     / "app"
@@ -40,6 +41,14 @@ class M4ProjectLocalPackagesTest(unittest.TestCase):
         self.assertEqual("64 MiB", common["max_workspace_archive_bytes"])
         self.assertEqual("8192", common["max_workspace_entries"])
         self.assertEqual("128 MiB", common["max_workspace_uncompressed_bytes"])
+
+        verifier = STATIC_VERIFIER.read_text(encoding="utf-8")
+        for assertion in (
+            r"maxWorkspaceArchiveBytes\s*=\s*64L\s*\*\s*1024L\s*\*\s*1024L",
+            r"maxWorkspaceEntries\s*=\s*8_192",
+            r"maxWorkspaceUncompressedBytes\s*=\s*128L\s*\*\s*1024L\s*\*\s*1024L",
+        ):
+            self.assertIn(assertion, verifier)
 
     def test_example_is_reproducible_source_without_checked_in_packages(self) -> None:
         self.assertEqual(

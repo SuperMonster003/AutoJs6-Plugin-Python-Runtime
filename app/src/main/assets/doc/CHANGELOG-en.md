@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.5
+
+###### 2026/08/24
+
+* `Hint` Fifth M3 automation current-tree alpha candidate; bounded template matching passed on an accessibility-enabled API 37 emulator and failed closed on an API 31 physical device without changing its accessibility services; OCR, publication, and a complete device matrix remain outside this claim
+* `Feature` Add `autojs6.images.find_image(template, *, region=None, threshold=0)` for PNG/JPEG bytes, an optional bounded region, and a top-left coordinate-or-`None` result
+* `Improvement` Upload one execution-local template up to 1 MiB in 24 KiB raw chunks with SHA-256 verification, decode at most 2048 pixels per side, scan deterministically in row-major order under `autojs6-python-image-match-v1`, use exact-alpha pixels as participants and other pixels as wildcards, require no OpenCV, always release and zero buffers, and retry only Android's 333 ms screenshot throttle after a bounded 350 ms wait
+
 # v0.4.0-alpha.4
 
 ###### 2026/08/24

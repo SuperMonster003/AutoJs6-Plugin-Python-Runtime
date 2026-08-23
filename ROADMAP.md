@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.4.0-alpha.4 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.4.0-alpha.5 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -65,8 +65,9 @@
   严格限制坐标与持续时间, 返回平台实际布尔结果, 无障碍不可用时 fail closed 且不打开设置。
 - [x] 协议 1.5 Host selector/UI 树: 有界 `snapshot/find/click/set_text`, 节点引用绑定
   单次执行并在失效后返回稳定类型化错误。
-- [x] 协议 1.5 Host images: Android 11+ 有界 `capture_screen` 与宿主内
-  `find_color`; 找色仅返回坐标/未命中, 不跨进程传输截图字节。
+- [x] 协议 1.5 Host images: Android 11+ 有界 `capture_screen`、宿主内
+  `find_color` 与有界 PNG/JPEG `find_image`; 找色仅返回坐标/未命中, 找图只上传
+  执行级模板且不跨进程传输截图字节。
 - [x] 单文件脚本 `ModuleNotFoundError` 时提示用户改用显式 Python 项目。
 
 ### 真机与构建证据 (历史, 保持有效)
@@ -376,8 +377,16 @@
   `1e6836c`、`9d3c790`。
 - [x] [P] 找色示例 (`examples/python/m3_find_color.py`) 与区域/阈值/扫描顺序/错误说明
   (`docs/python/HOST_IMAGES.md`)。
-- [ ] [H+P] `autojs6.images.find_image` 模板找图: 仍需定义模板字节上传、资源生命周期、
-  匹配算法/阈值及返回契约; 不与已完成的零图像传输找色混为一个门禁。
+- [x] [H+P] `autojs6.images.find_image(template, *, region=None, threshold=0)` 有界模板找图:
+  接受最大 1 MiB 的 PNG/JPEG bytes-like 模板, 以 24 KiB 顺序块和 SHA-256 上传到单次
+  执行唯一模板槽; Android 解码限制单边 2048 / 总计 1,048,576 像素, 搜索区域限制
+  4,194,304 像素且比较预算为 16,777,216。仅 alpha=255 的模板像素参与逐通道 RGB
+  阈值匹配, 其余像素为 wildcard, 按行优先返回模板左上角或 `None`; 不依赖 OpenCV。
+  宿主隔离分支实现/测试提交: `f20f123b4`、`301da08f7`、`9d3940fb8`; 连续截图遵守
+  Android 333 ms 节流的有界重试修复: `f94df3b6f`; 插件实现/便携测试提交:
+  `e51ce0f`、`38187ee`。
+- [x] [P] 找图示例 (`examples/python/m3_find_image.py`) 与上传/解码/alpha/预算/错误说明
+  (`docs/python/HOST_IMAGES.md`)。
 - [ ] [H+P] `autojs6.ocr.recognize(image)` —— 复用宿主 OCR 引擎
 - [ ] 完整自动化示例: 一个真实的 "打开应用 → 找控件 → 点击 → 截图断言" Python 脚本
 - [ ] 发布 0.4.0
@@ -461,6 +470,28 @@
   `adb install --no-streaming -r -t` 覆盖安装, 未卸载、未清数据。用户已确认
   QV710AF65F 定时任务成功, 本轮找色验收未修改其定时任务或无障碍配置。
 
+### 2026-08-24 M3 screen template search 验收记录
+
+- 宿主模板上传/解码/匹配、dispatcher 与生命周期测试、公开 Python 引擎 instrumentation
+  由隔离分支提交 `f20f123b4`、`301da08f7`、`9d3940fb8` 固定; 首次设备运行还发现
+  Android 对相邻无障碍截图强制 333 ms 间隔, `f94df3b6f` 将原先不足的 50 ms 重试
+  收敛为仅针对精确限流错误的 350 ms 等待、最多 3 次且仍受 4 秒总 deadline 约束。
+  插件 façade 与 32 项聚焦 broker 测试由 `e51ce0f`、`38187ee` 固定。
+- API 37 / x86_64 / 16 KiB page 模拟器启用 AutoJs6 无障碍后, 同一个公共 Python 项目
+  上传 3 x 3 PNG 模板, 在受控 `#123456` bounds 内以逐通道阈值 2 返回模板左上角;
+  随后立即上传第二个 PNG 并穷尽返回 `None`, 同时覆盖连续截图限流路径。最终用时
+  5.841 秒, `OK (1 test)`；instrumentation 前后三份 codePath 完全一致。结束后已恢复
+  `accessibility_enabled=1`、唯一 AutoJs6 service、已绑定, `Binding services:{}` 与
+  `Crashed services:{}` 均为空, 且无测试进程残留。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 刻意不启用 AutoJs6
+  无障碍; 公共 Python 项目调用 `images.find_image(...)` 时稳定得到精确
+  `CapabilityUnavailableError`, 用时 0.979 秒, `OK (1 test)`。运行前后
+  `accessibility_enabled=1`, 既有六个无障碍服务列表逐字一致且 AutoJs6 服务始终缺席,
+  `Binding services:{}` 与 `Crashed services:{}` 均为空。
+- Host 5276、插件 `0.4.0-alpha.5`/63 与测试 APK 均保持 SM003 signer; 仅采用
+  `adb install --no-streaming -r -t` 覆盖安装, 未卸载、未清数据。用户已确认
+  QV710AF65F 定时任务成功, 本轮找图验收未修改其定时任务或无障碍配置。
+
 ### 后续批次 (需求驱动, 出现用例再排期)
 
 - [ ] [H+P] `shell` (root/shizuku)、`sensors`、`media`、`sqlite`、`storages`、
@@ -523,7 +554,7 @@
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
-| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (automator/selector/截图/找色已完成) |
+| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (automator/selector/截图/找色/找图已完成) |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 

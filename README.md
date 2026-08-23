@@ -51,7 +51,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 - 从已准入项目根目录 import 项目本地纯 Python 包与 `.dist-info` 元数据, 无需在线 pip 或运行时安装.
 - 在脚本执行期间按 stdout/stderr 原始顺序通过有界 chunk 与 credit 传送; credit 耗尽会对执行施加背压.
 - 通过协议 1.4 显式设置最大 64 KiB 的严格 JSON 结果, 并传送最多 16 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.
-- 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、权限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、仅限前台的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界 `automator.click/long_click/press/swipe/back/home`、有界 `selector.snapshot/find/click/set_text`、`images.capture_screen` 与 `images.find_color`, 终态后自动撤销.
+- 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、权限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、仅限前台的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界 `automator.click/long_click/press/swipe/back/home`、有界 `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color` 与 `images.find_image`, 终态后自动撤销.
 - 返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.
 - 同一运行时进程只允许一个活动会话, provider 侧不排队.
 - Host 无需重启; 安装或重新启用插件后下一次新执行会重新发现并 pin provider 身份, 在途 Binder death 会终止该执行且绝不自动重放.
@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.4.0-alpha.4
-release state: 0.4.0-alpha.4 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, and one-shot RGB find_color passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; template image matching, OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.5
+release state: 0.4.0-alpha.5 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, and bounded PNG/JPEG find_image template matching passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -134,7 +134,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 - 协议 1.5 每次执行最多 1024 次 Host 调用, 单个请求/响应最大 64 KiB, 文本最大 32 KiB, 普通 Host 主线程动作等待最多 5 s. Host files 使用最大 4 KiB 的相对路径、最大 32 KiB 的 UTF-8 文本, 每次最多枚举 128 个名称, 每个最大 255 UTF-8 bytes. 前台对话框标题最大 256 UTF-8 bytes, 正文最大 4 KiB, prompt 默认值/回复最大 32 KiB, select 最多 64 项、每项最大 1 KiB、合计最大 32 KiB, 单次用户响应最多等待 5 min. 每次执行最多成功异步启动 16 个限定根目录内的非 Python Host 子脚本; 嵌套 Python 返回 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self` 通过进程重启取消自身.
 - Automator 坐标仅接受 0 到 1000000 的严格整数, press 与 swipe 持续时间为 1 ms 到 4 s; 宿主无障碍不可用时抛 `CapabilityUnavailableError`, 不打开设置.
 - Selector snapshot 最多接受 128 个节点、深度 32 及 48 KiB JSON; find 最多扫描 1024 个节点, 节点文本上限为 256 Unicode code points, 查询文本上限为 1024 UTF-8 bytes, set_text 上限为 4 KiB, 每次执行最多保留 128 个节点引用. 扫描不完整时返回 `SELECTOR_SCAN_LIMIT_EXCEEDED`, 引用过期时返回 `STALE_NODE`.
-- 屏幕截图每次执行最多保留 1 张, 单张编码后最大 4 MiB, 以 32 KiB 原始块传输, 单边最大 8192 像素且总计最多 16777216 像素. Python 在返回前核对长度、顺序、EOF、SHA-256 与格式签名; 无障碍/API 不可用抛 `CapabilityUnavailableError`, 其他稳定错误包括 `SCREEN_CAPTURE_FAILED`、`RESULT_LIMIT_EXCEEDED` 与 `STALE_IMAGE`. 找色在一张最新截图内按行优先扫描, 支持有界可选区域及最大 255 的逐通道阈值, 只返回坐标或未命中且不传输图像字节.
+- 屏幕截图每次执行最多保留 1 张, 单张编码后最大 4 MiB, 以 32 KiB 原始块传输, 单边最大 8192 像素且总计最多 16777216 像素. Python 在返回前核对长度、顺序、EOF、SHA-256 与格式签名; 无障碍/API 不可用抛 `CapabilityUnavailableError`, 其他稳定错误包括 `SCREEN_CAPTURE_FAILED`、`RESULT_LIMIT_EXCEEDED` 与 `STALE_IMAGE`. 找色在一张最新截图内按行优先扫描, 支持有界可选区域及最大 255 的逐通道阈值, 只返回坐标或未命中且不传输图像字节. 模板找图每次执行最多保留 1 个 PNG/JPEG 模板, 最大 1 MiB, 以 24 KiB 原始块上传; 单边最大 2048, 面积最大 1048576, 搜索区域最大 4194304, 比较次数最大 16777216; 仅全不透明像素参与匹配, 其余为通配, 按 row-major 确定性扫描, 终态释放并清零缓冲区.
 - 取消模式为进程重启, 不是 CPython 级协作取消; 原生扩展或阻塞调用仍需后续 Android 验证.
 - 插件已授予 `INTERNET` 以支持脚本通过标准库直接联网; 仍不支持在线 pip、自动下载代码或运行时安装第三方包.
 
@@ -146,7 +146,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 - 不提供通用实时 stdin 或直接 `sys.stdin` callback streaming. 前台交互仅适用于最大 1 MiB 的有限 snapshot 到达 EOF 后的内置 `input()` 与标准库 `getpass.getpass()`. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.
 - 不提供 UI 脚本, 调试器, REPL 或任意宿主 Java 对象访问.
-- 实时 broker 已覆盖完整首批低风险能力、有界 Host files、前台对话框、有界 engines、显式坐标/全局 automator 动作、有界 selector/UI 树快照与动作、有界屏幕截图及有界 `find_color`; `find_image`、模板上传与 OCR 仍未声明.
+- 实时 broker 已覆盖完整首批低风险能力、有界 Host files、前台对话框、有界 engines、显式坐标/全局 automator 动作、有界 selector/UI 树快照与动作、有界屏幕截图、`find_color` 与 `find_image`; OCR、可变图像处理与多尺度匹配仍未声明.
 - 不声明 32 位 Android 支持, 也不保证任意第三方 native wheel 可用.
 - 当前树已有 API 31 arm64-v8a 真机冒烟证据与 API 37 x86_64 16 KB page 模拟器冒烟证据; 两者都不冒充完整设备矩阵或发布资质.
 
@@ -156,7 +156,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 ******
 
-M4 路径 A 已完成, M3 自动化现已通过宿主无障碍接通有界坐标/全局动作、有界 selector/UI 树数据面、有界屏幕截图及单次 RGB 找色. 模板找图、OCR 与 M4 构建期/native 包路径继续按用户价值推进; 历史证据工具保留但不作为自动发布门禁.
+M4 路径 A 已完成, M3 自动化现已通过宿主无障碍接通有界坐标/全局动作、有界 selector/UI 树数据面、有界屏幕截图、单次 RGB 找色及有界 PNG/JPEG 模板找图. OCR 与 M4 构建期/native 包路径继续按用户价值推进; 历史证据工具保留但不作为自动发布门禁.
 
 - [查看 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -165,6 +165,14 @@ M4 路径 A 已完成, M3 自动化现已通过宿主无障碍接通有界坐标
 ### 版本历史
 
 ******
+
+# v0.4.0-alpha.5
+
+###### 2026/08/24
+
+* `提示` 当前树第五个 M3 自动化 alpha 候选; 有界模板找图已在启用无障碍的 API 37 模拟器通过, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; OCR、发布及完整设备矩阵仍不在本次声明范围
+* `新增` 新增 `autojs6.images.find_image(template, *, region=None, threshold=0)`, 接受 PNG/JPEG 字节与可选有界区域, 返回左上角坐标或 `None`
+* `优化` 每次执行上传一个最大 1 MiB 的模板, 以 24 KiB 原始块传输并校验 SHA-256, 单边解码不超过 2048 像素, 按 row-major 确定性扫描并校验 `autojs6-python-image-match-v1`; 仅全不透明像素参与、其余为通配, 无需 OpenCV, 始终 release 并清零缓冲区, 且仅对 Android 333 ms 截图节流执行有界 350 ms 等待重试
 
 # v0.4.0-alpha.4
 
@@ -181,14 +189,6 @@ M4 路径 A 已完成, M3 自动化现已通过宿主无障碍接通有界坐标
 * `提示` 当前树第三个 M3 自动化 alpha 候选; Android 11+ 有界截图完整路径已在启用无障碍的 API 37 模拟器通过聚焦验收, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; 找图找色、OCR、发布及完整设备矩阵仍不在本次声明范围
 * `新增` 新增 `autojs6.images.capture_screen`, 以 PNG/JPEG 返回经验证的编码字节, 或原子写入并发布执行输出产物
 * `优化` 每次执行最多保留 1 张截图, 以 32 KiB 原始块传输且编码后最多 4 MiB; Python 核对顺序、EOF、SHA-256 与格式签名并始终 release, 宿主在替换/释放/终态清零, 失败使用稳定错误且不启用服务、不打开设置
-
-# v0.4.0-alpha.2
-
-###### 2026/08/24
-
-* `提示` 当前树第二个 M3 自动化 alpha 候选; 完整有界 selector/UI 树路径已在启用无障碍的 API 37 模拟器通过聚焦验收, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; 截图, OCR, 发布及完整设备矩阵仍不在本次声明范围
-* `新增` 新增实时 `autojs6.selector.snapshot/find/click/set_text` API, 通过不透明的执行级节点引用提供分离的无障碍树纯数据, AND 组合首次匹配查询及显式动作
-* `优化` 限制快照节点, 深度, 载荷及节点文本, 选择器扫描规模, 查询/设置文本与保留节点; 扫描不完整返回 `SELECTOR_SCAN_LIMIT_EXCEEDED`, 引用过期返回 `STALE_NODE`, 无障碍不可用时不打开设置并抛出 `CapabilityUnavailableError`
 
 ##### 更多版本
 

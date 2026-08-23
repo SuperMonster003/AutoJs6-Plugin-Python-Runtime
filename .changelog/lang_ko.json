@@ -5,6 +5,18 @@
   "changelog_label_improvement": "개선",
   "changelog_label_dependency": "의존성",
   "$data": {
+    "v0.4.0-alpha.5": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "현재 tree의 다섯 번째 M3 automation alpha candidate입니다. 제한된 template matching은 accessibility가 활성화된 API 37 emulator에서 통과했고 API 31 실제 기기에서는 accessibility service를 바꾸지 않고 fail-closed했습니다. OCR, 공개 및 전체 device matrix는 이 주장에 포함하지 않습니다"
+      ],
+      "feature": [
+        "PNG/JPEG bytes, 선택적 제한 region, 왼쪽 위 좌표 또는 `None` 결과를 위한 `autojs6.images.find_image(template, *, region=None, threshold=0)` 추가"
+      ],
+      "improvement": [
+        "실행당 최대 1 MiB template 하나를 24 KiB raw chunk와 SHA-256 검증으로 업로드하고 변당 최대 2048 pixel로 decode하며 `autojs6-python-image-match-v1` 아래 deterministic row-major로 스캔합니다. 완전 불투명 pixel만 참여하고 나머지는 wildcard이며 OpenCV가 필요 없고 항상 release 후 buffer를 0으로 지우며 Android 333 ms screenshot throttle만 제한된 350 ms 대기 후 retry합니다"
+      ]
+    },
     "v0.4.0-alpha.4": {
       "released_date": "2026/08/24",
       "hint": [

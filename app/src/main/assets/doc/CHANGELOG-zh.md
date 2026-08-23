@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.5
+
+###### 2026/08/24
+
+* `提示` 当前树第五个 M3 自动化 alpha 候选; 有界模板找图已在启用无障碍的 API 37 模拟器通过, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; OCR、发布及完整设备矩阵仍不在本次声明范围
+* `新增` 新增 `autojs6.images.find_image(template, *, region=None, threshold=0)`, 接受 PNG/JPEG 字节与可选有界区域, 返回左上角坐标或 `None`
+* `优化` 每次执行上传一个最大 1 MiB 的模板, 以 24 KiB 原始块传输并校验 SHA-256, 单边解码不超过 2048 像素, 按 row-major 确定性扫描并校验 `autojs6-python-image-match-v1`; 仅全不透明像素参与、其余为通配, 无需 OpenCV, 始终 release 并清零缓冲区, 且仅对 Android 333 ms 截图节流执行有界 350 ms 等待重试
+
 # v0.4.0-alpha.4
 
 ###### 2026/08/24

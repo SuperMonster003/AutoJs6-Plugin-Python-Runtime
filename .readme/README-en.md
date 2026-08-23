@@ -51,7 +51,7 @@ Python Runtime is an independent provider for version 1 of the Python protocol. 
 - Import project-local pure-Python packages and `.dist-info` metadata from the admitted project root without online pip or runtime installation.
 - Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.
 - Set an explicit strict JSON result of at most 64 KiB and transfer up to 16 optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.
-- Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, bounded `automator.click/long_click/press/swipe/back/home`, bounded `selector.snapshot/find/click/set_text`, `images.capture_screen`, and `images.find_color` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.
+- Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, bounded `automator.click/long_click/press/swipe/back/home`, bounded `selector.snapshot/find/click/set_text`, `images.capture_screen`, `images.find_color`, and `images.find_image` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.
 - Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.
 - Allow one active session in the runtime process with no provider-side queue.
 - Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed.
@@ -103,8 +103,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 > Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
-release target: 0.4.0-alpha.4
-release state: 0.4.0-alpha.4 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, and one-shot RGB find_color passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; template image matching, OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.5
+release state: 0.4.0-alpha.5 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, and bounded PNG/JPEG find_image template matching passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -134,7 +134,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 - Protocol 1.5 admits at most 1024 Host calls per execution, caps each request/response at 64 KiB and text at 32 KiB, and waits at most 5 s for an ordinary Host main-thread action. Host files use 4 KiB relative paths, 32 KiB UTF-8 text, and listings of at most 128 names of 255 UTF-8 bytes each. Foreground dialogs cap titles at 256 UTF-8 bytes, content at 4 KiB, prompt defaults/replies at 32 KiB, and selection lists at 64 items of 1 KiB each and 32 KiB total; one user response may wait up to 5 min. One execution may successfully launch at most 16 scoped asynchronous non-Python Host child scripts; nested Python returns `NESTED_PYTHON_NOT_ALLOWED`, and `stop_self` cancels through process restart.
 - Automator coordinates are strict integers from 0 through 1000000, while press and swipe durations range from 1 ms through 4 s; unavailable Host accessibility raises `CapabilityUnavailableError` without opening settings.
 - Selector snapshots accept at most 128 nodes, depth 32, and 48 KiB of JSON; find scans at most 1024 nodes, node text is capped at 256 Unicode code points, query text at 1024 UTF-8 bytes, set text at 4 KiB, and each execution retains at most 128 node references. Incomplete scans return `SELECTOR_SCAN_LIMIT_EXCEEDED` and stale references return `STALE_NODE`.
-- Screen capture retains at most 1 image per execution, caps encoded data at 4 MiB, transfers raw chunks of 32 KiB, and limits each dimension to 8192 pixels and total area to 16777216 pixels. Python verifies length, order, EOF, SHA-256, and the format signature before returning; unavailable accessibility/API raises `CapabilityUnavailableError`, while stable failures include `SCREEN_CAPTURE_FAILED`, `RESULT_LIMIT_EXCEEDED`, and `STALE_IMAGE`. Color search scans one fresh screenshot in row-major order with an optional bounded region and per-channel threshold up to 255, returning only a coordinate or miss without transferring image bytes.
+- Screen capture retains at most 1 image per execution, caps encoded data at 4 MiB, transfers raw chunks of 32 KiB, and limits each dimension to 8192 pixels and total area to 16777216 pixels. Python verifies length, order, EOF, SHA-256, and the format signature before returning; unavailable accessibility/API raises `CapabilityUnavailableError`, while stable failures include `SCREEN_CAPTURE_FAILED`, `RESULT_LIMIT_EXCEEDED`, and `STALE_IMAGE`. Color search scans one fresh screenshot in row-major order with an optional bounded region and per-channel threshold up to 255, returning only a coordinate or miss without transferring image bytes. Template search retains at most 1 PNG/JPEG template, caps it at 1 MiB, transfers 24 KiB raw chunks, and limits dimensions to 2048, area to 1048576, search region to 4194304, and comparisons to 16777216; exact-alpha pixels participate, other pixels are wildcards, matching is deterministic row-major, and buffers are released and zeroed at terminal.
 - Cancellation uses process restart rather than CPython-level cooperation; native extensions and blocking calls still require later Android validation.
 - The plugin grants `INTERNET` for script-initiated standard-library networking; online pip, automatic code downloads, and runtime third-party package installation remain unsupported.
 
@@ -146,7 +146,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 - General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to built-in `input()` and standard-library `getpass.getpass()` after the finite snapshot of at most 1 MiB reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.
 - There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.
-- The live broker covers the complete first low-risk slice, bounded Host files, foreground dialogs, bounded engines, explicit coordinate/global automator actions, bounded selector/UI-tree snapshots/actions, bounded screen capture, and bounded `find_color`; `find_image`, template upload, and OCR remain undeclared.
+- The live broker covers the complete first low-risk slice, bounded Host files, foreground dialogs, bounded engines, explicit coordinate/global automator actions, bounded selector/UI-tree snapshots/actions, bounded screen capture, `find_color`, and `find_image`; OCR, mutable image processing, and multi-scale matching remain undeclared.
 - 32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.
 - The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification.
 
@@ -156,7 +156,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-M4 Path A is complete, and M3 automation now includes bounded coordinate/global actions, the bounded selector/UI-tree data plane, screen capture, and one-shot RGB color search through Host accessibility. Template image matching, OCR, and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.
+M4 Path A is complete, and M3 automation now includes bounded coordinate/global actions, the bounded selector/UI-tree data plane, screen capture, one-shot RGB color search, and bounded PNG/JPEG template matching through Host accessibility. OCR and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -165,6 +165,14 @@ M4 Path A is complete, and M3 automation now includes bounded coordinate/global 
 ### Release history
 
 ******
+
+# v0.4.0-alpha.5
+
+###### 2026/08/24
+
+* `Hint` Fifth M3 automation current-tree alpha candidate; bounded template matching passed on an accessibility-enabled API 37 emulator and failed closed on an API 31 physical device without changing its accessibility services; OCR, publication, and a complete device matrix remain outside this claim
+* `Feature` Add `autojs6.images.find_image(template, *, region=None, threshold=0)` for PNG/JPEG bytes, an optional bounded region, and a top-left coordinate-or-`None` result
+* `Improvement` Upload one execution-local template up to 1 MiB in 24 KiB raw chunks with SHA-256 verification, decode at most 2048 pixels per side, scan deterministically in row-major order under `autojs6-python-image-match-v1`, use exact-alpha pixels as participants and other pixels as wildcards, require no OpenCV, always release and zero buffers, and retry only Android's 333 ms screenshot throttle after a bounded 350 ms wait
 
 # v0.4.0-alpha.4
 
@@ -181,14 +189,6 @@ M4 Path A is complete, and M3 automation now includes bounded coordinate/global 
 * `Hint` Third M3 automation current-tree alpha candidate; the complete bounded Android 11+ screen-capture path passed focused acceptance on an accessibility-enabled API 37 emulator, and fail-closed passed on an API 31 physical device without changing its accessibility services; image/color matching, OCR, publication, and a complete device matrix remain outside this claim
 * `Feature` Add `autojs6.images.capture_screen`, returning verified PNG/JPEG encoded bytes or atomically writing and publishing an execution output artifact
 * `Improvement` Retain at most 1 capture per execution, transfer 32 KiB raw chunks, and cap encoded data at 4 MiB; Python verifies order, EOF, SHA-256, and format signatures and always releases, while the Host zeros on replacement/release/terminal and reports stable failures without enabling services or opening settings
-
-# v0.4.0-alpha.2
-
-###### 2026/08/24
-
-* `Hint` Second M3 automation current-tree alpha candidate; the full bounded selector/UI-tree path passed focused acceptance on an accessibility-enabled API 37 emulator, and fail-closed passed on an API 31 physical device without changing its accessibility services; screenshots, OCR, publication, and a complete device matrix remain outside this claim
-* `Feature` Add live `autojs6.selector.snapshot/find/click/set_text` APIs for detached accessibility-tree data, AND-composed first-match queries, and explicit actions through opaque execution-local node references
-* `Improvement` Bound snapshot nodes, depth, payload and node text, selector scan size, query/set text and retained nodes; report incomplete scans as `SELECTOR_SCAN_LIMIT_EXCEEDED`, stale references as `STALE_NODE`, and unavailable accessibility as `CapabilityUnavailableError` without opening settings
 
 ##### For more releases
 

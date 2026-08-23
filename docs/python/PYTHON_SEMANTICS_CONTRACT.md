@@ -521,16 +521,53 @@ Android object crosses into Python; the Host clears its bounded row buffer and
 recycles the screenshot in `finally`. Color search does not occupy or replace
 the one retained encoded-image slot used by `capture_screen`.
 
+`images.find_image(template, *, region=None, threshold=0)` accepts PNG/JPEG
+`bytes`, `bytearray` or a byte-oriented `memoryview` and returns the absolute
+top-left `(x, y)` of the first exact-size template candidate in deterministic
+top-to-bottom/left-to-right order, or `None` after exhaustive absence. Region
+and threshold use the same strict local and repeated Host validation as
+`find_color`. The Host compares absolute RGB channel differences and treats only
+decoded template pixels with alpha exactly 255 as participating pixels; every
+other pixel is a wildcard, and at least one fully opaque pixel is required.
+
+Python identifies the encoded format, copies the template into a mutable
+temporary buffer, declares byte length and SHA-256, and uploads ordered canonical
+Base64 chunks of at most 24 KiB through exact
+`autojs6-python-image-template-v1` and
+`autojs6-python-image-template-chunk-v1` responses. Encoded bytes are capped at
+1 MiB; decoded dimensions at 2048 each and decoded area at 1,048,576 pixels.
+The screenshot search region is capped at 4,194,304 pixels and one search at
+16,777,216 counted anchor/full comparisons. Exceeding a bound fails rather than
+returning a false miss.
+
+The Host owns at most one pending or decoded execution-local template and clears
+encoded/pixel/offset arrays on replacement, upload/decode failure, release, or
+broker terminal. Python releases every usable ID in `finally` and overwrites its
+mutable upload copy. A successful match uses exact
+`autojs6-python-image-match-v1`; Python verifies hit/miss consistency, fixed
+coordinate bounds, and full template containment in a requested region. Host
+decode uses Android `BitmapFactory`; matching does not load, require, or fall
+back to the AutoJs6 OpenCV plugin.
+
 Android/API or capture-service absence maps to `CapabilityUnavailableError` via
 `SCREEN_CAPTURE_UNAVAILABLE` or `ACCESSIBILITY_UNAVAILABLE`. Platform capture or
-search/encoding failure returns `SCREEN_CAPTURE_FAILED`, size overflow returns
-`RESULT_LIMIT_EXCEEDED`, an unavailable execution-local handle returns
-`STALE_IMAGE`, and malformed transfer or color-match data returns
-`BROKER_PROTOCOL_ERROR`.
+search/encoding failure returns `SCREEN_CAPTURE_FAILED`; size, region, or
+comparison overflow returns `RESULT_LIMIT_EXCEEDED`. Unavailable execution-local
+handles return `STALE_IMAGE` or `STALE_TEMPLATE`, while invalid template bytes,
+digest/decode/dimensions, or an all-wildcard template return
+`INVALID_IMAGE_TEMPLATE`. Malformed transfer, acknowledgement, color-match, or
+template-match data returns `BROKER_PROTOCOL_ERROR`.
 Android image objects and callbacks never cross the process boundary. Mutable
-images, cropping, arbitrary pixel access, `find_image`, template upload and OCR
-remain undeclared. The full transfer, search, error and artifact contract is documented in
-`HOST_IMAGES.md`.
+images, cropping, arbitrary pixel access, capture-to-template handles,
+multi-scale/rotated matching, and OCR remain undeclared. The full transfer,
+search, error and artifact contract is documented in `HOST_IMAGES.md`.
+
+Android rejects accessibility screenshot requests made within 333 ms of the
+previous accepted request. Only exact
+`ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT` is retried: the Host waits 350 ms,
+allows at most three total attempts, and keeps every attempt inside the same
+four-second capture deadline. Every other platform error, interruption,
+deadline exhaustion, or unavailable service remains fail-closed without retry.
 
 Focused screen-capture acceptance exercised the public Python project engine
 against Host 5276 and Plugin `0.4.0-alpha.3`/57. On the API 37 x86_64 16
@@ -559,6 +596,23 @@ list remained byte-for-byte unchanged; it completed in 0.945 seconds with
 The emulator service was restored to enabled, bound, non-binding and non-crashed
 state after instrumentation; this remains focused current-tree acceptance rather
 than a release claim.
+
+Focused template-search acceptance exercised the public Python project engine
+against Host 5276 and Plugin `0.4.0-alpha.5`/63. On the API 37 x86_64 16
+KiB-page emulator, one execution uploaded a 3 x 3 PNG target, searched only the
+controlled `#123456` bounds with per-channel threshold 2, returned a contained
+top-left coordinate, then immediately uploaded a second PNG and proved
+exhaustive absence returned `None`. The back-to-back captures also exercised
+the bounded 350 ms retry for Android's 333 ms screenshot throttle. The final
+run completed in 5.841 seconds with `OK (1 test)`, and Host, test and Plugin
+code paths remained unchanged across instrumentation. On Sony XQ-AT72
+(`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages), `images.find_image(...)`
+failed closed with the exact `CapabilityUnavailableError` in 0.979 seconds;
+`accessibility_enabled=1` and the pre-existing six-service list remained
+byte-for-byte unchanged with AutoJs6 absent. Neither run uninstalled packages
+or cleared application data. The emulator was restored to the one enabled and
+bound AutoJs6 service with empty binding/crashed sets; this remains focused
+current-tree acceptance rather than a release claim.
 
 Focused selector acceptance exercised the public Python project engine against
 the paired Host 5276 and Plugin `0.4.0-alpha.2`/54 builds. On the API 37 x86_64
