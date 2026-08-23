@@ -3,12 +3,12 @@
 Status: implemented in the current Host and Plugin development trees. The first
 capability slice covers toast, clipboard, application launch/navigation, live
 device state, level-aware Host console output and permission-aware notices. The
-bounded Host-files portion of the second slice adds execution-relative UTF-8
-text I/O and direct directory inspection. The complete first slice passed one
-API 31 arm64 physical-device smoke and one API 37 x86_64 16 KiB-page emulator
-smoke on 2026-08-23. This document describes the reusable broker contract; it
-does not claim that later Roadmap capabilities, a complete device matrix or a
-published release exist.
+second slice now includes bounded execution-relative Host files plus
+foreground-only alert, confirmation, text-prompt and selection dialogs. Both
+second-slice portions passed one API 31 arm64 physical-device smoke and one API
+37 x86_64 16 KiB-page emulator smoke on 2026-08-23. This document describes the
+reusable broker contract; it does not claim that later Roadmap capabilities, a
+complete device matrix or a published release exist.
 
 ## Negotiation and Binder compatibility
 
@@ -113,10 +113,17 @@ exact object defined by the selected capability.
 | One Host file path | 4 KiB UTF-8, normalized relative path |
 | One Host text file read/write | 32 KiB UTF-8 |
 | One direct directory listing | 128 names, each at most 255 UTF-8 bytes |
-| One Host main-thread action wait | 5 s |
+| One dialog title | 256 UTF-8 bytes, non-empty |
+| One dialog content | 4 KiB UTF-8 |
+| One prompt default or reply | 32 KiB UTF-8 |
+| One selection list | 1-64 non-empty items, each at most 1 KiB and at most 32 KiB total |
+| One ordinary Host main-thread action wait | 5 s |
+| One foreground dialog response wait | 5 min |
 
-The overall Python execution deadline still applies independently. Exhausting
-the call quota does not extend that deadline.
+The overall Python execution deadline still applies independently. A dialog
+call holds one broker call until the user responds, the dialog is dismissed,
+the execution is cancelled, or its five-minute dialog wait expires. Exhausting
+the call quota does not extend either deadline.
 
 ## Stable errors
 
@@ -136,6 +143,7 @@ The Host dispatcher can return:
 | `PATH_NOT_FOUND` | The requested Host file or required parent directory does not exist |
 | `PATH_TYPE_MISMATCH` | A file operation received a directory or vice versa |
 | `FILE_ENCODING_ERROR` | A Host file is not strict UTF-8 text |
+| `INTERACTIVE_NOT_ALLOWED` | A Host dialog was requested without a live foreground Activity-backed grant |
 
 `CAPABILITY_UNAVAILABLE` and `BROKER_CLOSED` become
 `autojs6.CapabilityUnavailableError`. Other Host failures become
@@ -165,6 +173,10 @@ code. A dead Binder, closed private bridge or missing negotiated broker becomes
 | `autojs6.files.is_file(path) -> bool` | `files.is_file` | `{"path": path}` | regular-file test |
 | `autojs6.files.is_dir(path) -> bool` | `files.is_dir` | `{"path": path}` | directory test |
 | `autojs6.files.list(path=".") -> list[str]` | `files.list` | `{"path": path}` | sorted direct names |
+| `autojs6.dialogs.alert(text, *, title="AutoJs6 Python") -> None` | `dialogs.alert` | `{"title": title, "text": text}` | `null` after acknowledgement or dismissal |
+| `autojs6.dialogs.confirm(text, *, title="AutoJs6 Python") -> bool` | `dialogs.confirm` | `{"title": title, "text": text}` | positive action is `true`; negative/dismissal is `false` |
+| `autojs6.dialogs.prompt(text, *, default="", title="AutoJs6 Python") -> str \| None` | `dialogs.prompt` | `{"title": title, "text": text, "default": default}` | entered text, or `null` on dismissal |
+| `autojs6.dialogs.select(items, *, title="AutoJs6 Python") -> int \| None` | `dialogs.select` | `{"title": title, "items": items}` | zero-based index, or `null` on dismissal |
 
 Package names must use ordinary dotted Android identifier segments. URLs must
 start with `http://` or `https://`. Empty toast/clipboard/console text is
@@ -207,13 +219,28 @@ Listings contain at most 128 validated direct child names and the Python facade
 returns them in deterministic sorted order. Filesystem permission failures are
 reduced to `PERMISSION_DENIED` or `HOST_FAILURE` without leaking Host internals.
 
+Host dialogs reuse the same opaque foreground authorization boundary as
+protocol 1.3 interactive input. Only an explicit user-gesture launch with a
+live `Activity` receives a controller; scheduled tasks, ordinary background
+project execution and other non-interactive launches have no controller and
+return `INTERACTIVE_NOT_ALLOWED` before any UI is posted. The Host owns and
+renders every `MaterialDialog`; Python receives only the typed pure-data result.
+
+The foreground controller serializes one prompt or Host dialog at a time.
+Cancel/back/dismiss maps to `false` for `confirm` and `None` for `prompt` and
+`select`; alert dismissal completes with `None`. Execution cancellation closes
+the current dialog and wakes the blocked call. Titles must be non-empty; dialog
+content may be empty. Selection items must be non-empty text, and the Python
+facade validates every byte/count limit before dispatch while the Host validates
+it again. No dialog exposes a `Context`, view object, callback or raw Binder to
+Python.
+
 The launch-time `app.snapshot()` and `device.snapshot()` APIs remain detached
 immutable snapshots. The execution-private workspace visible to ordinary Python
 `open()` is still a frozen Plugin-side copy and is not mutated by
 `autojs6.files`. Conversely, `autojs6.files` observes the live bounded Host root;
 it does not grant arbitrary filesystem access, expose a general Java bridge, or
-add dialog, accessibility, screenshot or OCR APIs. Those are separate Roadmap
-items.
+add accessibility, screenshot or OCR APIs. Those remain separate Roadmap items.
 
 ## Trust boundary
 
@@ -268,3 +295,19 @@ on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages) and 3.295 seconds
 on the API 37 x86_64 16 KiB-page emulator. Both reported `OK (1 test)`. This is
 focused dual-device current-tree acceptance, not a published release or a full
 device matrix.
+
+`PythonU1R2AcceptanceInstrumentationTest#foregroundDialogsRoundTripThroughProtocol15Broker`
+launches a standalone file through `Scripts.runInteractive`, the public Host
+engine and the real Plugin. It acknowledges an alert, accepts a confirmation,
+replaces a prompt default and selects the second item, then verifies the exact
+typed structured result and private transport cleanup. The companion
+`backgroundDialogsFailClosedWithoutOpeningUi` test launches an admitted project
+without foreground authorization and requires the stable
+`INTERACTIVE_NOT_ALLOWED` result without opening a dialog.
+
+On the `0.3.0-alpha.4` current tree paired to clean Host commit
+`f9eef784855f64da4ac0a9f33ad89688b3f3bd03`, the foreground test passed in
+1.838 seconds on Sony XQ-AT72 and 8.295 seconds on the API 37 emulator. The
+background test passed in 0.988 and 0.936 seconds respectively. All four runs
+reported `OK (1 test)`. APKs were installed with replacement semantics under
+the existing SM003 identity; no package uninstall or app-data clear was used.

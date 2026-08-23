@@ -50,7 +50,7 @@ Python Runtime 是獨立的 Python 協定 V1 provider. 宿主將單一 Python �
 - 為已准入專案明確選擇 `entryMode=file|module`; module 模式使用標準 `runpy` 中繼資料、專案根目錄 `sys.path[0]` 與 package-relative import, file 模式保留一般指令碼語義.
 - 在腳本執行期間依 stdout/stderr 原始順序透過有界 chunk 與 credit 傳送; credit 耗盡會對執行施加背壓.
 - 透過協定 1.4 明確設定最大 64 KiB 的嚴格 JSON 結果, 並傳送最多 16 個具有路徑、大小與 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.
-- 透過協定 1.5 的執行級純資料 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice` 與有界 `files.read_text/write_text/exists/is_file/is_dir/list`, 終態後自動撤銷.
+- 透過協定 1.5 的執行級純資料 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list` 與僅限前景的 `dialogs.alert/confirm/prompt/select`, 終態後自動撤銷.
 - 回傳 `SystemExit`, 語法錯誤與執行階段例外, 包含有界結構化 traceback.
 - 同一執行環境程序只允許一個作用中工作階段, provider 端不排隊.
 - 宿主無須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播.
@@ -91,7 +91,7 @@ engine: python
 protocol: 1.0-1.5
 ```
 
-外掛接收獨立 SOURCE, 可選的有界 workspace archive, 最大 1 MiB 的有限預置 stdin snapshot, 以及協定 1.1 的唯讀宿主能力快照. 協定 1.2 為已准入專案加入明確 file/module 入口協商. 協定 1.3 在 snapshot EOF 後為內建 `input()` 加入由 Host 持有且僅限前景的 prompt/reply; 標準庫 `getpass.getpass()` 使用隱藏回顯. 協定 1.4 加入明確嚴格 JSON 結果與可選的 SHA-256 manifest 輸出 artifact, stdout 僅供診斷且絕不解析為結果. 協定 1.5 加入綁定單次執行、外掛 UID、呼叫序號與配額的純資料 Host capability broker. 直接 `sys.stdin` 始終有限, 背景啟動絕不開啟輸入 UI, 使用者指令碼也不會取得 Context、原始 Binder、宿主執行環境物件或 callback sink.
+外掛接收獨立 SOURCE, 可選的有界 workspace archive, 最大 1 MiB 的有限預置 stdin snapshot, 以及協定 1.1 的唯讀宿主能力快照. 協定 1.2 為已准入專案加入明確 file/module 入口協商. 協定 1.3 在 snapshot EOF 後為內建 `input()` 加入由 Host 持有且僅限前景的 prompt/reply; 標準庫 `getpass.getpass()` 使用隱藏回顯. 協定 1.4 加入明確嚴格 JSON 結果與可選的 SHA-256 manifest 輸出 artifact, stdout 僅供診斷且絕不解析為結果. 協定 1.5 加入綁定單次執行、外掛 UID、呼叫序號與配額的純資料 Host capability broker. Host 對話框也要求由有效 Activity 支援的前景授權; 背景啟動不會開啟 UI, 而是穩定回傳 `INTERACTIVE_NOT_ALLOWED`. 直接 `sys.stdin` 始終有限, 背景啟動絕不開啟輸入 UI, 使用者指令碼也不會取得 Context、原始 Binder、宿主執行環境物件或 callback sink.
 
 ******
 
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂與三件 AAR distribution manifest 已寫入 lock. 每次新執行都重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後無須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.3.0-alpha.3
-release state: 0.3.0-alpha.3 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files portion of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; dialogs, engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.4
+release state: 0.3.0-alpha.4 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files and foreground-dialog portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 - SOURCE 描述元採用 Binder 接收端完整 PFD 所有權, 保留 reliable-pipe 錯誤通道, 並於終態或關閉時釋放.
 - 輸出在執行期間依 credit 逐 chunk 傳送; credit 耗盡會暫停腳本, 已接受的輸出先於唯一終態, 終態後禁止輸出.
 - 結構化 JSON 最大 64 KiB; 輸出 artifact 最多 16 個, 路徑最大 1024 UTF-8 bytes, 單個最大 4 MiB, 合計最大 8 MiB, Host 必須核對精確長度、EOF 與 SHA-256.
-- 協定 1.5 每次執行最多 1024 次 Host 呼叫, 每個請求/回應最大 64 KiB, 文字最大 32 KiB, 單次 Host 調度最多等待 5 s. Host files 使用最大 4 KiB 的相對路徑、最大 32 KiB 的 UTF-8 文字, 每次最多列出 128 個名稱, 每個最大 255 UTF-8 bytes.
+- 協定 1.5 每次執行最多 1024 次 Host 呼叫, 每個請求/回應最大 64 KiB, 文字最大 32 KiB, 一般 Host 主執行緒動作最多等待 5 s. Host files 使用最大 4 KiB 的相對路徑、最大 32 KiB 的 UTF-8 文字, 每次最多列出 128 個名稱, 每個最大 255 UTF-8 bytes. 前景對話框標題最大 256 UTF-8 bytes, 內容最大 4 KiB, prompt 預設值/回覆最大 32 KiB, select 最多 64 項、每項最大 1 KiB、合計最大 32 KiB, 單次使用者回應最多等待 5 min.
 - 取消模式為程序重啟, 而非 CPython 級協作取消; 原生擴充套件或阻塞呼叫仍需後續 Android 驗證.
 - 外掛已授予 `INTERNET` 以支援腳本透過標準函式庫直接連線; 仍不支援線上 pip、自動下載程式碼或執行期安裝第三方套件.
 
@@ -141,7 +141,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 - 不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前景互動僅適用於最大 1 MiB 的有限 snapshot 到達 EOF 後的內建 `input()` 與標準庫 `getpass.getpass()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.
 - 不提供 UI 指令碼, 偵錯器, REPL 或任意宿主 Java 物件存取.
-- 即時 broker 已涵蓋完整首批低風險能力與有界 Host files; 對話框、引擎、無障礙、截圖與 OCR 仍未宣告.
+- 即時 broker 已涵蓋完整首批低風險能力、有界 Host files 與前景對話框; 引擎、無障礙、截圖與 OCR 仍未宣告.
 - 不宣告 32 位元 Android 支援, 也不保證任何第三方 native wheel 可用.
 - 目前樹已有 API 31 arm64-v8a 實機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格.
 
@@ -161,6 +161,14 @@ R6-P2/P3 的本機 RC 與集中裝置證據保留為歷史記錄. 本次 clean V
 
 ******
 
+# v0.3.0-alpha.4
+
+###### 2026/08/23
+
+* `提示` M3 第四個 current-tree alpha 候選; 前景 Host 對話框已通過雙裝置聚焦驗收, 引擎、後續能力、公開發行與完整裝置矩陣不在本項宣告範圍
+* `新增` 新增僅限前景的 `autojs6.dialogs.alert/confirm/prompt/select` API, 分別回傳確認完成、布林選擇、可空文字與從零開始的可空選項索引
+* `改善` 限制對話框標題、內容、回覆與選項, 依序顯示單一 Host 擁有的對話框, 背景啟動不會開啟 UI 並穩定回傳 `INTERACTIVE_NOT_ALLOWED`
+
 # v0.3.0-alpha.3
 
 ###### 2026/08/23
@@ -176,15 +184,6 @@ R6-P2/P3 的本機 RC 與集中裝置證據保留為歷史記錄. 本次 clean V
 * `提示` M3 第二個 current-tree alpha 候選; 完整首批低風險 Host 能力已實作, 後續能力批次、公開發行與完整裝置矩陣不在本項宣告範圍
 * `新增` 新增即時 `autojs6.device.info()` 電量/螢幕/亮度/音量資訊、`autojs6.console.log/warn/error` 宿主控制台級別與 `autojs6.notice` 通知
 * `改善` 嚴格驗證 device 結果結構, 通知權限不足時穩定傳回 `PERMISSION_DENIED`, 不開啟設定或變更裝置權限狀態
-
-# v0.3.0-alpha.1
-
-###### 2026/08/23
-
-* `提示` M3 首個 current-tree alpha 候選; 協定 1.5 與低風險 Host 能力子集已實作, 後續能力、發行與完整裝置矩陣不在本項宣告範圍
-* `新增` 新增協定 1.5 執行級 Host capability broker, 以純資料 JSON 綁定 request UUID、外掛 UID、單調呼叫序號、1024 次配額、64 KiB 訊息與 5 秒 Host 調度上限
-* `新增` 新增 `autojs6.toast`, `autojs6.clip.get/set` 與 `autojs6.app.launch/launch_app/open_url` 即時 Host API
-* `改善` 終態、取消、Binder death 與清理路徑統一撤銷 broker, Python 端穩定映射 capability unavailable、Host 與協定錯誤
 
 ##### 更多版本
 

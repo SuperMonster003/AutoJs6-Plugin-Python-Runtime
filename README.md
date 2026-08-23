@@ -50,7 +50,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 - 为已准入项目显式选择 `entryMode=file|module`; module 模式使用标准 `runpy` 元数据、项目根目录 `sys.path[0]` 与包相对导入, file 模式保持普通脚本语义.
 - 在脚本执行期间按 stdout/stderr 原始顺序通过有界 chunk 与 credit 传送; credit 耗尽会对执行施加背压.
 - 通过协议 1.4 显式设置最大 64 KiB 的严格 JSON 结果, 并传送最多 16 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.
-- 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、权限感知 `notice` 与有界 `files.read_text/write_text/exists/is_file/is_dir/list`, 终态后自动撤销.
+- 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、权限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list` 与仅限前台的 `dialogs.alert/confirm/prompt/select`, 终态后自动撤销.
 - 返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.
 - 同一运行时进程只允许一个活动会话, provider 侧不排队.
 - Host 无需重启; 安装或重新启用插件后下一次新执行会重新发现并 pin provider 身份, 在途 Binder death 会终止该执行且绝不自动重放.
@@ -91,7 +91,7 @@ engine: python
 protocol: 1.0-1.5
 ```
 
-插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. 协议 1.2 为已准入项目增加显式 file/module 入口协商. 协议 1.3 在快照 EOF 后为内置 `input()` 增加由 Host 持有且仅限前台的 prompt/reply; 标准库 `getpass.getpass()` 使用隐藏回显. 协议 1.4 增加显式严格 JSON 结果与可选的 SHA-256 manifest 输出 artifact, stdout 仅用于诊断且绝不被解析为结果. 协议 1.5 增加绑定单次执行、插件 UID、调用序号与配额的纯数据 Host capability broker. 直接 `sys.stdin` 始终有限, 后台启动绝不打开输入 UI, 用户脚本也不会得到 Context、原始 Binder、宿主运行时对象或 callback sink.
+插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. 协议 1.2 为已准入项目增加显式 file/module 入口协商. 协议 1.3 在快照 EOF 后为内置 `input()` 增加由 Host 持有且仅限前台的 prompt/reply; 标准库 `getpass.getpass()` 使用隐藏回显. 协议 1.4 增加显式严格 JSON 结果与可选的 SHA-256 manifest 输出 artifact, stdout 仅用于诊断且绝不被解析为结果. 协议 1.5 增加绑定单次执行、插件 UID、调用序号与配额的纯数据 Host capability broker. Host 对话框还要求由存活 Activity 支撑的前台授权; 后台启动不会打开 UI, 而是稳定返回 `INTERACTIVE_NOT_ALLOWED`. 直接 `sys.stdin` 始终有限, 后台启动绝不打开输入 UI, 用户脚本也不会得到 Context、原始 Binder、宿主运行时对象或 callback sink.
 
 ******
 
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.3.0-alpha.3
-release state: 0.3.0-alpha.3 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files portion of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; dialogs, engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.4
+release state: 0.3.0-alpha.4 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files and foreground-dialog portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 - SOURCE 描述符采用 Binder 接收端完整 PFD 所有权, 保留 reliable-pipe 错误通道, 并在终态或关闭时释放.
 - 输出在执行期间按 credit 逐 chunk 发送; credit 耗尽会暂停脚本, 已接受的输出先于唯一终态, 终态后禁止输出.
 - 结构化 JSON 最大 64 KiB; 输出 artifact 最多 16 个, 路径最大 1024 UTF-8 bytes, 单个最大 4 MiB, 合计最大 8 MiB, Host 必须核对精确长度、EOF 与 SHA-256.
-- 协议 1.5 每次执行最多 1024 次 Host 调用, 单个请求/响应最大 64 KiB, 文本最大 32 KiB, 单次 Host 调度等待最多 5 s. Host files 使用最大 4 KiB 的相对路径、最大 32 KiB 的 UTF-8 文本, 每次最多枚举 128 个名称, 每个最大 255 UTF-8 bytes.
+- 协议 1.5 每次执行最多 1024 次 Host 调用, 单个请求/响应最大 64 KiB, 文本最大 32 KiB, 普通 Host 主线程动作等待最多 5 s. Host files 使用最大 4 KiB 的相对路径、最大 32 KiB 的 UTF-8 文本, 每次最多枚举 128 个名称, 每个最大 255 UTF-8 bytes. 前台对话框标题最大 256 UTF-8 bytes, 正文最大 4 KiB, prompt 默认值/回复最大 32 KiB, select 最多 64 项、每项最大 1 KiB、合计最大 32 KiB, 单次用户响应最多等待 5 min.
 - 取消模式为进程重启, 不是 CPython 级协作取消; 原生扩展或阻塞调用仍需后续 Android 验证.
 - 插件已授予 `INTERNET` 以支持脚本通过标准库直接联网; 仍不支持在线 pip、自动下载代码或运行时安装第三方包.
 
@@ -141,7 +141,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 - 不提供通用实时 stdin 或直接 `sys.stdin` callback streaming. 前台交互仅适用于最大 1 MiB 的有限 snapshot 到达 EOF 后的内置 `input()` 与标准库 `getpass.getpass()`. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.
 - 不提供 UI 脚本, 调试器, REPL 或任意宿主 Java 对象访问.
-- 实时 broker 已覆盖完整首批低风险能力与有界 Host files; 对话框、引擎、无障碍、截图及 OCR 仍未声明.
+- 实时 broker 已覆盖完整首批低风险能力、有界 Host files 与前台对话框; 引擎、无障碍、截图及 OCR 仍未声明.
 - 不声明 32 位 Android 支持, 也不保证任意第三方 native wheel 可用.
 - 当前树已有 API 31 arm64-v8a 真机冒烟证据与 API 37 x86_64 16 KB page 模拟器冒烟证据; 两者都不冒充完整设备矩阵或发布资质.
 
@@ -161,6 +161,14 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 
 ******
 
+# v0.3.0-alpha.4
+
+###### 2026/08/23
+
+* `提示` M3 第四个 current-tree alpha 候选; 前台 Host 对话框已通过双设备聚焦验收, 引擎、后续能力、公开发布和完整设备矩阵仍不在本条声明范围内
+* `新增` 新增仅限前台的 `autojs6.dialogs.alert/confirm/prompt/select` API, 分别返回确认完成、布尔选择、可空文本与从零开始的可空选项索引
+* `优化` 限制对话框标题、正文、回复与选项, 串行显示单个 Host 所有的对话框, 后台启动不会打开 UI 并稳定返回 `INTERACTIVE_NOT_ALLOWED`
+
 # v0.3.0-alpha.3
 
 ###### 2026/08/23
@@ -176,15 +184,6 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 * `提示` M3 第二个 current-tree alpha 候选; 完整首批低风险 Host 能力已实现, 后续能力批次、公开发布和完整设备矩阵仍不在本条声明范围内
 * `新增` 新增实时 `autojs6.device.info()` 电量/屏幕/亮度/音量数据、`autojs6.console.log/warn/error` 宿主控制台级别及 `autojs6.notice` 通知
 * `优化` 严格校验 device 结果结构, 通知权限不足时稳定返回 `PERMISSION_DENIED`, 不打开设置或更改设备权限状态
-
-# v0.3.0-alpha.1
-
-###### 2026/08/23
-
-* `提示` M3 首个 current-tree alpha 候选; 协议 1.5 与低风险 Host 能力子集已实现, 后续能力、发布和完整设备矩阵仍不在本条声明范围内
-* `新增` 新增协议 1.5 执行级 Host capability broker, 以纯数据 JSON 绑定 request UUID、插件 UID、单调调用序号、1024 次配额、64 KiB 消息及 5 秒 Host 调度上限
-* `新增` 新增 `autojs6.toast`, `autojs6.clip.get/set` 与 `autojs6.app.launch/launch_app/open_url` 实时 Host API
-* `优化` 终态、取消、Binder death 与清理路径统一撤销 broker, Python 侧稳定映射 capability unavailable、Host 与协议错误
 
 ##### 更多版本
 

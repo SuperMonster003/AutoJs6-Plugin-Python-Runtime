@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.3.0-alpha.3 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.3.0-alpha.4 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -56,6 +56,8 @@
   每次执行独立 broker, 终态自动撤销。
 - [x] 协议 1.5 实时 Host files API: 项目根/单文件脚本目录内的 UTF-8 文本读写、
   存在/类型检查及直接目录枚举; 严格相对路径与容量边界阻止越过执行根目录。
+- [x] 协议 1.5 前台 Host dialogs API: `alert/confirm/prompt/select`; 复用 Activity-backed
+  前台授权, 后台与定时启动稳定返回 `INTERACTIVE_NOT_ALLOWED` 且不打开 UI。
 - [x] 单文件脚本 `ModuleNotFoundError` 时提示用户改用显式 Python 项目。
 
 ### 真机与构建证据 (历史, 保持有效)
@@ -196,7 +198,7 @@
 ## M3 —— 兑现初衷: AutoJs6 API 实时能力 broker (目标版本 0.3.0 起)
 
 > 主题: 进入 M3 前, Python 只有 4 个只读快照, 而 JS 有约 45 个模块。当前树已打通
-> 协议 1.5 broker 骨架并交付完整第一批低风险能力。后续继续按用户价值
+> 协议 1.5 broker 骨架、完整第一批低风险能力及第二批 files/dialogs。后续继续按用户价值
 > 逐批扩面。方案不必从零设计 —— 宿主已有两个现成参照:
 > Lua broker (机制完整: executionId 绑定、防重放、配额、唯一终态, 能力仅 2 项) 与
 > Node.js broker (能力面完整: 31 个模块)。Python 取两者之长:
@@ -262,8 +264,11 @@
   不提供删除、递归、二进制或自动创建父目录。宿主提交: `3cadd1497`、`6911116bc`;
   插件提交: `69d24a0`、`be72119`。
 - [x] [P] Host files 示例脚本 (`examples/python/m3_host_files.py`)。
-- [ ] [H+P] `autojs6.dialogs.alert/confirm/prompt/select` —— 前台弹窗 (复用协议 1.3
-  的前台授权与回复通道模式)
+- [x] [H+P] `autojs6.dialogs.alert/confirm/prompt/select` —— 前台弹窗; 复用协议 1.3
+  的 Activity-backed 前台授权, 标题/正文/prompt 回复/select 数量与总量均有界,
+  后台稳定返回 `INTERACTIVE_NOT_ALLOWED`。宿主提交: `7788da650`、`108095b42`、
+  `c7c9e9b05`、`f9eef7848`; 插件提交: `171cfa0`、`03e599b`。
+- [x] [P] Host dialogs 示例脚本 (`examples/python/m3_dialogs.py`)。
 - [ ] [H+P] `autojs6.engines` 最小集: 当前引擎信息 / 停止自身 / 运行其他脚本
 - [ ] 发布 0.3.x alpha
 
@@ -280,6 +285,24 @@
 - `0.3.0-alpha.3` current tree 在 Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a /
   4 KiB page) 用时 0.811 秒, API 37 / x86_64 / 16 KiB page 模拟器用时 3.295 秒,
   均为 `OK (1 test)`。这是 files 能力的双设备聚焦验收, 不冒充公开发布或完整设备矩阵。
+
+### 2026-08-23 M3 Host dialogs 验收记录
+
+- 宿主实现与首轮测试由 `7788da650`、`108095b42` 固定; `c7c9e9b05` 补齐
+  `PendingFileExecution` 编译契约, `f9eef7848` 让 MaterialDialog 正按钮选择不依赖设备与
+  应用语言是否同步。插件 façade、示例与便携测试由 `171cfa0`、`03e599b` 固定。
+- 三件 release AAR 经干净宿主 `f9eef784855f64da4ac0a9f33ad89688b3f3bd03`
+  的 protocol 1.5 distribution gate 重新生成并锁定; Host 源指纹为
+  `6fd409c181514be7e0dc6859ab6855b0b3e3c24792c351960ddd23d4736b6b56`。
+- 前台公共路径经 `Scripts.runInteractive` → `ScriptEngineService` →
+  `PythonPluginScriptEngine` → 真实插件 Binder 会话, 依次完成 alert、confirm 正向选择、
+  prompt 默认值替换及 select 第二项, 并核对精确结构化结果与私有传输清理。
+- 后台项目路径不携带前台授权, `dialogs.alert` 稳定返回 `INTERACTIVE_NOT_ALLOWED`,
+  全程不打开 UI。对话框仍由 Host 独占持有, Python 只接收纯数据结果。
+- `0.3.0-alpha.4` current tree 上, 前台用例在 Sony XQ-AT72 (`QV710AF65F`, API 31 /
+  arm64-v8a / 4 KiB page) 与 API 37 / x86_64 / 16 KiB page 模拟器分别用时 1.838 秒、
+  8.295 秒; 后台用例分别用时 0.988 秒、0.936 秒。四次均为 `OK (1 test)`。
+  APK 全部以同一 SM003 签名执行 `install -r -t`, 未卸载、未清数据, 已有定时任务状态保留。
 
 ### 第三批: 自动化核心 (0.4.0)
 
@@ -342,7 +365,7 @@
 | --- | --- | --- |
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
-| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架、完整第一批及第二批 files 已完成) |
+| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架、完整第一批及第二批 files/dialogs 已完成) |
 | 0.4.0 | M3 自动化核心 + M4 第三方包路径 A/B | 计划 |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |

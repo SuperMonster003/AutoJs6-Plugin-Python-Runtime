@@ -5,6 +5,18 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "اعتماد",
   "$data": {
+    "v0.3.0-alpha.4": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "مرشح alpha رابع من M3 للشجرة الحالية؛ اجتازت حوارات Host في foreground قبولاً مركزاً على جهازين، ولا يشمل ذلك engines أو القدرات اللاحقة أو النشر أو مصفوفة أجهزة كاملة"
+      ],
+      "feature": [
+        "إضافة API المقصورة على foreground وهي `autojs6.dialogs.alert/confirm/prompt/select` مع نتائج typed للإقرار والتأكيد والنص nullable وفهرس nullable يبدأ من الصفر"
+      ],
+      "improvement": [
+        "تقييد العناوين والمحتوى والردود والعناصر، وتسلسل حوار واحد تملكه Host في كل مرة، ورفض تشغيل background بالرمز المستقر `INTERACTIVE_NOT_ALLOWED` من دون فتح UI"
+      ]
+    },
     "v0.3.0-alpha.3": {
       "released_date": "2026/08/23",
       "hint": [

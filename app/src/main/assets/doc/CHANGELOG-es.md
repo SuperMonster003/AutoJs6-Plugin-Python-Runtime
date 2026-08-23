@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.4
+
+###### 2026/08/23
+
+* `Nota` Cuarto candidato alpha M3 del árbol actual; los diálogos Host en primer plano superaron la aceptación focalizada en dos dispositivos, sin afirmar engines, capacidades posteriores, publicación ni una matriz completa de dispositivos
+* `Función` Añadir las API solo en primer plano `autojs6.dialogs.alert/confirm/prompt/select`, con resultados tipados de acuse, confirmación, texto anulable e índice anulable desde cero
+* `Mejora` Limitar títulos, contenido, respuestas y elementos, serializar un diálogo propiedad del Host a la vez y rechazar inicios en segundo plano con `INTERACTIVE_NOT_ALLOWED` sin abrir UI
+
 # v0.3.0-alpha.3
 
 ###### 2026/08/23

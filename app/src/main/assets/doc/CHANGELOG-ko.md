@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.4
+
+###### 2026/08/23
+
+* `안내` 네 번째 M3 current-tree alpha candidate입니다. Foreground Host dialogs가 두 device의 focused acceptance를 통과했지만 engines, 이후 capability, 공개 배포 및 전체 device matrix는 포함하지 않습니다
+* `추가` foreground 전용 `autojs6.dialogs.alert/confirm/prompt/select` API를 추가하고 acknowledgement, boolean, nullable text 및 0-based nullable index 결과를 제공합니다
+* `개선` dialog title, content, reply 및 item을 제한하고 Host 소유 dialog를 한 번에 하나씩 직렬화하며 background 실행은 UI를 열지 않고 안정된 `INTERACTIVE_NOT_ALLOWED`로 거부합니다
+
 # v0.3.0-alpha.3
 
 ###### 2026/08/23

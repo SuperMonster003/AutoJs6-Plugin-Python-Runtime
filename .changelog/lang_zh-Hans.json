@@ -5,6 +5,18 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v0.3.0-alpha.4": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "M3 第四个 current-tree alpha 候选; 前台 Host 对话框已通过双设备聚焦验收, 引擎、后续能力、公开发布和完整设备矩阵仍不在本条声明范围内"
+      ],
+      "feature": [
+        "新增仅限前台的 `autojs6.dialogs.alert/confirm/prompt/select` API, 分别返回确认完成、布尔选择、可空文本与从零开始的可空选项索引"
+      ],
+      "improvement": [
+        "限制对话框标题、正文、回复与选项, 串行显示单个 Host 所有的对话框, 后台启动不会打开 UI 并稳定返回 `INTERACTIVE_NOT_ALLOWED`"
+      ]
+    },
     "v0.3.0-alpha.3": {
       "released_date": "2026/08/23",
       "hint": [

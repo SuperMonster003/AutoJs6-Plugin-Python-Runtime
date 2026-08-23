@@ -1,7 +1,8 @@
 # Python execution semantics contract
 
 Status: cumulative U1-R0 through U1-R2 contract plus the first M3 protocol 1.5
-Host capability slice and the bounded Host-files portion of its second slice.
+Host capability slice and the bounded Host-files and foreground-dialog portions
+of its second slice.
 Historical R2 evidence remains covered through E2; the M1/M2 public Host paths
 and focused M3 broker paths passed an API 31 / arm64-v8a / 4 KiB-page physical
 device and an API 37 / x86_64 / 16 KiB-page emulator on 2026-08-23. Those
@@ -333,14 +334,20 @@ The current public Python surface is:
   `autojs6.files.write_text(path, text, *, encoding="utf-8") -> None`;
 - `autojs6.files.exists/is_file/is_dir(path) -> bool` and
   `autojs6.files.list(path=".") -> list[str]` for the live Host execution root.
+- `autojs6.dialogs.alert(text, *, title="AutoJs6 Python") -> None`;
+- `autojs6.dialogs.confirm(text, *, title="AutoJs6 Python") -> bool`;
+- `autojs6.dialogs.prompt(text, *, default="", title="AutoJs6 Python") -> str | None`;
+- `autojs6.dialogs.select(items, *, title="AutoJs6 Python") -> int | None`.
 
 These are live Host operations, distinct from the detached launch-time
 `app.snapshot()` and `device.snapshot()` data. Every request is bound to the
 canonical execution request UUID and a positive monotonic call ID. The Host
 also pins the Plugin UID, admits at most 1024 calls, bounds request/response
-documents to 64 KiB and text to 32 KiB, and bounds a Host main-thread action to
-5 seconds. Calls are serialized by the Python facade and block until a typed
-response arrives.
+documents to 64 KiB and text to 32 KiB, and bounds an ordinary Host main-thread
+action to 5 seconds. Calls are serialized by the Python facade and block until
+a typed response arrives. A foreground dialog may wait for one user response
+for at most 5 minutes and remains independently bounded by the overall execution
+deadline.
 
 Missing/closed capabilities raise `CapabilityUnavailableError`. Host and wire
 failures raise `HostCapabilityError`, whose `code` property is stable. Cleanup
@@ -356,8 +363,21 @@ channel denial raises `HostCapabilityError` with code `PERMISSION_DENIED`.
 `HOST_CAPABILITY_BROKER_PROTOCOL.md`; malformed, extra or mistyped result fields
 are rejected as `BROKER_PROTOCOL_ERROR`.
 
-Dialogs, accessibility, screenshots and OCR remain planned rather than implied
-by the generic broker transport.
+Host dialogs require the opaque Activity-backed foreground grant already used
+by protocol 1.3 input. Background and scheduled launches never open dialog UI;
+they receive `HostCapabilityError.code == "INTERACTIVE_NOT_ALLOWED"`. The Host
+renders and owns one serialized dialog at a time. Alert produces `None` after
+acknowledgement/dismissal; confirmation returns `True` only for the positive
+action; prompt and selection return `None` on cancel/back/dismiss, otherwise
+text or a zero-based index.
+
+Dialog titles are non-empty and at most 256 UTF-8 bytes; content is at most
+4 KiB; prompt defaults and replies are at most 32 KiB. Selection accepts 1-64
+non-empty items, each at most 1 KiB and at most 32 KiB in aggregate. The Python
+facade rejects invalid values before dispatch, and the Host repeats the bounds.
+Cancellation closes the current Host dialog and wakes the blocked call. No view,
+Context, callback or Binder handle is exposed to Python. Engines, accessibility,
+screenshots and OCR remain planned rather than implied by the generic broker.
 
 The focused public Host acceptance invoked the six current method names through
 a real protocol 1.5 session on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a,
@@ -382,6 +402,15 @@ rejected parent traversal, and proved the write remained absent from the frozen
 Plugin workspace snapshot. On the `0.3.0-alpha.3` current tree it passed on the
 same physical device and emulator in 0.811 and 3.295 seconds respectively; both
 runs reported `OK (1 test)` and removed the temporary Host project.
+
+The foreground-dialog public-engine test then exercised alert, positive
+confirmation, prompt default replacement and zero-based selection through a
+real Host-owned `MaterialDialog` chain. On the `0.3.0-alpha.4` current tree it
+passed on the same physical device and emulator in 1.838 and 8.295 seconds.
+The paired background project required `INTERACTIVE_NOT_ALLOWED` without UI and
+passed in 0.988 and 0.936 seconds. All four runs reported `OK (1 test)`, used
+clean Host commit `f9eef784855f64da4ac0a9f33ad89688b3f3bd03`, and retained normal
+private-snapshot cleanup.
 
 ## Files, Java bridge and isolation
 

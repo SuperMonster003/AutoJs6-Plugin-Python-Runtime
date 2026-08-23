@@ -14,7 +14,7 @@
     "許可済み project では `entryMode=file|module` を明示的に選択します. module mode は標準 `runpy` metadata, project root の `sys.path[0]`, package-relative import を使用し, file mode は通常の script semantics を維持します.",
     "スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.",
     "protocol 1.4 で最大 {{ max_structured_json_bytes }} の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 {{ max_output_artifacts }} 個転送します. stdout から result を推測しません.",
-    "実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list` をリアルタイムに呼び出し、terminal 時に無効化します.",
+    "実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list`、foreground 限定の `dialogs.alert/confirm/prompt/select` をリアルタイムに呼び出し、terminal 時に無効化します.",
     "`SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.",
     "プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.",
     "ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません."
@@ -24,7 +24,7 @@
   "p_runtime_version_status": "ビルドは Python {{ python_line }} を要求します. 凍結済みローカル RC 産物と正確な端末実行では CPython {{ python_version_expected }} を記録しました. 最終 0.1.0 はソース凍結後に版と hash を再検証します.",
   "h3_plugin_interface": "プラグインインターフェース",
   "p_plugin_interface": "ホストは次の識別子でプラグインを検出して呼び出します",
-  "p_plugin_scope": "独立 SOURCE, 任意の上限付き workspace archive, 最大 {{ max_stdin_bytes }} の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加し, 標準ライブラリの `getpass.getpass()` は非表示入力を使用します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. プロトコル 1.5 は 1 回の実行、plugin UID、call 順序、有限 quota に結び付く pure-data Host broker を追加します. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, user script に Context、raw Binder、Host runtime object、callback sink は渡しません.",
+  "p_plugin_scope": "独立 SOURCE, 任意の上限付き workspace archive, 最大 {{ max_stdin_bytes }} の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加し, 標準ライブラリの `getpass.getpass()` は非表示入力を使用します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. プロトコル 1.5 は 1 回の実行、plugin UID、call 順序、有限 quota に結び付く pure-data Host broker を追加します. Host dialog にも live Activity に裏付けられた foreground 認可が必要で, background 起動は UI を開かず `INTERACTIVE_NOT_ALLOWED` を返します. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, user script に Context、raw Binder、Host runtime object、callback sink は渡しません.",
   "h3_host_integration_status": "ホスト統合状況",
   "p_host_integration_status": "0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.",
   "h3_security": "セキュリティとプライバシー",
@@ -36,7 +36,7 @@
     "Binder 受信側の完全な PFD を所有し, 終端または close 時に閉じます.",
     "出力は実行中に credit ごとに chunk 単位で送信します. credit 枯渇時はスクリプトを停止し, 受理済み出力は唯一の terminal より前に置かれ, terminal 後の出力は禁止されます.",
     "構造化 JSON は {{ max_structured_json_bytes }}, artifact は最大 {{ max_output_artifacts }} 個, path は {{ max_output_artifact_path_bytes }}, 1 file は {{ max_output_artifact_bytes }}, 合計は {{ max_total_output_artifact_bytes }} が上限で, Host が正確な長さ, EOF, SHA-256 を検証します.",
-    "プロトコル 1.5 は実行ごとに最大 {{ max_host_capability_calls }} Host call、request/response ごとに {{ max_host_capability_message_bytes }}、text に {{ max_host_capability_text_bytes }}、1 dispatch の待機に {{ host_capability_call_timeout }} の上限を設けます. Host files は {{ max_host_file_path_bytes }} の相対 path、{{ max_host_file_text_bytes }} の UTF-8 text、最大 {{ max_host_file_entries }} 件かつ各 {{ max_host_file_name_bytes }} の名前に制限されます.",
+    "プロトコル 1.5 は実行ごとに最大 {{ max_host_capability_calls }} Host call、request/response ごとに {{ max_host_capability_message_bytes }}、text に {{ max_host_capability_text_bytes }}、通常の Host main-thread action の待機に {{ host_capability_call_timeout }} の上限を設けます. Host files は {{ max_host_file_path_bytes }} の相対 path、{{ max_host_file_text_bytes }} の UTF-8 text、最大 {{ max_host_file_entries }} 件かつ各 {{ max_host_file_name_bytes }} の名前に制限されます. Foreground dialog は title {{ max_host_dialog_title_bytes }}、content {{ max_host_dialog_text_bytes }}、prompt default/reply {{ max_host_dialog_prompt_reply_bytes }}、select 最大 {{ max_host_dialog_items }} 項・各 {{ max_host_dialog_item_bytes }}・合計 {{ max_host_dialog_total_item_bytes }} に制限され、1 回の応答を最大 {{ host_dialog_wait_timeout }} 待ちます.",
     "キャンセルはプロセス再起動方式です. native extension とブロッキング呼び出しは Android 検証が必要です.",
     "`INTERNET` 権限によりスクリプトは標準ライブラリのネットワーク機能を直接利用できますが、online pip、自動コードダウンロード、実行時の第三者パッケージ導入は引き続き非対応です."
   ],
@@ -44,7 +44,7 @@
   "unsupported_capabilities": [
     "汎用 live stdin と直接の `sys.stdin` callback streaming は未対応です. foreground 対話は最大 {{ max_stdin_bytes }} の有限 snapshot が EOF に達した後の組み込み `input()` と標準ライブラリの `getpass.getpass()` のみに適用されます. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.",
     "UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.",
-    "live broker は最初の低リスク機能一式と有界な Host files を提供します. dialogs、engines、accessibility、screenshot、OCR は未宣言です.",
+    "live broker は最初の低リスク機能一式、有界な Host files、foreground dialogs を提供します. engines、accessibility、screenshot、OCR は未宣言です.",
     "32 bit Android と任意の native wheel は保証しません.",
     "現在の tree には API 31 arm64-v8a 実機 smoke evidence と API 37 x86_64 16 KB page emulator smoke evidence がありますが, 完全な device matrix や release qualification とは扱いません."
   ],

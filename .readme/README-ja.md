@@ -50,7 +50,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 - 許可済み project では `entryMode=file|module` を明示的に選択します. module mode は標準 `runpy` metadata, project root の `sys.path[0]`, package-relative import を使用し, file mode は通常の script semantics を維持します.
 - スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.
 - protocol 1.4 で最大 64 KiB の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 16 個転送します. stdout から result を推測しません.
-- 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list` をリアルタイムに呼び出し、terminal 時に無効化します.
+- 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list`、foreground 限定の `dialogs.alert/confirm/prompt/select` をリアルタイムに呼び出し、terminal 時に無効化します.
 - `SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.
 - プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.
 - ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません.
@@ -91,7 +91,7 @@ engine: python
 protocol: 1.0-1.5
 ```
 
-独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加し, 標準ライブラリの `getpass.getpass()` は非表示入力を使用します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. プロトコル 1.5 は 1 回の実行、plugin UID、call 順序、有限 quota に結び付く pure-data Host broker を追加します. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, user script に Context、raw Binder、Host runtime object、callback sink は渡しません.
+独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加し, 標準ライブラリの `getpass.getpass()` は非表示入力を使用します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. プロトコル 1.5 は 1 回の実行、plugin UID、call 順序、有限 quota に結び付く pure-data Host broker を追加します. Host dialog にも live Activity に裏付けられた foreground 認可が必要で, background 起動は UI を開かず `INTERACTIVE_NOT_ALLOWED` を返します. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, user script に Context、raw Binder、Host runtime object、callback sink は渡しません.
 
 ******
 
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.3.0-alpha.3
-release state: 0.3.0-alpha.3 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files portion of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; dialogs, engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.4
+release state: 0.3.0-alpha.4 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files and foreground-dialog portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 - Binder 受信側の完全な PFD を所有し, 終端または close 時に閉じます.
 - 出力は実行中に credit ごとに chunk 単位で送信します. credit 枯渇時はスクリプトを停止し, 受理済み出力は唯一の terminal より前に置かれ, terminal 後の出力は禁止されます.
 - 構造化 JSON は 64 KiB, artifact は最大 16 個, path は 1024 UTF-8 bytes, 1 file は 4 MiB, 合計は 8 MiB が上限で, Host が正確な長さ, EOF, SHA-256 を検証します.
-- プロトコル 1.5 は実行ごとに最大 1024 Host call、request/response ごとに 64 KiB、text に 32 KiB、1 dispatch の待機に 5 s の上限を設けます. Host files は 4 KiB の相対 path、32 KiB の UTF-8 text、最大 128 件かつ各 255 UTF-8 bytes の名前に制限されます.
+- プロトコル 1.5 は実行ごとに最大 1024 Host call、request/response ごとに 64 KiB、text に 32 KiB、通常の Host main-thread action の待機に 5 s の上限を設けます. Host files は 4 KiB の相対 path、32 KiB の UTF-8 text、最大 128 件かつ各 255 UTF-8 bytes の名前に制限されます. Foreground dialog は title 256 UTF-8 bytes、content 4 KiB、prompt default/reply 32 KiB、select 最大 64 項・各 1 KiB・合計 32 KiB に制限され、1 回の応答を最大 5 min 待ちます.
 - キャンセルはプロセス再起動方式です. native extension とブロッキング呼び出しは Android 検証が必要です.
 - `INTERNET` 権限によりスクリプトは標準ライブラリのネットワーク機能を直接利用できますが、online pip、自動コードダウンロード、実行時の第三者パッケージ導入は引き続き非対応です.
 
@@ -141,7 +141,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 - 汎用 live stdin と直接の `sys.stdin` callback streaming は未対応です. foreground 対話は最大 1 MiB の有限 snapshot が EOF に達した後の組み込み `input()` と標準ライブラリの `getpass.getpass()` のみに適用されます. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
 - UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.
-- live broker は最初の低リスク機能一式と有界な Host files を提供します. dialogs、engines、accessibility、screenshot、OCR は未宣言です.
+- live broker は最初の低リスク機能一式、有界な Host files、foreground dialogs を提供します. engines、accessibility、screenshot、OCR は未宣言です.
 - 32 bit Android と任意の native wheel は保証しません.
 - 現在の tree には API 31 arm64-v8a 実機 smoke evidence と API 37 x86_64 16 KB page emulator smoke evidence がありますが, 完全な device matrix や release qualification とは扱いません.
 
@@ -161,6 +161,14 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 
 ******
 
+# v0.3.0-alpha.4
+
+###### 2026/08/23
+
+* `注記` M3 4 番目の current-tree alpha candidate です. Foreground Host dialogs が 2 device の focused acceptance を通過しましたが、engines、後続 capability、公開、完全な device matrix は含みません
+* `追加` foreground 限定の `autojs6.dialogs.alert/confirm/prompt/select` API を追加し、acknowledgement、boolean、nullable text、0-based nullable index を型付きで返します
+* `改善` dialog title、content、reply、item を制限し、Host 所有 dialog を 1 件ずつ直列化し、background 起動は UI を開かず安定した `INTERACTIVE_NOT_ALLOWED` で拒否します
+
 # v0.3.0-alpha.3
 
 ###### 2026/08/23
@@ -176,15 +184,6 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 * `注記` M3 2 番目の current-tree alpha candidate です. 最初の低リスク Host capability 一式を実装しましたが, 後続 batch、公開、完全な device matrix はこの宣言に含みません
 * `追加` live `autojs6.device.info()` のバッテリー/画面/明るさ/音量データ、`autojs6.console.log/warn/error` Host console レベル、`autojs6.notice` 通知を追加
 * `改善` device result schema を厳密に検証し、通知権限不足を設定画面や権限状態の変更なしで安定した `PERMISSION_DENIED` として返す
-
-# v0.3.0-alpha.1
-
-###### 2026/08/23
-
-* `注記` M3 最初の current-tree alpha candidate です. protocol 1.5 と低リスク Host capability subset を実装しましたが, 後続 capability、公開、完全な device matrix はこの宣言に含みません
-* `追加` request UUID、plugin UID、単調 call ID、1024 call quota、64 KiB message、5 秒 Host dispatch 上限に結び付く pure-data JSON の protocol 1.5 execution-scoped Host capability broker を追加
-* `追加` live Host API `autojs6.toast`、`autojs6.clip.get/set`、`autojs6.app.launch/launch_app/open_url` を追加
-* `改善` terminal、cancel、Binder death、cleanup の全経路で broker を無効化し、unavailable capability と Host/protocol error を安定した Python error に変換
 
 ##### その他のバージョン
 

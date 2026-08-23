@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.4
+
+###### 2026/08/23
+
+* `注記` M3 4 番目の current-tree alpha candidate です. Foreground Host dialogs が 2 device の focused acceptance を通過しましたが、engines、後続 capability、公開、完全な device matrix は含みません
+* `追加` foreground 限定の `autojs6.dialogs.alert/confirm/prompt/select` API を追加し、acknowledgement、boolean、nullable text、0-based nullable index を型付きで返します
+* `改善` dialog title、content、reply、item を制限し、Host 所有 dialog を 1 件ずつ直列化し、background 起動は UI を開かず安定した `INTERACTIVE_NOT_ALLOWED` で拒否します
+
 # v0.3.0-alpha.3
 
 ###### 2026/08/23

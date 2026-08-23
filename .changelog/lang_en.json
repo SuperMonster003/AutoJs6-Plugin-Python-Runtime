@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Improvement",
   "changelog_label_dependency": "Dependency",
   "$data": {
+    "v0.3.0-alpha.4": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "Fourth M3 current-tree alpha candidate; foreground Host dialogs passed focused dual-device acceptance, while engines, later capabilities, publication, and a complete device matrix remain outside this claim"
+      ],
+      "feature": [
+        "Add foreground-only `autojs6.dialogs.alert/confirm/prompt/select` APIs with typed acknowledgement, confirmation, nullable prompt text, and zero-based nullable selection results"
+      ],
+      "improvement": [
+        "Bound dialog titles, content, replies, and items; serialize one Host-owned dialog at a time; and fail background launches closed with stable `INTERACTIVE_NOT_ALLOWED` without opening UI"
+      ]
+    },
     "v0.3.0-alpha.3": {
       "released_date": "2026/08/23",
       "hint": [
