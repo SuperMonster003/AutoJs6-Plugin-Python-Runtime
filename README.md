@@ -48,6 +48,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 - 将一个 UTF-8 Python 源码快照作为 `__main__` 执行.
 - 接收最大 1 MiB 的有限预置 stdin snapshot; 快照到达 EOF 后, 显式前台启动可通过协议 1.3 的有界 prompt/reply 继续内置 `input()`, 且标准库 `getpass.getpass()` 使用隐藏回显.
 - 为已准入项目显式选择 `entryMode=file|module`; module 模式使用标准 `runpy` 元数据、项目根目录 `sys.path[0]` 与包相对导入, file 模式保持普通脚本语义.
+- 从已准入项目根目录 import 项目本地纯 Python 包与 `.dist-info` 元数据, 无需在线 pip 或运行时安装.
 - 在脚本执行期间按 stdout/stderr 原始顺序通过有界 chunk 与 credit 传送; credit 耗尽会对执行施加背压.
 - 通过协议 1.4 显式设置最大 64 KiB 的严格 JSON 结果, 并传送最多 16 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.
 - 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、权限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、仅限前台的 `dialogs.alert/confirm/prompt/select` 与 `engines.current/run/stop_self`, 终态后自动撤销.
@@ -126,6 +127,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 - 源码最大 4 MiB, 总输出最大 16 MiB, 单个输出 chunk 最大 16 KiB, 最多 16384 个 chunk.
 - 请求超时最大 30 min, 同一进程最多一个活动会话, provider 侧不排队.
+- 项目 workspace 上限为压缩后 64 MiB、8192 个文件条目及解压后 128 MiB; 分发前 Provider 选择必须同时满足快照的实际三维需求.
 - SOURCE 描述符采用 Binder 接收端完整 PFD 所有权, 保留 reliable-pipe 错误通道, 并在终态或关闭时释放.
 - 输出在执行期间按 credit 逐 chunk 发送; credit 耗尽会暂停脚本, 已接受的输出先于唯一终态, 终态后禁止输出.
 - 结构化 JSON 最大 64 KiB; 输出 artifact 最多 16 个, 路径最大 1024 UTF-8 bytes, 单个最大 4 MiB, 合计最大 8 MiB, Host 必须核对精确长度、EOF 与 SHA-256.

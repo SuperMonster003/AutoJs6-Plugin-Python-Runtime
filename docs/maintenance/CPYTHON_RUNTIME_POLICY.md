@@ -139,7 +139,11 @@ to destinations reachable from the device, such as the local network.
 
 The `INTERNET` permission authorizes script-initiated networking only. The
 runtime must not automatically fetch code, resolve missing imports online,
-install packages, run online `pip`, or download wheels. Protocol 1.5 permits only
+install packages, run online `pip`, or download wheels. M4 Path A permits a
+trusted project to carry development-machine-prepared pure-Python packages in
+its own bounded workspace. Those user-selected files are script input, not
+embedded runtime inventory: they do not change `python-runtime.lock`, the
+stdlib-only APK baseline, or the no-runtime-installer rule. Protocol 1.5 permits only
 the methods and pure-data shapes frozen in
 `docs/python/HOST_CAPABILITY_BROKER_PROTOCOL.md`; it never exposes the raw Host
 Binder to user globals. Do not add arbitrary Host objects, Android `Context`,

@@ -48,6 +48,7 @@ Python Runtime is an independent provider for version 1 of the Python protocol. 
 - Execute one UTF-8 Python source snapshot as `__main__`.
 - Accept a finite pre-supplied stdin snapshot of at most 1 MiB; after it reaches EOF, an explicit foreground launch may continue the built-in `input()` through bounded protocol 1.3 prompt/reply, while standard-library `getpass.getpass()` uses hidden echo.
 - Select explicit `entryMode=file|module` for an admitted project; module mode uses standard `runpy` metadata, project-root `sys.path[0]`, and package-relative imports while file mode keeps ordinary script semantics.
+- Import project-local pure-Python packages and `.dist-info` metadata from the admitted project root without online pip or runtime installation.
 - Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.
 - Set an explicit strict JSON result of at most 64 KiB and transfer up to 16 optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.
 - Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, and `engines.current/run/stop_self` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.
@@ -126,6 +127,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 - Source is capped at 4 MiB, total output at 16 MiB, each output chunk at 16 KiB, and output count at 16384 chunks.
 - Request timeout is capped at 30 min, with one active session per process and no provider-side queue.
+- A project workspace is capped at 64 MiB compressed, 8192 file entries, and 128 MiB extracted; Provider selection must satisfy the actual snapshot in all three dimensions before dispatch.
 - SOURCE descriptors adopt complete Binder receiver-side PFD ownership, preserve reliable-pipe error channels, and close at terminal or session close.
 - Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.
 - Structured JSON is capped at 64 KiB; at most 16 artifacts are accepted with 1024 UTF-8 bytes paths, 4 MiB per file, 8 MiB aggregate, and Host verification of exact length, EOF, and SHA-256.

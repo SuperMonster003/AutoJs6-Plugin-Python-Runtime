@@ -12,6 +12,7 @@
     "Execute one UTF-8 Python source snapshot as `__main__`.",
     "Accept a finite pre-supplied stdin snapshot of at most {{ max_stdin_bytes }}; after it reaches EOF, an explicit foreground launch may continue the built-in `input()` through bounded protocol 1.3 prompt/reply, while standard-library `getpass.getpass()` uses hidden echo.",
     "Select explicit `entryMode=file|module` for an admitted project; module mode uses standard `runpy` metadata, project-root `sys.path[0]`, and package-relative imports while file mode keeps ordinary script semantics.",
+    "Import project-local pure-Python packages and `.dist-info` metadata from the admitted project root without online pip or runtime installation.",
     "Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.",
     "Set an explicit strict JSON result of at most {{ max_structured_json_bytes }} and transfer up to {{ max_output_artifacts }} optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.",
     "Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, and `engines.current/run/stop_self` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.",
@@ -33,6 +34,7 @@
   "security_limits": [
     "Source is capped at {{ max_source_bytes }}, total output at {{ max_output_bytes }}, each output chunk at {{ max_output_chunk_bytes }}, and output count at {{ max_output_chunks }} chunks.",
     "Request timeout is capped at {{ max_timeout }}, with one active session per process and no provider-side queue.",
+    "A project workspace is capped at {{ max_workspace_archive_bytes }} compressed, {{ max_workspace_entries }} file entries, and {{ max_workspace_uncompressed_bytes }} extracted; Provider selection must satisfy the actual snapshot in all three dimensions before dispatch.",
     "SOURCE descriptors adopt complete Binder receiver-side PFD ownership, preserve reliable-pipe error channels, and close at terminal or session close.",
     "Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.",
     "Structured JSON is capped at {{ max_structured_json_bytes }}; at most {{ max_output_artifacts }} artifacts are accepted with {{ max_output_artifact_path_bytes }} paths, {{ max_output_artifact_bytes }} per file, {{ max_total_output_artifact_bytes }} aggregate, and Host verification of exact length, EOF, and SHA-256.",

@@ -12,6 +12,7 @@
     "تنفيذ لقطة مصدر Python بترميز UTF-8 كـ `__main__`.",
     "قبول stdin snapshot محدود ومقدم مسبقا بحجم أقصاه {{ max_stdin_bytes }}؛ وبعد وصوله إلى EOF يمكن لتشغيل صريح في foreground متابعة `input()` المضمنة عبر prompt/reply محدود في البروتوكول 1.3، بينما تستخدم `getpass.getpass()` إدخالا مخفيا.",
     "اختيار `entryMode=file|module` صراحة لمشروع مقبول؛ يستخدم وضع module بيانات `runpy` القياسية وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية للحزمة، بينما يحافظ وضع file على دلالات السكربت العادية.",
+    "استيراد حزم pure-Python المحلية للمشروع وبيانات `.dist-info` من جذر المشروع المقبول دون pip عبر الإنترنت أو تثبيت وقت التشغيل.",
     "إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.",
     "تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه {{ max_structured_json_bytes }} ونقل ما يصل إلى {{ max_output_artifacts }} من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.",
     "استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات و`files.read_text/write_text/exists/is_file/is_dir/list` المحدود و`dialogs.alert/confirm/prompt/select` المقصور على foreground و`engines.current/run/stop_self` مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.",
@@ -33,6 +34,7 @@
   "security_limits": [
     "حد المصدر {{ max_source_bytes }} والخرج الكلي {{ max_output_bytes }} وكل chunk ‏{{ max_output_chunk_bytes }} وعددها {{ max_output_chunks }}.",
     "أقصى timeout هو {{ max_timeout }} مع جلسة واحدة ودون طابور provider.",
+    "يحد workspace المشروع عند {{ max_workspace_archive_bytes }} مضغوطا و{{ max_workspace_entries }} ملفا و{{ max_workspace_uncompressed_bytes }} بعد الاستخراج؛ وقبل dispatch يجب أن يلبي اختيار Provider الأبعاد الفعلية الثلاثة للـ snapshot.",
     "تتملك العملية نسخ PFD الكاملة المستلمة عبر Binder وتغلقها عند النهاية أو close.",
     "يرسل الخرج chunk بعد chunk بالـ credits أثناء التنفيذ؛ يوقف نفاد credits السكربت مؤقتا، ويسبق الخرج المقبول الحالة terminal الوحيدة، ويمنع الخرج بعدها.",
     "يحد JSON المنظم عند {{ max_structured_json_bytes }} وتقبل حتى {{ max_output_artifacts }} artifacts بمسار {{ max_output_artifact_path_bytes }} و{{ max_output_artifact_bytes }} لكل ملف و{{ max_total_output_artifact_bytes }} إجمالا مع تحقق Host من الطول الدقيق وEOF وSHA-256.",

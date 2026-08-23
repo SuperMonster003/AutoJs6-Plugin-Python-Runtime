@@ -12,6 +12,7 @@
     "Выполнение одного UTF-8 снимка Python как `__main__`.",
     "Принимается конечный заранее переданный stdin snapshot размером до {{ max_stdin_bytes }}; после его EOF явный запуск на переднем плане может продолжить встроенный `input()` через ограниченный prompt/reply протокола 1.3, а стандартный `getpass.getpass()` использует скрытый ввод.",
     "Явный выбор `entryMode=file|module` для допущенного проекта: режим module использует стандартные метаданные `runpy`, корень проекта в `sys.path[0]` и относительные импорты пакета, а режим file сохраняет обычную семантику скрипта.",
+    "Импорт локальных для проекта pure-Python пакетов и метаданных `.dist-info` из допущенного корня без online pip и установки во время выполнения.",
     "Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.",
     "Явное задание строгого JSON-результата до {{ max_structured_json_bytes }} и передача до {{ max_output_artifacts }} необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.",
     "Вызов live-операций `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, учитывающего разрешения `notice`, ограниченного `files.read_text/write_text/exists/is_file/is_dir/list`, доступного только на переднем плане `dialogs.alert/confirm/prompt/select` и `engines.current/run/stop_self` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.",
@@ -33,6 +34,7 @@
   "security_limits": [
     "Источник ограничен {{ max_source_bytes }}, весь вывод {{ max_output_bytes }}, chunk {{ max_output_chunk_bytes }}, число chunks {{ max_output_chunks }}.",
     "Максимальный timeout {{ max_timeout }}, один активный сеанс и без очереди provider.",
+    "Workspace проекта ограничен {{ max_workspace_archive_bytes }} в сжатом виде, {{ max_workspace_entries }} файлами и {{ max_workspace_uncompressed_bytes }} после извлечения; до dispatch выбор Provider должен удовлетворять всем трем фактическим измерениям snapshot.",
     "Полные PFD на стороне получателя Binder принимаются во владение и закрываются при завершении или close.",
     "Вывод передаётся по chunks и credits во время выполнения; при исчерпании credits скрипт приостанавливается, принятый вывод предшествует единственному terminal, а вывод после terminal запрещён.",
     "Структурированный JSON ограничен {{ max_structured_json_bytes }}; допускается до {{ max_output_artifacts }} artifacts с путем до {{ max_output_artifact_path_bytes }}, {{ max_output_artifact_bytes }} на файл, {{ max_total_output_artifact_bytes }} суммарно и проверкой Host точной длины, EOF и SHA-256.",

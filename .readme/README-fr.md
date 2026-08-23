@@ -48,6 +48,7 @@ Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte t
 - Exécuter un instantané de source Python UTF-8 en tant que `__main__`.
 - Accepter un snapshot stdin fini et préfourni de 1 MiB au maximum; après son EOF, un lancement explicite au premier plan peut poursuivre le `input()` intégré par le prompt/réponse borné du protocole 1.3, tandis que `getpass.getpass()` utilise une saisie masquée.
 - Sélectionner explicitement `entryMode=file|module` pour un projet admis; le mode module emploie les métadonnées standard de `runpy`, la racine du projet dans `sys.path[0]` et les imports relatifs au package, tandis que le mode file conserve la sémantique d'un script ordinaire.
+- Importer depuis la racine admise des paquets Python purs locaux au projet et leurs métadonnées `.dist-info`, sans pip en ligne ni installation à l'exécution.
 - Livrer pendant l'exécution des chunks stdout/stderr bornés dans leur ordre d'origine; l'épuisement des crédits applique une contre-pression à l'exécution.
 - Définir un résultat JSON strict explicite de 64 KiB au maximum et transférer jusqu'à 16 artefacts facultatifs sous les limites de chemin, taille et SHA-256 du protocole 1.4; ne jamais déduire un résultat de stdout.
 - Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible aux autorisations, `files.read_text/write_text/exists/is_file/is_dir/list` borné, `dialogs.alert/confirm/prompt/select` réservé au premier plan et `engines.current/run/stop_self` via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
@@ -126,6 +127,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 - La source est limitée à 4 MiB, la sortie totale à 16 MiB, chaque chunk à 16 KiB et le nombre de chunks à 16384.
 - Le délai maximal est 30 min, avec une session active et aucune file côté fournisseur.
+- Un workspace de projet est limité à 64 MiB compressés, 8192 fichiers et 128 MiB extraits; avant l'envoi, la sélection du Provider doit satisfaire les trois dimensions réelles du snapshot.
 - Les PFD complets reçus par Binder sont possédés puis fermés à l'état terminal ou à la fermeture.
 - La sortie est livrée chunk par chunk sous crédits pendant l'exécution; l'épuisement des crédits suspend le script, toute sortie acceptée précède l'unique état terminal et aucune sortie n'est permise après celui-ci.
 - Le JSON structuré est limité à 64 KiB; au plus 16 artefacts sont admis avec des chemins de 1024 UTF-8 bytes, 4 MiB par fichier, 8 MiB au total et une vérification hôte de la longueur exacte, de l'EOF et du SHA-256.

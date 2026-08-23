@@ -12,6 +12,7 @@
     "Ejecutar una instantánea UTF-8 como `__main__`.",
     "Aceptar un snapshot stdin finito y preproporcionado de hasta {{ max_stdin_bytes }}; tras su EOF, un inicio explícito en primer plano puede continuar el `input()` integrado mediante el prompt/respuesta acotado del protocolo 1.3, mientras `getpass.getpass()` usa entrada oculta.",
     "Seleccionar explícitamente `entryMode=file|module` para un proyecto admitido; el modo module usa metadatos estándar de `runpy`, la raíz del proyecto en `sys.path[0]` e imports relativos al package, mientras el modo file conserva la semántica de script ordinaria.",
+    "Importar desde la raíz admitida paquetes Python puros locales al proyecto y sus metadatos `.dist-info`, sin pip en línea ni instalación en ejecución.",
     "Entregar durante la ejecución chunks acotados de stdout/stderr en su orden original; al agotarse los créditos se aplica contrapresión a la ejecución.",
     "Establecer un resultado JSON estricto explícito de hasta {{ max_structured_json_bytes }} y transferir hasta {{ max_output_artifacts }} artefactos opcionales con límites de ruta, tamaño y SHA-256 del protocolo 1.4; nunca inferir un resultado desde stdout.",
     "Invocar en vivo `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible a permisos, `files.read_text/write_text/exists/is_file/is_dir/list` acotado, `dialogs.alert/confirm/prompt/select` solo en primer plano y `engines.current/run/stop_self` mediante el broker de datos puros del protocolo 1.5 ligado a la ejecución y revocado al terminar.",
@@ -33,6 +34,7 @@
   "security_limits": [
     "El código se limita a {{ max_source_bytes }}, la salida total a {{ max_output_bytes }}, cada chunk a {{ max_output_chunk_bytes }} y el total a {{ max_output_chunks }} chunks.",
     "El timeout máximo es {{ max_timeout }}, con una sesión activa y sin cola del proveedor.",
+    "Un workspace de proyecto se limita a {{ max_workspace_archive_bytes }} comprimidos, {{ max_workspace_entries }} archivos y {{ max_workspace_uncompressed_bytes }} extraídos; antes del envío, la selección del Provider debe satisfacer las tres dimensiones reales del snapshot.",
     "Se adopta la propiedad de los PFD completos recibidos por Binder y se cierran al terminar o cerrar la sesión.",
     "La salida se entrega chunk a chunk con créditos durante la ejecución; al agotarse se pausa el script, la salida aceptada precede al único terminal y se prohíbe toda salida posterior.",
     "El JSON estructurado se limita a {{ max_structured_json_bytes }}; se admiten hasta {{ max_output_artifacts }} artefactos con rutas de {{ max_output_artifact_path_bytes }}, {{ max_output_artifact_bytes }} por archivo, {{ max_total_output_artifact_bytes }} en total y verificación Host de longitud exacta, EOF y SHA-256.",

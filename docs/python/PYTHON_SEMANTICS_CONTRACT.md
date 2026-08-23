@@ -303,13 +303,28 @@ imports without widening the admitted workspace.
 
 ### Third-party dependencies
 
-`0.1.0` is stdlib-only. An absent third-party package raises ordinary
-`ModuleNotFoundError`. No import failure may trigger online pip, a runtime
-download or another engine. Starting with `0.2.0`, stdlib modules may make
-script-initiated network connections because the plugin declares Android's
+The embedded `0.1.0` runtime is stdlib-only. M4 Path A adds project-local
+pure-Python distributions: an admitted project may place import packages and
+their `.dist-info` metadata directly in its root, which is already first on
+`sys.path` during project execution. Ordinary transitive imports and
+`importlib.metadata` discovery then work from the immutable workspace snapshot;
+the packages do not become part of the Plugin runtime or its dependency lock.
+
+The Host admits at most a 64 MiB compressed workspace, 8192 archive file
+entries and 128 MiB of extracted file content. Provider selection compares the
+actual snapshot against all three advertised capacities before dispatch. These
+bounds include project source and data as well as dependency files.
+
+An absent third-party package still raises ordinary `ModuleNotFoundError`. No
+import failure may trigger online pip, a runtime download or another engine.
+Starting with `0.2.0`, stdlib and project-local clients may make
+script-initiated network connections because the Plugin declares Android's
 normal `INTERNET` permission; that permission does not install packages or
-fetch code automatically. U1-R3 defines separately signed offline package packs,
-pure-Python first and native wheels behind independent ABI gates.
+fetch code automatically. Arbitrary native wheels remain unsupported until a
+package has a separate Android, ABI and page-size admission path.
+
+Preparation instructions, reproducibility guidance and failure behavior are
+defined in `docs/python/PROJECT_LOCAL_PACKAGES.md`.
 
 ## Live Host capabilities (protocol 1.5)
 

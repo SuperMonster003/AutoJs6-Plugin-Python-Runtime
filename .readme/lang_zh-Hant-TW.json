@@ -12,6 +12,7 @@
     "將一個 UTF-8 Python 原始碼快照當作 `__main__` 執行.",
     "接收最大 {{ max_stdin_bytes }} 的有限預置 stdin snapshot; snapshot 到達 EOF 後, 明確前景啟動可透過協定 1.3 的有界 prompt/reply 繼續內建 `input()`, 而標準庫 `getpass.getpass()` 使用隱藏回顯.",
     "為已准入專案明確選擇 `entryMode=file|module`; module 模式使用標準 `runpy` 中繼資料、專案根目錄 `sys.path[0]` 與 package-relative import, file 模式保留一般指令碼語義.",
+    "從已准入專案根目錄 import 專案本地純 Python 套件與 `.dist-info` 中繼資料, 無須線上 pip 或執行期安裝.",
     "在腳本執行期間依 stdout/stderr 原始順序透過有界 chunk 與 credit 傳送; credit 耗盡會對執行施加背壓.",
     "透過協定 1.4 明確設定最大 {{ max_structured_json_bytes }} 的嚴格 JSON 結果, 並傳送最多 {{ max_output_artifacts }} 個具有路徑、大小與 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.",
     "透過協定 1.5 的執行級純資料 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、僅限前景的 `dialogs.alert/confirm/prompt/select` 與 `engines.current/run/stop_self`, 終態後自動撤銷.",
@@ -33,6 +34,7 @@
   "security_limits": [
     "原始碼最大 {{ max_source_bytes }}, 總輸出最大 {{ max_output_bytes }}, 每個輸出 chunk 最大 {{ max_output_chunk_bytes }}, 最多 {{ max_output_chunks }} 個 chunk.",
     "要求逾時最大 {{ max_timeout }}, 同一程序最多一個作用中工作階段, provider 端不排隊.",
+    "專案 workspace 上限為壓縮後 {{ max_workspace_archive_bytes }}、{{ max_workspace_entries }} 個檔案項目及解壓後 {{ max_workspace_uncompressed_bytes }}; 分發前 Provider 選擇必須同時滿足 snapshot 的實際三維需求.",
     "SOURCE 描述元採用 Binder 接收端完整 PFD 所有權, 保留 reliable-pipe 錯誤通道, 並於終態或關閉時釋放.",
     "輸出在執行期間依 credit 逐 chunk 傳送; credit 耗盡會暫停腳本, 已接受的輸出先於唯一終態, 終態後禁止輸出.",
     "結構化 JSON 最大 {{ max_structured_json_bytes }}; 輸出 artifact 最多 {{ max_output_artifacts }} 個, 路徑最大 {{ max_output_artifact_path_bytes }}, 單個最大 {{ max_output_artifact_bytes }}, 合計最大 {{ max_total_output_artifact_bytes }}, Host 必須核對精確長度、EOF 與 SHA-256.",
