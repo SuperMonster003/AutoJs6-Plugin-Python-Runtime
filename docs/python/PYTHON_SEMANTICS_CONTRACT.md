@@ -343,9 +343,24 @@ computes SHA-256, and sends only that snapshot through an exactly referenced
 read-only result PFD. The Host requires a regular file, exact declared length,
 immediate EOF and matching SHA-256 before exposing Host-owned immutable bytes.
 
-Result files are not project write-back. Failure, cancellation, timeout,
-output-limit, callback loss and result rejection publish neither a JSON result
-nor artifacts and close/delete all result-owned descriptors and roots. See
+The paired Host now presents a non-null `structuredJson` value in its global
+console as `[result] <json>`. It publishes verified artifacts below either the
+project root or the single script's parent directory at
+`.python-artifacts/execution-<engine-id>-<request-uuid>/` and prints every
+absolute path as `[artifact] <path>`. Artifacts are first written into a hidden
+same-parent staging directory with their logical paths, lengths and digests
+revalidated, then the complete directory is renamed into place. Existing
+execution directories are never overwritten. `.python-artifacts` is a reserved
+top-level Host output directory and is excluded from later project workspace
+snapshots; project entry points inside it are rejected. Publication failure is
+reported as `PYTHON_RUNTIME_RESULT_PUBLICATION_FAILED` and cannot turn a
+partial directory into a successful result. This is a Host presentation rule,
+not a protocol change, and JSON-looking stdout remains diagnostic output.
+
+The artifact protocol is not a general project write-back channel. Failure,
+cancellation, timeout, output-limit, callback loss and result rejection publish
+neither a JSON result nor artifacts and close/delete all result-owned
+descriptors and roots. See
 `U1_R2_STRUCTURED_RESULTS_PROTOCOL.md` for the complete wire and ownership
 contract. This is still trusted-local execution rather than a hostile-code
 sandbox and does not expose Host objects to Python.

@@ -56,6 +56,33 @@ PROJECT_POLICY_PATH = (
     / "PythonProjectLaunchPolicy.kt"
 )
 LAUNCH_FACTORY_PATH = PROJECT_POLICY_PATH.with_name("ScriptLaunchSourceFactory.kt")
+RESULT_PRESENTER_PATH = (
+    HOST
+    / "app"
+    / "src"
+    / "main"
+    / "java"
+    / "org"
+    / "autojs"
+    / "autojs"
+    / "core"
+    / "plugin"
+    / "python"
+    / "PythonRuntimeResultPresenter.kt"
+)
+PRIVATE_SNAPSHOT_PATH = RESULT_PRESENTER_PATH.with_name("PythonPrivateExecutionSnapshot.kt")
+PYTHON_ENGINE_PATH = (
+    HOST
+    / "app"
+    / "src"
+    / "main"
+    / "java"
+    / "org"
+    / "autojs"
+    / "autojs"
+    / "engine"
+    / "PythonPluginScriptEngine.kt"
+)
 
 FIXTURE = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
 RUNNER_WRAPPER = RUNNER_WRAPPER_PATH.read_text(encoding="utf-8")
@@ -66,6 +93,9 @@ FUNCTIONAL_GATE = FUNCTIONAL_GATE_PATH.read_text(encoding="utf-8")
 PUBLIC_TEST = PUBLIC_TEST_PATH.read_text(encoding="utf-8")
 PROJECT_POLICY = PROJECT_POLICY_PATH.read_text(encoding="utf-8")
 LAUNCH_FACTORY = LAUNCH_FACTORY_PATH.read_text(encoding="utf-8")
+RESULT_PRESENTER = RESULT_PRESENTER_PATH.read_text(encoding="utf-8")
+PRIVATE_SNAPSHOT = PRIVATE_SNAPSHOT_PATH.read_text(encoding="utf-8")
+PYTHON_ENGINE = PYTHON_ENGINE_PATH.read_text(encoding="utf-8")
 BINDER_TEST = BINDER_TEST_PATH.read_text(encoding="utf-8")
 CANCEL_TEST = CANCEL_TEST_PATH.read_text(encoding="utf-8")
 TIMEOUT_TEST = TIMEOUT_TEST_PATH.read_text(encoding="utf-8")
@@ -188,6 +218,40 @@ class U1R2DeviceEvidenceSourceTest(unittest.TestCase):
         r1_source = R1_PUBLIC_TEST_PATH.read_text(encoding="utf-8")
         self.assertIn("as? PythonRuntimeExecutionResult", r1_source)
         self.assertIn("hostResult.terminal", r1_source)
+
+    def test_host_presents_structured_results_and_atomically_publishes_artifacts(self) -> None:
+        for marker in (
+            'const val OUTPUT_DIRECTORY_NAME = ".python-artifacts"',
+            '"execution-$executionId-${result.terminal.requestId}"',
+            'add("[result] $structuredJson")',
+            'add("[artifact] ${artifact.absolutePath}")',
+            "PythonRuntimeValidation.validateOutputArtifactPath(artifact.path)",
+            "PythonSha256.digest(bytes) == artifact.sha256",
+            "stream.fd.sync()",
+            "check(!target.exists())",
+            "stagingDirectory.renameTo(target)",
+            "staging?.deleteRecursively()",
+            "PythonRuntimeHostError.RESULT_PUBLICATION_FAILED",
+        ):
+            self.assertIn(marker, RESULT_PRESENTER)
+        for marker in (
+            "PythonRuntimeResultPresenter.present(fileSource, id, result)",
+            "globalConsole.println(Log.INFO, line)",
+        ):
+            self.assertIn(marker, PYTHON_ENGINE)
+        for marker in (
+            "PythonRuntimeResultPresenter.OUTPUT_DIRECTORY_NAME",
+            "depth == 0",
+            "reserved result directory",
+        ):
+            self.assertIn(marker, PRIVATE_SNAPSHOT)
+        for marker in (
+            'assertConsoleSince(checkpoint, "[result] $EXPECTED_STRUCTURED_JSON")',
+            'assertConsoleSince(checkpoint, "[artifact] ${publishedArtifact.absolutePath}")',
+            "publishedArtifact.readBytes()",
+            'candidate.name.startsWith(".")',
+        ):
+            self.assertIn(marker, PUBLIC_TEST)
 
     def test_public_project_stdin_path_is_explicit_bounded_and_device_exercised(self) -> None:
         for marker in (

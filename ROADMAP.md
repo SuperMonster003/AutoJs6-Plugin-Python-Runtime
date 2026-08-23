@@ -38,7 +38,7 @@
   stdout/stderr, 宿主按流增量解码 UTF-8 并即时写入控制台。
 - [x] 结构化 JSON 结果 (`autojs6.result.set`, ≤64 KiB) 与输出产物
   (`autojs6.artifacts.path`, ≤16 个 / 合计 ≤8 MiB, SHA-256 校验, 协议 1.4)
-  —— 插件侧完整, 宿主收到后暂未展示 (见 M2)。
+  —— 插件侧完整, 宿主已在控制台展示结果并安全发布产物 (见 M2)。
 - [x] 结构化 traceback: project/stdlib/package 来源分类, 行号与源码行, 不泄漏插件私有路径。
 - [x] 超时、取消、Binder death 均有确定性唯一终态; 取消模式为进程重启
   (`PROCESS_RESTART_ONLY`); 已 dispatch 的请求绝不自动重放。
@@ -125,10 +125,11 @@
   `STDIN_SNAPSHOT_ARGUMENT`; 单文件脚本暂不提供 UI (需求出现再加)。
   `sys.stdin.read()` 公共路径已在物理设备与 16 KiB page 模拟器以预置输入运行成功;
   宿主提交: `e3a5b6da3`。
-- [ ] [H] **结构化结果展示**: 脚本终态后, 若存在 `structuredJson`, 在控制台以
-  `[result] {...}` 追加展示; artifacts 落盘到宿主可见目录
-  (如 `<脚本目录>/.python-artifacts/<执行id>/`) 并在控制台打印路径。
-  验收: `autojs6.result.set({...})` 与 `artifacts.path()` 的产物用户可见。
+- [x] [H] **结构化结果展示**: 脚本终态后, 若存在 `structuredJson`, 在控制台以
+  `[result] {...}` 追加展示; 已校验 artifacts 经隐藏 staging 目录整体发布到
+  `<项目根或脚本目录>/.python-artifacts/execution-<执行id>-<request UUID>/`,
+  并以 `[artifact] <绝对路径>` 打印。保留输出目录不进入后续项目 workspace 快照;
+  发布失败不覆盖旧结果且以稳定宿主错误终止。宿主提交: `c4066c8e9`。
 - [ ] [H] **交互式 `input()` 多入口冒烟**: 编辑器运行与 Explorer 运行均可弹出输入框,
   隐藏回显 (`getpass` 场景) 表现正确。
 - [ ] [H] **清理陈旧注释与文档漂移**: `PythonProjectLaunchPolicy` "workspace 未落地" 注释、
@@ -155,6 +156,20 @@
 - Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 用时 0.963 秒,
   API 37 / x86_64 / 16 KiB page 模拟器用时 1.503 秒, 均为 `OK (1 test)`;
   验收覆盖项目文件快照、Unicode `sys.stdin.read()`、重复读取 EOF、无交互弹框与传输清理。
+
+### 2026-08-23 M2 结构化结果展示验收记录
+
+- 宿主继续消费协议 1.4 已完成长度、EOF 与 SHA-256 校验的 Host-owned bytes, 没有新增
+  跨进程字段; JSON-looking stdout 仍是普通诊断输出, 绝不被推断为显式结果。
+- 非空 `structuredJson` 以 `[result]` 前缀写入全局控制台; 每个已发布文件以
+  `[artifact] <绝对路径>` 报告, 返回的 `PythonRuntimeExecutionResult` 仍保留防御性字节副本。
+- artifact 先写入同级隐藏 staging 目录并复验逻辑路径、长度与摘要, 全部成功后整体重命名;
+  目录名同时绑定执行 ID 与协议 request UUID。已有终态目录拒绝覆盖, 路径穿越、前缀冲突、
+  中断或文件系统失败均清理 staging 并返回 `PYTHON_RUNTIME_RESULT_PUBLICATION_FAILED`。
+- `.python-artifacts` 是宿主保留的顶层输出目录, 后续项目快照会跳过它, 且项目入口不得位于其中。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 用时 0.891 秒,
+  API 37 / x86_64 / 16 KiB page 模拟器用时 1.054 秒, 均为 `OK (1 test)`;
+  验收覆盖真实插件会话、控制台前缀、二进制字节、用户可见目录与无 staging 残留。
 
 ******
 
