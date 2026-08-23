@@ -454,8 +454,8 @@ accessibility service is missing, disconnected or not operational, the Host
 returns stable `ACCESSIBILITY_UNAVAILABLE`, which the Python facade maps to
 `CapabilityUnavailableError`. The API never enables accessibility or opens
 settings. Selector/UI-tree access is a separate bounded surface; screenshots and
-OCR remain planned rather than implied by the coordinate action API. The
-complete bounded coordinate/global surface is documented in `HOST_AUTOMATOR.md`.
+OCR remain separate from the coordinate action API. The complete bounded
+coordinate/global surface is documented in `HOST_AUTOMATOR.md`.
 
 `selector.snapshot` returns strict schema `autojs6-python-ui-tree-v1` with a
 positive generation, an honest `truncated` flag, and breadth-first detached node
@@ -482,6 +482,50 @@ evicted, invalidated or unrefreshable reference returns stable `STALE_NODE`.
 text-setting accepts at most 4096 UTF-8 bytes. Accessibility unavailability uses
 the same fail-closed `CapabilityUnavailableError` mapping as automator. The full
 schema and lifetime contract is documented in `HOST_SELECTOR.md`.
+
+`images.capture_screen(*, format="png", quality=100, path=None)` requires Android
+11 or newer plus an enabled, connected and operational AutoJs6 accessibility
+service. It accepts only exact `png`/`jpeg` formats and a strict non-boolean
+quality from 1 through 100. With no path it returns immutable encoded bytes;
+with a normalized execution-relative path it atomically writes and publishes an
+ordinary output artifact, returning the Plugin-private absolute path. The API
+never enables accessibility, opens settings, invokes MediaProjection or shows a
+screen-sharing permission prompt.
+
+The Host retains at most one execution-local encoded image and exposes it only
+through exact `autojs6-python-screen-image-v1` and
+`autojs6-python-screen-image-chunk-v1` pure-data mappings. Width and height are
+each capped at 8192, total area at 16,777,216 pixels, encoded size at 4 MiB, and
+raw transfer chunks at 32 KiB (at most 128 chunks). Python validates exact
+fields, format, bounds, ordered offsets, canonical Base64, EOF, byte length,
+SHA-256 and PNG/JPEG signatures before returning or writing the image. A valid
+opaque image ID is always released; replacement, release and broker terminal
+zero Host-retained bytes, while Python zeroes its mutable assembly buffer after
+copy/write or failure.
+
+Android/API or capture-service absence maps to `CapabilityUnavailableError` via
+`SCREEN_CAPTURE_UNAVAILABLE` or `ACCESSIBILITY_UNAVAILABLE`. Platform capture or
+encoding failure returns `SCREEN_CAPTURE_FAILED`, size overflow returns
+`RESULT_LIMIT_EXCEEDED`, an unavailable execution-local handle returns
+`STALE_IMAGE`, and malformed transfer data returns `BROKER_PROTOCOL_ERROR`.
+Android image objects and callbacks never cross the process boundary. Mutable
+images, cropping, pixel access, `find_color`, `find_image` and OCR remain
+undeclared. The full transfer, error and artifact contract is documented in
+`HOST_IMAGES.md`.
+
+Focused screen-capture acceptance exercised the public Python project engine
+against Host 5276 and Plugin `0.4.0-alpha.3`/57. On the API 37 x86_64 16
+KiB-page emulator, an accessibility-enabled run captured the controlled UI to
+`screens/python-capture.png`, decoded the published PNG, matched its target
+`#123456` pixel, enforced the 4 MiB bound, and proved that the Python payload,
+Plugin reconstruction and Host artifact had identical lengths and SHA-256
+values. It completed in 5.867 seconds with `OK (1 test)`. On Sony XQ-AT72
+(`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages), `images.capture_screen()` failed
+closed with the exact `CapabilityUnavailableError`, published no artifact and
+left the pre-existing six-service accessibility list byte-for-byte unchanged;
+that run completed in 0.866 seconds with `OK (1 test)`. Neither run uninstalled
+packages or cleared application data, and this is focused current-tree
+acceptance rather than a release claim.
 
 Focused selector acceptance exercised the public Python project engine against
 the paired Host 5276 and Plugin `0.4.0-alpha.2`/54 builds. On the API 37 x86_64

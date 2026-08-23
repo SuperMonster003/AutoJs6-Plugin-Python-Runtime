@@ -61,8 +61,9 @@ or raw Binder handle.
 
 The complementary bounded selector, UI-tree snapshot, node click, and text
 setting surface is documented in [`HOST_SELECTOR.md`](HOST_SELECTOR.md).
-Screenshot, image matching, and OCR remain separate Roadmap items because they
-require image and artifact data models in addition to the action channel.
+Bounded accessibility screen capture is documented in
+[`HOST_IMAGES.md`](HOST_IMAGES.md). Image matching and OCR remain separate
+Roadmap items; coordinate actions do not imply either capability.
 
 See [`m3_automator.py`](../../examples/python/m3_automator.py) for a minimal
 script and [`PYTHON_SEMANTICS_CONTRACT.md`](PYTHON_SEMANTICS_CONTRACT.md) for the

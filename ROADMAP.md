@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.4.0-alpha.2 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.4.0-alpha.3 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -354,8 +354,16 @@
   插件实现/便携测试提交: `4af84bc`、`e665f00`。
 - [x] [P] selector 示例 (`examples/python/m3_selector.py`) 与完整边界/生命周期说明
   (`docs/python/HOST_SELECTOR.md`)。
-- [ ] [H+P] `autojs6.images.capture_screen()` 截图 (返回产物路径或字节),
-  `find_image/find_color` 找图找色
+- [x] [H+P] `autojs6.images.capture_screen()` 有界截图: Android 11+ 通过宿主
+  无障碍 `takeScreenshot` 捕获 PNG/JPEG, 返回经长度、顺序、EOF、SHA-256 与格式签名
+  验证的字节, 或原子写入执行产物。宿主每次执行最多保留 1 张、编码后最多 4 MiB,
+  以 32 KiB 原始块传输; 替换、release 与执行终态清零。无障碍/API 不可用时 fail-closed,
+  不启用服务、不打开设置、不触发 MediaProjection。宿主实现/测试提交:
+  `d6c463ca2`、`799e31311`、`e9e7a53eb`、`8bd79e18e`、`27d38f1dd`;
+  插件实现/便携测试提交: `5e2f6ad`、`91824f6`。
+- [x] [P] 截图示例 (`examples/python/m3_capture_screen.py`) 与完整传输/资源/错误说明
+  (`docs/python/HOST_IMAGES.md`)。
+- [ ] [H+P] `autojs6.images.find_image/find_color` 找图找色
 - [ ] [H+P] `autojs6.ocr.recognize(image)` —— 复用宿主 OCR 引擎
 - [ ] 完整自动化示例: 一个真实的 "打开应用 → 找控件 → 点击 → 截图断言" Python 脚本
 - [ ] 发布 0.4.0
@@ -397,6 +405,28 @@
 - Host 5276、插件 `0.4.0-alpha.2`/54 与测试 APK 均以覆盖方式安装; 使用
   `adb install --no-streaming -r -t`, 未卸载、未清数据。用户已确认 QV710AF65F 定时
   任务成功, 本轮 selector 验收未修改其定时任务或无障碍配置。
+
+### 2026-08-24 M3 screen capture 验收记录
+
+- 宿主有界截图、dispatcher/资源边界测试、受控颜色 Activity 与公开 Python 引擎
+  instrumentation 分别由 `d6c463ca2`、`799e31311`、`e9e7a53eb`、`8bd79e18e`
+  固定; `27d38f1dd` 让正向无障碍验收在 instrumentation 内确定性刷新既有 AutoJs6
+  组件并以十六进制文本核对结构化 SHA-256。插件 façade 与 25 项聚焦便携测试由
+  `5e2f6ad`、`91824f6` 固定。
+- API 37 / x86_64 / 16 KiB page 模拟器启用 AutoJs6 无障碍后, 公共 Python 项目调用
+  `images.capture_screen(format="png", quality=100, path="screens/python-capture.png")`;
+  验收确认产物可解码、PNG 签名正确、受控 `#123456` 像素命中、编码结果不超过 4 MiB,
+  且 Python 读取值、插件重组值与宿主发布产物的长度和 SHA-256 完全一致。用时
+  5.867 秒, `OK (1 test)`。结束后组件已恢复为启用且已绑定,
+  `Binding services:{}` 与 `Crashed services:{}` 均为空。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 刻意不启用
+  AutoJs6 无障碍; 公共 Python 项目调用 `images.capture_screen()` 时稳定得到
+  `CapabilityUnavailableError` 与精确消息, 未发布任何产物, 用时 0.866 秒,
+  `OK (1 test)`。运行前后 `accessibility_enabled=1`, 既有六个无障碍服务列表逐字
+  一致且 AutoJs6 服务始终缺席; 未打开设置, 因此本条只声明物理机 fail-closed。
+- Host 5276、插件 `0.4.0-alpha.3`/57 与测试 APK 均保持 SM003 signer; 覆盖安装采用
+  `adb install --no-streaming -r -t`, 未卸载、未清数据。用户已确认 QV710AF65F
+  定时任务成功, 本轮截图验收未修改其定时任务或无障碍配置。
 
 ### 后续批次 (需求驱动, 出现用例再排期)
 

@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.3
+
+###### 2026/08/24
+
+* `ملاحظة` مرشح alpha ثالث لأتمتة M3 في الشجرة الحالية؛ اجتاز مسار screen capture المحدود الكامل لنظام Android 11+ قبولاً مركزاً على محاكي API 37 مع تفعيل accessibility service، واجتاز fail-closed على جهاز فعلي API 31 من دون تغيير accessibility services فيه؛ يبقى البحث عن image/color وOCR والنشر ومصفوفة الأجهزة الكاملة خارج هذا الادعاء
+* `إضافة` إضافة `autojs6.images.capture_screen` لإرجاع encoded bytes موثقة بصيغة PNG/JPEG أو كتابة ونشر output artifact للتنفيذ بصورة ذرية
+* `تحسين` الاحتفاظ بما يصل إلى 1 capture لكل تنفيذ ونقل raw chunks بحجم 32 KiB وحد encoded data عند 4 MiB؛ يتحقق Python من الترتيب وEOF وSHA-256 وتواقيع التنسيق ويجري release دائماً، ويمسح Host البيانات عند الاستبدال/release/terminal ويعيد أخطاء ثابتة من دون تفعيل service أو فتح الإعدادات
+
 # v0.4.0-alpha.2
 
 ###### 2026/08/24

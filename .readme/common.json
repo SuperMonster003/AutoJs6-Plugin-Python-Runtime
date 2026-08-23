@@ -2,8 +2,8 @@
   "repo_url": "https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime",
   "repo_slug": "SuperMonster003/AutoJs6-Plugin-Python-Runtime",
   "default_branch": "master",
-  "release_target": "0.4.0-alpha.2",
-  "release_state": "0.4.0-alpha.2 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions passed the enabled-service path on the emulator and fail-closed on the physical device, while execution-local selector/UI-tree snapshot/find/click/set_text passed full enabled-service acceptance on the emulator and fail-closed on the physical device without changing its accessibility services; screenshots, OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim",
+  "release_target": "0.4.0-alpha.3",
+  "release_state": "0.4.0-alpha.3 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, and bounded Android 11+ screen capture passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; image/color matching, OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim",
   "host_pairing": "AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275",
   "long_term_signer": "SM003",
   "release_owner": "SuperMonster003",
@@ -61,6 +61,11 @@
   "max_host_selector_query_text_bytes": "1024 UTF-8 bytes",
   "max_host_selector_set_text_bytes": "4 KiB",
   "max_host_selector_retained_nodes": "128",
+  "max_host_screen_images": "1",
+  "max_host_screen_image_bytes": "4 MiB",
+  "max_host_screen_chunk_bytes": "32 KiB",
+  "max_host_screen_dimension": "8192",
+  "max_host_screen_pixels": "16777216",
   "max_timeout": "30 min",
   "local_aars": "common-plugin-api.aar\nprotocol-wire-api.aar\npython-runtime-api.aar"
 }

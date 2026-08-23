@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.3
+
+###### 2026/08/24
+
+* `안내` 현재 tree의 세 번째 M3 automation alpha candidate입니다. 제한된 Android 11+ screen-capture 전체 경로는 accessibility service를 활성화한 API 37 emulator에서 focused acceptance를 통과했고, fail-closed는 기존 accessibility service를 변경하지 않고 API 31 physical device에서 통과했습니다; image/color matching, OCR, publication 및 전체 device matrix는 이 선언에 포함하지 않습니다
+* `추가` 검증된 PNG/JPEG encoded bytes를 반환하거나 execution output artifact를 atomic하게 기록하고 게시하는 `autojs6.images.capture_screen`을 추가
+* `개선` 실행당 최대 1 capture를 보존하고 32 KiB raw chunk로 전송하며 encoded data를 4 MiB로 제한합니다. Python은 order, EOF, SHA-256 및 format signature를 검증하고 항상 release하며 Host는 replacement/release/terminal에서 zero 처리하고 service 활성화나 설정 열기 없이 안정 오류를 반환합니다
+
 # v0.4.0-alpha.2
 
 ###### 2026/08/24

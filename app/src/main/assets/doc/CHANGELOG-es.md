@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.3
+
+###### 2026/08/24
+
+* `Nota` Tercer candidato alpha M3 de automatización del árbol actual; la ruta completa de captura de pantalla acotada para Android 11+ superó la aceptación focalizada en un emulador API 37 con accesibilidad habilitada, y el cierre seguro superó la prueba en un dispositivo físico API 31 sin cambiar sus servicios de accesibilidad; búsqueda de imagen/color, OCR, publicación y una matriz completa quedan fuera de esta declaración
+* `Función` Añade `autojs6.images.capture_screen`, que devuelve bytes PNG/JPEG verificados o escribe y publica atómicamente un artefacto de salida de ejecución
+* `Mejora` Conserva como máximo 1 captura por ejecución, transfiere bloques sin codificar de 32 KiB y limita los datos codificados a 4 MiB; Python verifica orden, EOF, SHA-256 y firmas de formato y siempre ejecuta release, mientras Host borra al reemplazar/release/terminar y comunica errores estables sin habilitar servicios ni abrir ajustes
+
 # v0.4.0-alpha.2
 
 ###### 2026/08/24

@@ -24,10 +24,11 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.4.0-alpha.2", common["release_target"])
+        self.assertEqual("0.4.0-alpha.3", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
         self.assertIn("selector/UI-tree", common["release_state"])
+        self.assertIn("screen capture", common["release_state"])
         self.assertIn("M4 Path A", common["release_state"])
         self.assertIn("project-local pure-Python", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
@@ -66,6 +67,11 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("1024 UTF-8 bytes", common["max_host_selector_query_text_bytes"])
         self.assertEqual("4 KiB", common["max_host_selector_set_text_bytes"])
         self.assertEqual("128", common["max_host_selector_retained_nodes"])
+        self.assertEqual("1", common["max_host_screen_images"])
+        self.assertEqual("4 MiB", common["max_host_screen_image_bytes"])
+        self.assertEqual("32 KiB", common["max_host_screen_chunk_bytes"])
+        self.assertEqual("8192", common["max_host_screen_dimension"])
+        self.assertEqual("16777216", common["max_host_screen_pixels"])
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
@@ -104,6 +110,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "`selector.snapshot/find/click/set_text`",
                     broker_features[0],
                 )
+                self.assertIn("`images.capture_screen`", broker_features[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
                 self.assertIn("1.3", source["p_plugin_scope"])
                 self.assertIn("1.4", source["p_plugin_scope"])
@@ -113,7 +120,11 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("`sys.stdin`", source["p_plugin_scope"])
                 self.assertIn("`getpass.getpass()`", source["p_plugin_scope"])
                 self.assertIn("`INTERACTIVE_NOT_ALLOWED`", source["p_plugin_scope"])
-                result_limits = [item for item in source["security_limits"] if "SHA-256" in item]
+                result_limits = [
+                    item
+                    for item in source["security_limits"]
+                    if "{{ max_structured_json_bytes }}" in item
+                ]
                 self.assertEqual(1, len(result_limits))
                 for placeholder in (
                     "{{ max_structured_json_bytes }}",
@@ -171,6 +182,27 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     self.assertIn(placeholder, selector_limits[0])
                 self.assertIn("`SELECTOR_SCAN_LIMIT_EXCEEDED`", selector_limits[0])
                 self.assertIn("`STALE_NODE`", selector_limits[0])
+                image_limits = [
+                    item
+                    for item in source["security_limits"]
+                    if "{{ max_host_screen_images }}" in item
+                ]
+                self.assertEqual(1, len(image_limits))
+                for placeholder in (
+                    "{{ max_host_screen_images }}",
+                    "{{ max_host_screen_image_bytes }}",
+                    "{{ max_host_screen_chunk_bytes }}",
+                    "{{ max_host_screen_dimension }}",
+                    "{{ max_host_screen_pixels }}",
+                ):
+                    self.assertIn(placeholder, image_limits[0])
+                for error_code in (
+                    "`CapabilityUnavailableError`",
+                    "`SCREEN_CAPTURE_FAILED`",
+                    "`RESULT_LIMIT_EXCEEDED`",
+                    "`STALE_IMAGE`",
+                ):
+                    self.assertIn(error_code, image_limits[0])
                 network_limits = [item for item in source["security_limits"] if "INTERNET" in item]
                 self.assertEqual(1, len(network_limits))
                 self.assertIn("pip", network_limits[0])
@@ -201,6 +233,13 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     any("engines" in item for item in source["unsupported_capabilities"]),
                     f"{code} does not describe the bounded engines surface",
                 )
+                self.assertTrue(
+                    any(
+                        "find_color" in item and "find_image" in item
+                        for item in source["unsupported_capabilities"]
+                    ),
+                    f"{code} does not bound the remaining image surface",
+                )
                 self.assertIn("16 KB", source["p_build_architecture"])
                 self.assertIn("gate", source["p_build_architecture"].lower())
                 self.assertIn("M4", source["p_roadmap"])
@@ -212,6 +251,14 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                screen_capture = source["$data"]["v0.4.0-alpha.3"]
+                self.assertEqual("2026/08/24", screen_capture["released_date"])
+                self.assertEqual(1, len(screen_capture["feature"]))
+                self.assertIn("capture_screen", screen_capture["feature"][0])
+                self.assertIn("PNG/JPEG", screen_capture["feature"][0])
+                for boundary in ("1", "32 KiB", "4 MiB", "SHA-256", "release"):
+                    self.assertIn(boundary, screen_capture["improvement"][0])
+
                 selector = source["$data"]["v0.4.0-alpha.2"]
                 self.assertEqual("2026/08/24", selector["released_date"])
                 self.assertEqual(1, len(selector["feature"]))
@@ -348,6 +395,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("engines.current/run/stop_self", body)
                 self.assertIn("automator.click/long_click/press/swipe/back/home", body)
                 self.assertIn("selector.snapshot/find/click/set_text", body)
+                self.assertIn("images.capture_screen", body)
                 self.assertIn("1000000", body)
                 self.assertIn("4 s", body)
                 self.assertIn("48 KiB", body)
@@ -355,6 +403,11 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("1024 UTF-8 bytes", body)
                 self.assertIn("SELECTOR_SCAN_LIMIT_EXCEEDED", body)
                 self.assertIn("STALE_NODE", body)
+                self.assertIn("SCREEN_CAPTURE_FAILED", body)
+                self.assertIn("RESULT_LIMIT_EXCEEDED", body)
+                self.assertIn("STALE_IMAGE", body)
+                self.assertIn("16777216", body)
+                self.assertIn("32 KiB", body)
                 self.assertIn("CapabilityUnavailableError", body)
                 self.assertIn("NESTED_PYTHON_NOT_ALLOWED", body)
                 self.assertIn("INTERACTIVE_NOT_ALLOWED", body)
@@ -382,11 +435,16 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`engines.current/run/stop_self`", simplified)
         self.assertIn("`automator.click/long_click/press/swipe/back/home`", simplified)
         self.assertIn("`selector.snapshot/find/click/set_text`", simplified)
+        self.assertIn("`images.capture_screen`", simplified)
         self.assertIn("0 到 1000000", simplified)
         self.assertIn("1 ms 到 4 s", simplified)
         self.assertIn("最多接受 128 个节点、深度 32 及 48 KiB JSON", simplified)
         self.assertIn("`SELECTOR_SCAN_LIMIT_EXCEEDED`", simplified)
         self.assertIn("`STALE_NODE`", simplified)
+        self.assertIn("屏幕截图每次执行最多保留 1 张", simplified)
+        self.assertIn("`SCREEN_CAPTURE_FAILED`", simplified)
+        self.assertIn("`RESULT_LIMIT_EXCEEDED`", simplified)
+        self.assertIn("`STALE_IMAGE`", simplified)
         self.assertIn("项目本地纯 Python 包与 `.dist-info` 元数据", simplified)
         self.assertIn("项目 workspace 上限为压缩后 64 MiB、8192 个文件条目及解压后 128 MiB", simplified)
         self.assertIn("M4 路径 A 已完成", simplified)
@@ -406,11 +464,16 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`engines.current/run/stop_self`", english)
         self.assertIn("`automator.click/long_click/press/swipe/back/home`", english)
         self.assertIn("`selector.snapshot/find/click/set_text`", english)
+        self.assertIn("`images.capture_screen`", english)
         self.assertIn("0 through 1000000", english)
         self.assertIn("1 ms through 4 s", english)
         self.assertIn("at most 128 nodes, depth 32, and 48 KiB of JSON", english)
         self.assertIn("`SELECTOR_SCAN_LIMIT_EXCEEDED`", english)
         self.assertIn("`STALE_NODE`", english)
+        self.assertIn("Screen capture retains at most 1 image per execution", english)
+        self.assertIn("`SCREEN_CAPTURE_FAILED`", english)
+        self.assertIn("`RESULT_LIMIT_EXCEEDED`", english)
+        self.assertIn("`STALE_IMAGE`", english)
         self.assertIn("project-local pure-Python packages and `.dist-info` metadata", english)
         self.assertIn("64 MiB compressed, 8192 file entries, and 128 MiB extracted", english)
         self.assertIn("M4 Path A is complete", english)

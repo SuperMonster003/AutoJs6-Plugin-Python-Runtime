@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Улучшено",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v0.4.0-alpha.3": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "Третий alpha-кандидат M3 automation для текущего дерева; полный ограниченный путь screen capture для Android 11+ прошёл целевую приёмку на эмуляторе API 37 с включённой accessibility service, а fail-closed прошёл на физическом устройстве API 31 без изменения его accessibility services; поиск image/color, OCR, публикация и полная матрица устройств остаются вне этого заявления"
+      ],
+      "feature": [
+        "Добавлен `autojs6.images.capture_screen`, возвращающий проверенные encoded bytes PNG/JPEG либо атомарно записывающий и публикующий output artifact выполнения"
+      ],
+      "improvement": [
+        "На выполнение сохраняется не более 1 capture, передача идёт raw chunk по 32 KiB, encoded data ограничены 4 MiB; Python проверяет порядок, EOF, SHA-256 и сигнатуры формата и всегда выполняет release, Host обнуляет при замене/release/terminal и сообщает стабильные ошибки без включения service или открытия настроек"
+      ]
+    },
     "v0.4.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [

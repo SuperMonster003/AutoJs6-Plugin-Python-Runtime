@@ -5,6 +5,18 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v0.4.0-alpha.3": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "現在の tree に対する 3 番目の M3 automation alpha candidate. Android 11+ の有界 screen-capture 完全経路は accessibility service を有効にした API 37 emulator で focused acceptance に合格し, fail-closed は既存の accessibility service を変更せず API 31 physical device で合格しました; image/color matching, OCR, publication, 完全な device matrix はこの claim の対象外です"
+      ],
+      "feature": [
+        "検証済み PNG/JPEG encoded bytes を返すか execution output artifact を atomic に書き込み公開する `autojs6.images.capture_screen` を追加"
+      ],
+      "improvement": [
+        "各実行で最大 1 capture を保持し, 32 KiB raw chunk で転送して encoded data を 4 MiB に制限. Python は order, EOF, SHA-256, format signature を検証して常に release し, Host は replacement/release/terminal で zero 化し, service 有効化や設定画面を行わず安定した error を返します"
+      ]
+    },
     "v0.4.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [

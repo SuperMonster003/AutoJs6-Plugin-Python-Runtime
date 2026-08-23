@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.3
+
+###### 2026/08/24
+
+* `Hint` Third M3 automation current-tree alpha candidate; the complete bounded Android 11+ screen-capture path passed focused acceptance on an accessibility-enabled API 37 emulator, and fail-closed passed on an API 31 physical device without changing its accessibility services; image/color matching, OCR, publication, and a complete device matrix remain outside this claim
+* `Feature` Add `autojs6.images.capture_screen`, returning verified PNG/JPEG encoded bytes or atomically writing and publishing an execution output artifact
+* `Improvement` Retain at most 1 capture per execution, transfer 32 KiB raw chunks, and cap encoded data at 4 MiB; Python verifies order, EOF, SHA-256, and format signatures and always releases, while the Host zeros on replacement/release/terminal and reports stable failures without enabling services or opening settings
+
 # v0.4.0-alpha.2
 
 ###### 2026/08/24

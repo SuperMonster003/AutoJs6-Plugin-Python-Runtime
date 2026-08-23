@@ -5,6 +5,18 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "相依性",
   "$data": {
+    "v0.4.0-alpha.3": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "目前樹第三個 M3 自動化 alpha 候選; Android 11+ 有界螢幕擷取完整路徑已在啟用無障礙的 API 37 模擬器通過聚焦驗收, API 31 實體裝置在不變更既有無障礙服務的前提下通過 fail-closed; 找圖找色、OCR、發布及完整裝置矩陣仍不在本次宣告範圍"
+      ],
+      "feature": [
+        "新增 `autojs6.images.capture_screen`, 以 PNG/JPEG 回傳經驗證的編碼位元組, 或原子寫入並發布執行輸出成品"
+      ],
+      "improvement": [
+        "每次執行最多保留 1 張擷取, 以 32 KiB 原始區塊傳輸且編碼後最多 4 MiB; Python 核對順序、EOF、SHA-256 與格式簽章並一律 release, Host 在替換/釋放/終態清零, 失敗使用穩定錯誤且不啟用服務、不開啟設定"
+      ]
+    },
     "v0.4.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [
