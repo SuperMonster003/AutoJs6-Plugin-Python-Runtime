@@ -10,7 +10,7 @@
   "h3_functions": "기능",
   "features": [
     "UTF-8 Python 소스 스냅샷 하나를 `__main__`으로 실행합니다.",
-    "최대 {{ max_stdin_bytes }}의 유한한 사전 제공 stdin snapshot을 받습니다. snapshot이 EOF에 도달한 뒤에는 명시적 foreground 실행에서 프로토콜 1.3의 제한된 prompt/reply로 내장 `input()`을 계속할 수 있습니다.",
+    "최대 {{ max_stdin_bytes }}의 유한한 사전 제공 stdin snapshot을 받습니다. snapshot이 EOF에 도달한 뒤에는 명시적 foreground 실행에서 프로토콜 1.3의 제한된 prompt/reply로 내장 `input()`을 계속할 수 있고 표준 라이브러리 `getpass.getpass()`는 숨김 입력을 사용합니다.",
     "승인된 project에서 `entryMode=file|module`을 명시적으로 선택합니다. module mode는 표준 `runpy` metadata, project root의 `sys.path[0]` 및 package-relative import를 사용하고 file mode는 일반 script semantics를 유지합니다.",
     "스크립트 실행 중 stdout/stderr의 원래 순서대로 제한된 chunk를 credit으로 전달하며, credit이 소진되면 실행에 backpressure를 적용합니다.",
     "프로토콜 1.4에서 최대 {{ max_structured_json_bytes }}의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 {{ max_output_artifacts }}개 전달하며 stdout에서 결과를 추론하지 않습니다.",
@@ -23,7 +23,7 @@
   "p_runtime_version_status": "빌드는 Python {{ python_line }}을 요청합니다. 동결된 로컬 RC 산출물과 정확한 기기 실행은 CPython {{ python_version_expected }}를 기록했습니다. 최종 0.1.0은 소스 동결 후 버전과 hash를 다시 검증해야 합니다.",
   "h3_plugin_interface": "플러그인 인터페이스",
   "p_plugin_interface": "호스트는 다음 식별자로 플러그인을 검색하고 호출합니다",
-  "p_plugin_scope": "독립 SOURCE, 선택적인 제한 workspace archive, 최대 {{ max_stdin_bytes }}의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. 프로토콜 1.2는 승인된 project에 명시적인 file/module entry negotiation을 추가합니다. 프로토콜 1.3은 snapshot EOF 뒤 내장 `input()`에 Host 소유의 foreground 전용 prompt/reply를 추가합니다. 프로토콜 1.4는 명시적 엄격 JSON과 선택적 SHA-256 manifest output artifact를 추가하며 stdout은 진단 텍스트로 유지되고 결과로 분석되지 않습니다. 직접 `sys.stdin`은 계속 유한하며 background 실행은 입력 UI를 열지 않고 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.",
+  "p_plugin_scope": "독립 SOURCE, 선택적인 제한 workspace archive, 최대 {{ max_stdin_bytes }}의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. 프로토콜 1.2는 승인된 project에 명시적인 file/module entry negotiation을 추가합니다. 프로토콜 1.3은 snapshot EOF 뒤 내장 `input()`에 Host 소유의 foreground 전용 prompt/reply를 추가하고 표준 라이브러리 `getpass.getpass()`는 숨김 입력을 사용합니다. 프로토콜 1.4는 명시적 엄격 JSON과 선택적 SHA-256 manifest output artifact를 추가하며 stdout은 진단 텍스트로 유지되고 결과로 분석되지 않습니다. 직접 `sys.stdin`은 계속 유한하며 background 실행은 입력 UI를 열지 않고 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.",
   "h3_host_integration_status": "호스트 통합 상태",
   "p_host_integration_status": "0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.",
   "h3_security": "보안 및 개인정보",
@@ -40,11 +40,11 @@
   ],
   "h3_unsupported": "선언하지 않은 기능",
   "unsupported_capabilities": [
-    "일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 {{ max_stdin_bytes }}의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.",
+    "일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 {{ max_stdin_bytes }}의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`과 표준 라이브러리 `getpass.getpass()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.",
     "UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.",
     "실시간 AutoJs6 capability broker는 없습니다. 첫 API는 실행 시작 시 동결된 app/device/execution/project snapshot과 plugin-private workspace의 제한된 읽기 전용 접근만 사용합니다.",
     "32비트 Android와 임의의 native wheel은 보장하지 않습니다.",
-    "arm64-v8a에는 API 31 기기 증거가 있습니다. x86_64는 현재 packaging 증거만 있으며 기기 실행이나 완전한 기기 matrix로 제시하지 않습니다."
+    "현재 tree에는 API 31 arm64-v8a 실제 기기 smoke evidence와 API 37 x86_64 16 KB page emulator smoke evidence가 있으며, 어느 쪽도 완전한 기기 matrix나 release qualification으로 제시하지 않습니다."
   ],
   "h3_roadmap": "로드맵",
   "p_roadmap": "R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=11 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. stable APK provenance는 해당 exact identity를 기준으로 평가되며 production receipt도 같은 기준을 사용해야 합니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.",
@@ -58,7 +58,7 @@
   "h3_build": "빌드",
   "p_build_deferred": "문서 생성 자체는 빌드를 실행하지 않습니다. release 설정은 AAR, SHA-256, signer 또는 runtime lock drift 시 fail closed됩니다. stable artifact는 exact release identity에 결속될 때만 허용됩니다.",
   "p_local_aars": "빌드 전에 다음 release AAR을 `libs`에 배치하고 고정해야 합니다",
-  "p_build_architecture": "Maven의 {{ runtime_dependency }}과 CPython {{ python_version_expected }}를 lock하고 stdlib만 package합니다. release gate는 의존성 metadata, native library, NOTICE, SM003 signer 및 배포 APK 세 개를 exact identity에 대해 확인합니다. 16 KB page 호환성은 현재 전용 gate가 없으며 검증되었다고 주장하지 않습니다.",
+  "p_build_architecture": "Maven의 {{ runtime_dependency }}과 CPython {{ python_version_expected }}를 lock하고 stdlib만 package합니다. release gate는 의존성 metadata, native library, NOTICE, SM003 signer 및 배포 APK 세 개를 exact identity에 대해 확인합니다. 현재 tree의 API 37 x86_64 16 KB page emulator focused smoke는 통과했지만, 포괄적인 호환성 gate나 기기 matrix를 의미하지 않습니다.",
   "h3_license": "라이선스",
   "p_license": "프로젝트 소스는 MPL-2.0입니다. Chaquopy, CPython 및 기타 구성 요소는 각 라이선스를 따르며 attribution과 upstream/project source 접근은 `THIRD_PARTY_NOTICES.md`에 기록됩니다.",
   "h3_resource_layout": "리소스 구성",

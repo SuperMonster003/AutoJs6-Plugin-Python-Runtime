@@ -115,8 +115,9 @@ The module-mode field is required-for-reader on the wire, so a pre-1.2 reader
 rejects the request instead of silently running the dotted module name with
 file semantics.
 
-The bootstrap must restore `builtins.input`, stdout, stderr, stdin, argv, cwd and `sys.path` on
-every terminal path. Project modules and project importer-cache entries must
+The bootstrap must restore `builtins.input`, `getpass.getpass`, stdout, stderr,
+stdin, argv, cwd and `sys.path` on every terminal path. Project modules and
+project importer-cache entries must
 not leak into a later execution. U1-R1 adds exact sequential-workspace tests
 for same-named modules.
 
@@ -213,10 +214,15 @@ prompt/reply loop below is interactive input and remains a separate channel.
 - Protocol 1.3 advertises `supportsInteractiveInput` and nonzero prompt, reply,
   count and wait ceilings. An interactive request carries a narrower policy in
   a required-for-reader field so a pre-1.3 reader fails closed.
-- The built-in `input()` consumes the finite snapshot first. Only after snapshot
-  EOF does it issue a typed prompt with an execution request ID, positive
-  monotonic prompt ID, bounded text, visible/hidden echo policy, reply byte
-  ceiling and monotonic deadline.
+- The built-in `input()` and standard-library `getpass.getpass()` consume the
+  finite snapshot first. Only after snapshot EOF do they issue a typed prompt
+  with an execution request ID, positive monotonic prompt ID, bounded text,
+  visible/hidden echo policy, reply byte ceiling and monotonic deadline.
+- `input()` requests visible echo and writes its prompt to captured stdout.
+  `getpass.getpass(prompt="Password: ", stream=None)` requests hidden echo and
+  writes its prompt to the supplied stream, or captured stderr when no stream is
+  supplied. The Host password dialog disables visible characters and keyboard
+  suggestions.
 - Exactly one matching `VALUE`, `EOF`, or `CANCELLED` reply is accepted.
   `VALUE` permits an empty string; `EOF` raises `EOFError`; `CANCELLED` raises
   `KeyboardInterrupt`. Duplicate, unsolicited, reordered, mismatched or
@@ -228,9 +234,19 @@ prompt/reply loop below is interactive input and remains a separate channel.
   destruction and runtime-generation retirement clear the pending prompt and
   wake the Plugin wait. Host terminal/connection/plugin-state paths interrupt
   the separate bounded UI task and dismiss its dialog.
-- The original built-in and stdio/process state are restored on all terminal
-  paths. The Host dialog/controller never crosses Binder and the narrow
+- The original built-in, original `getpass.getpass`, and stdio/process state are
+  restored on all terminal paths. The Host dialog/controller never crosses Binder and the narrow
   Plugin bridge is never placed in Python globals.
+
+The paired public Host entry paths were accepted with real Host-owned dialogs
+and the real CPython Plugin on Sony XQ-AT72 (`QV710AF65F`, API 31,
+arm64-v8a, 4 KiB pages) and an API 37 x86_64 emulator with 16 KiB pages. The
+test follows the editor's `Scripts.runWithBroadcastSenderInteractive` entry and
+Explorer's `Scripts.runInteractive` entry, verifies visible versus password
+accessibility nodes, submits bounded replies, validates the structured results,
+and proves that neither reply appears in the global console. The paired Host
+implementation/evidence commit is `70ea17097`; this remains current-tree
+acceptance rather than stable-release provenance.
 
 The detailed wire and lifecycle rules are in
 `docs/python/U1_R2_INTERACTIVE_INPUT_PROTOCOL.md`.

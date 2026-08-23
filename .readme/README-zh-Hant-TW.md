@@ -46,7 +46,7 @@ Python Runtime 是獨立的 Python 協定 V1 provider. 宿主將單一 Python �
 ******
 
 - 將一個 UTF-8 Python 原始碼快照當作 `__main__` 執行.
-- 接收最大 1 MiB 的有限預置 stdin snapshot; snapshot 到達 EOF 後, 明確前景啟動可透過協定 1.3 的有界 prompt/reply 繼續內建 `input()`.
+- 接收最大 1 MiB 的有限預置 stdin snapshot; snapshot 到達 EOF 後, 明確前景啟動可透過協定 1.3 的有界 prompt/reply 繼續內建 `input()`, 而標準庫 `getpass.getpass()` 使用隱藏回顯.
 - 為已准入專案明確選擇 `entryMode=file|module`; module 模式使用標準 `runpy` 中繼資料、專案根目錄 `sys.path[0]` 與 package-relative import, file 模式保留一般指令碼語義.
 - 在腳本執行期間依 stdout/stderr 原始順序透過有界 chunk 與 credit 傳送; credit 耗盡會對執行施加背壓.
 - 透過協定 1.4 明確設定最大 64 KiB 的嚴格 JSON 結果, 並傳送最多 16 個具有路徑、大小與 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.
@@ -90,7 +90,7 @@ engine: python
 protocol: 1.0-1.4
 ```
 
-外掛接收獨立 SOURCE, 可選的有界 workspace archive, 最大 1 MiB 的有限預置 stdin snapshot, 以及協定 1.1 的唯讀宿主能力快照. 協定 1.2 為已准入專案加入明確 file/module 入口協商. 協定 1.3 在 snapshot EOF 後為內建 `input()` 加入由 Host 持有且僅限前景的 prompt/reply. 協定 1.4 加入明確嚴格 JSON 結果與可選的 SHA-256 manifest 輸出 artifact, stdout 僅供診斷且絕不解析為結果. 直接 `sys.stdin` 始終有限, 背景啟動絕不開啟輸入 UI, 外掛也不會向指令碼注入 Context, Binder, 宿主執行環境物件或 callback sink.
+外掛接收獨立 SOURCE, 可選的有界 workspace archive, 最大 1 MiB 的有限預置 stdin snapshot, 以及協定 1.1 的唯讀宿主能力快照. 協定 1.2 為已准入專案加入明確 file/module 入口協商. 協定 1.3 在 snapshot EOF 後為內建 `input()` 加入由 Host 持有且僅限前景的 prompt/reply; 標準庫 `getpass.getpass()` 使用隱藏回顯. 協定 1.4 加入明確嚴格 JSON 結果與可選的 SHA-256 manifest 輸出 artifact, stdout 僅供診斷且絕不解析為結果. 直接 `sys.stdin` 始終有限, 背景啟動絕不開啟輸入 UI, 外掛也不會向指令碼注入 Context, Binder, 宿主執行環境物件或 callback sink.
 
 ******
 
@@ -102,8 +102,8 @@ protocol: 1.0-1.4
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
-paired host: AutoJs6 6.8.0 / versionCode 5275
+release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -137,11 +137,11 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-- 不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前景互動僅適用於最大 1 MiB 的有限 snapshot 到達 EOF 後的內建 `input()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.
+- 不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前景互動僅適用於最大 1 MiB 的有限 snapshot 到達 EOF 後的內建 `input()` 與標準庫 `getpass.getpass()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.
 - 不提供 UI 指令碼, 偵錯器, REPL 或任意宿主 Java 物件存取.
 - 不提供即時 AutoJs6 能力 broker; 首批 API 只使用執行開始時凍結的 app/device/execution/project 快照與外掛私有 workspace 的有界唯讀檔案介面.
 - 不宣告 32 位元 Android 支援, 也不保證任何第三方 native wheel 可用.
-- arm64-v8a 有 API 31 裝置證據; x86_64 目前只有封裝證據, 不會冒充裝置執行或完整裝置矩陣.
+- 目前樹已有 API 31 arm64-v8a 實機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格.
 
 ******
 
@@ -167,7 +167,7 @@ R6-P2/P3 的本機 RC 與集中裝置證據保留為歷史記錄. 本次 clean V
 * `新增` 新增最大 1 MiB 的有限預先提供 stdin snapshot, 為 `input()` 與 `sys.stdin` 提供確定性輸入和 EOF
 * `新增` 完善專案 import 語義, 支援 workspace 模組, 巢狀入口同層與根模組以及 package-relative import
 * `新增` 新增協定 1.2 明確 `entryMode=file|module`; module 執行透過 `runpy` 提供正確的 `__package__`、`__spec__`、專案根目錄 `sys.path[0]` 與相對 import, file 模式維持不變
-* `新增` 新增協定 1.3: 有限 snapshot 到達 EOF 後, 僅前景內建 `input()` 使用有界 prompt/reply; 背景啟動絕不開啟輸入 UI, 直接 `sys.stdin` 始終有限
+* `新增` 新增協定 1.3: 有限 snapshot 到達 EOF 後, 僅前景內建 `input()` 使用可見回顯、標準庫 `getpass.getpass()` 使用隱藏回顯的有界 prompt/reply; 背景啟動絕不開啟輸入 UI, 直接 `sys.stdin` 始終有限
 * `新增` 新增協定 1.4 明確嚴格 JSON 結果與可選輸出 artifact, 對數量、正規化路徑、單個/合計大小、精確 PFD 引用與 SHA-256 設限, 且絕不從 stdout 推斷結果
 * `修正` 執行前以 strict UTF-8 解碼原始碼, 非 UTF-8 encoding cookie 不再繞過契約
 * `改善` 授予 `INTERNET`, 讓可信腳本可直接使用標準函式庫網路用戶端, 同時仍停用線上 pip 與自動程式碼下載
@@ -239,7 +239,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-執行環境透過 Maven 鎖定 Chaquopy 17.0.0 與 CPython 3.13.9, 並只封裝 stdlib. Release gate 按精確身分核對相依性資料, native 程式庫, NOTICE, SM003 signer 與三種發行 APK; 16 KB page 相容性目前沒有專用 gate, 不作已核驗聲明.
+執行環境透過 Maven 鎖定 Chaquopy 17.0.0 與 CPython 3.13.9, 並只封裝 stdlib. Release gate 按精確身分核對相依性資料, native 程式庫, NOTICE, SM003 signer 與三種發行 APK. 目前樹已通過 API 37 x86_64 16 KB page 模擬器的聚焦冒煙; 這不等同完整相容性 gate 或裝置矩陣聲明.
 
 ******
 

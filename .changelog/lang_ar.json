@@ -14,7 +14,7 @@
         "إضافة snapshot محدود ومقدم مسبقا لـ stdin بحجم أقصى 1 MiB لتوفير input وEOF حتميين عبر `input()` و`sys.stdin`",
         "إكمال دلالات project import لوحدات workspace ووحدات sibling/root لنقطة دخول متداخلة وعمليات package-relative import",
         "إضافة البروتوكول 1.2 مع `entryMode=file|module` الصريح؛ يستخدم تنفيذ module أداة `runpy` مع `__package__` و`__spec__` الصحيحين وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية، بينما يبقى وضع file دون تغيير",
-        "إضافة prompt/reply محدود في البروتوكول 1.3 ومقصور على foreground للدالة `input()` المضمنة بعد EOF للـ snapshot المحدود؛ لا تفتح عمليات background واجهة إدخال ويظل `sys.stdin` المباشر محدودا",
+        "إضافة prompt/reply محدود في البروتوكول 1.3 ومقصور على foreground بعد EOF للـ snapshot المحدود، بإدخال ظاهر للدالة `input()` ومخفي للدالة `getpass.getpass()`؛ لا تفتح عمليات background واجهة إدخال ويظل `sys.stdin` المباشر محدودا",
         "إضافة نتائج JSON صارمة وصريحة وoutput artifacts اختيارية في البروتوكول 1.4 ضمن حدود العدد والمسار المنظم وحجم الملف/الإجمالي ومراجع PFD الدقيقة وSHA-256 دون استنتاج نتيجة من stdout"
       ],
       "fix": [

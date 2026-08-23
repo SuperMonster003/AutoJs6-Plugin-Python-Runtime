@@ -8,6 +8,7 @@ remain the effective isolation mechanism for the R2 POC.
 from __future__ import annotations
 
 import builtins
+import getpass as getpass_module
 import io
 import keyword
 import linecache
@@ -154,11 +155,16 @@ def _stdin_snapshot(stdin_input: Any) -> io.TextIOWrapper:
     )
 
 
-def _interactive_input(prompt: Any, input_bridge: Any) -> str:
+def _interactive_line(
+    prompt: Any,
+    input_bridge: Any,
+    echo: str,
+    prompt_stream: Any,
+) -> str:
     """Preserve finite stdin first, then request exactly one bounded foreground reply."""
     prompt_text = str(prompt)
     if prompt_text:
-        sys.stdout.write(prompt_text)
+        prompt_stream.write(prompt_text)
     line = sys.stdin.readline()
     if line != "":
         if line.endswith("\n"):
@@ -166,7 +172,7 @@ def _interactive_input(prompt: Any, input_bridge: Any) -> str:
             if line.endswith("\r"):
                 line = line[:-1]
         return line
-    response = str(input_bridge.request(prompt_text, "visible"))
+    response = str(input_bridge.request(prompt_text, echo))
     if not response:
         raise RuntimeError("Python interactive input bridge returned an empty response")
     status, value = response[0], response[1:]
@@ -177,6 +183,15 @@ def _interactive_input(prompt: Any, input_bridge: Any) -> str:
     if status == "\u0003":
         raise KeyboardInterrupt
     raise RuntimeError("Python interactive input bridge returned an unknown response")
+
+
+def _interactive_input(prompt: Any, input_bridge: Any) -> str:
+    return _interactive_line(prompt, input_bridge, "visible", sys.stdout)
+
+
+def _interactive_getpass(prompt: Any, stream: Any, input_bridge: Any) -> str:
+    prompt_stream = sys.stderr if stream is None else stream
+    return _interactive_line(prompt, input_bridge, "hidden", prompt_stream)
 
 
 def _entry_package(logical_entry: str, workspace_root: str | None) -> str | None:
@@ -372,6 +387,7 @@ def _run_source(
     previous_importer_cache_object = sys.path_importer_cache
     previous_importer_cache = dict(previous_importer_cache_object)
     previous_builtin_input = builtins.input
+    previous_getpass = getpass_module.getpass
     capability_token: Any = None
     globals_dict: dict[str, Any] | None = None
     try:
@@ -434,6 +450,11 @@ def _run_source(
         sys.stdin, sys.stdout, sys.stderr = stdin, stdout, stderr
         if input_bridge_input is not None:
             builtins.input = lambda prompt="": _interactive_input(prompt, input_bridge_input)
+            getpass_module.getpass = lambda prompt="Password: ", stream=None: _interactive_getpass(
+                prompt,
+                stream,
+                input_bridge_input,
+            )
         sys.argv = [logical_entry, *list(arguments)]
         try:
             if entry_mode == "module":
@@ -514,6 +535,7 @@ def _run_source(
             previous_argv,
         )
         builtins.input = previous_builtin_input
+        getpass_module.getpass = previous_getpass
         sys.path = previous_sys_path_object
         previous_sys_path_object[:] = previous_sys_path
         _restore_importer_cache(

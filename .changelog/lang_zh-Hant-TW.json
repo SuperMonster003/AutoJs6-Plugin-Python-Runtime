@@ -14,7 +14,7 @@
         "新增最大 1 MiB 的有限預先提供 stdin snapshot, 為 `input()` 與 `sys.stdin` 提供確定性輸入和 EOF",
         "完善專案 import 語義, 支援 workspace 模組, 巢狀入口同層與根模組以及 package-relative import",
         "新增協定 1.2 明確 `entryMode=file|module`; module 執行透過 `runpy` 提供正確的 `__package__`、`__spec__`、專案根目錄 `sys.path[0]` 與相對 import, file 模式維持不變",
-        "新增協定 1.3: 有限 snapshot 到達 EOF 後, 僅前景內建 `input()` 使用有界 prompt/reply; 背景啟動絕不開啟輸入 UI, 直接 `sys.stdin` 始終有限",
+        "新增協定 1.3: 有限 snapshot 到達 EOF 後, 僅前景內建 `input()` 使用可見回顯、標準庫 `getpass.getpass()` 使用隱藏回顯的有界 prompt/reply; 背景啟動絕不開啟輸入 UI, 直接 `sys.stdin` 始終有限",
         "新增協定 1.4 明確嚴格 JSON 結果與可選輸出 artifact, 對數量、正規化路徑、單個/合計大小、精確 PFD 引用與 SHA-256 設限, 且絕不從 stdout 推斷結果"
       ],
       "fix": [

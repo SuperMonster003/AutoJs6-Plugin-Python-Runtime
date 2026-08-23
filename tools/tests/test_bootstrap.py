@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import builtins
+import getpass
 import json
 import pathlib
 import os
@@ -383,6 +384,40 @@ class BootstrapTest(unittest.TestCase):
         self.assertEqual("failed", cancelled["status"])
         self.assertEqual("KeyboardInterrupt", cancelled["exception_type"])
         self.assertEqual(b"cancel>", b"".join(chunk for _, chunk in cancelled["output"]))
+
+    def test_getpass_consumes_snapshot_then_uses_hidden_echo_and_restores_function(self) -> None:
+        original_getpass = getpass.getpass
+        bridge = RecordingInputBridge("\u0001live-secret")
+        outcome = run(
+            b"from getpass import getpass\n"
+            b"first = getpass('snapshot-secret>')\n"
+            b"second = getpass('live-secret>')\n"
+            b"print(first, second, sep='/')\n",
+            stdin=b"snapshot-secret\n",
+            input_bridge=bridge,
+        )
+
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(
+            b"snapshot-secret>live-secret>snapshot-secret/live-secret\n",
+            b"".join(chunk for _, chunk in outcome["output"]),
+        )
+        self.assertEqual([("live-secret>", "hidden")], bridge.calls)
+        self.assertIs(original_getpass, getpass.getpass)
+
+    def test_getpass_maps_hidden_eof_and_cancel_to_python_control_flow(self) -> None:
+        for marker, expected in (("\u0002", "EOFError"), ("\u0003", "KeyboardInterrupt")):
+            with self.subTest(expected=expected):
+                bridge = RecordingInputBridge(marker)
+                outcome = run(
+                    b"import getpass\ngetpass.getpass('password>')\n",
+                    input_bridge=bridge,
+                )
+
+                self.assertEqual("failed", outcome["status"])
+                self.assertEqual(expected, outcome["exception_type"])
+                self.assertEqual(b"password>", b"".join(chunk for _, chunk in outcome["output"]))
+                self.assertEqual([("password>", "hidden")], bridge.calls)
 
     def test_interactive_bridge_does_not_turn_sys_stdin_reads_into_an_unbounded_stream(self) -> None:
         bridge = RecordingInputBridge("\u0001must-not-be-consumed")

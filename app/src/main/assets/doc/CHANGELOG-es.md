@@ -12,7 +12,7 @@
 * `Función` Añade un snapshot stdin finito y preproporcionado de hasta 1 MiB para entrada y EOF deterministas mediante `input()` y `sys.stdin`
 * `Función` Completa los imports de proyecto para módulos workspace, módulos hermanos y raíz de una entrada anidada e imports relativos al package
 * `Función` Añade el protocolo 1.2 con `entryMode=file|module` explícito; la ejecución module usa `runpy` con `__package__`, `__spec__`, la raíz del proyecto en `sys.path[0]` e imports relativos correctos, mientras el modo file no cambia
-* `Función` Añade con el protocolo 1.3 prompt/respuesta acotado y solo en primer plano para el `input()` integrado tras el EOF del snapshot finito; los inicios en segundo plano nunca abren UI de entrada y `sys.stdin` directo sigue finito
+* `Función` Añade con el protocolo 1.3 prompt/respuesta acotado y solo en primer plano tras el EOF del snapshot finito, con entrada visible para `input()` y oculta para `getpass.getpass()`; los inicios en segundo plano nunca abren UI de entrada y `sys.stdin` directo sigue finito
 * `Función` Añade con el protocolo 1.4 resultados JSON estrictos explícitos y artefactos opcionales acotados por cantidad, ruta normalizada, tamaño por archivo/total, referencias PFD exactas y SHA-256, sin inferir nunca un resultado desde stdout
 * `Corrección` Decodifica el código como UTF-8 estricto antes de ejecutarlo para que un encoding cookie no UTF-8 no eluda el contrato
 * `Mejora` Conceder `INTERNET` para que los scripts de confianza usen directamente los clientes de red de la biblioteca estándar, manteniendo desactivados pip en línea y la descarga automática de código

@@ -46,7 +46,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 ******
 
 - 将一个 UTF-8 Python 源码快照作为 `__main__` 执行.
-- 接收最大 1 MiB 的有限预置 stdin snapshot; 快照到达 EOF 后, 显式前台启动可通过协议 1.3 的有界 prompt/reply 继续内置 `input()`.
+- 接收最大 1 MiB 的有限预置 stdin snapshot; 快照到达 EOF 后, 显式前台启动可通过协议 1.3 的有界 prompt/reply 继续内置 `input()`, 且标准库 `getpass.getpass()` 使用隐藏回显.
 - 为已准入项目显式选择 `entryMode=file|module`; module 模式使用标准 `runpy` 元数据、项目根目录 `sys.path[0]` 与包相对导入, file 模式保持普通脚本语义.
 - 在脚本执行期间按 stdout/stderr 原始顺序通过有界 chunk 与 credit 传送; credit 耗尽会对执行施加背压.
 - 通过协议 1.4 显式设置最大 64 KiB 的严格 JSON 结果, 并传送最多 16 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.
@@ -90,7 +90,7 @@ engine: python
 protocol: 1.0-1.4
 ```
 
-插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. 协议 1.2 为已准入项目增加显式 file/module 入口协商. 协议 1.3 在快照 EOF 后为内置 `input()` 增加由 Host 持有且仅限前台的 prompt/reply. 协议 1.4 增加显式严格 JSON 结果与可选的 SHA-256 manifest 输出 artifact, stdout 仅用于诊断且绝不被解析为结果. 直接 `sys.stdin` 始终有限, 后台启动绝不打开输入 UI, 插件也不会向脚本注入 Context, Binder, 宿主运行时对象或 callback sink.
+插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. 协议 1.2 为已准入项目增加显式 file/module 入口协商. 协议 1.3 在快照 EOF 后为内置 `input()` 增加由 Host 持有且仅限前台的 prompt/reply; 标准库 `getpass.getpass()` 使用隐藏回显. 协议 1.4 增加显式严格 JSON 结果与可选的 SHA-256 manifest 输出 artifact, stdout 仅用于诊断且绝不被解析为结果. 直接 `sys.stdin` 始终有限, 后台启动绝不打开输入 UI, 插件也不会向脚本注入 Context, Binder, 宿主运行时对象或 callback sink.
 
 ******
 
@@ -102,8 +102,8 @@ protocol: 1.0-1.4
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
-paired host: AutoJs6 6.8.0 / versionCode 5275
+release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -137,11 +137,11 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 ******
 
-- 不提供通用实时 stdin 或直接 `sys.stdin` callback streaming. 前台交互仅适用于最大 1 MiB 的有限 snapshot 到达 EOF 后的内置 `input()`. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.
+- 不提供通用实时 stdin 或直接 `sys.stdin` callback streaming. 前台交互仅适用于最大 1 MiB 的有限 snapshot 到达 EOF 后的内置 `input()` 与标准库 `getpass.getpass()`. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.
 - 不提供 UI 脚本, 调试器, REPL 或任意宿主 Java 对象访问.
 - 不提供实时 AutoJs6 能力 broker; 首批 API 仅使用执行启动时冻结的 app/device/execution/project 快照和插件私有 workspace 的有界只读文件接口.
 - 不声明 32 位 Android 支持, 也不保证任意第三方 native wheel 可用.
-- arm64-v8a 有 API 31 真机证据; x86_64 当前仅有打包证据, 不冒充设备执行或完整设备矩阵.
+- 当前树已有 API 31 arm64-v8a 真机冒烟证据与 API 37 x86_64 16 KB page 模拟器冒烟证据; 两者都不冒充完整设备矩阵或发布资质.
 
 ******
 
@@ -167,7 +167,7 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 * `新增` 新增最大 1 MiB 的有限预置 stdin snapshot, 为 `input()` 与 `sys.stdin` 提供确定性输入和 EOF
 * `新增` 完善项目导入语义, 支持 workspace 模块, 嵌套入口同级与根模块以及 package-relative import
 * `新增` 新增协议 1.2 显式 `entryMode=file|module`; module 执行通过 `runpy` 提供正确的 `__package__`、`__spec__`、项目根目录 `sys.path[0]` 与相对导入, file 模式保持不变
-* `新增` 新增协议 1.3: 有限 snapshot 到达 EOF 后, 仅前台内置 `input()` 使用有界 prompt/reply; 后台启动绝不打开输入 UI, 直接 `sys.stdin` 始终有限
+* `新增` 新增协议 1.3: 有限 snapshot 到达 EOF 后, 仅前台内置 `input()` 使用可见回显、标准库 `getpass.getpass()` 使用隐藏回显的有界 prompt/reply; 后台启动绝不打开输入 UI, 直接 `sys.stdin` 始终有限
 * `新增` 新增协议 1.4 显式严格 JSON 结果与可选输出 artifact, 对数量、规范化路径、单个/合计大小、精确 PFD 引用及 SHA-256 设限, 且绝不从 stdout 推断结果
 * `修复` 执行前按 strict UTF-8 解码源码, 非 UTF-8 encoding cookie 不再绕过契约
 * `优化` 授予 `INTERNET`, 让可信脚本可直接使用标准库网络客户端, 同时仍禁用在线 pip 与自动代码下载
@@ -239,7 +239,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-运行时通过 Maven 锁定 Chaquopy 17.0.0 与 CPython 3.13.9, 仅打包 stdlib. Release gate 按精确身份核对依赖校验元数据, native 库, NOTICE, SM003 signer 和三种发行 APK; 16 KB page 兼容性当前没有专用 gate, 不作为已核验声明.
+运行时通过 Maven 锁定 Chaquopy 17.0.0 与 CPython 3.13.9, 仅打包 stdlib. Release gate 按精确身份核对依赖校验元数据, native 库, NOTICE, SM003 signer 和三种发行 APK. 当前树已通过 API 37 x86_64 16 KB page 模拟器的聚焦冒烟; 这不等同于完整兼容性 gate 或设备矩阵声明.
 
 ******
 

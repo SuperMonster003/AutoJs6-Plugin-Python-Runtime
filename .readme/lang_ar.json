@@ -10,7 +10,7 @@
   "h3_functions": "الميزات",
   "features": [
     "تنفيذ لقطة مصدر Python بترميز UTF-8 كـ `__main__`.",
-    "قبول stdin snapshot محدود ومقدم مسبقا بحجم أقصاه {{ max_stdin_bytes }}؛ وبعد وصوله إلى EOF يمكن لتشغيل صريح في foreground متابعة `input()` المضمنة عبر prompt/reply محدود في البروتوكول 1.3.",
+    "قبول stdin snapshot محدود ومقدم مسبقا بحجم أقصاه {{ max_stdin_bytes }}؛ وبعد وصوله إلى EOF يمكن لتشغيل صريح في foreground متابعة `input()` المضمنة عبر prompt/reply محدود في البروتوكول 1.3، بينما تستخدم `getpass.getpass()` إدخالا مخفيا.",
     "اختيار `entryMode=file|module` صراحة لمشروع مقبول؛ يستخدم وضع module بيانات `runpy` القياسية وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية للحزمة، بينما يحافظ وضع file على دلالات السكربت العادية.",
     "إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.",
     "تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه {{ max_structured_json_bytes }} ونقل ما يصل إلى {{ max_output_artifacts }} من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.",
@@ -23,7 +23,7 @@
   "p_runtime_version_status": "يطلب البناء Python {{ python_line }}. سجلت عناصر RC المحلية المجمدة والتنفيذ الدقيق على الجهاز CPython {{ python_version_expected }}؛ يجب إعادة فحص الإصدار وhashes النهائية لـ 0.1.0 بعد تجميد المصدر.",
   "h3_plugin_interface": "واجهة الإضافة",
   "p_plugin_interface": "يكتشف المضيف الإضافة ويستدعيها بالمعرفات التالية",
-  "p_plugin_scope": "تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه {{ max_stdin_bytes }} وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. يضيف البروتوكول 1.2 تفاوضا صريحا على مدخل file/module للمشاريع المقبولة. يضيف البروتوكول 1.3 بعد EOF للـ snapshot تفاعل prompt/reply تملكه Host ومقصورا على `input()` المضمنة في foreground. يضيف البروتوكول 1.4 JSON صارما وصريحا وoutput artifacts اختيارية موصوفة بـ SHA-256؛ يبقى stdout للتشخيص ولا يحلل كنتيجة. يظل `sys.stdin` المباشر محدودا ولا تفتح عمليات background واجهة إدخال ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.",
+  "p_plugin_scope": "تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه {{ max_stdin_bytes }} وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. يضيف البروتوكول 1.2 تفاوضا صريحا على مدخل file/module للمشاريع المقبولة. يضيف البروتوكول 1.3 بعد EOF للـ snapshot تفاعل prompt/reply تملكه Host ومقصورا على `input()` المضمنة في foreground، بينما تستخدم `getpass.getpass()` إدخالا مخفيا. يضيف البروتوكول 1.4 JSON صارما وصريحا وoutput artifacts اختيارية موصوفة بـ SHA-256؛ يبقى stdout للتشخيص ولا يحلل كنتيجة. يظل `sys.stdin` المباشر محدودا ولا تفتح عمليات background واجهة إدخال ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.",
   "h3_host_integration_status": "حالة تكامل المضيف",
   "p_host_integration_status": "يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.",
   "h3_security": "الأمان والخصوصية",
@@ -40,11 +40,11 @@
   ],
   "h3_unsupported": "قدرات غير معلنة",
   "unsupported_capabilities": [
-    "لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة بعد EOF للـ snapshot المحدود حتى {{ max_stdin_bytes }}. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.",
+    "لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة و`getpass.getpass()` بعد EOF للـ snapshot المحدود حتى {{ max_stdin_bytes }}. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.",
     "لا توجد نصوص UI أو debugger أو REPL أو صلاحية عشوائية لكائنات Java في المضيف.",
     "لا يوجد AutoJs6 capability broker آني؛ تستخدم أول API فقط snapshot ‏app/device/execution/project المجمد عند بدء التنفيذ وقراءة محدودة من workspace الخاص بالإضافة.",
     "لا يضمن Android ‏32-bit أو أي native wheel خارجي.",
-    "يوجد دليل جهاز API 31 لـ arm64-v8a؛ أما x86_64 فلديه دليل packaging فقط وليس تنفيذا على جهاز أو مصفوفة كاملة."
+    "تتوفر للشجرة الحالية أدلة smoke على جهاز API 31 ‏arm64-v8a وعلى محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يقدم أي منهما كمصفوفة أجهزة كاملة أو كتأهيل release."
   ],
   "h3_roadmap": "خارطة الطريق",
   "p_roadmap": "تبقى أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=11 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ تقيم stable APK provenance مقابل هذه exact identities ويجب أن يستخدم أي production receipt الأساس نفسه. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.",
@@ -58,7 +58,7 @@
   "h3_build": "البناء",
   "p_build_deferred": "لا يشغل توليد الوثائق البناء بذاته. تفشل إعدادات release بشكل مغلق عند تغير AAR أو SHA-256 أو signer أو runtime lock؛ لا تقبل stable artifacts إلا عند ربطها بهوية release الدقيقة.",
   "p_local_aars": "يجب وضع ملفات release AAR التالية وتثبيتها في `libs` قبل البناء",
-  "p_build_architecture": "تقفل البيئة {{ runtime_dependency }} وCPython {{ python_version_expected }} من Maven وتحزم stdlib فقط. يفحص release gate ‏metadata والمكتبات الأصلية وNOTICE وsigner ‏SM003 وملفات APK الثلاثة مقابل الهوية الدقيقة؛ لا يوجد حاليا gate مخصص لتوافق صفحات 16 KB ولا يدعى أنه تم التحقق منه.",
+  "p_build_architecture": "تقفل البيئة {{ runtime_dependency }} وCPython {{ python_version_expected }} من Maven وتحزم stdlib فقط. يفحص release gate ‏metadata والمكتبات الأصلية وNOTICE وsigner ‏SM003 وملفات APK الثلاثة مقابل الهوية الدقيقة. نجح smoke مركز للشجرة الحالية على محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يعادل ذلك compatibility gate شاملا أو مصفوفة أجهزة كاملة.",
   "h3_license": "الترخيص",
   "p_license": "يستخدم مصدر المشروع MPL-2.0 وتبقى Chaquopy وCPython والمكونات الأخرى تحت تراخيصها؛ توثق `THIRD_PARTY_NOTICES.md` النسب والوصول إلى upstream/project source.",
   "h3_resource_layout": "بنية الموارد",

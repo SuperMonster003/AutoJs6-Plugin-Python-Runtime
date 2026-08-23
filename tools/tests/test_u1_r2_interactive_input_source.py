@@ -19,11 +19,14 @@ GITIGNORE = ROOT / ".gitignore"
 
 
 class U1R2InteractiveInputSourceTest(unittest.TestCase):
-    def test_bootstrap_patches_only_builtin_input_and_restores_it(self) -> None:
+    def test_bootstrap_patches_input_and_getpass_per_execution_and_restores_both(self) -> None:
         body = BOOTSTRAP.read_text(encoding="utf-8")
         self.assertIn("def _interactive_input(prompt: Any, input_bridge: Any) -> str:", body)
         self.assertIn("line = sys.stdin.readline()", body)
-        self.assertIn('input_bridge.request(prompt_text, "visible")', body)
+        self.assertIn('return _interactive_line(prompt, input_bridge, "visible", sys.stdout)', body)
+        self.assertIn('return _interactive_line(prompt, input_bridge, "hidden", prompt_stream)', body)
+        self.assertIn("previous_getpass = getpass_module.getpass", body)
+        self.assertIn("getpass_module.getpass = previous_getpass", body)
         self.assertIn("raise EOFError", body)
         self.assertIn("raise KeyboardInterrupt", body)
         self.assertIn("previous_builtin_input = builtins.input", body)

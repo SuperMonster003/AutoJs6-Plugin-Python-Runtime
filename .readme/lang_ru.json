@@ -10,7 +10,7 @@
   "h3_functions": "Возможности",
   "features": [
     "Выполнение одного UTF-8 снимка Python как `__main__`.",
-    "Принимается конечный заранее переданный stdin snapshot размером до {{ max_stdin_bytes }}; после его EOF явный запуск на переднем плане может продолжить встроенный `input()` через ограниченный prompt/reply протокола 1.3.",
+    "Принимается конечный заранее переданный stdin snapshot размером до {{ max_stdin_bytes }}; после его EOF явный запуск на переднем плане может продолжить встроенный `input()` через ограниченный prompt/reply протокола 1.3, а стандартный `getpass.getpass()` использует скрытый ввод.",
     "Явный выбор `entryMode=file|module` для допущенного проекта: режим module использует стандартные метаданные `runpy`, корень проекта в `sys.path[0]` и относительные импорты пакета, а режим file сохраняет обычную семантику скрипта.",
     "Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.",
     "Явное задание строгого JSON-результата до {{ max_structured_json_bytes }} и передача до {{ max_output_artifacts }} необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.",
@@ -23,7 +23,7 @@
   "p_runtime_version_status": "Сборка запрашивает Python {{ python_line }}. Замороженные локальные RC-артефакты и точный запуск на устройстве зафиксировали CPython {{ python_version_expected }}; версию и hashes финальной 0.1.0 нужно проверить заново после заморозки исходников.",
   "h3_plugin_interface": "Интерфейс плагина",
   "p_plugin_interface": "Хост находит и вызывает плагин по следующим идентификаторам",
-  "p_plugin_scope": "Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до {{ max_stdin_bytes }} и read-only snapshot возможностей хоста протокола 1.1. Протокол 1.2 добавляет явное согласование входа file/module для допущенных проектов. Протокол 1.3 добавляет после EOF snapshot принадлежащий Host prompt/reply только для встроенного `input()` на переднем плане. Протокол 1.4 добавляет явный строгий JSON и необязательные output artifacts с манифестом SHA-256; stdout остается диагностикой и никогда не разбирается как результат. Прямой `sys.stdin` остается конечным, фоновые запуски никогда не открывают UI ввода, а Context, Binder, объекты хоста и callback sink не внедряются.",
+  "p_plugin_scope": "Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до {{ max_stdin_bytes }} и read-only snapshot возможностей хоста протокола 1.1. Протокол 1.2 добавляет явное согласование входа file/module для допущенных проектов. Протокол 1.3 добавляет после EOF snapshot принадлежащий Host prompt/reply только для встроенного `input()` на переднем плане, а стандартный `getpass.getpass()` использует скрытый ввод. Протокол 1.4 добавляет явный строгий JSON и необязательные output artifacts с манифестом SHA-256; stdout остается диагностикой и никогда не разбирается как результат. Прямой `sys.stdin` остается конечным, фоновые запуски никогда не открывают UI ввода, а Context, Binder, объекты хоста и callback sink не внедряются.",
   "h3_host_integration_status": "Состояние интеграции с хостом",
   "p_host_integration_status": "Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.",
   "h3_security": "Безопасность и конфиденциальность",
@@ -40,11 +40,11 @@
   ],
   "h3_unsupported": "Необъявленные возможности",
   "unsupported_capabilities": [
-    "Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` после EOF конечного snapshot до {{ max_stdin_bytes }}. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.",
+    "Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` и стандартному `getpass.getpass()` после EOF конечного snapshot до {{ max_stdin_bytes }}. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.",
     "Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.",
     "Нет realtime AutoJs6 capability broker; первые API используют только замороженный при запуске snapshot app/device/execution/project и ограниченное read-only чтение private workspace плагина.",
     "32-разрядный Android и произвольные native wheels не гарантируются.",
-    "Для arm64-v8a есть свидетельство устройства API 31; для x86_64 пока только packaging, не запуск на устройстве и не полная матрица."
+    "Для текущего дерева есть smoke evidence на устройстве API 31 arm64-v8a и эмуляторе API 37 x86_64 со страницами 16 KB; это не выдается за полную матрицу устройств или release qualification."
   ],
   "h3_roadmap": "План",
   "p_roadmap": "Локальные RC- и концентрированные device-свидетельства R6-P2/P3 сохраняются как история. Этот clean VERSION_BUILD=11 freeze commit фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock; provenance стабильных APK оценивается относительно этих exact identities, и любой production receipt должен использовать ту же основу. Полная API×ABI matrix и новый soak не являются автоматическими gates.",
@@ -58,7 +58,7 @@
   "h3_build": "Сборка",
   "p_build_deferred": "Генерация документации сама не запускает сборку. Release-конфигурация fail closed при drift AAR, SHA-256, signer или runtime lock; stable artifacts принимаются только при связи с exact release identity.",
   "p_local_aars": "Перед сборкой следующие release AAR нужно разместить и зафиксировать в `libs`",
-  "p_build_architecture": "Runtime фиксирует {{ runtime_dependency }} и CPython {{ python_version_expected }} из Maven и включает только stdlib. Release gate проверяет metadata, native libraries, NOTICE, signer SM003 и три распространяемых APK относительно exact identity; для совместимости с 16 KB page сейчас нет отдельного gate, поэтому она не заявляется как проверенная.",
+  "p_build_architecture": "Runtime фиксирует {{ runtime_dependency }} и CPython {{ python_version_expected }} из Maven и включает только stdlib. Release gate проверяет metadata, native libraries, NOTICE, signer SM003 и три распространяемых APK относительно exact identity. Сфокусированный smoke текущего дерева на эмуляторе API 37 x86_64 со страницами 16 KB пройден; это не комплексный compatibility gate и не полная матрица устройств.",
   "h3_license": "Лицензия",
   "p_license": "Исходный код распространяется по MPL-2.0. Chaquopy, CPython и другие компоненты сохраняют свои лицензии; атрибуция и доступ к upstream/project source описаны в `THIRD_PARTY_NOTICES.md`.",
   "h3_resource_layout": "Структура ресурсов",

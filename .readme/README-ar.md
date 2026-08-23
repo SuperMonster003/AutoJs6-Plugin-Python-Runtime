@@ -46,7 +46,7 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 ******
 
 - تنفيذ لقطة مصدر Python بترميز UTF-8 كـ `__main__`.
-- قبول stdin snapshot محدود ومقدم مسبقا بحجم أقصاه 1 MiB؛ وبعد وصوله إلى EOF يمكن لتشغيل صريح في foreground متابعة `input()` المضمنة عبر prompt/reply محدود في البروتوكول 1.3.
+- قبول stdin snapshot محدود ومقدم مسبقا بحجم أقصاه 1 MiB؛ وبعد وصوله إلى EOF يمكن لتشغيل صريح في foreground متابعة `input()` المضمنة عبر prompt/reply محدود في البروتوكول 1.3، بينما تستخدم `getpass.getpass()` إدخالا مخفيا.
 - اختيار `entryMode=file|module` صراحة لمشروع مقبول؛ يستخدم وضع module بيانات `runpy` القياسية وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية للحزمة، بينما يحافظ وضع file على دلالات السكربت العادية.
 - إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.
 - تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه 64 KiB ونقل ما يصل إلى 16 من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.
@@ -90,7 +90,7 @@ engine: python
 protocol: 1.0-1.4
 ```
 
-تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه 1 MiB وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. يضيف البروتوكول 1.2 تفاوضا صريحا على مدخل file/module للمشاريع المقبولة. يضيف البروتوكول 1.3 بعد EOF للـ snapshot تفاعل prompt/reply تملكه Host ومقصورا على `input()` المضمنة في foreground. يضيف البروتوكول 1.4 JSON صارما وصريحا وoutput artifacts اختيارية موصوفة بـ SHA-256؛ يبقى stdout للتشخيص ولا يحلل كنتيجة. يظل `sys.stdin` المباشر محدودا ولا تفتح عمليات background واجهة إدخال ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.
+تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه 1 MiB وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. يضيف البروتوكول 1.2 تفاوضا صريحا على مدخل file/module للمشاريع المقبولة. يضيف البروتوكول 1.3 بعد EOF للـ snapshot تفاعل prompt/reply تملكه Host ومقصورا على `input()` المضمنة في foreground، بينما تستخدم `getpass.getpass()` إدخالا مخفيا. يضيف البروتوكول 1.4 JSON صارما وصريحا وoutput artifacts اختيارية موصوفة بـ SHA-256؛ يبقى stdout للتشخيص ولا يحلل كنتيجة. يظل `sys.stdin` المباشر محدودا ولا تفتح عمليات background واجهة إدخال ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.
 
 ******
 
@@ -102,8 +102,8 @@ protocol: 1.0-1.4
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
-paired host: AutoJs6 6.8.0 / versionCode 5275
+release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -137,11 +137,11 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
-- لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة بعد EOF للـ snapshot المحدود حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
+- لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة و`getpass.getpass()` بعد EOF للـ snapshot المحدود حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
 - لا توجد نصوص UI أو debugger أو REPL أو صلاحية عشوائية لكائنات Java في المضيف.
 - لا يوجد AutoJs6 capability broker آني؛ تستخدم أول API فقط snapshot ‏app/device/execution/project المجمد عند بدء التنفيذ وقراءة محدودة من workspace الخاص بالإضافة.
 - لا يضمن Android ‏32-bit أو أي native wheel خارجي.
-- يوجد دليل جهاز API 31 لـ arm64-v8a؛ أما x86_64 فلديه دليل packaging فقط وليس تنفيذا على جهاز أو مصفوفة كاملة.
+- تتوفر للشجرة الحالية أدلة smoke على جهاز API 31 ‏arm64-v8a وعلى محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يقدم أي منهما كمصفوفة أجهزة كاملة أو كتأهيل release.
 
 ******
 
@@ -167,7 +167,7 @@ runtime/security/release owner: SuperMonster003
 * `إضافة` إضافة snapshot محدود ومقدم مسبقا لـ stdin بحجم أقصى 1 MiB لتوفير input وEOF حتميين عبر `input()` و`sys.stdin`
 * `إضافة` إكمال دلالات project import لوحدات workspace ووحدات sibling/root لنقطة دخول متداخلة وعمليات package-relative import
 * `إضافة` إضافة البروتوكول 1.2 مع `entryMode=file|module` الصريح؛ يستخدم تنفيذ module أداة `runpy` مع `__package__` و`__spec__` الصحيحين وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية، بينما يبقى وضع file دون تغيير
-* `إضافة` إضافة prompt/reply محدود في البروتوكول 1.3 ومقصور على foreground للدالة `input()` المضمنة بعد EOF للـ snapshot المحدود؛ لا تفتح عمليات background واجهة إدخال ويظل `sys.stdin` المباشر محدودا
+* `إضافة` إضافة prompt/reply محدود في البروتوكول 1.3 ومقصور على foreground بعد EOF للـ snapshot المحدود، بإدخال ظاهر للدالة `input()` ومخفي للدالة `getpass.getpass()`؛ لا تفتح عمليات background واجهة إدخال ويظل `sys.stdin` المباشر محدودا
 * `إضافة` إضافة نتائج JSON صارمة وصريحة وoutput artifacts اختيارية في البروتوكول 1.4 ضمن حدود العدد والمسار المنظم وحجم الملف/الإجمالي ومراجع PFD الدقيقة وSHA-256 دون استنتاج نتيجة من stdout
 * `إصلاح` فك source بترميز strict UTF-8 قبل التنفيذ لمنع encoding cookie بترميز آخر من تجاوز العقد
 * `تحسين` منح `INTERNET` كي تستخدم النصوص الموثوقة عملاء شبكة المكتبة القياسية مباشرة مع إبقاء pip عبر الإنترنت والتنزيل التلقائي للكود معطلين
@@ -239,7 +239,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-تقفل البيئة Chaquopy 17.0.0 وCPython 3.13.9 من Maven وتحزم stdlib فقط. يفحص release gate ‏metadata والمكتبات الأصلية وNOTICE وsigner ‏SM003 وملفات APK الثلاثة مقابل الهوية الدقيقة؛ لا يوجد حاليا gate مخصص لتوافق صفحات 16 KB ولا يدعى أنه تم التحقق منه.
+تقفل البيئة Chaquopy 17.0.0 وCPython 3.13.9 من Maven وتحزم stdlib فقط. يفحص release gate ‏metadata والمكتبات الأصلية وNOTICE وsigner ‏SM003 وملفات APK الثلاثة مقابل الهوية الدقيقة. نجح smoke مركز للشجرة الحالية على محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يعادل ذلك compatibility gate شاملا أو مصفوفة أجهزة كاملة.
 
 ******
 

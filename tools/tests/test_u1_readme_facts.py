@@ -38,6 +38,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 )
                 self.assertIn("{{ max_stdin_bytes }}", source["features"][1])
                 self.assertIn("1.3", source["features"][1])
+                self.assertIn("`getpass.getpass()`", source["features"][1])
                 result_features = [item for item in source["features"] if "1.4" in item]
                 self.assertEqual(1, len(result_features))
                 self.assertIn("{{ max_structured_json_bytes }}", result_features[0])
@@ -49,6 +50,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("SHA-256", source["p_plugin_scope"])
                 self.assertIn("stdout", source["p_plugin_scope"])
                 self.assertIn("`sys.stdin`", source["p_plugin_scope"])
+                self.assertIn("`getpass.getpass()`", source["p_plugin_scope"])
                 result_limits = [item for item in source["security_limits"] if "SHA-256" in item]
                 self.assertEqual(1, len(result_limits))
                 for placeholder in (
@@ -64,6 +66,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("pip", network_limits[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["unsupported_capabilities"][0])
                 self.assertIn("`sys.stdin`", source["unsupported_capabilities"][0])
+                self.assertIn("`getpass.getpass()`", source["unsupported_capabilities"][0])
                 self.assertIn("16 KB", source["p_build_architecture"])
                 self.assertIn("gate", source["p_build_architecture"].lower())
 
@@ -82,6 +85,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertEqual(1, len(protocol_13))
                 self.assertEqual(1, len(protocol_14))
                 self.assertIn("`input()`", protocol_13[0])
+                self.assertIn("`getpass.getpass()`", protocol_13[0])
                 self.assertIn("`sys.stdin`", protocol_13[0])
                 self.assertIn("SHA-256", protocol_14[0])
                 self.assertIn("stdout", protocol_14[0])
@@ -128,17 +132,21 @@ class U1ReadmeFactsTest(unittest.TestCase):
             (README_DIR / "README-zh-Hans.md").read_text(encoding="utf-8"),
         )
         self.assertIn("协议 1.3 在快照 EOF 后为内置 `input()`", simplified)
+        self.assertIn("`getpass.getpass()` 使用隐藏回显", simplified)
         self.assertIn("后台启动绝不打开输入 UI", simplified)
         self.assertIn("直接 `sys.stdin` 始终有限", simplified)
         self.assertIn("协议 1.4 增加显式严格 JSON 结果", simplified)
         self.assertIn("绝不被解析为结果", simplified)
-        self.assertIn("16 KB page 兼容性当前没有专用 gate", simplified)
+        self.assertIn("API 37 x86_64 16 KB page 模拟器的聚焦冒烟", simplified)
+        self.assertIn("不等同于完整兼容性 gate", simplified)
         self.assertIn("Protocol 1.3 adds Host-owned, foreground-only prompt/reply", english)
+        self.assertIn("`getpass.getpass()` uses hidden echo", english)
         self.assertIn("background launches never open input UI", english)
         self.assertIn("Direct `sys.stdin` remains finite", english)
         self.assertIn("Protocol 1.4 adds explicit strict JSON", english)
         self.assertIn("never parsed as a result", english)
-        self.assertIn("16 KB page compatibility currently has no dedicated gate", english)
+        self.assertIn("API 37 x86_64 16 KB-page emulator smoke has passed", english)
+        self.assertIn("not a comprehensive compatibility gate", english)
 
 
 if __name__ == "__main__":

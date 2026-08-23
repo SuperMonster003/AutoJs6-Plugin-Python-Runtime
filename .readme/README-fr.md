@@ -46,7 +46,7 @@ Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte t
 ******
 
 - Exécuter un instantané de source Python UTF-8 en tant que `__main__`.
-- Accepter un snapshot stdin fini et préfourni de 1 MiB au maximum; après son EOF, un lancement explicite au premier plan peut poursuivre le `input()` intégré par le prompt/réponse borné du protocole 1.3.
+- Accepter un snapshot stdin fini et préfourni de 1 MiB au maximum; après son EOF, un lancement explicite au premier plan peut poursuivre le `input()` intégré par le prompt/réponse borné du protocole 1.3, tandis que `getpass.getpass()` utilise une saisie masquée.
 - Sélectionner explicitement `entryMode=file|module` pour un projet admis; le mode module emploie les métadonnées standard de `runpy`, la racine du projet dans `sys.path[0]` et les imports relatifs au package, tandis que le mode file conserve la sémantique d'un script ordinaire.
 - Livrer pendant l'exécution des chunks stdout/stderr bornés dans leur ordre d'origine; l'épuisement des crédits applique une contre-pression à l'exécution.
 - Définir un résultat JSON strict explicite de 64 KiB au maximum et transférer jusqu'à 16 artefacts facultatifs sous les limites de chemin, taille et SHA-256 du protocole 1.4; ne jamais déduire un résultat de stdout.
@@ -90,7 +90,7 @@ engine: python
 protocol: 1.0-1.4
 ```
 
-Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facultative, un snapshot stdin fini et préfourni de 1 MiB au maximum, et le snapshot en lecture seule des capacités hôte du protocole 1.1. Le protocole 1.2 ajoute la négociation explicite de l'entrée file/module pour les projets admis. Le protocole 1.3 ajoute, après l'EOF du snapshot, un prompt/réponse détenu par l'hôte et réservé au premier plan pour le `input()` intégré. Le protocole 1.4 ajoute un JSON strict explicite et des artefacts facultatifs manifestés par SHA-256; stdout reste un diagnostic et n'est jamais analysé comme résultat. `sys.stdin` direct reste fini, les lancements en arrière-plan n'ouvrent jamais d'interface de saisie et aucun Context, Binder, objet d'exécution hôte ou callback sink n'est injecté.
+Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facultative, un snapshot stdin fini et préfourni de 1 MiB au maximum, et le snapshot en lecture seule des capacités hôte du protocole 1.1. Le protocole 1.2 ajoute la négociation explicite de l'entrée file/module pour les projets admis. Le protocole 1.3 ajoute, après l'EOF du snapshot, un prompt/réponse détenu par l'hôte et réservé au premier plan pour le `input()` intégré; `getpass.getpass()` utilise une saisie masquée. Le protocole 1.4 ajoute un JSON strict explicite et des artefacts facultatifs manifestés par SHA-256; stdout reste un diagnostic et n'est jamais analysé comme résultat. `sys.stdin` direct reste fini, les lancements en arrière-plan n'ouvrent jamais d'interface de saisie et aucun Context, Binder, objet d'exécution hôte ou callback sink n'est injecté.
 
 ******
 
@@ -102,8 +102,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
-paired host: AutoJs6 6.8.0 / versionCode 5275
+release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -137,11 +137,11 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 ******
 
-- Le stdin général en direct et le streaming callback de `sys.stdin` direct sont indisponibles. L'interaction au premier plan s'applique uniquement au `input()` intégré après l'EOF du snapshot fini de 1 MiB au maximum. L'écriture dans le workspace, pip en ligne et les téléchargements de wheel restent indisponibles.
+- Le stdin général en direct et le streaming callback de `sys.stdin` direct sont indisponibles. L'interaction au premier plan s'applique uniquement au `input()` intégré et à `getpass.getpass()` après l'EOF du snapshot fini de 1 MiB au maximum. L'écriture dans le workspace, pip en ligne et les téléchargements de wheel restent indisponibles.
 - Aucun script UI, débogueur, REPL ou accès arbitraire aux objets Java de l'hôte.
 - Aucun broker AutoJs6 temps réel; les premières API utilisent seulement le snapshot app/device/execution/project gelé au démarrage et un accès borné en lecture seule au workspace privé du plug-in.
 - Le support Android 32 bits et les wheels natives tierces ne sont pas garantis.
-- arm64-v8a dispose d'une preuve appareil API 31; x86_64 n'a actuellement qu'une preuve d'empaquetage, ni exécution appareil ni matrice complète.
+- L'arbre courant dispose d'un smoke sur appareil API 31 arm64-v8a et d'un smoke sur émulateur API 37 x86_64 à pages de 16 KB; aucun ne constitue une matrice complète d'appareils ni une qualification de release.
 
 ******
 
@@ -167,7 +167,7 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 * `Fonction` Ajout d'un snapshot stdin fini et préfourni de 1 MiB au plus pour une entrée et une EOF déterministes avec `input()` et `sys.stdin`
 * `Fonction` Finalisation des imports projet pour les modules workspace, les modules voisins et racine d'une entrée imbriquée, et les imports relatifs au package
 * `Fonction` Ajout du protocole 1.2 avec `entryMode=file|module` explicite; l'exécution module emploie `runpy` avec `__package__`, `__spec__`, la racine du projet dans `sys.path[0]` et les imports relatifs corrects, tandis que le mode file reste inchangé
-* `Fonction` Ajout avec le protocole 1.3 d'un prompt/réponse borné, réservé au premier plan, pour le `input()` intégré après l'EOF du snapshot fini; les lancements en arrière-plan n'ouvrent jamais d'interface de saisie et `sys.stdin` direct reste fini
+* `Fonction` Ajout avec le protocole 1.3 d'un prompt/réponse borné au premier plan après l'EOF du snapshot fini, avec saisie visible pour le `input()` intégré et masquée pour `getpass.getpass()`; les lancements en arrière-plan n'ouvrent jamais d'interface de saisie et `sys.stdin` direct reste fini
 * `Fonction` Ajout avec le protocole 1.4 de résultats JSON stricts explicites et d'artefacts facultatifs bornés par nombre, chemin normalisé, taille par fichier/totale, références PFD exactes et SHA-256, sans jamais déduire un résultat de stdout
 * `Correction` Décodage de la source en UTF-8 strict avant exécution afin qu'un encoding cookie non UTF-8 ne contourne plus le contrat
 * `Amélioration` Accorder `INTERNET` afin que les scripts de confiance utilisent directement les clients réseau de la bibliothèque standard, tout en maintenant pip en ligne et le téléchargement automatique de code désactivés
@@ -239,7 +239,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Le runtime verrouille Chaquopy 17.0.0 et CPython 3.13.9 depuis Maven et n'empaquette que la stdlib. Le gate release vérifie métadonnées, bibliothèques natives, NOTICE, signer SM003 et les trois APK distribués par rapport à l'identité exacte; la compatibilité des pages 16 KB n'a actuellement aucun gate dédié et n'est pas déclarée vérifiée.
+Le runtime verrouille Chaquopy 17.0.0 et CPython 3.13.9 depuis Maven et n'empaquette que la stdlib. Le gate release vérifie métadonnées, bibliothèques natives, NOTICE, signer SM003 et les trois APK distribués par rapport à l'identité exacte. Un smoke ciblé de l'arbre courant a réussi sur un émulateur API 37 x86_64 à pages de 16 KB; ce n'est ni un gate complet de compatibilité ni une matrice d'appareils.
 
 ******
 

@@ -10,7 +10,7 @@
   "h3_functions": "Funciones",
   "features": [
     "Ejecutar una instantánea UTF-8 como `__main__`.",
-    "Aceptar un snapshot stdin finito y preproporcionado de hasta {{ max_stdin_bytes }}; tras su EOF, un inicio explícito en primer plano puede continuar el `input()` integrado mediante el prompt/respuesta acotado del protocolo 1.3.",
+    "Aceptar un snapshot stdin finito y preproporcionado de hasta {{ max_stdin_bytes }}; tras su EOF, un inicio explícito en primer plano puede continuar el `input()` integrado mediante el prompt/respuesta acotado del protocolo 1.3, mientras `getpass.getpass()` usa entrada oculta.",
     "Seleccionar explícitamente `entryMode=file|module` para un proyecto admitido; el modo module usa metadatos estándar de `runpy`, la raíz del proyecto en `sys.path[0]` e imports relativos al package, mientras el modo file conserva la semántica de script ordinaria.",
     "Entregar durante la ejecución chunks acotados de stdout/stderr en su orden original; al agotarse los créditos se aplica contrapresión a la ejecución.",
     "Establecer un resultado JSON estricto explícito de hasta {{ max_structured_json_bytes }} y transferir hasta {{ max_output_artifacts }} artefactos opcionales con límites de ruta, tamaño y SHA-256 del protocolo 1.4; nunca inferir un resultado desde stdout.",
@@ -23,7 +23,7 @@
   "p_runtime_version_status": "La compilación solicita Python {{ python_line }}. Los artefactos RC locales congelados y la ejecución exacta en dispositivo registraron CPython {{ python_version_expected }}; la versión y los hashes finales de 0.1.0 deben revisarse tras congelar el código.",
   "h3_plugin_interface": "Interfaz del complemento",
   "p_plugin_interface": "El host descubre e invoca el complemento con las siguientes identidades",
-  "p_plugin_scope": "El complemento acepta una SOURCE independiente, un workspace archive acotado opcional, un snapshot stdin finito y preproporcionado de hasta {{ max_stdin_bytes }} y el snapshot de capacidades host de solo lectura del protocolo 1.1. El protocolo 1.2 añade negociación explícita de entrada file/module para proyectos admitidos. El protocolo 1.3 añade, tras el EOF del snapshot, prompt/respuesta propiedad del Host y solo en primer plano para el `input()` integrado. El protocolo 1.4 añade JSON estricto explícito y artefactos opcionales manifestados con SHA-256; stdout sigue siendo diagnóstico y nunca se analiza como resultado. `sys.stdin` directo sigue siendo finito, los inicios en segundo plano nunca abren UI de entrada y no se inyectan Context, Binder, objetos del runtime host ni callback sinks.",
+  "p_plugin_scope": "El complemento acepta una SOURCE independiente, un workspace archive acotado opcional, un snapshot stdin finito y preproporcionado de hasta {{ max_stdin_bytes }} y el snapshot de capacidades host de solo lectura del protocolo 1.1. El protocolo 1.2 añade negociación explícita de entrada file/module para proyectos admitidos. El protocolo 1.3 añade, tras el EOF del snapshot, prompt/respuesta propiedad del Host y solo en primer plano para el `input()` integrado; `getpass.getpass()` usa entrada oculta. El protocolo 1.4 añade JSON estricto explícito y artefactos opcionales manifestados con SHA-256; stdout sigue siendo diagnóstico y nunca se analiza como resultado. `sys.stdin` directo sigue siendo finito, los inicios en segundo plano nunca abren UI de entrada y no se inyectan Context, Binder, objetos del runtime host ni callback sinks.",
   "h3_host_integration_status": "Estado de integración con el host",
   "p_host_integration_status": "La versión 0.1.0 se empareja solo con AutoJs6 6.8.0, con el versionCode mínimo del Host 5275 congelado y aplicado; la revisión final y limpia del código fuente del Host y el manifiesto de distribución de los tres AAR están registrados en el lock. Cada ejecución nueva redescubre el provider; si falta o está desactivado pide instalar o activar sin fallback, y la instalación o reactivación no exige reiniciar el Host. La identidad del APK estable está vinculada a ese código fuente exacto del Plugin y al lock Host.",
   "h3_security": "Seguridad y privacidad",
@@ -40,11 +40,11 @@
   ],
   "h3_unsupported": "Capacidades no declaradas",
   "unsupported_capabilities": [
-    "No hay stdin general en vivo ni streaming callback de `sys.stdin` directo. La interacción en primer plano solo se aplica al `input()` integrado después del EOF del snapshot finito de hasta {{ max_stdin_bytes }}. La escritura de workspace, pip en línea y descarga de wheels siguen sin soporte.",
+    "No hay stdin general en vivo ni streaming callback de `sys.stdin` directo. La interacción en primer plano solo se aplica al `input()` integrado y a `getpass.getpass()` después del EOF del snapshot finito de hasta {{ max_stdin_bytes }}. La escritura de workspace, pip en línea y descarga de wheels siguen sin soporte.",
     "No hay scripts UI, depurador, REPL ni acceso arbitrario a objetos Java del host.",
     "No hay broker AutoJs6 en tiempo real; las primeras API solo usan el snapshot app/device/execution/project congelado al iniciar y acceso de lectura acotado al workspace privado del complemento.",
     "No se garantiza Android de 32 bits ni wheels nativas de terceros.",
-    "arm64-v8a tiene evidencia de dispositivo API 31; x86_64 solo tiene evidencia de empaquetado, no ejecución en dispositivo ni matriz completa."
+    "El árbol actual tiene evidencia smoke en un dispositivo API 31 arm64-v8a y en un emulador API 37 x86_64 con páginas de 16 KB; ninguna se presenta como matriz completa de dispositivos ni como calificación de release."
   ],
   "h3_roadmap": "Hoja de ruta",
   "p_roadmap": "La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 permanecen históricas. Este clean VERSION_BUILD=11 freeze commit fija la identidad fuente estable del Plugin y el lock Host exacto 6.8.0/5275; la provenance del APK estable se evalúa contra esas identidades exactas y cualquier production receipt debe usar la misma base. Una matriz API×ABI completa y un soak nuevo no son gates automáticos.",
@@ -58,7 +58,7 @@
   "h3_build": "Compilación",
   "p_build_deferred": "La generación documental no ejecuta compilación. La configuración release falla cerrada ante deriva de AAR, SHA-256, signer o runtime lock; los artefactos estables solo se aceptan vinculados a la identidad release exacta.",
   "p_local_aars": "Estos AAR release deben colocarse y bloquearse en `libs` antes de compilar",
-  "p_build_architecture": "El runtime bloquea {{ runtime_dependency }} y CPython {{ python_version_expected }} desde Maven y solo empaqueta stdlib. El gate release comprueba metadatos, bibliotecas nativas, NOTICE, signer SM003 y los tres APK distribuidos contra la identidad exacta; la compatibilidad con páginas de 16 KB aún no tiene un gate dedicado y no se declara verificada.",
+  "p_build_architecture": "El runtime bloquea {{ runtime_dependency }} y CPython {{ python_version_expected }} desde Maven y solo empaqueta stdlib. El gate release comprueba metadatos, bibliotecas nativas, NOTICE, signer SM003 y los tres APK distribuidos contra la identidad exacta. Pasó un smoke focalizado del árbol actual en un emulador API 37 x86_64 con páginas de 16 KB; no equivale a un gate integral de compatibilidad ni a una matriz de dispositivos.",
   "h3_license": "Licencia",
   "p_license": "El código fuente usa MPL-2.0. Chaquopy, CPython y los demás componentes conservan sus licencias; atribuciones y acceso a fuentes upstream y del proyecto constan en `THIRD_PARTY_NOTICES.md`.",
   "h3_resource_layout": "Estructura de recursos",

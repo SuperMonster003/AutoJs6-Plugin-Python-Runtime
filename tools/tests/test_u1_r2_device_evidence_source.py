@@ -276,6 +276,21 @@ class U1R2DeviceEvidenceSourceTest(unittest.TestCase):
         self.assertIn("PythonProjectLaunchPolicy.snapshotStdin", LAUNCH_FACTORY)
         self.assertIn("PythonExecutionInputPolicy.STDIN_SNAPSHOT_ARGUMENT", LAUNCH_FACTORY)
 
+    def test_public_editor_and_explorer_entries_exercise_visible_and_hidden_dialogs(self) -> None:
+        for marker in (
+            "editorAndExplorerForegroundEntriesAcceptVisibleAndHiddenDialogInput",
+            "Scripts.runWithBroadcastSenderInteractive",
+            "Scripts.runInteractive(activity, ScriptFile(explorerFile.path))",
+            'reply = input("$EDITOR_PROMPT")',
+            'reply = getpass.getpass("$EXPLORER_PROMPT")',
+            "AccessibilityNodeInfo.ACTION_SET_TEXT",
+            "input.isPassword",
+            "consoleContainsSince(checkpoint, reply)",
+            "EXPECTED_EDITOR_INPUT_JSON",
+            "EXPECTED_EXPLORER_INPUT_JSON",
+        ):
+            self.assertIn(marker, PUBLIC_TEST)
+
     def test_binder_selectors_validate_prompt_order_result_independence_and_limit_recovery(self) -> None:
         for marker in (
             "PythonRuntimeCodec.decodeInputPrompt",

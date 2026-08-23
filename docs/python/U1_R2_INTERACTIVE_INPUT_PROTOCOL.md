@@ -1,15 +1,18 @@
 # U1-R2 foreground interactive input protocol
 
-Status: implemented and covered through E2 on the current Host and Plugin
-trees. This document does not claim a real Binder/CPython device run, a device
-matrix, publication, or stable release provenance.
+Status: implemented, with portable/build coverage and current-tree public Host
+dialog acceptance against the real Binder/CPython Plugin on one arm64 device
+and one 16 KiB-page x86_64 emulator. This is not publication, a complete device
+matrix, or stable-release provenance.
 
 ## User-visible boundary
 
 Interactive input is deliberately narrower than “live stdin.” A foreground
-user-gesture launch may pause the Python built-in `input()` and display one
-Host-owned Material dialog. The finite, verified stdin snapshot is consumed
-first; the Plugin requests a live reply only after that snapshot reaches EOF.
+user-gesture launch may pause the Python built-in `input()` or standard-library
+`getpass.getpass()` and display one Host-owned Material dialog. The finite,
+verified stdin snapshot is consumed first; the Plugin requests a live reply
+only after that snapshot reaches EOF. `input()` requests visible echo, while
+`getpass.getpass()` requests hidden echo.
 
 Background launches never receive interactive authority, never open UI, and
 retain deterministic finite-input behavior: after the optional snapshot is
@@ -75,19 +78,20 @@ minutes respectively.
 ## Bootstrap and bridge isolation
 
 The Plugin creates one private `ChaquopyInputBridge` for an authorized
-execution and temporarily replaces only `builtins.input`. The bridge has one
+execution and temporarily replaces `builtins.input` and `getpass.getpass`. The bridge has one
 reflective method carrying prompt text and a fixed echo token. It validates the
 typed reply and returns a private status marker to the bootstrap; it is not put
 in user globals and contains no Android `Context`, Binder handle, Host callback,
 or arbitrary capability object.
 
-The patched built-in writes the prompt to captured stdout exactly once, reads
-one line from the finite snapshot first, and requests a live reply only on EOF.
-`VALUE` returns text, `EOF` raises `EOFError`, and `CANCELLED` raises
-`KeyboardInterrupt`. The original `builtins.input` and all stdio/process state
-are restored on every terminal path. Bridge delivery, timeout and negotiated
-limit failures are rethrown to the Kotlin session so they cannot be mistaken
-for an ordinary Python exception.
+The patched built-in writes the prompt to captured stdout exactly once; patched
+`getpass.getpass()` writes it to the explicit stream or captured stderr. Both
+read one line from the finite snapshot first and request a live reply only on
+EOF. `VALUE` returns text, `EOF` raises `EOFError`, and `CANCELLED` raises
+`KeyboardInterrupt`. The original callables and all stdio/process state are
+restored on every terminal path. Bridge delivery, timeout and negotiated limit
+failures are rethrown to the Kotlin session so they cannot be mistaken for an
+ordinary Python exception.
 
 ## Wait and terminal lifecycle
 
@@ -114,13 +118,19 @@ terminal callback interrupts that task and dismisses the active dialog.
 
 ## Evidence boundary
 
-Portable tests cover snapshot-first behavior, multiple live prompts, empty
-values, EOF, cancellation, bounded direct `sys.stdin`, and restoration.
+Portable tests cover snapshot-first behavior, multiple live prompts, visible
+`input()`, hidden `getpass.getpass()`, empty values, EOF, cancellation, bounded
+direct `sys.stdin`, and restoration.
 Plugin JVM tests cover bridge markers and exact failure propagation. Shared API
 tests freeze AIDL and tagged-wire goldens, old-reader compatibility, all
 limits, and the monotonic one-shot prompt state machine. Host JVM tests cover
 unforgeable/missing authority, Provider selection, and interactive request
-planning. Plugin assembly and affected Host compilation establish E2 only.
+planning. The public Android test additionally follows the exact foreground
+methods used by the editor and Explorer, submits replies through the real
+Host-owned dialogs, asserts the visible/password accessibility distinction,
+and reaches real CPython structured results without logging reply text. It
+passed on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages) in
+2.232 seconds and an API 37 x86_64 emulator with 16 KiB pages in 8.853 seconds.
 
 The reproducible partial gate is:
 
@@ -135,6 +145,6 @@ not retroactively claim result transport or device evidence. Protocol 1.4
 structured JSON/output artifacts are now covered independently by
 `U1_R2_STRUCTURED_RESULTS_PROTOCOL.md` and its partial E2 report. The dedicated
 five-selector E3 runner/verifier boundary is documented in
-`U1_R2_DEVICE_EVIDENCE.md`, but no R2 device transaction has been executed and
-R2 E3 remains open. A Host AAR triplet built from a dirty current tree is
-development input, not stable-release provenance.
+`U1_R2_DEVICE_EVIDENCE.md`; the focused M2 smoke above is deliberately not a
+claim that this legacy canonical transaction, publication, or release
+provenance was completed. The paired Host test is commit `70ea17097`.

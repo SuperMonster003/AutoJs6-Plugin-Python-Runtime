@@ -12,7 +12,7 @@
 * `追加` 最大 1 MiB の有限な事前提供 stdin snapshot を追加し, `input()` と `sys.stdin` に決定的な入力と EOF を提供
 * `追加` workspace module, nested entry の sibling/root module, package-relative import に対応して project import semantics を完成
 * `追加` プロトコル 1.2 の明示的な `entryMode=file|module` を追加し, module 実行は `runpy` により正しい `__package__`, `__spec__`, project root の `sys.path[0]`, relative import を使用し, file mode は変更しない
-* `追加` プロトコル 1.3 で有限 snapshot の EOF 後の組み込み `input()` に foreground 限定の上限付き prompt/reply を追加し, background 起動では入力 UI を開かず, 直接の `sys.stdin` は有限のままにする
+* `追加` プロトコル 1.3 で有限 snapshot の EOF 後に foreground 限定の上限付き prompt/reply を追加し, 組み込み `input()` は表示入力, `getpass.getpass()` は非表示入力を使用し, background 起動では入力 UI を開かず, 直接の `sys.stdin` は有限のままにする
 * `追加` プロトコル 1.4 で明示的な厳密 JSON result と任意 output artifact を追加し, count, normalized path, file/aggregate size, exact PFD reference, SHA-256 を制限して stdout から result を推測しない
 * `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止
 * `改善` `INTERNET` を付与して信頼済みスクリプトが標準ライブラリのネットワーククライアントを直接利用できるようにし、online pip と自動コードダウンロードは引き続き無効化

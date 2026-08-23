@@ -46,7 +46,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 ******
 
 - 1 つの UTF-8 Python ソースを `__main__` として実行します.
-- 最大 1 MiB の有限な事前供給 stdin snapshot を受け付けます. snapshot が EOF に達した後は, 明示的な foreground 起動で protocol 1.3 の上限付き prompt/reply により組み込み `input()` を継続できます.
+- 最大 1 MiB の有限な事前供給 stdin snapshot を受け付けます. snapshot が EOF に達した後は, 明示的な foreground 起動で protocol 1.3 の上限付き prompt/reply により組み込み `input()` を継続でき, 標準ライブラリの `getpass.getpass()` は非表示入力を使用します.
 - 許可済み project では `entryMode=file|module` を明示的に選択します. module mode は標準 `runpy` metadata, project root の `sys.path[0]`, package-relative import を使用し, file mode は通常の script semantics を維持します.
 - スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.
 - protocol 1.4 で最大 64 KiB の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 16 個転送します. stdout から result を推測しません.
@@ -90,7 +90,7 @@ engine: python
 protocol: 1.0-1.4
 ```
 
-独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, Context, Binder, ホストオブジェクト, callback sink は注入しません.
+独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加し, 標準ライブラリの `getpass.getpass()` は非表示入力を使用します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, Context, Binder, ホストオブジェクト, callback sink は注入しません.
 
 ******
 
@@ -102,8 +102,8 @@ protocol: 1.0-1.4
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
-paired host: AutoJs6 6.8.0 / versionCode 5275
+release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -137,11 +137,11 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-- 汎用 live stdin と直接の `sys.stdin` callback streaming は未対応です. foreground 対話は最大 1 MiB の有限 snapshot が EOF に達した後の組み込み `input()` のみに適用されます. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
+- 汎用 live stdin と直接の `sys.stdin` callback streaming は未対応です. foreground 対話は最大 1 MiB の有限 snapshot が EOF に達した後の組み込み `input()` と標準ライブラリの `getpass.getpass()` のみに適用されます. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
 - UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.
 - リアルタイム AutoJs6 capability broker はありません. 最初の API は実行開始時に凍結した app/device/execution/project snapshot と plugin-private workspace の上限付き読み取り専用アクセスだけを使います.
 - 32 bit Android と任意の native wheel は保証しません.
-- arm64-v8a には API 31 端末証拠があります. x86_64 は現時点で packaging 証拠のみで, 端末実行や完全な端末 matrix とは扱いません.
+- 現在の tree には API 31 arm64-v8a 実機 smoke evidence と API 37 x86_64 16 KB page emulator smoke evidence がありますが, 完全な device matrix や release qualification とは扱いません.
 
 ******
 
@@ -167,7 +167,7 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 * `追加` 最大 1 MiB の有限な事前提供 stdin snapshot を追加し, `input()` と `sys.stdin` に決定的な入力と EOF を提供
 * `追加` workspace module, nested entry の sibling/root module, package-relative import に対応して project import semantics を完成
 * `追加` プロトコル 1.2 の明示的な `entryMode=file|module` を追加し, module 実行は `runpy` により正しい `__package__`, `__spec__`, project root の `sys.path[0]`, relative import を使用し, file mode は変更しない
-* `追加` プロトコル 1.3 で有限 snapshot の EOF 後の組み込み `input()` に foreground 限定の上限付き prompt/reply を追加し, background 起動では入力 UI を開かず, 直接の `sys.stdin` は有限のままにする
+* `追加` プロトコル 1.3 で有限 snapshot の EOF 後に foreground 限定の上限付き prompt/reply を追加し, 組み込み `input()` は表示入力, `getpass.getpass()` は非表示入力を使用し, background 起動では入力 UI を開かず, 直接の `sys.stdin` は有限のままにする
 * `追加` プロトコル 1.4 で明示的な厳密 JSON result と任意 output artifact を追加し, count, normalized path, file/aggregate size, exact PFD reference, SHA-256 を制限して stdout から result を推測しない
 * `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止
 * `改善` `INTERNET` を付与して信頼済みスクリプトが標準ライブラリのネットワーククライアントを直接利用できるようにし、online pip と自動コードダウンロードは引き続き無効化
@@ -239,7 +239,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Maven の Chaquopy 17.0.0 と CPython 3.13.9 を lock し, stdlib のみを package します. release gate は依存 metadata, native library, NOTICE, SM003 signer, 3 種の配布 APK を exact identity に対して確認します. 16 KB page 互換性には現在専用 gate がなく, 検証済みとは宣言しません.
+Maven の Chaquopy 17.0.0 と CPython 3.13.9 を lock し, stdlib のみを package します. release gate は依存 metadata, native library, NOTICE, SM003 signer, 3 種の配布 APK を exact identity に対して確認します. 現在の tree では API 37 x86_64 16 KB page emulator の focused smoke が合格していますが, 包括的な互換性 gate や device matrix の主張ではありません.
 
 ******
 

@@ -46,7 +46,7 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 ******
 
 - UTF-8 Python 소스 스냅샷 하나를 `__main__`으로 실행합니다.
-- 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 받습니다. snapshot이 EOF에 도달한 뒤에는 명시적 foreground 실행에서 프로토콜 1.3의 제한된 prompt/reply로 내장 `input()`을 계속할 수 있습니다.
+- 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 받습니다. snapshot이 EOF에 도달한 뒤에는 명시적 foreground 실행에서 프로토콜 1.3의 제한된 prompt/reply로 내장 `input()`을 계속할 수 있고 표준 라이브러리 `getpass.getpass()`는 숨김 입력을 사용합니다.
 - 승인된 project에서 `entryMode=file|module`을 명시적으로 선택합니다. module mode는 표준 `runpy` metadata, project root의 `sys.path[0]` 및 package-relative import를 사용하고 file mode는 일반 script semantics를 유지합니다.
 - 스크립트 실행 중 stdout/stderr의 원래 순서대로 제한된 chunk를 credit으로 전달하며, credit이 소진되면 실행에 backpressure를 적용합니다.
 - 프로토콜 1.4에서 최대 64 KiB의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 16개 전달하며 stdout에서 결과를 추론하지 않습니다.
@@ -90,7 +90,7 @@ engine: python
 protocol: 1.0-1.4
 ```
 
-독립 SOURCE, 선택적인 제한 workspace archive, 최대 1 MiB의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. 프로토콜 1.2는 승인된 project에 명시적인 file/module entry negotiation을 추가합니다. 프로토콜 1.3은 snapshot EOF 뒤 내장 `input()`에 Host 소유의 foreground 전용 prompt/reply를 추가합니다. 프로토콜 1.4는 명시적 엄격 JSON과 선택적 SHA-256 manifest output artifact를 추가하며 stdout은 진단 텍스트로 유지되고 결과로 분석되지 않습니다. 직접 `sys.stdin`은 계속 유한하며 background 실행은 입력 UI를 열지 않고 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.
+독립 SOURCE, 선택적인 제한 workspace archive, 최대 1 MiB의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. 프로토콜 1.2는 승인된 project에 명시적인 file/module entry negotiation을 추가합니다. 프로토콜 1.3은 snapshot EOF 뒤 내장 `input()`에 Host 소유의 foreground 전용 prompt/reply를 추가하고 표준 라이브러리 `getpass.getpass()`는 숨김 입력을 사용합니다. 프로토콜 1.4는 명시적 엄격 JSON과 선택적 SHA-256 manifest output artifact를 추가하며 stdout은 진단 텍스트로 유지되고 결과로 분석되지 않습니다. 직접 `sys.stdin`은 계속 유한하며 background 실행은 입력 UI를 열지 않고 Context, Binder, 호스트 런타임 객체 또는 callback sink를 주입하지 않습니다.
 
 ******
 
@@ -102,8 +102,8 @@ protocol: 1.0-1.4
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
-paired host: AutoJs6 6.8.0 / versionCode 5275
+release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -137,11 +137,11 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-- 일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 1 MiB의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.
+- 일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 1 MiB의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`과 표준 라이브러리 `getpass.getpass()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.
 - UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.
 - 실시간 AutoJs6 capability broker는 없습니다. 첫 API는 실행 시작 시 동결된 app/device/execution/project snapshot과 plugin-private workspace의 제한된 읽기 전용 접근만 사용합니다.
 - 32비트 Android와 임의의 native wheel은 보장하지 않습니다.
-- arm64-v8a에는 API 31 기기 증거가 있습니다. x86_64는 현재 packaging 증거만 있으며 기기 실행이나 완전한 기기 matrix로 제시하지 않습니다.
+- 현재 tree에는 API 31 arm64-v8a 실제 기기 smoke evidence와 API 37 x86_64 16 KB page emulator smoke evidence가 있으며, 어느 쪽도 완전한 기기 matrix나 release qualification으로 제시하지 않습니다.
 
 ******
 
@@ -167,7 +167,7 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 * `추가` 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 추가하여 `input()`과 `sys.stdin`에 결정적 입력과 EOF 제공
 * `추가` workspace module, 중첩 entry의 sibling/root module 및 package-relative import를 지원하도록 project import semantics 완성
 * `추가` 프로토콜 1.2의 명시적 `entryMode=file|module`을 추가하고 module 실행은 `runpy`로 올바른 `__package__`, `__spec__`, project root의 `sys.path[0]` 및 relative import를 사용하며 file mode는 변경하지 않음
-* `추가` 프로토콜 1.3에서 유한 snapshot EOF 뒤 내장 `input()`에 foreground 전용 제한 prompt/reply를 추가하고, background 실행은 입력 UI를 열지 않으며 직접 `sys.stdin`은 유한하게 유지
+* `추가` 프로토콜 1.3에서 유한 snapshot EOF 뒤 foreground 전용 제한 prompt/reply를 추가해 내장 `input()`은 표시 입력, `getpass.getpass()`는 숨김 입력을 사용하고, background 실행은 입력 UI를 열지 않으며 직접 `sys.stdin`은 유한하게 유지
 * `추가` 프로토콜 1.4에서 명시적 엄격 JSON 결과와 선택적 output artifact를 추가하고 count, normalized path, file/aggregate size, exact PFD reference 및 SHA-256을 제한하며 stdout에서 결과를 추론하지 않음
 * `수정` 실행 전에 source를 strict UTF-8로 decode하여 비 UTF-8 encoding cookie가 contract를 우회하지 못하도록 수정
 * `개선` 신뢰된 스크립트가 표준 라이브러리 네트워크 클라이언트를 직접 사용하도록 `INTERNET` 권한을 부여하되 online pip와 자동 코드 다운로드는 계속 비활성화
@@ -239,7 +239,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Maven의 Chaquopy 17.0.0과 CPython 3.13.9를 lock하고 stdlib만 package합니다. release gate는 의존성 metadata, native library, NOTICE, SM003 signer 및 배포 APK 세 개를 exact identity에 대해 확인합니다. 16 KB page 호환성은 현재 전용 gate가 없으며 검증되었다고 주장하지 않습니다.
+Maven의 Chaquopy 17.0.0과 CPython 3.13.9를 lock하고 stdlib만 package합니다. release gate는 의존성 metadata, native library, NOTICE, SM003 signer 및 배포 APK 세 개를 exact identity에 대해 확인합니다. 현재 tree의 API 37 x86_64 16 KB page emulator focused smoke는 통과했지만, 포괄적인 호환성 gate나 기기 matrix를 의미하지 않습니다.
 
 ******
 

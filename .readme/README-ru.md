@@ -46,7 +46,7 @@ Python Runtime — независимый provider протокола Python V1.
 ******
 
 - Выполнение одного UTF-8 снимка Python как `__main__`.
-- Принимается конечный заранее переданный stdin snapshot размером до 1 MiB; после его EOF явный запуск на переднем плане может продолжить встроенный `input()` через ограниченный prompt/reply протокола 1.3.
+- Принимается конечный заранее переданный stdin snapshot размером до 1 MiB; после его EOF явный запуск на переднем плане может продолжить встроенный `input()` через ограниченный prompt/reply протокола 1.3, а стандартный `getpass.getpass()` использует скрытый ввод.
 - Явный выбор `entryMode=file|module` для допущенного проекта: режим module использует стандартные метаданные `runpy`, корень проекта в `sys.path[0]` и относительные импорты пакета, а режим file сохраняет обычную семантику скрипта.
 - Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.
 - Явное задание строгого JSON-результата до 64 KiB и передача до 16 необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.
@@ -90,7 +90,7 @@ engine: python
 protocol: 1.0-1.4
 ```
 
-Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до 1 MiB и read-only snapshot возможностей хоста протокола 1.1. Протокол 1.2 добавляет явное согласование входа file/module для допущенных проектов. Протокол 1.3 добавляет после EOF snapshot принадлежащий Host prompt/reply только для встроенного `input()` на переднем плане. Протокол 1.4 добавляет явный строгий JSON и необязательные output artifacts с манифестом SHA-256; stdout остается диагностикой и никогда не разбирается как результат. Прямой `sys.stdin` остается конечным, фоновые запуски никогда не открывают UI ввода, а Context, Binder, объекты хоста и callback sink не внедряются.
+Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до 1 MiB и read-only snapshot возможностей хоста протокола 1.1. Протокол 1.2 добавляет явное согласование входа file/module для допущенных проектов. Протокол 1.3 добавляет после EOF snapshot принадлежащий Host prompt/reply только для встроенного `input()` на переднем плане, а стандартный `getpass.getpass()` использует скрытый ввод. Протокол 1.4 добавляет явный строгий JSON и необязательные output artifacts с манифестом SHA-256; stdout остается диагностикой и никогда не разбирается как результат. Прямой `sys.stdin` остается конечным, фоновые запуски никогда не открывают UI ввода, а Context, Binder, объекты хоста и callback sink не внедряются.
 
 ******
 
@@ -102,8 +102,8 @@ protocol: 1.0-1.4
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
-paired host: AutoJs6 6.8.0 / versionCode 5275
+release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -137,11 +137,11 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
-- Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` после EOF конечного snapshot до 1 MiB. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.
+- Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` и стандартному `getpass.getpass()` после EOF конечного snapshot до 1 MiB. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.
 - Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.
 - Нет realtime AutoJs6 capability broker; первые API используют только замороженный при запуске snapshot app/device/execution/project и ограниченное read-only чтение private workspace плагина.
 - 32-разрядный Android и произвольные native wheels не гарантируются.
-- Для arm64-v8a есть свидетельство устройства API 31; для x86_64 пока только packaging, не запуск на устройстве и не полная матрица.
+- Для текущего дерева есть smoke evidence на устройстве API 31 arm64-v8a и эмуляторе API 37 x86_64 со страницами 16 KB; это не выдается за полную матрицу устройств или release qualification.
 
 ******
 
@@ -167,7 +167,7 @@ Runtime Chaquopy предназначен только для доверенны
 * `Добавлено` Добавлен конечный заранее предоставленный snapshot stdin до 1 MiB для детерминированного ввода и EOF через `input()` и `sys.stdin`
 * `Добавлено` Завершена семантика project import для модулей workspace, соседних и корневых модулей вложенной точки входа и package-relative imports
 * `Добавлено` Добавлен протокол 1.2 с явным `entryMode=file|module`; выполнение module использует `runpy` с корректными `__package__`, `__spec__`, корнем проекта в `sys.path[0]` и относительными импортами, а режим file не изменён
-* `Добавлено` В протокол 1.3 добавлен ограниченный prompt/reply только на переднем плане для встроенного `input()` после EOF конечного snapshot; фоновые запуски не открывают UI ввода, а прямой `sys.stdin` остается конечным
+* `Добавлено` В протокол 1.3 добавлен ограниченный prompt/reply только на переднем плане после EOF конечного snapshot: видимый ввод для встроенного `input()` и скрытый для `getpass.getpass()`; фоновые запуски не открывают UI ввода, а прямой `sys.stdin` остается конечным
 * `Добавлено` В протокол 1.4 добавлены явные строгие JSON-результаты и необязательные output artifacts с ограничениями количества, нормализованного пути, размера файла/суммы, точных PFD-ссылок и SHA-256 без вывода результата из stdout
 * `Исправлено` Исходник декодируется как strict UTF-8 до выполнения, поэтому encoding cookie с иной кодировкой больше не обходит контракт
 * `Улучшено` Предоставить `INTERNET`, чтобы доверенные скрипты напрямую использовали сетевые клиенты стандартной библиотеки, оставив online pip и автоматическую загрузку кода отключёнными
@@ -239,7 +239,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-Runtime фиксирует Chaquopy 17.0.0 и CPython 3.13.9 из Maven и включает только stdlib. Release gate проверяет metadata, native libraries, NOTICE, signer SM003 и три распространяемых APK относительно exact identity; для совместимости с 16 KB page сейчас нет отдельного gate, поэтому она не заявляется как проверенная.
+Runtime фиксирует Chaquopy 17.0.0 и CPython 3.13.9 из Maven и включает только stdlib. Release gate проверяет metadata, native libraries, NOTICE, signer SM003 и три распространяемых APK относительно exact identity. Сфокусированный smoke текущего дерева на эмуляторе API 37 x86_64 со страницами 16 KB пройден; это не комплексный compatibility gate и не полная матрица устройств.
 
 ******
 

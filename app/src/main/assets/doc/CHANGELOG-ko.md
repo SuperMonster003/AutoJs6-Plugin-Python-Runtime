@@ -12,7 +12,7 @@
 * `추가` 최대 1 MiB의 유한한 사전 제공 stdin snapshot을 추가하여 `input()`과 `sys.stdin`에 결정적 입력과 EOF 제공
 * `추가` workspace module, 중첩 entry의 sibling/root module 및 package-relative import를 지원하도록 project import semantics 완성
 * `추가` 프로토콜 1.2의 명시적 `entryMode=file|module`을 추가하고 module 실행은 `runpy`로 올바른 `__package__`, `__spec__`, project root의 `sys.path[0]` 및 relative import를 사용하며 file mode는 변경하지 않음
-* `추가` 프로토콜 1.3에서 유한 snapshot EOF 뒤 내장 `input()`에 foreground 전용 제한 prompt/reply를 추가하고, background 실행은 입력 UI를 열지 않으며 직접 `sys.stdin`은 유한하게 유지
+* `추가` 프로토콜 1.3에서 유한 snapshot EOF 뒤 foreground 전용 제한 prompt/reply를 추가해 내장 `input()`은 표시 입력, `getpass.getpass()`는 숨김 입력을 사용하고, background 실행은 입력 UI를 열지 않으며 직접 `sys.stdin`은 유한하게 유지
 * `추가` 프로토콜 1.4에서 명시적 엄격 JSON 결과와 선택적 output artifact를 추가하고 count, normalized path, file/aggregate size, exact PFD reference 및 SHA-256을 제한하며 stdout에서 결과를 추론하지 않음
 * `수정` 실행 전에 source를 strict UTF-8로 decode하여 비 UTF-8 encoding cookie가 contract를 우회하지 못하도록 수정
 * `개선` 신뢰된 스크립트가 표준 라이브러리 네트워크 클라이언트를 직접 사용하도록 `INTERNET` 권한을 부여하되 online pip와 자동 코드 다운로드는 계속 비활성화

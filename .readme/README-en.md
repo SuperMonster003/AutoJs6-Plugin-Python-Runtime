@@ -46,7 +46,7 @@ Python Runtime is an independent provider for version 1 of the Python protocol. 
 ******
 
 - Execute one UTF-8 Python source snapshot as `__main__`.
-- Accept a finite pre-supplied stdin snapshot of at most 1 MiB; after it reaches EOF, an explicit foreground launch may continue the built-in `input()` through a bounded protocol 1.3 prompt/reply.
+- Accept a finite pre-supplied stdin snapshot of at most 1 MiB; after it reaches EOF, an explicit foreground launch may continue the built-in `input()` through bounded protocol 1.3 prompt/reply, while standard-library `getpass.getpass()` uses hidden echo.
 - Select explicit `entryMode=file|module` for an admitted project; module mode uses standard `runpy` metadata, project-root `sys.path[0]`, and package-relative imports while file mode keeps ordinary script semantics.
 - Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.
 - Set an explicit strict JSON result of at most 64 KiB and transfer up to 16 optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.
@@ -90,7 +90,7 @@ engine: python
 protocol: 1.0-1.4
 ```
 
-The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most 1 MiB, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Direct `sys.stdin` remains finite, background launches never open input UI, and no Context, Binder, host runtime object, or callback sink is injected into script globals.
+The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most 1 MiB, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF; standard-library `getpass.getpass()` uses hidden echo. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Direct `sys.stdin` remains finite, background launches never open input UI, and no Context, Binder, host runtime object, or callback sink is injected into script globals.
 
 ******
 
@@ -102,8 +102,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 
 ```text
 release target: 0.2.0-alpha.1
-release state: post-0.1 U1 current-tree alpha candidate; U1-R2 module entry, live output, foreground built-in input, explicit structured JSON and bounded output artifacts are implemented through E2 only; background launches and direct sys.stdin remain finite and non-interactive, R2 E3 is still open, and prior 0.1.0 artifacts do not cover U1 or establish device-matrix, release, or public evidence
-paired host: AutoJs6 6.8.0 / versionCode 5275
+release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
 runtime/security/release owner: SuperMonster003
@@ -137,11 +137,11 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-- General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to the built-in `input()` after the finite snapshot of at most 1 MiB reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.
+- General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to built-in `input()` and standard-library `getpass.getpass()` after the finite snapshot of at most 1 MiB reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.
 - There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.
 - There is no live AutoJs6 capability broker; the first APIs use only the app/device/execution/project snapshot frozen at execution start and bounded read-only access to the plugin-private workspace.
 - 32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.
-- arm64-v8a has API 31 device evidence; x86_64 currently has packaging evidence only and is not presented as device execution or a complete device matrix.
+- The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification.
 
 ******
 
@@ -167,7 +167,7 @@ The R6-P2/P3 local RC and concentrated device evidence remain historical. This c
 * `Feature` Add a finite pre-supplied stdin snapshot of at most 1 MiB for deterministic `input()` and `sys.stdin` input and EOF
 * `Feature` Complete project import semantics for workspace modules, nested-entry sibling and root modules, and package-relative imports
 * `Feature` Add protocol 1.2 explicit `entryMode=file|module`; module execution uses `runpy` with correct `__package__`, `__spec__`, project-root `sys.path[0]`, and relative imports while file mode remains unchanged
-* `Feature` Add protocol 1.3 foreground-only bounded prompt/reply for built-in `input()` after finite snapshot EOF; background launches never open input UI and direct `sys.stdin` stays finite
+* `Feature` Add protocol 1.3 foreground-only bounded prompt/reply after finite snapshot EOF, with visible echo for built-in `input()` and hidden echo for standard-library `getpass.getpass()`; background launches never open input UI and direct `sys.stdin` stays finite
 * `Feature` Add protocol 1.4 explicit strict JSON results and optional output artifacts bounded by count, normalized path, per-file/aggregate size, exact PFD references, and SHA-256, without ever inferring a result from stdout
 * `Fix` Decode source as strict UTF-8 before execution so a non-UTF-8 encoding cookie cannot bypass the contract
 * `Improvement` Grant `INTERNET` so trusted scripts can use standard-library network clients directly, while online pip and automatic code downloads remain disabled
@@ -239,7 +239,7 @@ protocol-wire-api.aar
 python-runtime-api.aar
 ```
 
-The runtime locks Chaquopy 17.0.0 and CPython 3.13.9 from Maven and packages only the stdlib. The release gate checks dependency metadata, native libraries, notices, the SM003 signer, and all three distribution APKs against the exact identity; 16 KB page compatibility currently has no dedicated gate and is not claimed as verified.
+The runtime locks Chaquopy 17.0.0 and CPython 3.13.9 from Maven and packages only the stdlib. The release gate checks dependency metadata, native libraries, notices, the SM003 signer, and all three distribution APKs against the exact identity. A focused current-tree API 37 x86_64 16 KB-page emulator smoke has passed; this is not a comprehensive compatibility gate or device-matrix claim.
 
 ******
 
