@@ -13,3 +13,7 @@
 -keep class io.github.supermonster003.autojs6.plugin.python.runtime.execution.ChaquopyInputBridge {
     public java.lang.String request(java.lang.String, java.lang.String);
 }
+
+-keep class io.github.supermonster003.autojs6.plugin.python.runtime.execution.ChaquopyHostCapabilityBridge {
+    public java.lang.String dispatch(java.lang.String);
+}

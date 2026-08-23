@@ -28,6 +28,7 @@ from autojs6._context import (
     _install_execution_context,
     _reset_execution_context,
 )
+from autojs6._broker import _install_execution_broker, _reset_execution_broker
 
 
 class _OutputLimitExceeded(BaseException):
@@ -358,6 +359,8 @@ def _run_source(
     max_structured_json_bytes: int,
     max_output_artifacts: int,
     max_output_artifact_path_bytes: int,
+    host_capability_broker_input: Any | None,
+    execution_id: str | None,
 ) -> dict[str, Any]:
     records: list[tuple[str, bytes]] = []
     output_sink = (
@@ -389,6 +392,7 @@ def _run_source(
     previous_builtin_input = builtins.input
     previous_getpass = getpass_module.getpass
     capability_token: Any = None
+    broker_token: Any = None
     globals_dict: dict[str, Any] | None = None
     try:
         if entry_mode not in ("file", "module"):
@@ -447,6 +451,11 @@ def _run_source(
             int(max_output_artifact_path_bytes),
         )
         host_capability_snapshot = None
+        broker_token = _install_execution_broker(
+            host_capability_broker_input,
+            execution_id,
+        )
+        host_capability_broker_input = None
         sys.stdin, sys.stdout, sys.stderr = stdin, stdout, stderr
         if input_bridge_input is not None:
             builtins.input = lambda prompt="": _interactive_input(prompt, input_bridge_input)
@@ -526,6 +535,8 @@ def _run_source(
             "artifact_paths": (),
         }
     finally:
+        if broker_token is not None:
+            _reset_execution_broker(broker_token)
         if capability_token is not None:
             _reset_execution_context(capability_token)
         sys.stdin, sys.stdout, sys.stderr, sys.argv = (
@@ -570,6 +581,8 @@ def run_source(
     max_structured_json_bytes: int = 0,
     max_output_artifacts: int = 0,
     max_output_artifact_path_bytes: int = 0,
+    host_capability_broker_input: Any | None = None,
+    execution_id: str | None = None,
 ) -> dict[str, Any]:
     return _run_source(
         source_input,
@@ -588,6 +601,8 @@ def run_source(
         max_structured_json_bytes,
         max_output_artifacts,
         max_output_artifact_path_bytes,
+        host_capability_broker_input,
+        execution_id,
     )
 
 
@@ -608,6 +623,8 @@ def run_project(
     max_structured_json_bytes: int = 0,
     max_output_artifacts: int = 0,
     max_output_artifact_path_bytes: int = 0,
+    host_capability_broker_input: Any | None = None,
+    execution_id: str | None = None,
 ) -> dict[str, Any]:
     return _run_source(
         source_input,
@@ -626,6 +643,8 @@ def run_project(
         max_structured_json_bytes,
         max_output_artifacts,
         max_output_artifact_path_bytes,
+        host_capability_broker_input,
+        execution_id,
     )
 
 

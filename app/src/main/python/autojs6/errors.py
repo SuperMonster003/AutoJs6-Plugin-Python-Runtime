@@ -6,7 +6,15 @@ class AutoJs6Error(RuntimeError):
 
 
 class CapabilityUnavailableError(AutoJs6Error):
-    """The host did not grant the requested frozen capability to this execution."""
+    """The host did not grant the requested capability to this execution."""
+
+
+class HostCapabilityError(AutoJs6Error):
+    """A live Host capability failed with a stable protocol error code."""
+
+    def __init__(self, code: str, message: str) -> None:
+        self.code = code
+        super().__init__(f"{code}: {message}")
 
 
 class ProjectPathError(AutoJs6Error, ValueError):
@@ -40,6 +48,7 @@ class ArtifactLimitError(AutoJs6Error):
 __all__ = (
     "AutoJs6Error",
     "CapabilityUnavailableError",
+    "HostCapabilityError",
     "ProjectPathError",
     "ProjectReadLimitError",
     "ResultAlreadySetError",

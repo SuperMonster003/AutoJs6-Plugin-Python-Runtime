@@ -37,6 +37,7 @@ internal class ChaquopyRuntime(context: Context) {
         onOutput: (BufferedOutputRecord) -> Unit,
         onInput: ((String, PythonInputEcho) -> PythonInputReply)? = null,
         outputArtifactRoot: File? = null,
+        hostCapabilityBridge: ChaquopyHostCapabilityBridge? = null,
     ): PythonRunOutcome {
         val python = ensureStarted()
         val bootstrap = python.getModule("autojs6_runtime.bootstrap")
@@ -59,6 +60,8 @@ internal class ChaquopyRuntime(context: Context) {
                 request.resultPolicy?.maxStructuredJsonBytes ?: 0,
                 request.resultPolicy?.maxArtifacts ?: 0,
                 request.resultPolicy?.maxArtifactPathBytes ?: 0,
+                hostCapabilityBridge,
+                request.requestId.toString().takeIf { hostCapabilityBridge != null },
             )
         } else {
             bootstrap.callAttr(
@@ -79,6 +82,8 @@ internal class ChaquopyRuntime(context: Context) {
                 request.resultPolicy?.maxStructuredJsonBytes ?: 0,
                 request.resultPolicy?.maxArtifacts ?: 0,
                 request.resultPolicy?.maxArtifactPathBytes ?: 0,
+                hostCapabilityBridge,
+                request.requestId.toString().takeIf { hostCapabilityBridge != null },
             )
         }
         return try {

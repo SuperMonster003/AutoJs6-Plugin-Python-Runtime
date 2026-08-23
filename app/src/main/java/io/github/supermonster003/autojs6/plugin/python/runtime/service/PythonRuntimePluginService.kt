@@ -13,11 +13,13 @@ import io.github.supermonster003.autojs6.plugin.python.runtime.security.HostCall
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.OwnedParcelFileDescriptors
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.PythonRequestEnvelope
 import org.autojs.plugin.python.runtime.api.IPythonExecutionCallback
+import org.autojs.plugin.python.runtime.api.IPythonHostCapabilityBroker
 import org.autojs.plugin.python.runtime.api.IPythonRuntimeProvider
 import org.autojs.plugin.python.runtime.api.IPythonSessionOpenCallback
 import org.autojs.plugin.python.runtime.api.PythonErrorCode
 import org.autojs.plugin.python.runtime.api.PythonExecutionError
 import org.autojs.plugin.python.runtime.api.PythonFailurePhase
+import org.autojs.plugin.python.runtime.api.PythonProtocolVersion
 import org.autojs.plugin.python.runtime.api.PythonRuntimeCodec
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
 import org.autojs.plugin.python.runtime.api.PythonRuntimeContractException
@@ -107,6 +109,34 @@ class PythonRuntimePluginService : Service() {
             descriptors: Array<out ParcelFileDescriptor?>?,
             admissionCallback: IPythonSessionOpenCallback?,
             executionCallback: IPythonExecutionCallback?,
+        ) = openSessionInternal(
+            request = request,
+            descriptors = descriptors,
+            hostCapabilityBroker = null,
+            admissionCallback = admissionCallback,
+            executionCallback = executionCallback,
+        )
+
+        override fun openSessionWithHostCapabilities(
+            request: ByteArray?,
+            descriptors: Array<out ParcelFileDescriptor?>?,
+            hostCapabilityBroker: IPythonHostCapabilityBroker?,
+            admissionCallback: IPythonSessionOpenCallback?,
+            executionCallback: IPythonExecutionCallback?,
+        ) = openSessionInternal(
+            request = request,
+            descriptors = descriptors,
+            hostCapabilityBroker = hostCapabilityBroker,
+            admissionCallback = admissionCallback,
+            executionCallback = executionCallback,
+        )
+
+        private fun openSessionInternal(
+            request: ByteArray?,
+            descriptors: Array<out ParcelFileDescriptor?>?,
+            hostCapabilityBroker: IPythonHostCapabilityBroker?,
+            admissionCallback: IPythonSessionOpenCallback?,
+            executionCallback: IPythonExecutionCallback?,
         ) {
             var receiverCopiesTransferred = false
             var unassignedOwner: OwnedParcelFileDescriptors? = null
@@ -117,6 +147,9 @@ class PythonRuntimePluginService : Service() {
                 val safeAdmission = requireNotNull(admissionCallback) { "Python admission callback is missing" }
                 val safeExecution = requireNotNull(executionCallback) { "Python execution callback is missing" }
                 requireCallbacksAlive(safeAdmission, safeExecution)
+                require(hostCapabilityBroker?.asBinder()?.isBinderAlive != false) {
+                    "Python host capability broker is dead"
+                }
 
                 val requestId = try {
                     PythonRequestEnvelope.requireUniqueRequestId(safeRequest)
@@ -133,6 +166,12 @@ class PythonRuntimePluginService : Service() {
                             value.protocolVersion >= PythonRuntimeMetadata.protocolMinVersion &&
                                 value.protocolVersion <= PythonRuntimeMetadata.protocolVersion,
                         ) { "Python request protocol is outside the provider range" }
+                        require(
+                            (value.protocolVersion >= HOST_CAPABILITY_BROKER_PROTOCOL) ==
+                                (hostCapabilityBroker != null),
+                        ) {
+                            "Python protocol 1.5 requires exactly one host capability broker"
+                        }
                         PythonRuntimeValidation.validateRequestAgainst(
                             request = value,
                             capabilities = PythonRuntimeMetadata.capabilities,
@@ -193,6 +232,7 @@ class PythonRuntimePluginService : Service() {
                     descriptors = owned,
                     admissionCallback = safeAdmission,
                     executionCallback = safeExecution,
+                    hostCapabilityBroker = hostCapabilityBroker,
                     callerVerifier = callerVerifier,
                     runtime = runtime,
                     worker = worker,
@@ -312,6 +352,8 @@ class PythonRuntimePluginService : Service() {
     }
 
     private companion object {
+        val HOST_CAPABILITY_BROKER_PROTOCOL = PythonProtocolVersion(1, 5)
+
         fun generateRuntimeGeneration(): Long {
             val random = SecureRandom()
             while (true) {

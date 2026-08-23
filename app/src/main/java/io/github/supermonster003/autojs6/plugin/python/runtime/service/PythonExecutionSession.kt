@@ -6,6 +6,7 @@ import android.os.SystemClock
 import android.util.Log
 import io.github.supermonster003.autojs6.plugin.python.runtime.PythonRuntimeMetadata
 import io.github.supermonster003.autojs6.plugin.python.runtime.execution.BufferedOutputRecord
+import io.github.supermonster003.autojs6.plugin.python.runtime.execution.ChaquopyHostCapabilityBridge
 import io.github.supermonster003.autojs6.plugin.python.runtime.execution.ChaquopyRuntime
 import io.github.supermonster003.autojs6.plugin.python.runtime.execution.PythonInputDeliveryException
 import io.github.supermonster003.autojs6.plugin.python.runtime.execution.PythonInputLimitExceededException
@@ -24,6 +25,7 @@ import io.github.supermonster003.autojs6.plugin.python.runtime.transport.StdinSn
 import io.github.supermonster003.autojs6.plugin.python.runtime.transport.WorkspaceSnapshot
 import org.autojs.plugin.python.runtime.api.IPythonExecutionCallback
 import org.autojs.plugin.python.runtime.api.IPythonExecutionSession
+import org.autojs.plugin.python.runtime.api.IPythonHostCapabilityBroker
 import org.autojs.plugin.python.runtime.api.IPythonSessionOpenCallback
 import org.autojs.plugin.python.runtime.api.PythonCancellationReason
 import org.autojs.plugin.python.runtime.api.PythonErrorCode
@@ -56,6 +58,7 @@ internal class PythonExecutionSession(
     private val descriptors: OwnedParcelFileDescriptors,
     private val admissionCallback: IPythonSessionOpenCallback,
     private val executionCallback: IPythonExecutionCallback,
+    hostCapabilityBroker: IPythonHostCapabilityBroker?,
     private val callerVerifier: HostCallerVerifier,
     private val runtime: ChaquopyRuntime,
     private val worker: ExecutorService,
@@ -76,6 +79,8 @@ internal class PythonExecutionSession(
     private val signal = java.lang.Object()
     private val admissionBinder = admissionCallback.asBinder()
     private val executionBinder = executionCallback.asBinder()
+    private val hostCapabilityBrokerBinder = hostCapabilityBroker?.asBinder()
+    private val hostCapabilityBridge = hostCapabilityBroker?.let(::ChaquopyHostCapabilityBridge)
     private val deathRecipient = IBinder.DeathRecipient(::callbackDied)
     private val createdAtMillis = SystemClock.elapsedRealtime()
 
@@ -237,7 +242,12 @@ internal class PythonExecutionSession(
         return try {
             admissionBinder.linkToDeath(deathRecipient, 0)
             executionBinder.linkToDeath(deathRecipient, 0)
-            if (!admissionBinder.isBinderAlive || !executionBinder.isBinderAlive) {
+            hostCapabilityBrokerBinder?.linkToDeath(deathRecipient, 0)
+            if (
+                !admissionBinder.isBinderAlive ||
+                !executionBinder.isBinderAlive ||
+                hostCapabilityBrokerBinder?.isBinderAlive == false
+            ) {
                 callbackDied()
                 false
             } else {
@@ -269,6 +279,7 @@ internal class PythonExecutionSession(
         startLease.close()
         deadlineFuture?.cancel(false)
         terminalLeaseFuture?.cancel(false)
+        hostCapabilityBridge?.close()
         workerFuture?.cancel(true)
         descriptors.close()
         inputs.getAndSet(null)?.close()
@@ -346,8 +357,10 @@ internal class PythonExecutionSession(
                         onOutput = ::emitOutput,
                         onInput = request.interactiveInput?.let { ::requestInput },
                         outputArtifactRoot = outputArtifactWorkspace?.root,
+                        hostCapabilityBridge = hostCapabilityBridge,
                     )
                 } finally {
+                    hostCapabilityBridge?.close()
                     source.fill(0)
                     hostCapabilitySnapshot?.fill(0)
                     stdinSnapshot?.fill(0)
@@ -815,6 +828,7 @@ internal class PythonExecutionSession(
                 return
             }
             deadlineFuture?.cancel(false)
+            hostCapabilityBridge?.close()
             descriptors.close()
             inputs.getAndSet(null)?.close()
             synchronized(signal) {
@@ -872,6 +886,7 @@ internal class PythonExecutionSession(
 
     private fun finishCancellation(encoded: ByteArray, retireProcess: Boolean) {
         deadlineFuture?.cancel(false)
+        hostCapabilityBridge?.close()
         descriptors.close()
         inputs.getAndSet(null)?.close()
         synchronized(signal) {
@@ -937,6 +952,7 @@ internal class PythonExecutionSession(
         if (!callbackDeathsLinked.compareAndSet(true, false)) return
         runCatching { admissionBinder.unlinkToDeath(deathRecipient, 0) }
         runCatching { executionBinder.unlinkToDeath(deathRecipient, 0) }
+        runCatching { hostCapabilityBrokerBinder?.unlinkToDeath(deathRecipient, 0) }
     }
 
     private fun isStopped(): Boolean = state.get() != State.STARTED || Thread.currentThread().isInterrupted
