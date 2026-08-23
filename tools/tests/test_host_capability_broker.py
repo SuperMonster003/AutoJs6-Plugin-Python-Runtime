@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 PYTHON_SOURCE = ROOT / "app" / "src" / "main" / "python"
 sys.path.insert(0, str(PYTHON_SOURCE))
 
-from autojs6 import app, clip, console, device, dialogs, files, notice, toast  # noqa: E402
+from autojs6 import app, clip, console, device, dialogs, engines, files, notice, toast  # noqa: E402
 from autojs6._broker import _install_execution_broker, _reset_execution_broker  # noqa: E402
 from autojs6.errors import (  # noqa: E402
     CapabilityUnavailableError,
@@ -30,6 +30,22 @@ DEVICE_INFO = {
         "notification": {"current": 4, "max": 7},
         "alarm": {"current": 5, "max": 7},
     },
+}
+ENGINE_INFO = {
+    "schema": "autojs6-python-engine-info-v1",
+    "id": 17,
+    "engineName": "python",
+    "sourceName": "main",
+    "entryPoint": "main.py",
+    "project": True,
+    "startedAtMillis": 123456789,
+}
+ENGINE_LAUNCH = {
+    "schema": "autojs6-python-engine-launch-v1",
+    "id": 18,
+    "engineName": "org.autojs.autojs.script.JavaScriptSource.Engine",
+    "sourceName": "child",
+    "path": "child.js",
 }
 
 
@@ -94,12 +110,17 @@ class RecordingBroker:
                 )
             elif capability in self.dialog_results:
                 value = self.dialog_results[capability]
+            elif capability == "engines.current":
+                value = ENGINE_INFO
+            elif capability == "engines.run":
+                value = {**ENGINE_LAUNCH, "path": arguments["path"]}
             elif capability in {
                 "toast.show",
                 "console.log",
                 "console.warn",
                 "console.error",
                 "notice.show",
+                "engines.stop_self",
             }:
                 value = None
             else:
@@ -382,6 +403,99 @@ class HostCapabilityBrokerTest(unittest.TestCase):
             self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
         finally:
             _reset_execution_broker(token)
+
+    def test_engines_use_typed_identity_scoped_launch_and_nonreturning_self_stop(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            self.assertEqual(ENGINE_INFO, engines.current())
+            self.assertEqual(ENGINE_LAUNCH, engines.run("child.js"))
+            with self.assertRaises(SystemExit) as stopped:
+                engines.stop_self()
+            self.assertEqual(0, stopped.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+        self.assertEqual(
+            [
+                ("engines.current", {}),
+                ("engines.run", {"path": "child.js"}),
+                ("engines.stop_self", {}),
+            ],
+            broker.calls,
+        )
+
+    def test_engines_validate_paths_and_map_nested_python_rejection(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            for unsafe in ("", "../outside.js", "/absolute.js", "C:/absolute.js", "a\\b.js"):
+                with self.subTest(unsafe=unsafe), self.assertRaises(ValueError):
+                    engines.run(unsafe)
+            self.assertEqual([], broker.calls)
+        finally:
+            _reset_execution_broker(token)
+
+        denied = RecordingBroker()
+        denied.failure = (
+            "NESTED_PYTHON_NOT_ALLOWED",
+            "nested Python is unavailable",
+        )
+        token = _install_execution_broker(denied, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                engines.run("child.py")
+            self.assertEqual("NESTED_PYTHON_NOT_ALLOWED", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_engines_reject_malformed_host_identity_and_launch_results(self) -> None:
+        malformed = RecordingBroker()
+        malformed.response_mutator = lambda response: response.__setitem__(
+            "value",
+            {**ENGINE_INFO, "engineName": "javascript"},
+        )
+        token = _install_execution_broker(malformed, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                engines.current()
+            self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+        malformed = RecordingBroker()
+        malformed.response_mutator = lambda response: response.__setitem__(
+            "value",
+            {**ENGINE_LAUNCH, "path": "different.js"},
+        )
+        token = _install_execution_broker(malformed, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                engines.run("child.js")
+            self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_bootstrap_stop_self_never_executes_following_user_code(self) -> None:
+        broker = RecordingBroker()
+        outcome = run_source(
+            b"from autojs6 import engines\n"
+            b"print('before', flush=True)\n"
+            b"engines.stop_self()\n"
+            b"print('after', flush=True)\n",
+            "main.py",
+            [],
+            4096,
+            256,
+            128,
+            host_capability_broker_input=broker,
+            execution_id=EXECUTION_ID,
+        )
+
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(0, outcome["exit_code"])
+        self.assertEqual(b"before\n", b"".join(chunk for _, chunk in outcome["output"]))
+        self.assertEqual([("engines.stop_self", {})], broker.calls)
 
     def test_bootstrap_installs_and_revokes_live_broker_around_user_code(self) -> None:
         broker = RecordingBroker()
