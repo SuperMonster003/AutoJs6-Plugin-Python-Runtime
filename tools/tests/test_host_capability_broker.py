@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 PYTHON_SOURCE = ROOT / "app" / "src" / "main" / "python"
 sys.path.insert(0, str(PYTHON_SOURCE))
 
-from autojs6 import app, clip, console, device, files, notice, toast  # noqa: E402
+from autojs6 import app, clip, console, device, dialogs, files, notice, toast  # noqa: E402
 from autojs6._broker import _install_execution_broker, _reset_execution_broker  # noqa: E402
 from autojs6.errors import (  # noqa: E402
     CapabilityUnavailableError,
@@ -42,6 +42,12 @@ class RecordingBroker:
         self.response_mutator = None
         self.file_texts = {"seed.txt": "seed"}
         self.file_directories = {".", "nested"}
+        self.dialog_results = {
+            "dialogs.alert": None,
+            "dialogs.confirm": True,
+            "dialogs.prompt": "typed value",
+            "dialogs.select": 1,
+        }
 
     def dispatch(self, request_json: str) -> str:
         self.raw_requests.append(request_json)
@@ -86,6 +92,8 @@ class RecordingBroker:
                 value = sorted(
                     [*self.file_texts, *(entry for entry in self.file_directories if entry != ".")]
                 )
+            elif capability in self.dialog_results:
+                value = self.dialog_results[capability]
             elif capability in {
                 "toast.show",
                 "console.log",
@@ -262,6 +270,103 @@ class HostCapabilityBrokerTest(unittest.TestCase):
             with self.assertRaises(HostCapabilityError) as captured:
                 files.read_text("missing.txt")
             self.assertEqual("PATH_NOT_FOUND", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_foreground_dialogs_use_typed_bounded_requests_and_results(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            self.assertIsNone(dialogs.alert("Alert text"))
+            self.assertTrue(dialogs.confirm("Confirm text", title="Question"))
+            self.assertEqual(
+                "typed value",
+                dialogs.prompt("Prompt text", default="seed", title="Input"),
+            )
+            self.assertEqual(1, dialogs.select(("first", "second"), title="Choose"))
+        finally:
+            _reset_execution_broker(token)
+
+        self.assertEqual(
+            [
+                ("dialogs.alert", {"title": dialogs.DEFAULT_TITLE, "text": "Alert text"}),
+                ("dialogs.confirm", {"title": "Question", "text": "Confirm text"}),
+                (
+                    "dialogs.prompt",
+                    {"title": "Input", "text": "Prompt text", "default": "seed"},
+                ),
+                ("dialogs.select", {"title": "Choose", "items": ["first", "second"]}),
+            ],
+            broker.calls,
+        )
+
+        cancelled = RecordingBroker()
+        cancelled.dialog_results.update(
+            {
+                "dialogs.confirm": False,
+                "dialogs.prompt": None,
+                "dialogs.select": None,
+            }
+        )
+        token = _install_execution_broker(cancelled, EXECUTION_ID)
+        try:
+            self.assertFalse(dialogs.confirm("cancel"))
+            self.assertIsNone(dialogs.prompt("cancel"))
+            self.assertIsNone(dialogs.select(["cancel"]))
+        finally:
+            _reset_execution_broker(token)
+
+    def test_dialog_validation_and_foreground_authorization_fail_closed(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            invalid_calls = (
+                lambda: dialogs.alert("text", title=""),
+                lambda: dialogs.alert("x" * (dialogs.MAX_TEXT_BYTES + 1)),
+                lambda: dialogs.prompt("text", default="x" * (dialogs.MAX_PROMPT_REPLY_BYTES + 1)),
+                lambda: dialogs.select("not-a-sequence-of-items"),
+                lambda: dialogs.select([]),
+                lambda: dialogs.select([""]),
+                lambda: dialogs.select(["item"] * (dialogs.MAX_ITEMS + 1)),
+            )
+            for invalid in invalid_calls:
+                with self.subTest(invalid=invalid), self.assertRaises((TypeError, ValueError)):
+                    invalid()
+            self.assertEqual([], broker.calls)
+        finally:
+            _reset_execution_broker(token)
+
+        denied = RecordingBroker()
+        denied.failure = (
+            "INTERACTIVE_NOT_ALLOWED",
+            "Host dialog requires a foreground user-authorized execution",
+        )
+        token = _install_execution_broker(denied, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                dialogs.alert("background")
+            self.assertEqual("INTERACTIVE_NOT_ALLOWED", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_dialog_facade_rejects_malformed_host_results(self) -> None:
+        malformed_prompt = RecordingBroker()
+        malformed_prompt.dialog_results["dialogs.prompt"] = 7
+        token = _install_execution_broker(malformed_prompt, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                dialogs.prompt("prompt")
+            self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+        malformed_selection = RecordingBroker()
+        malformed_selection.dialog_results["dialogs.select"] = True
+        token = _install_execution_broker(malformed_selection, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                dialogs.select(["only"])
+            self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
         finally:
             _reset_execution_broker(token)
 
