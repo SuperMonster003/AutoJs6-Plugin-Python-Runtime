@@ -120,9 +120,11 @@
   (如 `"entryMode": "module", "main": "pkg.main"`), 写入 `ENTRY_MODE_ARGUMENT`。
   含相对导入的包项目已在物理设备与 16 KiB page 模拟器以 module 语义运行成功;
   宿主提交: `d3f623217`。
-- [ ] [H] **stdin 快照入口**: `project.json` 支持 `"stdin"` 字段 (内联文本或文件路径),
-  写入 `STDIN_SNAPSHOT_ARGUMENT`; 单文件脚本暂不提供 UI (需求出现再加)。
-  验收: 依赖 `sys.stdin.read()` 的脚本以预置输入运行成功。
+- [x] [H] **stdin 快照入口**: `project.json` 支持 `"stdin"` 字段; JSON 字符串始终表示
+  内联文本, `{"file":"fixtures/input.txt"}` 显式表示项目内相对文件, 写入现有
+  `STDIN_SNAPSHOT_ARGUMENT`; 单文件脚本暂不提供 UI (需求出现再加)。
+  `sys.stdin.read()` 公共路径已在物理设备与 16 KiB page 模拟器以预置输入运行成功;
+  宿主提交: `e3a5b6da3`。
 - [ ] [H] **结构化结果展示**: 脚本终态后, 若存在 `structuredJson`, 在控制台以
   `[result] {...}` 追加展示; artifacts 落盘到宿主可见目录
   (如 `<脚本目录>/.python-artifacts/<执行id>/`) 并在控制台打印路径。
@@ -140,6 +142,19 @@
 - Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 与 API 37 /
   x86_64 / 16 KiB page 模拟器均 PASS; 验收覆盖 `__package__`、`__spec__`、包内相对导入、
   结构化 JSON 与二进制 artifact。
+
+### 2026-08-23 M2 stdin 快照入口验收记录
+
+- `project.json` 使用 `"stdin":"literal text"` 声明内联 UTF-8 文本, 或使用
+  `"stdin":{"file":"fixtures/input.txt"}` 声明项目内相对文件; 普通字符串绝不猜测为路径,
+  显式空字符串保留为零字节快照。
+- 文件路径仅接受 NFC 规范化的正斜杠相对路径, 拒绝绝对路径、URI、反斜杠、控制字符、
+  `.` / `..`、符号链接、缺失或非普通文件; 单次快照上限与当前插件一致为 1 MiB。
+- 宿主在统一 Launch 配置中读取并固定文件字节, 继续复用协议 1.1 stdin PFD 通道,
+  没有新增跨进程字段; 私有传输前同时复验 manifest 中的 stdin 声明。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 用时 0.963 秒,
+  API 37 / x86_64 / 16 KiB page 模拟器用时 1.503 秒, 均为 `OK (1 test)`;
+  验收覆盖项目文件快照、Unicode `sys.stdin.read()`、重复读取 EOF、无交互弹框与传输清理。
 
 ******
 

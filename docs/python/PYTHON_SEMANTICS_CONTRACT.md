@@ -166,6 +166,42 @@ evidence remain separate.
   process stdin and never waits for UI.
 - Always restore the previous `sys.stdin` reference at cleanup.
 
+### Current Host project declaration
+
+The current paired Host exposes the existing finite snapshot channel to an
+explicitly admitted Python project's `project.json`:
+
+- `"stdin": "literal text"` always means inline text. The Host never guesses
+  that a string naming an existing file is a path. An explicit empty string is
+  retained as a present zero-byte snapshot.
+- `"stdin": {"file": "fixtures/input.txt"}` explicitly selects the exact
+  bytes of a project-relative regular file. The object must contain exactly
+  the string property `file`; `text` aliases, extra properties and all other
+  JSON shapes are invalid.
+- A file name must be a Unicode NFC-normalized, forward-slash relative path no
+  longer than 4 KiB in UTF-8. Absolute paths, URI-like names, backslashes,
+  control characters, empty or `.` / `..` segments, symbolic links, missing
+  paths and non-regular files fail closed.
+- Inline and file snapshots are bounded by the current Provider maximum of
+  1 MiB. The manifest itself retains its separate 64 KiB limit. The file is
+  read with a bounded loop while the unified Launch creates its execution
+  configuration, so subsequent file edits do not mutate that execution's
+  pre-supplied bytes.
+- The admitted declaration is retained on `PythonProjectSource` and rechecked
+  immediately before private transport. The Host writes the existing
+  `autojs6.python.stdinSnapshot` argument, so this public entry requires no new
+  Binder or tagged-wire field. An absent `stdin` leaves the argument absent.
+- Standalone-file launches still have no public manifest or UI for supplying a
+  snapshot. Foreground built-in `input()` remains the separate interactive
+  path described below.
+
+The public Host engine path was accepted with project-file stdin, Unicode
+`sys.stdin.read()`, deterministic repeated-read EOF and private-snapshot
+cleanup on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages) and an
+API 37 x86_64 emulator with 16 KiB pages. The paired Host implementation is
+commit `e3a5b6da3`; this is current-tree device acceptance, not stable-release
+provenance.
+
 The snapshot path above is finite pre-supplied input. The foreground
 prompt/reply loop below is interactive input and remains a separate channel.
 

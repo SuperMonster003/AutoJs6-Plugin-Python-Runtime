@@ -43,6 +43,19 @@ BINDER_TEST_PATH = (
 CANCEL_TEST_PATH = BINDER_TEST_PATH.with_name("PythonRuntimeRealPluginCancelRebindDiagnosticTest.kt")
 TIMEOUT_TEST_PATH = BINDER_TEST_PATH.with_name("PythonRuntimeRealPluginTimeoutRebindDiagnosticTest.kt")
 R1_PUBLIC_TEST_PATH = PUBLIC_TEST_PATH.with_name("PythonU1R1AcceptanceInstrumentationTest.kt")
+PROJECT_POLICY_PATH = (
+    HOST
+    / "app"
+    / "src"
+    / "main"
+    / "java"
+    / "org"
+    / "autojs"
+    / "autojs"
+    / "script"
+    / "PythonProjectLaunchPolicy.kt"
+)
+LAUNCH_FACTORY_PATH = PROJECT_POLICY_PATH.with_name("ScriptLaunchSourceFactory.kt")
 
 FIXTURE = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
 RUNNER_WRAPPER = RUNNER_WRAPPER_PATH.read_text(encoding="utf-8")
@@ -51,6 +64,8 @@ VERIFIER_WRAPPER = VERIFIER_WRAPPER_PATH.read_text(encoding="utf-8")
 VERIFIER_CORE = VERIFIER_CORE_PATH.read_text(encoding="utf-8")
 FUNCTIONAL_GATE = FUNCTIONAL_GATE_PATH.read_text(encoding="utf-8")
 PUBLIC_TEST = PUBLIC_TEST_PATH.read_text(encoding="utf-8")
+PROJECT_POLICY = PROJECT_POLICY_PATH.read_text(encoding="utf-8")
+LAUNCH_FACTORY = LAUNCH_FACTORY_PATH.read_text(encoding="utf-8")
 BINDER_TEST = BINDER_TEST_PATH.read_text(encoding="utf-8")
 CANCEL_TEST = CANCEL_TEST_PATH.read_text(encoding="utf-8")
 TIMEOUT_TEST = TIMEOUT_TEST_PATH.read_text(encoding="utf-8")
@@ -173,6 +188,29 @@ class U1R2DeviceEvidenceSourceTest(unittest.TestCase):
         r1_source = R1_PUBLIC_TEST_PATH.read_text(encoding="utf-8")
         self.assertIn("as? PythonRuntimeExecutionResult", r1_source)
         self.assertIn("hostResult.terminal", r1_source)
+
+    def test_public_project_stdin_path_is_explicit_bounded_and_device_exercised(self) -> None:
+        for marker in (
+            "projectManifestFileStdinFeedsSysStdinWithoutInteractivePrompt",
+            r'\"stdin\":{\"file\":\"$STDIN_FILE_PATH\"}',
+            "actual = sys.stdin.read()",
+            'assert sys.stdin.read() == ""',
+            "config.getArgument(STDIN_SNAPSHOT_ARGUMENT) as? ByteArray",
+            "assertArrayEquals(expectedBytes, configuredStdin)",
+            "assertPrivateTransportSnapshotsRemoved()",
+        ):
+            self.assertIn(marker, PUBLIC_TEST)
+        for marker in (
+            "PythonProjectStdinSource.InlineText",
+            "PythonProjectStdinSource.ProjectFile",
+            "stdinObject.size() != 1",
+            "MAX_STDIN_SNAPSHOT_BYTES = 1L * 1024L * 1024L",
+            "candidate.absoluteFile.path != normalizedFile.path",
+            "PythonProjectLaunchError.STDIN_ESCAPES_ROOT",
+        ):
+            self.assertIn(marker, PROJECT_POLICY)
+        self.assertIn("PythonProjectLaunchPolicy.snapshotStdin", LAUNCH_FACTORY)
+        self.assertIn("PythonExecutionInputPolicy.STDIN_SNAPSHOT_ARGUMENT", LAUNCH_FACTORY)
 
     def test_binder_selectors_validate_prompt_order_result_independence_and_limit_recovery(self) -> None:
         for marker in (
