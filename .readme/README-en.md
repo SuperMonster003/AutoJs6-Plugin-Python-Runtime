@@ -51,7 +51,7 @@ Python Runtime is an independent provider for version 1 of the Python protocol. 
 - Import project-local pure-Python packages and `.dist-info` metadata from the admitted project root without online pip or runtime installation.
 - Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.
 - Set an explicit strict JSON result of at most 64 KiB and transfer up to 16 optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.
-- Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, and bounded `automator.click/long_click/press/swipe/back/home` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.
+- Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, bounded `automator.click/long_click/press/swipe/back/home`, and bounded `selector.snapshot/find/click/set_text` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.
 - Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.
 - Allow one active session in the runtime process with no provider-side queue.
 - Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed.
@@ -103,8 +103,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 > Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
-release target: 0.4.0-alpha.1
-release state: 0.4.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator coordinate/global actions passed on the accessibility-enabled emulator, and physical-device fail-closed acceptance passed without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.2
+release state: 0.4.0-alpha.2 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions passed the enabled-service path on the emulator and fail-closed on the physical device, while execution-local selector/UI-tree snapshot/find/click/set_text passed full enabled-service acceptance on the emulator and fail-closed on the physical device without changing its accessibility services; screenshots, OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,6 +133,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 - Structured JSON is capped at 64 KiB; at most 16 artifacts are accepted with 1024 UTF-8 bytes paths, 4 MiB per file, 8 MiB aggregate, and Host verification of exact length, EOF, and SHA-256.
 - Protocol 1.5 admits at most 1024 Host calls per execution, caps each request/response at 64 KiB and text at 32 KiB, and waits at most 5 s for an ordinary Host main-thread action. Host files use 4 KiB relative paths, 32 KiB UTF-8 text, and listings of at most 128 names of 255 UTF-8 bytes each. Foreground dialogs cap titles at 256 UTF-8 bytes, content at 4 KiB, prompt defaults/replies at 32 KiB, and selection lists at 64 items of 1 KiB each and 32 KiB total; one user response may wait up to 5 min. One execution may successfully launch at most 16 scoped asynchronous non-Python Host child scripts; nested Python returns `NESTED_PYTHON_NOT_ALLOWED`, and `stop_self` cancels through process restart.
 - Automator coordinates are strict integers from 0 through 1000000, while press and swipe durations range from 1 ms through 4 s; unavailable Host accessibility raises `CapabilityUnavailableError` without opening settings.
+- Selector snapshots accept at most 128 nodes, depth 32, and 48 KiB of JSON; find scans at most 1024 nodes, node text is capped at 256 Unicode code points, query text at 1024 UTF-8 bytes, set text at 4 KiB, and each execution retains at most 128 node references. Incomplete scans return `SELECTOR_SCAN_LIMIT_EXCEEDED` and stale references return `STALE_NODE`.
 - Cancellation uses process restart rather than CPython-level cooperation; native extensions and blocking calls still require later Android validation.
 - The plugin grants `INTERNET` for script-initiated standard-library networking; online pip, automatic code downloads, and runtime third-party package installation remain unsupported.
 
@@ -144,7 +145,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 - General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to built-in `input()` and standard-library `getpass.getpass()` after the finite snapshot of at most 1 MiB reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.
 - There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.
-- The live broker covers the complete first low-risk slice, bounded Host files, foreground dialogs, bounded engines, and explicit coordinate/global automator actions; selector/UI-tree, screenshot, and OCR APIs remain undeclared.
+- The live broker covers the complete first low-risk slice, bounded Host files, foreground dialogs, bounded engines, explicit coordinate/global automator actions, and bounded selector/UI-tree snapshots/actions; screenshot and OCR APIs remain undeclared.
 - 32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.
 - The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification.
 
@@ -154,7 +155,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-M4 Path A is complete, and M3 automation has begun with bounded coordinate gestures plus Back and Home actions through Host accessibility. Selector/UI-tree, screenshot, OCR, and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.
+M4 Path A is complete, and M3 automation now includes bounded coordinate/global actions plus the bounded selector/UI-tree data plane through Host accessibility. Screenshot, OCR, and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -163,6 +164,14 @@ M4 Path A is complete, and M3 automation has begun with bounded coordinate gestu
 ### Release history
 
 ******
+
+# v0.4.0-alpha.2
+
+###### 2026/08/24
+
+* `Hint` Second M3 automation current-tree alpha candidate; the full bounded selector/UI-tree path passed focused acceptance on an accessibility-enabled API 37 emulator, and fail-closed passed on an API 31 physical device without changing its accessibility services; screenshots, OCR, publication, and a complete device matrix remain outside this claim
+* `Feature` Add live `autojs6.selector.snapshot/find/click/set_text` APIs for detached accessibility-tree data, AND-composed first-match queries, and explicit actions through opaque execution-local node references
+* `Improvement` Bound snapshot nodes, depth, payload and node text, selector scan size, query/set text and retained nodes; report incomplete scans as `SELECTOR_SCAN_LIMIT_EXCEEDED`, stale references as `STALE_NODE`, and unavailable accessibility as `CapabilityUnavailableError` without opening settings
 
 # v0.4.0-alpha.1
 
@@ -179,14 +188,6 @@ M4 Path A is complete, and M3 automation has begun with bounded coordinate gestu
 * `Hint` First M4 current-tree alpha candidate; the project-local pure-Python dependency path passed focused dual-device acceptance, while later M3/M4 batches, publication, and a complete device matrix remain outside this claim
 * `Feature` Support project-local pure-Python packages and `.dist-info` metadata from admitted project roots, with a reproducible pinned `requests` example and no runtime installer
 * `Improvement` Raise project workspace limits to 64 MiB compressed, 8192 file entries, and 128 MiB extracted, and match the snapshot's actual three-dimensional requirement against Provider capabilities before dispatch; missing imports remain `ModuleNotFoundError` without online pip or engine fallback
-
-# v0.3.0-alpha.5
-
-###### 2026/08/23
-
-* `Hint` Fifth M3 current-tree alpha candidate; the bounded Host-engines portion of the second capability slice passed focused dual-device acceptance, while later capabilities, publication, and a complete device matrix remain outside this claim
-* `Feature` Add live `autojs6.engines.current/run/stop_self` APIs for path-free current-engine metadata, asynchronous non-Python Host child-script launch, and deterministic self-stop
-* `Improvement` Accept only normalized execution-root-relative child paths and at most 16 successful launches per execution; fail nested Python with stable `NESTED_PYTHON_NOT_ALLOWED`, while `stop_self` cancels through provider-process restart
 
 ##### For more releases
 

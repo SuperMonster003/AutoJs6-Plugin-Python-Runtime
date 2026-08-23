@@ -5,6 +5,18 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "اعتماد",
   "$data": {
+    "v0.4.0-alpha.2": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "مرشح alpha ثان لأتمتة M3 في الشجرة الحالية؛ اجتاز مسار selector/UI tree المحدود الكامل قبولاً مركزاً على محاكي API 37 مع تفعيل خدمة إمكانية الوصول، واجتاز fail-closed على جهاز فعلي API 31 من دون تغيير خدمات إمكانية الوصول فيه؛ تبقى screenshot وOCR والنشر ومصفوفة الأجهزة الكاملة خارج هذا الادعاء"
+      ],
+      "feature": [
+        "إضافة واجهات live `autojs6.selector.snapshot/find/click/set_text` لبيانات accessibility tree المنفصلة واستعلامات أول تطابق المركبة بعلاقة AND والإجراءات الصريحة عبر مراجع node مبهمة مرتبطة بالتنفيذ"
+      ],
+      "improvement": [
+        "تقييد nodes وعمق snapshot وحجمه ونصه وحجم selector scan ونص query/set والعقد المحتفظ بها؛ يعاد `SELECTOR_SCAN_LIMIT_EXCEEDED` للمسح غير المكتمل و`STALE_NODE` للمرجع القديم، وتؤدي accessibility غير المتاحة إلى `CapabilityUnavailableError` دون فتح الإعدادات"
+      ]
+    },
     "v0.4.0-alpha.1": {
       "released_date": "2026/08/23",
       "hint": [

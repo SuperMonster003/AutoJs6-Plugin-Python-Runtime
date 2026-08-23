@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.2
+
+###### 2026/08/24
+
+* `안내` 현재 tree의 두 번째 M3 automation alpha candidate입니다. 제한된 selector/UI tree 전체 경로는 accessibility service를 활성화한 API 37 emulator에서 focused acceptance를 통과했고, fail-closed는 기존 accessibility service를 변경하지 않고 API 31 physical device에서 통과했습니다; screenshot, OCR, publication 및 전체 device matrix는 이 선언에 포함하지 않습니다
+* `추가` 분리된 accessibility tree data, AND 조합 first-match query 및 불투명한 execution-local node reference를 통한 명시적 action을 제공하는 live `autojs6.selector.snapshot/find/click/set_text` API 추가
+* `개선` Snapshot node, depth, payload, node text, selector scan size, query/set text 및 retained node를 제한; 불완전 scan은 `SELECTOR_SCAN_LIMIT_EXCEEDED`, stale reference는 `STALE_NODE`, accessibility 사용 불가는 설정을 열지 않고 `CapabilityUnavailableError`로 보고
+
 # v0.4.0-alpha.1
 
 ###### 2026/08/23

@@ -24,9 +24,10 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.4.0-alpha.1", common["release_target"])
+        self.assertEqual("0.4.0-alpha.2", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
+        self.assertIn("selector/UI-tree", common["release_state"])
         self.assertIn("M4 Path A", common["release_state"])
         self.assertIn("project-local pure-Python", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
@@ -57,6 +58,14 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("16", common["max_host_engine_launches"])
         self.assertEqual("1000000", common["max_host_automator_coordinate"])
         self.assertEqual("4 s", common["max_host_automator_duration"])
+        self.assertEqual("128", common["max_host_selector_snapshot_nodes"])
+        self.assertEqual("1024", common["max_host_selector_find_nodes"])
+        self.assertEqual("32", common["max_host_selector_depth"])
+        self.assertEqual("48 KiB", common["max_host_selector_snapshot_value_bytes"])
+        self.assertEqual("256 Unicode code points", common["max_host_selector_node_text"])
+        self.assertEqual("1024 UTF-8 bytes", common["max_host_selector_query_text_bytes"])
+        self.assertEqual("4 KiB", common["max_host_selector_set_text_bytes"])
+        self.assertEqual("128", common["max_host_selector_retained_nodes"])
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
@@ -89,6 +98,10 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("`engines.current/run/stop_self`", broker_features[0])
                 self.assertIn(
                     "`automator.click/long_click/press/swipe/back/home`",
+                    broker_features[0],
+                )
+                self.assertIn(
+                    "`selector.snapshot/find/click/set_text`",
                     broker_features[0],
                 )
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
@@ -139,6 +152,25 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertEqual(1, len(automator_limits))
                 self.assertIn("{{ max_host_automator_duration }}", automator_limits[0])
                 self.assertIn("`CapabilityUnavailableError`", automator_limits[0])
+                selector_limits = [
+                    item
+                    for item in source["security_limits"]
+                    if "{{ max_host_selector_snapshot_nodes }}" in item
+                ]
+                self.assertEqual(1, len(selector_limits))
+                for placeholder in (
+                    "{{ max_host_selector_snapshot_nodes }}",
+                    "{{ max_host_selector_find_nodes }}",
+                    "{{ max_host_selector_depth }}",
+                    "{{ max_host_selector_snapshot_value_bytes }}",
+                    "{{ max_host_selector_node_text }}",
+                    "{{ max_host_selector_query_text_bytes }}",
+                    "{{ max_host_selector_set_text_bytes }}",
+                    "{{ max_host_selector_retained_nodes }}",
+                ):
+                    self.assertIn(placeholder, selector_limits[0])
+                self.assertIn("`SELECTOR_SCAN_LIMIT_EXCEEDED`", selector_limits[0])
+                self.assertIn("`STALE_NODE`", selector_limits[0])
                 network_limits = [item for item in source["security_limits"] if "INTERNET" in item]
                 self.assertEqual(1, len(network_limits))
                 self.assertIn("pip", network_limits[0])
@@ -163,7 +195,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 )
                 self.assertTrue(
                     any("selector" in item for item in source["unsupported_capabilities"]),
-                    f"{code} does not leave selector/UI-tree APIs undeclared",
+                    f"{code} does not describe the bounded selector/UI-tree surface",
                 )
                 self.assertTrue(
                     any("engines" in item for item in source["unsupported_capabilities"]),
@@ -180,6 +212,15 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                selector = source["$data"]["v0.4.0-alpha.2"]
+                self.assertEqual("2026/08/24", selector["released_date"])
+                self.assertEqual(1, len(selector["feature"]))
+                for method in ("snapshot", "find", "click", "set_text"):
+                    self.assertIn(method, selector["feature"][0])
+                self.assertIn("`SELECTOR_SCAN_LIMIT_EXCEEDED`", selector["improvement"][0])
+                self.assertIn("`STALE_NODE`", selector["improvement"][0])
+                self.assertIn("`CapabilityUnavailableError`", selector["improvement"][0])
+
                 automator = source["$data"]["v0.4.0-alpha.1"]
                 self.assertEqual("2026/08/23", automator["released_date"])
                 self.assertEqual(1, len(automator["feature"]))
@@ -306,8 +347,14 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("dialogs.alert/confirm/prompt/select", body)
                 self.assertIn("engines.current/run/stop_self", body)
                 self.assertIn("automator.click/long_click/press/swipe/back/home", body)
+                self.assertIn("selector.snapshot/find/click/set_text", body)
                 self.assertIn("1000000", body)
                 self.assertIn("4 s", body)
+                self.assertIn("48 KiB", body)
+                self.assertIn("256 Unicode code points", body)
+                self.assertIn("1024 UTF-8 bytes", body)
+                self.assertIn("SELECTOR_SCAN_LIMIT_EXCEEDED", body)
+                self.assertIn("STALE_NODE", body)
                 self.assertIn("CapabilityUnavailableError", body)
                 self.assertIn("NESTED_PYTHON_NOT_ALLOWED", body)
                 self.assertIn("INTERACTIVE_NOT_ALLOWED", body)
@@ -334,8 +381,12 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`dialogs.alert/confirm/prompt/select`", simplified)
         self.assertIn("`engines.current/run/stop_self`", simplified)
         self.assertIn("`automator.click/long_click/press/swipe/back/home`", simplified)
+        self.assertIn("`selector.snapshot/find/click/set_text`", simplified)
         self.assertIn("0 到 1000000", simplified)
         self.assertIn("1 ms 到 4 s", simplified)
+        self.assertIn("最多接受 128 个节点、深度 32 及 48 KiB JSON", simplified)
+        self.assertIn("`SELECTOR_SCAN_LIMIT_EXCEEDED`", simplified)
+        self.assertIn("`STALE_NODE`", simplified)
         self.assertIn("项目本地纯 Python 包与 `.dist-info` 元数据", simplified)
         self.assertIn("项目 workspace 上限为压缩后 64 MiB、8192 个文件条目及解压后 128 MiB", simplified)
         self.assertIn("M4 路径 A 已完成", simplified)
@@ -354,8 +405,12 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`dialogs.alert/confirm/prompt/select`", english)
         self.assertIn("`engines.current/run/stop_self`", english)
         self.assertIn("`automator.click/long_click/press/swipe/back/home`", english)
+        self.assertIn("`selector.snapshot/find/click/set_text`", english)
         self.assertIn("0 through 1000000", english)
         self.assertIn("1 ms through 4 s", english)
+        self.assertIn("at most 128 nodes, depth 32, and 48 KiB of JSON", english)
+        self.assertIn("`SELECTOR_SCAN_LIMIT_EXCEEDED`", english)
+        self.assertIn("`STALE_NODE`", english)
         self.assertIn("project-local pure-Python packages and `.dist-info` metadata", english)
         self.assertIn("64 MiB compressed, 8192 file entries, and 128 MiB extracted", english)
         self.assertIn("M4 Path A is complete", english)

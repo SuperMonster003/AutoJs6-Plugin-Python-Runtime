@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.2
+
+###### 2026/08/24
+
+* `注記` 現在の tree に対する 2 番目の M3 automation alpha candidate. 上限付き selector/UI tree の完全経路は accessibility service を有効にした API 37 emulator で focused acceptance に合格し, fail-closed は既存の accessibility service を変更せず API 31 physical device で合格しました; screenshot, OCR, publication, 完全な device matrix はこの claim の対象外です
+* `追加` 分離された accessibility tree data, AND 結合の first-match query, 不透明な execution-local node reference による明示的 action を提供する live `autojs6.selector.snapshot/find/click/set_text` API を追加
+* `改善` Snapshot node, depth, payload, node text, selector scan size, query/set text, retained node を制限; 不完全な scan は `SELECTOR_SCAN_LIMIT_EXCEEDED`, stale reference は `STALE_NODE`, accessibility 利用不可は設定を開かず `CapabilityUnavailableError` として報告
+
 # v0.4.0-alpha.1
 
 ###### 2026/08/23

@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Amélioration",
   "changelog_label_dependency": "Dépendance",
   "$data": {
+    "v0.4.0-alpha.2": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "Deuxième candidat alpha M3 d'automatisation de l'arbre courant; le parcours selector/arbre UI borné complet a réussi l'acceptation ciblée sur un émulateur API 37 avec accessibilité activée, et le fail-closed a réussi sur un appareil physique API 31 sans modifier ses services d'accessibilité; captures, OCR, publication et matrice complète restent hors de cette déclaration"
+      ],
+      "feature": [
+        "Ajouter les API live `autojs6.selector.snapshot/find/click/set_text` pour les données détachées de l'arbre d'accessibilité, les requêtes de première correspondance composées avec AND et les actions explicites via des références de node opaques liées à l'exécution"
+      ],
+      "improvement": [
+        "Borner les nodes, la profondeur, la charge et le texte des snapshots, la taille du parcours, le texte de requête/définition et les nodes conservés; signaler les parcours incomplets par `SELECTOR_SCAN_LIMIT_EXCEEDED`, les références obsolètes par `STALE_NODE` et l'accessibilité indisponible par `CapabilityUnavailableError` sans ouvrir les paramètres"
+      ]
+    },
     "v0.4.0-alpha.1": {
       "released_date": "2026/08/23",
       "hint": [

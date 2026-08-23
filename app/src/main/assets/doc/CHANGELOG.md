@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.2
+
+###### 2026/08/24
+
+* `提示` 当前树第二个 M3 自动化 alpha 候选; 完整有界 selector/UI 树路径已在启用无障碍的 API 37 模拟器通过聚焦验收, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; 截图, OCR, 发布及完整设备矩阵仍不在本次声明范围
+* `新增` 新增实时 `autojs6.selector.snapshot/find/click/set_text` API, 通过不透明的执行级节点引用提供分离的无障碍树纯数据, AND 组合首次匹配查询及显式动作
+* `优化` 限制快照节点, 深度, 载荷及节点文本, 选择器扫描规模, 查询/设置文本与保留节点; 扫描不完整返回 `SELECTOR_SCAN_LIMIT_EXCEEDED`, 引用过期返回 `STALE_NODE`, 无障碍不可用时不打开设置并抛出 `CapabilityUnavailableError`
+
 # v0.4.0-alpha.1
 
 ###### 2026/08/23

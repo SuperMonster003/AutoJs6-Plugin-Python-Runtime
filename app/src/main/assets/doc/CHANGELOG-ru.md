@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.2
+
+###### 2026/08/24
+
+* `Примечание` Второй alpha-кандидат M3 automation для текущего дерева; полный ограниченный путь selector/UI tree прошёл целевую приёмку на эмуляторе API 37 с включённой accessibility service, а fail-closed прошёл на физическом устройстве API 31 без изменения его accessibility services; screenshot, OCR, публикация и полная матрица устройств остаются вне этого заявления
+* `Добавлено` Добавлены live API `autojs6.selector.snapshot/find/click/set_text` для отделенных данных accessibility tree, составных AND-запросов первого совпадения и явных действий через непрозрачные execution-local ссылки на node
+* `Улучшено` Ограничены nodes, глубина, размер и текст snapshot, размер selector scan, текст запроса/установки и retained nodes; неполный scan возвращает `SELECTOR_SCAN_LIMIT_EXCEEDED`, устаревшая ссылка `STALE_NODE`, а недоступная accessibility вызывает `CapabilityUnavailableError` без открытия настроек
+
 # v0.4.0-alpha.1
 
 ###### 2026/08/23

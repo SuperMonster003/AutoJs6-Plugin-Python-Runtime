@@ -59,10 +59,10 @@ The broker is revoked at terminal, cancellation, or connection loss. Python does
 not receive an Android `Context`, accessibility service object, node, callback,
 or raw Binder handle.
 
-This slice deliberately exposes no selector, UI-tree snapshot, node handle,
-text-setting operation, screenshot, image matching, or OCR API. Those remain
-separate Roadmap items because they require bounded data models in addition to
-the action channel.
+The complementary bounded selector, UI-tree snapshot, node click, and text
+setting surface is documented in [`HOST_SELECTOR.md`](HOST_SELECTOR.md).
+Screenshot, image matching, and OCR remain separate Roadmap items because they
+require image and artifact data models in addition to the action channel.
 
 See [`m3_automator.py`](../../examples/python/m3_automator.py) for a minimal
 script and [`PYTHON_SEMANTICS_CONTRACT.md`](PYTHON_SEMANTICS_CONTRACT.md) for the

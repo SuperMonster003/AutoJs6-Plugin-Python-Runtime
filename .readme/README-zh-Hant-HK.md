@@ -51,7 +51,7 @@ Python Runtime 是獨立的 Python 協議 V1 provider. 宿主將單一 Python �
 - 從已准入項目根目錄 import 項目本地純 Python 套件及 `.dist-info` 元數據, 毋須線上 pip 或執行時安裝.
 - 在腳本執行期間按 stdout/stderr 原始次序透過有界 chunk 與 credit 傳送; credit 用盡會對執行施加背壓.
 - 透過協議 1.4 明確設定最大 64 KiB 的嚴格 JSON 結果, 並傳送最多 16 個具有路徑、大小及 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.
-- 透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、僅限前台的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self` 及有界 `automator.click/long_click/press/swipe/back/home`, 終態後自動撤銷.
+- 透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、僅限前台的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界 `automator.click/long_click/press/swipe/back/home` 及有界 `selector.snapshot/find/click/set_text`, 終態後自動撤銷.
 - 傳回 `SystemExit`, 語法錯誤和執行階段例外, 包括有界結構化 traceback.
 - 同一執行環境程序只允許一個使用中工作階段, provider 端不排隊.
 - 宿主毋須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播.
@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.4.0-alpha.1
-release state: 0.4.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator coordinate/global actions passed on the accessibility-enabled emulator, and physical-device fail-closed acceptance passed without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.2
+release state: 0.4.0-alpha.2 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions passed the enabled-service path on the emulator and fail-closed on the physical device, while execution-local selector/UI-tree snapshot/find/click/set_text passed full enabled-service acceptance on the emulator and fail-closed on the physical device without changing its accessibility services; screenshots, OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,6 +133,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 - 結構化 JSON 最大 64 KiB; 輸出 artifact 最多 16 個, 路徑最大 1024 UTF-8 bytes, 每個最大 4 MiB, 合計最大 8 MiB, Host 必須核對精確長度、EOF 及 SHA-256.
 - 協議 1.5 每次執行最多 1024 次 Host 呼叫, 每個要求/回應最大 64 KiB, 文字最大 32 KiB, 一般 Host 主線程動作最多等待 5 s. Host files 使用最大 4 KiB 的相對路徑、最大 32 KiB 的 UTF-8 文字, 每次最多列出 128 個名稱, 每個最大 255 UTF-8 bytes. 前台對話框標題最大 256 UTF-8 bytes, 內容最大 4 KiB, prompt 預設值/回覆最大 32 KiB, select 最多 64 項、每項最大 1 KiB、合計最大 32 KiB, 單次使用者回應最多等待 5 min. 每次執行最多成功非同步啟動 16 個限定根目錄內的非 Python Host 子指令碼; 巢狀 Python 返回 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self` 透過程序重啟取消自身.
 - Automator 座標只接受 0 至 1000000 的嚴格整數, press 及 swipe 持續時間為 1 ms 至 4 s; Host 無障礙不可用時拋出 `CapabilityUnavailableError`, 不開啟設定.
+- Selector snapshot 最多接受 128 個節點、深度 32 及 48 KiB JSON; find 最多掃描 1024 個節點, 節點文字上限為 256 Unicode code points, 查詢文字上限為 1024 UTF-8 bytes, set_text 上限為 4 KiB, 每次執行最多保留 128 個節點引用. 掃描不完整時返回 `SELECTOR_SCAN_LIMIT_EXCEEDED`, 引用過期時返回 `STALE_NODE`.
 - 取消模式是程序重啟, 而非 CPython 級協作取消; 原生擴充套件或阻塞呼叫仍需後續 Android 驗證.
 - 插件已授予 `INTERNET` 以支援腳本透過標準庫直接連線; 仍不支援線上 pip、自動下載程式碼或執行時安裝第三方套件.
 
@@ -144,7 +145,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 - 不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前台互動只適用於最大 1 MiB 的有限 snapshot 到達 EOF 後的內置 `input()` 與標準庫 `getpass.getpass()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.
 - 不提供 UI 指令碼, 除錯器, REPL 或任意宿主 Java 物件存取.
-- 即時 broker 已涵蓋完整首批低風險能力、有界 Host files、前台對話框、有界 engines 及顯式座標/全域 automator 動作; selector/UI 樹、截圖及 OCR 仍未聲明.
+- 即時 broker 已涵蓋完整首批低風險能力、有界 Host files、前台對話框、有界 engines、顯式座標/全域 automator 動作及有界 selector/UI 樹快照與動作; 截圖及 OCR 仍未聲明.
 - 不聲明 32 位元 Android 支援, 亦不保證任何第三方 native wheel 可用.
 - 目前樹已有 API 31 arm64-v8a 真機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格.
 
@@ -154,7 +155,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-M4 路徑 A 已完成, M3 自動化已透過 Host 無障礙接通有界座標手勢及返回/主畫面動作. selector/UI 樹、截圖、OCR 與 M4 構建期/native 套件路徑繼續按用戶價值推進; 歷史證據工具保留但不作自動發佈門禁.
+M4 路徑 A 已完成, M3 自動化現已透過 Host 無障礙接通有界座標/全域動作及有界 selector/UI 樹數據面. 截圖、OCR 與 M4 構建期/native 套件路徑繼續按用戶價值推進; 歷史證據工具保留但不作自動發佈門禁.
 
 - [檢視 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -163,6 +164,14 @@ M4 路徑 A 已完成, M3 自動化已透過 Host 無障礙接通有界座標手
 ### 版本記錄
 
 ******
+
+# v0.4.0-alpha.2
+
+###### 2026/08/24
+
+* `提示` 目前樹第二個 M3 自動化 alpha 候選; 完整有界 selector/UI 樹路徑已在啟用無障礙的 API 37 模擬器通過聚焦驗收, API 31 實體裝置在不變更既有無障礙服務的前提下通過 fail-closed; 截圖, OCR, 發布及完整裝置矩陣仍不在本次聲明範圍
+* `新增` 加入即時 `autojs6.selector.snapshot/find/click/set_text` API, 透過不透明的執行級節點引用提供分離的無障礙樹純數據, AND 組合首次匹配查詢及明確動作
+* `改善` 限制快照節點, 深度, 載荷及節點文字, 選擇器掃描規模, 查詢/設定文字與保留節點; 掃描不完整返回 `SELECTOR_SCAN_LIMIT_EXCEEDED`, 引用過期返回 `STALE_NODE`, 無障礙不可用時不開啟設定並拋出 `CapabilityUnavailableError`
 
 # v0.4.0-alpha.1
 
@@ -179,14 +188,6 @@ M4 路徑 A 已完成, M3 自動化已透過 Host 無障礙接通有界座標手
 * `提示` 首個 M4 current-tree alpha 候選; 項目本地純 Python 相依套件路徑已通過雙裝置聚焦驗收, 後續 M3/M4 批次、發佈及完整裝置矩陣不在本次聲明範圍
 * `新增` 支援從已准入項目根目錄匯入項目本地純 Python 套件及 `.dist-info` 元數據, 提供鎖定版本的 `requests` 可重現範例, 且不引入執行時安裝器
 * `改善` 將項目 workspace 上限提高至壓縮 64 MiB、8192 個檔案條目及解壓 128 MiB, 分發前按 snapshot 實際三維需求匹配 Provider 能力; 缺失 import 仍拋出 `ModuleNotFoundError`, 不觸發線上 pip 或引擎回退
-
-# v0.3.0-alpha.5
-
-###### 2026/08/23
-
-* `提示` M3 第五個 current-tree alpha 候選; 第二批有界 Host engines 能力已通過雙裝置聚焦驗收, 後續能力、公開發行及完整裝置矩陣不在本條聲明範圍
-* `新增` 新增即時 `autojs6.engines.current/run/stop_self` API, 提供不含絕對路徑的目前引擎資訊、非 Python Host 子指令碼非同步啟動及確定性停止自身
-* `改善` 子指令碼僅接受執行根目錄內的規範化相對路徑且每次執行最多成功啟動 16 個; 巢狀 Python 穩定返回 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self` 透過 provider 程序重啟取消目前執行
 
 ##### 更多版本
 

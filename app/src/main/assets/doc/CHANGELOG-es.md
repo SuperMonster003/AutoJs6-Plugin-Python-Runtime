@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.2
+
+###### 2026/08/24
+
+* `Nota` Segundo candidato alpha M3 de automatización del árbol actual; la ruta completa y acotada de selector/árbol UI superó la aceptación focalizada en un emulador API 37 con accesibilidad habilitada, y el cierre seguro superó la prueba en un dispositivo físico API 31 sin cambiar sus servicios de accesibilidad; capturas, OCR, publicación y una matriz completa quedan fuera de esta declaración
+* `Función` Añadir las API en vivo `autojs6.selector.snapshot/find/click/set_text` para datos separados del árbol de accesibilidad, consultas de primera coincidencia compuestas con AND y acciones explícitas mediante referencias opacas de nodo ligadas a la ejecución
+* `Mejora` Limitar nodos, profundidad, carga y texto de snapshot, tamaño de búsqueda, texto de consulta/asignación y nodos retenidos; informar búsquedas incompletas como `SELECTOR_SCAN_LIMIT_EXCEEDED`, referencias obsoletas como `STALE_NODE` y accesibilidad no disponible como `CapabilityUnavailableError` sin abrir ajustes
+
 # v0.4.0-alpha.1
 
 ###### 2026/08/23

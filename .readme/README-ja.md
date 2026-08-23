@@ -51,7 +51,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 - 許可済み project root から project-local pure-Python package と `.dist-info` metadata を import でき, online pip や runtime install は行いません.
 - スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.
 - protocol 1.4 で最大 64 KiB の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 16 個転送します. stdout から result を推測しません.
-- 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list`、foreground 限定の `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界な `automator.click/long_click/press/swipe/back/home` をリアルタイムに呼び出し、terminal 時に無効化します.
+- 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list`、foreground 限定の `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界な `automator.click/long_click/press/swipe/back/home`、有界な `selector.snapshot/find/click/set_text` をリアルタイムに呼び出し、terminal 時に無効化します.
 - `SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.
 - プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.
 - ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません.
@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.4.0-alpha.1
-release state: 0.4.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator coordinate/global actions passed on the accessibility-enabled emulator, and physical-device fail-closed acceptance passed without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.2
+release state: 0.4.0-alpha.2 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions passed the enabled-service path on the emulator and fail-closed on the physical device, while execution-local selector/UI-tree snapshot/find/click/set_text passed full enabled-service acceptance on the emulator and fail-closed on the physical device without changing its accessibility services; screenshots, OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,6 +133,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 - 構造化 JSON は 64 KiB, artifact は最大 16 個, path は 1024 UTF-8 bytes, 1 file は 4 MiB, 合計は 8 MiB が上限で, Host が正確な長さ, EOF, SHA-256 を検証します.
 - プロトコル 1.5 は実行ごとに最大 1024 Host call、request/response ごとに 64 KiB、text に 32 KiB、通常の Host main-thread action の待機に 5 s の上限を設けます. Host files は 4 KiB の相対 path、32 KiB の UTF-8 text、最大 128 件かつ各 255 UTF-8 bytes の名前に制限されます. Foreground dialog は title 256 UTF-8 bytes、content 4 KiB、prompt default/reply 32 KiB、select 最大 64 項・各 1 KiB・合計 32 KiB に制限され、1 回の応答を最大 5 min 待ちます. 1 実行で成功できるのは scope 内の非 Python Host child script の非同期起動 16 回までで、nested Python は `NESTED_PYTHON_NOT_ALLOWED`、`stop_self` は process restart による cancel になります.
 - Automator 座標は 0 から 1000000 までの厳密な整数で、press と swipe の継続時間は 1 ms から 4 s です. Host accessibility が利用できない場合は設定を開かず `CapabilityUnavailableError` を送出します.
+- Selector snapshot は最大 128 node、深さ 32、JSON 48 KiB までです. find は最大 1024 node を走査し、node text は 256 Unicode code points、query text は 1024 UTF-8 bytes、set_text は 4 KiB、各実行の保持 node reference は 128 に制限されます. 不完全な走査は `SELECTOR_SCAN_LIMIT_EXCEEDED`、期限切れ reference は `STALE_NODE` を返します.
 - キャンセルはプロセス再起動方式です. native extension とブロッキング呼び出しは Android 検証が必要です.
 - `INTERNET` 権限によりスクリプトは標準ライブラリのネットワーク機能を直接利用できますが、online pip、自動コードダウンロード、実行時の第三者パッケージ導入は引き続き非対応です.
 
@@ -144,7 +145,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 - 汎用 live stdin と直接の `sys.stdin` callback streaming は未対応です. foreground 対話は最大 1 MiB の有限 snapshot が EOF に達した後の組み込み `input()` と標準ライブラリの `getpass.getpass()` のみに適用されます. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
 - UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.
-- live broker は最初の低リスク機能一式、有界な Host files、foreground dialogs、有界な engines、明示的な座標/global automator action を提供します. selector/UI tree、screenshot、OCR は未宣言です.
+- live broker は最初の低リスク機能一式、有界な Host files、foreground dialogs、有界な engines、明示的な座標/global automator action、有界な selector/UI tree snapshot/action を提供します. screenshot と OCR は未宣言です.
 - 32 bit Android と任意の native wheel は保証しません.
 - 現在の tree には API 31 arm64-v8a 実機 smoke evidence と API 37 x86_64 16 KB page emulator smoke evidence がありますが, 完全な device matrix や release qualification とは扱いません.
 
@@ -154,7 +155,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-M4 Path A は完了し, M3 automation は Host accessibility 経由の有界な座標 gesture と Back/Home action から開始しました. selector/UI tree、screenshot、OCR、M4 build-time/native package path は user value に従って進め, 歴史的 evidence tool は利用可能なままですが自動 release gate にはしません.
+M4 Path A は完了し, M3 automation は Host accessibility 経由の有界な座標/global action と有界な selector/UI tree data plane を提供する段階に進みました. screenshot、OCR、M4 build-time/native package path は user value に従って進め, 歴史的 evidence tool は利用可能なままですが自動 release gate にはしません.
 
 - [ROADMAP.md を表示](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -163,6 +164,14 @@ M4 Path A は完了し, M3 automation は Host accessibility 経由の有界な�
 ### 更新履歴
 
 ******
+
+# v0.4.0-alpha.2
+
+###### 2026/08/24
+
+* `注記` 現在の tree に対する 2 番目の M3 automation alpha candidate. 上限付き selector/UI tree の完全経路は accessibility service を有効にした API 37 emulator で focused acceptance に合格し, fail-closed は既存の accessibility service を変更せず API 31 physical device で合格しました; screenshot, OCR, publication, 完全な device matrix はこの claim の対象外です
+* `追加` 分離された accessibility tree data, AND 結合の first-match query, 不透明な execution-local node reference による明示的 action を提供する live `autojs6.selector.snapshot/find/click/set_text` API を追加
+* `改善` Snapshot node, depth, payload, node text, selector scan size, query/set text, retained node を制限; 不完全な scan は `SELECTOR_SCAN_LIMIT_EXCEEDED`, stale reference は `STALE_NODE`, accessibility 利用不可は設定を開かず `CapabilityUnavailableError` として報告
 
 # v0.4.0-alpha.1
 
@@ -179,14 +188,6 @@ M4 Path A は完了し, M3 automation は Host accessibility 経由の有界な�
 * `注記` 最初の M4 current-tree alpha candidate. Project-local pure-Python dependency path は 2 device の focused acceptance に合格し, 後続の M3/M4 batch, publication, 完全な device matrix はこの claim の対象外です
 * `追加` 許可済み project root の project-local pure-Python package と `.dist-info` metadata に対応し, version 固定済みの再現可能な `requests` example を提供しつつ runtime installer は追加しない
 * `改善` Workspace 上限を圧縮後 64 MiB、file entry 8192 件、展開後 128 MiB に拡張し, dispatch 前に snapshot の実際の 3 次元要件と Provider capability を照合. Missing import は online pip や engine fallback を行わず `ModuleNotFoundError` のまま維持
-
-# v0.3.0-alpha.5
-
-###### 2026/08/23
-
-* `注記` M3 5 番目の current-tree alpha candidate です. 第 2 batch の有界な Host engines が 2 device の focused acceptance を通過しましたが、後続 capability、公開、完全な device matrix は含みません
-* `追加` path を含まない現在の engine metadata、非 Python Host child script の非同期起動、確定的 self-stop を提供する live `autojs6.engines.current/run/stop_self` API を追加
-* `改善` child path は実行 root 相対の正規化形式のみを受け付け、成功起動は実行ごとに最大 16 回; nested Python は `NESTED_PYTHON_NOT_ALLOWED`、`stop_self` は provider process restart で cancel
 
 ##### その他のバージョン
 

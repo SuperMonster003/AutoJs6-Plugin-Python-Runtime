@@ -51,7 +51,7 @@ Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte t
 - Importer depuis la racine admise des paquets Python purs locaux au projet et leurs métadonnées `.dist-info`, sans pip en ligne ni installation à l'exécution.
 - Livrer pendant l'exécution des chunks stdout/stderr bornés dans leur ordre d'origine; l'épuisement des crédits applique une contre-pression à l'exécution.
 - Définir un résultat JSON strict explicite de 64 KiB au maximum et transférer jusqu'à 16 artefacts facultatifs sous les limites de chemin, taille et SHA-256 du protocole 1.4; ne jamais déduire un résultat de stdout.
-- Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible aux autorisations, `files.read_text/write_text/exists/is_file/is_dir/list` borné, `dialogs.alert/confirm/prompt/select` réservé au premier plan, `engines.current/run/stop_self` et `automator.click/long_click/press/swipe/back/home` borné via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
+- Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible aux autorisations, `files.read_text/write_text/exists/is_file/is_dir/list` borné, `dialogs.alert/confirm/prompt/select` réservé au premier plan, `engines.current/run/stop_self`, `automator.click/long_click/press/swipe/back/home` borné et `selector.snapshot/find/click/set_text` borné via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
 - Signaler `SystemExit`, les erreurs de syntaxe et les exceptions avec une traceback structurée bornée.
 - Autoriser une session active par processus sans file d'attente côté fournisseur.
 - Ne pas redémarrer l'hôte: la prochaine nouvelle exécution après installation ou réactivation redécouvre et épingle le provider; une mort Binder en cours termine cette exécution sans jamais la rejouer.
@@ -103,8 +103,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.4.0-alpha.1
-release state: 0.4.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator coordinate/global actions passed on the accessibility-enabled emulator, and physical-device fail-closed acceptance passed without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.2
+release state: 0.4.0-alpha.2 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions passed the enabled-service path on the emulator and fail-closed on the physical device, while execution-local selector/UI-tree snapshot/find/click/set_text passed full enabled-service acceptance on the emulator and fail-closed on the physical device without changing its accessibility services; screenshots, OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -133,6 +133,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 - Le JSON structuré est limité à 64 KiB; au plus 16 artefacts sont admis avec des chemins de 1024 UTF-8 bytes, 4 MiB par fichier, 8 MiB au total et une vérification hôte de la longueur exacte, de l'EOF et du SHA-256.
 - Le protocole 1.5 admet au plus 1024 appels hôte par exécution, limite chaque requête/réponse à 64 KiB, le texte à 32 KiB et l'attente d'une action ordinaire du thread principal Host à 5 s. Host files utilise des chemins relatifs de 4 KiB, du texte UTF-8 de 32 KiB et des listes d'au plus 128 noms de 255 UTF-8 bytes chacun. Les dialogues de premier plan limitent le titre à 256 UTF-8 bytes, le contenu à 4 KiB, les valeurs/réponses prompt à 32 KiB et les listes select à 64 éléments de 1 KiB chacun et 32 KiB au total; une réponse utilisateur peut attendre 5 min. Une exécution peut lancer avec succès au plus 16 scripts enfants Host non-Python asynchrones et bornés; Python imbriqué renvoie `NESTED_PYTHON_NOT_ALLOWED` et `stop_self` annule par redémarrage du processus.
 - Les coordonnées automator sont des entiers stricts de 0 à 1000000, tandis que les durées de press et swipe vont de 1 ms à 4 s; une accessibilité Host indisponible lève `CapabilityUnavailableError` sans ouvrir les paramètres.
+- Les snapshots selector acceptent au plus 128 nœuds, une profondeur de 32 et 48 KiB de JSON; find parcourt au plus 1024 nœuds, le texte d'un nœud est limité à 256 Unicode code points, le texte de requête à 1024 UTF-8 bytes, set_text à 4 KiB et chaque exécution conserve au plus 128 références de nœud. Un parcours incomplet renvoie `SELECTOR_SCAN_LIMIT_EXCEEDED` et une référence périmée renvoie `STALE_NODE`.
 - L'annulation redémarre le processus; les extensions natives et appels bloquants restent à valider sur Android.
 - L'autorisation `INTERNET` permet aux scripts d'utiliser directement les clients réseau de la bibliothèque standard; pip en ligne, le téléchargement automatique de code et l'installation de paquets tiers à l'exécution restent non pris en charge.
 
@@ -144,7 +145,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 - Le stdin général en direct et le streaming callback de `sys.stdin` direct sont indisponibles. L'interaction au premier plan s'applique uniquement au `input()` intégré et à `getpass.getpass()` après l'EOF du snapshot fini de 1 MiB au maximum. L'écriture dans le workspace, pip en ligne et les téléchargements de wheel restent indisponibles.
 - Aucun script UI, débogueur, REPL ou accès arbitraire aux objets Java de l'hôte.
-- Le broker temps réel couvre le premier lot complet à faible risque, Host files borné, les dialogues de premier plan, engines borné et les actions automator explicites par coordonnées/globales; selector/arbre UI, capture d'écran et OCR restent non déclarés.
+- Le broker temps réel couvre le premier lot complet à faible risque, Host files borné, les dialogues de premier plan, engines borné, les actions automator explicites par coordonnées/globales ainsi que les snapshots/actions selector/arbre UI bornés; capture d'écran et OCR restent non déclarés.
 - Le support Android 32 bits et les wheels natives tierces ne sont pas garantis.
 - L'arbre courant dispose d'un smoke sur appareil API 31 arm64-v8a et d'un smoke sur émulateur API 37 x86_64 à pages de 16 KB; aucun ne constitue une matrice complète d'appareils ni une qualification de release.
 
@@ -154,7 +155,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 ******
 
-Le chemin A de M4 est terminé, et l'automatisation M3 a commencé avec des gestes bornés par coordonnées ainsi que les actions Retour et Accueil via l'accessibilité Host. Selector/arbre UI, capture d'écran, OCR et les chemins M4 de paquets intégrés/native suivront la valeur utilisateur; les outils de preuve historiques restent disponibles sans être des portes de publication automatiques.
+Le chemin A de M4 est terminé, et l'automatisation M3 comprend maintenant les actions bornées par coordonnées/globales ainsi que le plan de données selector/arbre UI borné via l'accessibilité Host. Capture d'écran, OCR et les chemins M4 de paquets intégrés/native suivront la valeur utilisateur; les outils de preuve historiques restent disponibles sans être des portes de publication automatiques.
 
 - [Voir ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -163,6 +164,14 @@ Le chemin A de M4 est terminé, et l'automatisation M3 a commencé avec des gest
 ### Historique des versions
 
 ******
+
+# v0.4.0-alpha.2
+
+###### 2026/08/24
+
+* `Note` Deuxième candidat alpha M3 d'automatisation de l'arbre courant; le parcours selector/arbre UI borné complet a réussi l'acceptation ciblée sur un émulateur API 37 avec accessibilité activée, et le fail-closed a réussi sur un appareil physique API 31 sans modifier ses services d'accessibilité; captures, OCR, publication et matrice complète restent hors de cette déclaration
+* `Fonction` Ajouter les API live `autojs6.selector.snapshot/find/click/set_text` pour les données détachées de l'arbre d'accessibilité, les requêtes de première correspondance composées avec AND et les actions explicites via des références de node opaques liées à l'exécution
+* `Amélioration` Borner les nodes, la profondeur, la charge et le texte des snapshots, la taille du parcours, le texte de requête/définition et les nodes conservés; signaler les parcours incomplets par `SELECTOR_SCAN_LIMIT_EXCEEDED`, les références obsolètes par `STALE_NODE` et l'accessibilité indisponible par `CapabilityUnavailableError` sans ouvrir les paramètres
 
 # v0.4.0-alpha.1
 
@@ -179,14 +188,6 @@ Le chemin A de M4 est terminé, et l'automatisation M3 a commencé avec des gest
 * `Note` Premier candidat alpha M4 de l'arbre courant; le chemin des dépendances Python pures locales au projet a réussi l'acceptation ciblée sur deux appareils, tandis que les lots M3/M4 suivants, la publication et une matrice complète restent hors de cette déclaration
 * `Fonction` Prendre en charge les paquets Python purs locaux au projet et les métadonnées `.dist-info` depuis les racines admises, avec un exemple `requests` reproductible et verrouillé, sans installateur à l'exécution
 * `Amélioration` Porter les limites du workspace à 64 MiB compressés, 8192 fichiers et 128 MiB extraits, puis comparer avant l'envoi les trois dimensions réelles du snapshot aux capacités du Provider; un import absent reste `ModuleNotFoundError`, sans pip en ligne ni repli de moteur
-
-# v0.3.0-alpha.5
-
-###### 2026/08/23
-
-* `Note` Cinquième candidat alpha M3 de l'arbre courant; la partie Host engines bornée du deuxième lot a passé l'acceptation ciblée sur deux appareils, sans revendiquer les capacités suivantes, la publication ni une matrice complète d'appareils
-* `Fonction` Ajout des API live `autojs6.engines.current/run/stop_self` pour les métadonnées du moteur courant sans chemin, le lancement asynchrone de scripts enfants Host non-Python et l'auto-arrêt déterministe
-* `Amélioration` Accepter uniquement les chemins enfants normalisés relatifs à la racine d'exécution et au plus 16 lancements réussis par exécution; Python imbriqué échoue avec `NESTED_PYTHON_NOT_ALLOWED`, tandis que `stop_self` annule par redémarrage du processus provider
 
 ##### Autres versions
 

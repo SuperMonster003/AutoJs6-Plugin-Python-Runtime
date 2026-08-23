@@ -315,8 +315,8 @@ entries and 128 MiB of extracted file content. Provider selection compares the
 actual snapshot against all three advertised capacities before dispatch. These
 bounds include project source and data as well as dependency files.
 
-An absent third-party package still raises ordinary `ModuleNotFoundError`. No
-import failure may trigger online pip, a runtime download or another engine.
+An absent third-party package still raises ordinary `ModuleNotFoundError`.
+No import failure may trigger online pip, a runtime download or another engine.
 Starting with `0.2.0`, stdlib and project-local clients may make
 script-initiated network connections because the Plugin declares Android's
 normal `INTERNET` permission; that permission does not install packages or
@@ -376,7 +376,15 @@ The current public Python surface is:
 - `autojs6.automator.press(x: int, y: int, duration_ms: int = 100) -> bool`;
 - `autojs6.automator.swipe(x1: int, y1: int, x2: int, y2: int,
   duration_ms: int = 300) -> bool`;
-- `autojs6.automator.back() -> bool` and `autojs6.automator.home() -> bool`.
+- `autojs6.automator.back() -> bool` and `autojs6.automator.home() -> bool`;
+- `autojs6.selector.snapshot(max_nodes: int = 64, max_depth: int = 16)
+  -> dict[str, object]` for a bounded breadth-first UI tree;
+- `autojs6.selector.find(*, text=None, text_contains=None, description=None,
+  description_contains=None, resource_id=None, class_name=None, clickable=None,
+  editable=None, enabled=None, scrollable=None, max_nodes=512, max_depth=32)
+  -> dict[str, object] | None` for an AND-composed first match;
+- `autojs6.selector.click(node: str | dict[str, object]) -> bool` and
+  `autojs6.selector.set_text(node: str | dict[str, object], text: str) -> bool`.
 
 These are live Host operations, distinct from the detached launch-time
 `app.snapshot()` and `device.snapshot()` data. Every request is bound to the
@@ -445,9 +453,48 @@ the Host accessibility action; false is not rewritten or retried. If the AutoJs6
 accessibility service is missing, disconnected or not operational, the Host
 returns stable `ACCESSIBILITY_UNAVAILABLE`, which the Python facade maps to
 `CapabilityUnavailableError`. The API never enables accessibility or opens
-settings. Selector/UI-tree data, screenshots and OCR remain planned rather than
-implied by the generic broker. The complete bounded surface is documented in
-`HOST_AUTOMATOR.md`.
+settings. Selector/UI-tree access is a separate bounded surface; screenshots and
+OCR remain planned rather than implied by the coordinate action API. The
+complete bounded coordinate/global surface is documented in `HOST_AUTOMATOR.md`.
+
+`selector.snapshot` returns strict schema `autojs6-python-ui-tree-v1` with a
+positive generation, an honest `truncated` flag, and breadth-first detached node
+mappings. A snapshot defaults to 64 nodes/depth 16, accepts at most 128
+nodes/depth 32, and caps its JSON value at 48 KiB. Node text, description,
+resource ID, class name and package name are nullable and capped at 256 Unicode
+code points; `truncatedFields` explicitly names shortened fields. Bounds,
+parent/depth relationships and accessibility state flags are plain JSON values.
+
+`selector.find` requires at least one condition and combines all supplied exact,
+literal-substring and boolean predicates with AND. It performs a breadth-first,
+case-sensitive scan of at most 512 nodes by default and at most 1024 nodes/depth
+32 when requested. Exhaustive absence returns `None`; hitting a node/depth bound
+before proving absence returns stable `SELECTOR_SCAN_LIMIT_EXCEEDED`. Query text
+is non-empty and capped at 1024 UTF-8 bytes. It does not poll, wait, interpret a
+regular expression, climb to a clickable ancestor or retry.
+
+Selector IDs are opaque execution-local references rather than serialized
+Android objects. A new snapshot invalidates the previous generation, `find`
+retains returned nodes up to a 128-node FIFO bound, window-invalid nodes must
+refresh before action, and broker cleanup recycles the entire set. An unknown,
+evicted, invalidated or unrefreshable reference returns stable `STALE_NODE`.
+`click` and `set_text` return the actual platform boolean without fallback;
+text-setting accepts at most 4096 UTF-8 bytes. Accessibility unavailability uses
+the same fail-closed `CapabilityUnavailableError` mapping as automator. The full
+schema and lifetime contract is documented in `HOST_SELECTOR.md`.
+
+Focused selector acceptance exercised the public Python project engine against
+the paired Host 5276 and Plugin `0.4.0-alpha.2`/54 builds. On the API 37 x86_64
+16 KiB-page emulator, an accessibility-enabled run validated the bounded tree
+schema and resource IDs, AND-composed first matches, exhaustive absence,
+click/set-text platform results and independent UI latches, then proved that a
+new snapshot invalidated the prior node with exact `STALE_NODE`. It completed in
+4.863 seconds with `OK (1 test)`. On Sony XQ-AT72 (`QV710AF65F`, API 31,
+arm64-v8a, 4 KiB pages), `selector.snapshot` failed closed with the exact
+`CapabilityUnavailableError` while the pre-existing six-service accessibility
+list remained byte-for-byte unchanged; that run completed in 0.869 seconds with
+`OK (1 test)`. Neither run uninstalled packages or cleared application data,
+and this is focused current-tree acceptance rather than a release claim.
 
 The focused public Host acceptance invoked the six current method names through
 a real protocol 1.5 session on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a,

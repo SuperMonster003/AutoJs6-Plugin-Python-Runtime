@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.4.0-alpha.1 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.4.0-alpha.2 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -346,8 +346,14 @@
   `25468e8`、`760e44f`。
 - [x] [P] 基础 automator 示例 (`examples/python/m3_automator.py`) 与使用说明
   (`docs/python/HOST_AUTOMATOR.md`)。
-- [ ] [H+P] `autojs6.selector`: UI 树只读快照 + `find/click/set_text` 显式动作
-  (选择器与节点以纯数据跨界, 参照 Node 的做法)
+- [x] [H+P] `autojs6.selector`: 有界 UI 树只读快照 + AND 条件
+  `find/click/set_text` 显式动作; 快照、查询与节点均以严格纯数据跨界, 原生节点引用绑定当前
+  执行并设 128 个保留上限, 新快照、淘汰、窗口失效或执行终态后稳定返回 `STALE_NODE`。
+  扫描无法在节点/深度上限内证明不存在时返回 `SELECTOR_SCAN_LIMIT_EXCEEDED`, 不伪装成未找到。
+  宿主实现/测试提交: `66874d195`、`87c367c49`、`c118ebc73`、`93b86c3c3`;
+  插件实现/便携测试提交: `4af84bc`、`e665f00`。
+- [x] [P] selector 示例 (`examples/python/m3_selector.py`) 与完整边界/生命周期说明
+  (`docs/python/HOST_SELECTOR.md`)。
 - [ ] [H+P] `autojs6.images.capture_screen()` 截图 (返回产物路径或字节),
   `find_image/find_color` 找图找色
 - [ ] [H+P] `autojs6.ocr.recognize(image)` —— 复用宿主 OCR 引擎
@@ -371,6 +377,26 @@
 - Host 5276、插件 `0.4.0-alpha.1`/51 与测试 APK 均保持 SM003 signer; 覆盖安装采用
   `adb install --no-streaming -r -t`, 未卸载、未清数据。用户已另行确认 QV710AF65F
   定时任务成功, 本轮验收未修改其定时任务或无障碍配置。
+
+### 2026-08-24 M3 selector/UI 树验收记录
+
+- 宿主 selector 数据面、dispatcher/边界测试、受控无障碍 Activity 与公开 Python 引擎
+  instrumentation 分别由 `66874d195`、`87c367c49`、`c118ebc73`、`93b86c3c3`
+  固定; 插件 façade 与便携测试由 `4af84bc`、`e665f00` 固定。
+- API 37 / x86_64 / 16 KiB page 模拟器启用 AutoJs6 无障碍后, 公共 Python 项目通过
+  `selector.snapshot/find/click/set_text` 验证 `autojs6-python-ui-tree-v1`、资源 ID、
+  AND 首次匹配、穷尽缺失返回、真实点击与文本写入回执, 并在新快照后得到精确
+  `STALE_NODE` 错误。受控界面独立观察到 1 次按钮激活及目标文本; 用时 4.863 秒,
+  `OK (1 test)`。instrumentation 结束后已恢复 service restart backoff, 组件为启用、
+  已绑定, `Binding services:{}` 且 `Crashed services:{}`。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 刻意不启用
+  AutoJs6 无障碍; 公共 Python 项目调用 `selector.snapshot` 时稳定得到
+  `CapabilityUnavailableError` 与精确消息, 用时 0.869 秒, `OK (1 test)`。运行前后
+  `accessibility_enabled=1`, 既有六个无障碍服务列表逐字一致且 AutoJs6 服务始终缺席;
+  未打开设置, 因此本条只声明物理机 fail-closed, 不声明物理机 UI 树动作成功。
+- Host 5276、插件 `0.4.0-alpha.2`/54 与测试 APK 均以覆盖方式安装; 使用
+  `adb install --no-streaming -r -t`, 未卸载、未清数据。用户已确认 QV710AF65F 定时
+  任务成功, 本轮 selector 验收未修改其定时任务或无障碍配置。
 
 ### 后续批次 (需求驱动, 出现用例再排期)
 
