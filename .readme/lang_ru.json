@@ -14,6 +14,7 @@
     "Явный выбор `entryMode=file|module` для допущенного проекта: режим module использует стандартные метаданные `runpy`, корень проекта в `sys.path[0]` и относительные импорты пакета, а режим file сохраняет обычную семантику скрипта.",
     "Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.",
     "Явное задание строгого JSON-результата до {{ max_structured_json_bytes }} и передача до {{ max_output_artifacts }} необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.",
+    "Вызов live-операций `toast`, `clip.get/set` и `app.launch/launch_app/open_url` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.",
     "Возврат `SystemExit`, синтаксических и runtime ошибок с ограниченным структурированным traceback.",
     "Один активный сеанс на процесс без очереди provider.",
     "Перезапуск хоста не нужен: следующая новая сессия после установки или повторного включения заново обнаруживает и фиксирует provider, а Binder death во время выполнения завершает его без автоматического повтора."
@@ -23,7 +24,7 @@
   "p_runtime_version_status": "Сборка запрашивает Python {{ python_line }}. Замороженные локальные RC-артефакты и точный запуск на устройстве зафиксировали CPython {{ python_version_expected }}; версию и hashes финальной 0.1.0 нужно проверить заново после заморозки исходников.",
   "h3_plugin_interface": "Интерфейс плагина",
   "p_plugin_interface": "Хост находит и вызывает плагин по следующим идентификаторам",
-  "p_plugin_scope": "Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до {{ max_stdin_bytes }} и read-only snapshot возможностей хоста протокола 1.1. Протокол 1.2 добавляет явное согласование входа file/module для допущенных проектов. Протокол 1.3 добавляет после EOF snapshot принадлежащий Host prompt/reply только для встроенного `input()` на переднем плане, а стандартный `getpass.getpass()` использует скрытый ввод. Протокол 1.4 добавляет явный строгий JSON и необязательные output artifacts с манифестом SHA-256; stdout остается диагностикой и никогда не разбирается как результат. Прямой `sys.stdin` остается конечным, фоновые запуски никогда не открывают UI ввода, а Context, Binder, объекты хоста и callback sink не внедряются.",
+  "p_plugin_scope": "Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до {{ max_stdin_bytes }} и read-only snapshot возможностей хоста протокола 1.1. Протокол 1.2 добавляет явное согласование входа file/module для допущенных проектов. Протокол 1.3 добавляет после EOF snapshot принадлежащий Host prompt/reply только для встроенного `input()` на переднем плане, а стандартный `getpass.getpass()` использует скрытый ввод. Протокол 1.4 добавляет явный строгий JSON и необязательные output artifacts с манифестом SHA-256; stdout остается диагностикой и никогда не разбирается как результат. Протокол 1.5 добавляет pure-data Host broker, привязанный к одному выполнению, UID плагина, порядку вызовов и конечной квоте. Прямой `sys.stdin` остается конечным, фоновые запуски не открывают UI ввода, а скрипты не получают Context, raw Binder, объекты Host runtime или callback sink.",
   "h3_host_integration_status": "Состояние интеграции с хостом",
   "p_host_integration_status": "Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.",
   "h3_security": "Безопасность и конфиденциальность",
@@ -35,6 +36,7 @@
     "Полные PFD на стороне получателя Binder принимаются во владение и закрываются при завершении или close.",
     "Вывод передаётся по chunks и credits во время выполнения; при исчерпании credits скрипт приостанавливается, принятый вывод предшествует единственному terminal, а вывод после terminal запрещён.",
     "Структурированный JSON ограничен {{ max_structured_json_bytes }}; допускается до {{ max_output_artifacts }} artifacts с путем до {{ max_output_artifact_path_bytes }}, {{ max_output_artifact_bytes }} на файл, {{ max_total_output_artifact_bytes }} суммарно и проверкой Host точной длины, EOF и SHA-256.",
+    "Протокол 1.5 допускает до {{ max_host_capability_calls }} Host-вызовов на выполнение, ограничивает request/response значением {{ max_host_capability_message_bytes }}, текст — {{ max_host_capability_text_bytes }}, а ожидание dispatch — {{ host_capability_call_timeout }}.",
     "Отмена перезапускает процесс; native extensions и блокирующие вызовы требуют Android-проверки.",
     "Разрешение `INTERNET` позволяет скриптам напрямую использовать сетевые клиенты стандартной библиотеки; online pip, автоматическая загрузка кода и установка сторонних пакетов во время выполнения по-прежнему не поддерживаются."
   ],
@@ -42,7 +44,7 @@
   "unsupported_capabilities": [
     "Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` и стандартному `getpass.getpass()` после EOF конечного snapshot до {{ max_stdin_bytes }}. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.",
     "Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.",
-    "Нет realtime AutoJs6 capability broker; первые API используют только замороженный при запуске snapshot app/device/execution/project и ограниченное read-only чтение private workspace плагина.",
+    "Live broker сейчас охватывает только toast, clipboard и запуск приложений/HTTP(S) URL; dynamic device, Host console, notifications, files, dialogs, accessibility, screenshot и OCR пока не заявлены.",
     "32-разрядный Android и произвольные native wheels не гарантируются.",
     "Для текущего дерева есть smoke evidence на устройстве API 31 arm64-v8a и эмуляторе API 37 x86_64 со страницами 16 KB; это не выдается за полную матрицу устройств или release qualification."
   ],

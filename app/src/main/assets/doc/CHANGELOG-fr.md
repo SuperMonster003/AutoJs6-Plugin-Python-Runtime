@@ -4,6 +4,15 @@
 
 ******
 
+# v0.3.0-alpha.1
+
+###### 2026/08/23
+
+* `Note` Premier candidat alpha M3 de l'arbre courant; le protocole 1.5 et le sous-ensemble de capacités Host à faible risque sont implémentés, sans revendiquer les capacités suivantes, la publication ni une matrice complète d'appareils
+* `Fonction` Ajouter le broker de capacités Host du protocole 1.5, lié à l'exécution par JSON de données pures, UUID de requête, UID du plug-in, identifiants d'appel monotones, quota de 1024 appels, messages de 64 KiB et plafond de dispatch Host de 5 secondes
+* `Fonction` Ajouter les API Host en direct `autojs6.toast`, `autojs6.clip.get/set` et `autojs6.app.launch/launch_app/open_url`
+* `Amélioration` Révoquer le broker de façon uniforme à l'état terminal, à l'annulation, à la mort Binder et au nettoyage, avec des erreurs Python stables
+
 # v0.2.0-alpha.1
 
 ###### 2026/08/13

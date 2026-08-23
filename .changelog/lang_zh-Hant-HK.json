@@ -5,6 +5,19 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "相依項目",
   "$data": {
+    "v0.3.0-alpha.1": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "M3 首個 current-tree alpha 候選; 協議 1.5 與低風險 Host 能力子集已實作, 後續能力、發行及完整裝置矩陣不在本條聲明範圍"
+      ],
+      "feature": [
+        "加入協議 1.5 執行級 Host capability broker, 以純數據 JSON 綁定 request UUID、外掛 UID、單調呼叫次序、1024 次配額、64 KiB 訊息及 5 秒 Host 調度上限",
+        "加入 `autojs6.toast`, `autojs6.clip.get/set` 及 `autojs6.app.launch/launch_app/open_url` 即時 Host API"
+      ],
+      "improvement": [
+        "終態、取消、Binder death 及清理路徑統一撤銷 broker, Python 端穩定映射 capability unavailable、Host 及協議錯誤"
+      ]
+    },
     "v0.2.0-alpha.1": {
       "released_date": "2026/08/13",
       "hint": [

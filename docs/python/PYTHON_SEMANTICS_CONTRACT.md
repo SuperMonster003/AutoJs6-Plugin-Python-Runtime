@@ -1,10 +1,11 @@
 # Python execution semantics contract
 
-Status: cumulative U1-R0 through U1-R2 contract for the post-`0.1.0`
-usability track. Historical R2 evidence remains covered through E2; the M1
-public Host path additionally passed an API 31 / arm64-v8a / 4 KiB-page
-physical-device smoke and an API 37 / x86_64 / 16 KiB-page emulator smoke on
-2026-08-23. Those smokes are not a release or device-matrix claim.
+Status: cumulative U1-R0 through U1-R2 contract plus the first M3 protocol 1.5
+Host capability slice. Historical R2 evidence remains covered through E2; the
+M1/M2 public Host paths and the focused M3 broker path passed an API 31 /
+arm64-v8a / 4 KiB-page physical-device smoke and an API 37 / x86_64 /
+16 KiB-page emulator smoke on 2026-08-23. Those smokes are not a release or
+device-matrix claim.
 
 This document distinguishes three facts which must not be collapsed:
 
@@ -308,6 +309,50 @@ normal `INTERNET` permission; that permission does not install packages or
 fetch code automatically. U1-R3 defines separately signed offline package packs,
 pure-Python first and native wheels behind independent ABI gates.
 
+## Live Host capabilities (protocol 1.5)
+
+Protocol 1.5 adds an execution-scoped, synchronous Host capability broker. The
+Provider advertises `supportsHostCapabilityBroker=true`; negotiation below 1.5
+continues through the historical `openSession` AIDL transaction with no live
+broker, while a 1.5 session requires the appended
+`openSessionWithHostCapabilities` transaction and exactly one live broker.
+
+The current public Python surface is:
+
+- `autojs6.toast(text: str) -> None`;
+- `autojs6.clip.get() -> str` and `autojs6.clip.set(text: str) -> None`;
+- `autojs6.app.launch(package_name: str) -> bool`;
+- `autojs6.app.launch_app(name: str) -> bool`;
+- `autojs6.app.open_url(url: str) -> bool` for HTTP(S) URLs.
+
+These are live Host operations, distinct from the detached launch-time
+`app.snapshot()` and `device.snapshot()` data. Every request is bound to the
+canonical execution request UUID and a positive monotonic call ID. The Host
+also pins the Plugin UID, admits at most 1024 calls, bounds request/response
+documents to 64 KiB and text to 32 KiB, and bounds a Host main-thread action to
+5 seconds. Calls are serialized by the Python facade and block until a typed
+response arrives.
+
+Missing/closed capabilities raise `CapabilityUnavailableError`. Host and wire
+failures raise `HostCapabilityError`, whose `code` property is stable. Cleanup
+revokes both the private Java bridge and execution-local Python state, including
+copied contexts; a call is never replayed after cancellation or connection
+loss. The detailed JSON schemas, error codes, lifecycle and exact capability
+mapping are in `HOST_CAPABILITY_BROKER_PROTOCOL.md`.
+
+Dynamic device information, direct Host console levels, notifications, files,
+dialogs, accessibility, screenshots and OCR remain planned rather than implied
+by the generic broker transport.
+
+The focused public Host acceptance invoked the six current method names through
+a real protocol 1.5 session on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a,
+4 KiB pages) and an API 37 x86_64 emulator with 16 KiB pages. It verified toast
+dispatch, clipboard round-trip and restoration, `False` launch results for
+missing targets, a stable `INVALID_ARGUMENT` result for a rejected non-HTTP(S)
+URL, strict structured output and private transport cleanup. The runs completed
+in 1.607 and 7.183 seconds respectively with `OK (1 test)`; this is focused
+current-tree acceptance, not a release claim.
+
 ## Files, Java bridge and isolation
 
 Project Python can read and write its execution-private workspace using normal
@@ -316,8 +361,10 @@ Python file APIs, but changes are not written back to the Host project. The
 
 The runtime executes trusted local code and is not a hostile-code sandbox.
 Chaquopy's Plugin-local Java bridge may exist, but the Host never sends
-`Context`, `ScriptRuntime`, Binder handles or arbitrary Java objects to Python.
-Future Host capabilities use versioned, bounded pure-data messages.
+`Context`, `ScriptRuntime`, callback sinks or arbitrary Java objects to user
+Python. Protocol 1.5 keeps its raw Host Binder in Plugin Kotlin and gives only a
+private single-method string bridge to the bootstrap. User-facing modules issue
+versioned, bounded pure-data JSON messages through execution-local state.
 
 The U1-R2 output path uses one Plugin-private execution sink with exactly a
 stream discriminator and immutable bytes. The object is held only by the

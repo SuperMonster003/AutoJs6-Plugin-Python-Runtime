@@ -4,6 +4,15 @@
 
 ******
 
+# v0.3.0-alpha.1
+
+###### 2026/08/23
+
+* `提示` M3 首個 current-tree alpha 候選; 協定 1.5 與低風險 Host 能力子集已實作, 後續能力、發行與完整裝置矩陣不在本項宣告範圍
+* `新增` 新增協定 1.5 執行級 Host capability broker, 以純資料 JSON 綁定 request UUID、外掛 UID、單調呼叫序號、1024 次配額、64 KiB 訊息與 5 秒 Host 調度上限
+* `新增` 新增 `autojs6.toast`, `autojs6.clip.get/set` 與 `autojs6.app.launch/launch_app/open_url` 即時 Host API
+* `改善` 終態、取消、Binder death 與清理路徑統一撤銷 broker, Python 端穩定映射 capability unavailable、Host 與協定錯誤
+
 # v0.2.0-alpha.1
 
 ###### 2026/08/13

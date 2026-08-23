@@ -4,6 +4,15 @@
 
 ******
 
+# v0.3.0-alpha.1
+
+###### 2026/08/23
+
+* `Примечание` Первый M3 current-tree alpha candidate: протокол 1.5 и низкорисковый набор Host capabilities реализованы; последующие возможности, публикация и полная матрица устройств не входят в это заявление
+* `Добавлено` Добавлен execution-scoped Host capability broker протокола 1.5 с pure-data JSON, привязкой к request UUID и UID плагина, монотонными call ID, квотой 1024 вызова, сообщениями 64 KiB и лимитом Host dispatch 5 секунд
+* `Добавлено` Добавлены live Host API `autojs6.toast`, `autojs6.clip.get/set` и `autojs6.app.launch/launch_app/open_url`
+* `Улучшено` Broker единообразно отзывается при terminal, cancel, Binder death и cleanup; ошибки unavailable capabilities и Host/protocol стабильно отображаются в Python
+
 # v0.2.0-alpha.1
 
 ###### 2026/08/13

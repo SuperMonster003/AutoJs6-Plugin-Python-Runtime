@@ -50,6 +50,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 - 許可済み project では `entryMode=file|module` を明示的に選択します. module mode は標準 `runpy` metadata, project root の `sys.path[0]`, package-relative import を使用し, file mode は通常の script semantics を維持します.
 - スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.
 - protocol 1.4 で最大 64 KiB の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 16 個転送します. stdout から result を推測しません.
+- 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url` をリアルタイムに呼び出し、terminal 時に無効化します.
 - `SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.
 - プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.
 - ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません.
@@ -87,10 +88,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.4
+protocol: 1.0-1.5
 ```
 
-独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加し, 標準ライブラリの `getpass.getpass()` は非表示入力を使用します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, Context, Binder, ホストオブジェクト, callback sink は注入しません.
+独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加し, 標準ライブラリの `getpass.getpass()` は非表示入力を使用します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. プロトコル 1.5 は 1 回の実行、plugin UID、call 順序、有限 quota に結び付く pure-data Host broker を追加します. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, user script に Context、raw Binder、Host runtime object、callback sink は渡しません.
 
 ******
 
@@ -101,8 +102,8 @@ protocol: 1.0-1.4
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.2.0-alpha.1
-release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+release target: 0.3.0-alpha.1
+release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -128,6 +129,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 - Binder 受信側の完全な PFD を所有し, 終端または close 時に閉じます.
 - 出力は実行中に credit ごとに chunk 単位で送信します. credit 枯渇時はスクリプトを停止し, 受理済み出力は唯一の terminal より前に置かれ, terminal 後の出力は禁止されます.
 - 構造化 JSON は 64 KiB, artifact は最大 16 個, path は 1024 UTF-8 bytes, 1 file は 4 MiB, 合計は 8 MiB が上限で, Host が正確な長さ, EOF, SHA-256 を検証します.
+- プロトコル 1.5 は実行ごとに最大 1024 Host call、request/response ごとに 64 KiB、text に 32 KiB、1 dispatch の待機に 5 s の上限を設けます.
 - キャンセルはプロセス再起動方式です. native extension とブロッキング呼び出しは Android 検証が必要です.
 - `INTERNET` 権限によりスクリプトは標準ライブラリのネットワーク機能を直接利用できますが、online pip、自動コードダウンロード、実行時の第三者パッケージ導入は引き続き非対応です.
 
@@ -139,7 +141,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 - 汎用 live stdin と直接の `sys.stdin` callback streaming は未対応です. foreground 対話は最大 1 MiB の有限 snapshot が EOF に達した後の組み込み `input()` と標準ライブラリの `getpass.getpass()` のみに適用されます. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
 - UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.
-- リアルタイム AutoJs6 capability broker はありません. 最初の API は実行開始時に凍結した app/device/execution/project snapshot と plugin-private workspace の上限付き読み取り専用アクセスだけを使います.
+- live broker は現在 toast、clipboard、app launch/HTTP(S) URL のみです. dynamic device、Host console、notification、files、dialogs、accessibility、screenshot、OCR は未宣言です.
 - 32 bit Android と任意の native wheel は保証しません.
 - 現在の tree には API 31 arm64-v8a 実機 smoke evidence と API 37 x86_64 16 KB page emulator smoke evidence がありますが, 完全な device matrix や release qualification とは扱いません.
 
@@ -158,6 +160,15 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 ### 更新履歴
 
 ******
+
+# v0.3.0-alpha.1
+
+###### 2026/08/23
+
+* `注記` M3 最初の current-tree alpha candidate です. protocol 1.5 と低リスク Host capability subset を実装しましたが, 後続 capability、公開、完全な device matrix はこの宣言に含みません
+* `追加` request UUID、plugin UID、単調 call ID、1024 call quota、64 KiB message、5 秒 Host dispatch 上限に結び付く pure-data JSON の protocol 1.5 execution-scoped Host capability broker を追加
+* `追加` live Host API `autojs6.toast`、`autojs6.clip.get/set`、`autojs6.app.launch/launch_app/open_url` を追加
+* `改善` terminal、cancel、Binder death、cleanup の全経路で broker を無効化し、unavailable capability と Host/protocol error を安定した Python error に変換
 
 # v0.2.0-alpha.1
 
@@ -187,16 +198,6 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 * `追加` 実行中の Binder death は replay せず現在の実行を終了し, 後続の新規実行で provider を再検出します
 * `改善` Chaquopy を trusted-local, non-sandbox runtime として固定. 長期 signer は SM003, runtime/security/release owner は SuperMonster003
 * `依存関係` Chaquopy 17.0.0 と CPython 3.13.9 を lock. stable APK は final source identity に紐づき, exact artifact として検証されます
-
-# v0.1.0-alpha.1
-
-###### 2026/08/09
-
-* `注記` R2 概念実証ソース. Gradle, APK, Binder, 端末受け入れは未実施
-* `追加` 専用プロセス, 1 セッション, provider キューなしの独立 Python V1 provider scaffold
-* `追加` 単一ソースの `__main__` 実行, 上限付き stdout/stderr, 構造化例外, プロセス再起動キャンセル
-* `追加` 固定順で 10 言語の README とアプリ内更新履歴を生成
-* `依存関係` Chaquopy 17.0.0 と Python 3.13 を仮選定. パッケージ版と依存 hash はビルド検証待ち
 
 ##### その他のバージョン
 

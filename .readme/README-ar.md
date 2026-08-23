@@ -50,6 +50,7 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 - اختيار `entryMode=file|module` صراحة لمشروع مقبول؛ يستخدم وضع module بيانات `runpy` القياسية وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية للحزمة، بينما يحافظ وضع file على دلالات السكربت العادية.
 - إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.
 - تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه 64 KiB ونقل ما يصل إلى 16 من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.
+- استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
 - إرجاع `SystemExit` وأخطاء الصياغة والتنفيذ مع traceback منظم ومحدود.
 - السماح بجلسة نشطة واحدة لكل عملية دون طابور لدى provider.
 - لا حاجة لإعادة تشغيل المضيف: يعيد التنفيذ الجديد التالي بعد التثبيت أو إعادة التفعيل اكتشاف provider وتثبيت هويته، بينما ينهي Binder death أثناء التشغيل ذلك التنفيذ دون إعادة تلقائية.
@@ -87,10 +88,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.4
+protocol: 1.0-1.5
 ```
 
-تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه 1 MiB وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. يضيف البروتوكول 1.2 تفاوضا صريحا على مدخل file/module للمشاريع المقبولة. يضيف البروتوكول 1.3 بعد EOF للـ snapshot تفاعل prompt/reply تملكه Host ومقصورا على `input()` المضمنة في foreground، بينما تستخدم `getpass.getpass()` إدخالا مخفيا. يضيف البروتوكول 1.4 JSON صارما وصريحا وoutput artifacts اختيارية موصوفة بـ SHA-256؛ يبقى stdout للتشخيص ولا يحلل كنتيجة. يظل `sys.stdin` المباشر محدودا ولا تفتح عمليات background واجهة إدخال ولا يتم حقن Context أو Binder أو كائنات المضيف أو callback sink.
+تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه 1 MiB وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. يضيف البروتوكول 1.2 تفاوضا صريحا على مدخل file/module للمشاريع المقبولة. يضيف البروتوكول 1.3 بعد EOF للـ snapshot تفاعل prompt/reply تملكه Host ومقصورا على `input()` المضمنة في foreground، بينما تستخدم `getpass.getpass()` إدخالا مخفيا. يضيف البروتوكول 1.4 JSON صارما وصريحا وoutput artifacts اختيارية موصوفة بـ SHA-256؛ يبقى stdout للتشخيص ولا يحلل كنتيجة. يضيف البروتوكول 1.5 broker Host ببيانات خالصة مرتبطا بتنفيذ واحد وUID الإضافة وترتيب الاستدعاءات وحصة محدودة. يظل `sys.stdin` المباشر محدودا ولا تفتح عمليات background واجهة إدخال ولا تتلقى النصوص Context أو Binder خاما أو كائنات Host runtime أو callback sink.
 
 ******
 
@@ -101,8 +102,8 @@ protocol: 1.0-1.4
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.2.0-alpha.1
-release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+release target: 0.3.0-alpha.1
+release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -128,6 +129,7 @@ runtime/security/release owner: SuperMonster003
 - تتملك العملية نسخ PFD الكاملة المستلمة عبر Binder وتغلقها عند النهاية أو close.
 - يرسل الخرج chunk بعد chunk بالـ credits أثناء التنفيذ؛ يوقف نفاد credits السكربت مؤقتا، ويسبق الخرج المقبول الحالة terminal الوحيدة، ويمنع الخرج بعدها.
 - يحد JSON المنظم عند 64 KiB وتقبل حتى 16 artifacts بمسار 1024 UTF-8 bytes و4 MiB لكل ملف و8 MiB إجمالا مع تحقق Host من الطول الدقيق وEOF وSHA-256.
+- يسمح البروتوكول 1.5 بحد أقصى 1024 من استدعاءات Host لكل تنفيذ، ويحد كل request/response عند 64 KiB والنص عند 32 KiB وانتظار dispatch عند 5 s.
 - يعيد الإلغاء تشغيل العملية؛ تتطلب native extensions والاستدعاءات الحاجبة تحقق Android لاحقا.
 - يسمح إذن `INTERNET` للنصوص باستخدام عملاء الشبكة في المكتبة القياسية مباشرة؛ ولا يزال pip عبر الإنترنت والتنزيل التلقائي للكود وتثبيت حزم الجهات الخارجية وقت التشغيل غير مدعوم.
 
@@ -139,7 +141,7 @@ runtime/security/release owner: SuperMonster003
 
 - لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة و`getpass.getpass()` بعد EOF للـ snapshot المحدود حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
 - لا توجد نصوص UI أو debugger أو REPL أو صلاحية عشوائية لكائنات Java في المضيف.
-- لا يوجد AutoJs6 capability broker آني؛ تستخدم أول API فقط snapshot ‏app/device/execution/project المجمد عند بدء التنفيذ وقراءة محدودة من workspace الخاص بالإضافة.
+- يغطي broker المباشر حاليا toast وclipboard وتشغيل التطبيقات/روابط HTTP(S) فقط؛ ولا تزال dynamic device وHost console والإشعارات والملفات والحوارات وaccessibility وscreenshot وOCR غير معلنة.
 - لا يضمن Android ‏32-bit أو أي native wheel خارجي.
 - تتوفر للشجرة الحالية أدلة smoke على جهاز API 31 ‏arm64-v8a وعلى محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يقدم أي منهما كمصفوفة أجهزة كاملة أو كتأهيل release.
 
@@ -158,6 +160,15 @@ runtime/security/release owner: SuperMonster003
 ### سجل الإصدارات
 
 ******
+
+# v0.3.0-alpha.1
+
+###### 2026/08/23
+
+* `ملاحظة` أول مرشح alpha من M3 للشجرة الحالية؛ نُفذ البروتوكول 1.5 ومجموعة قدرات Host منخفضة المخاطر، ولا يشمل هذا الادعاء القدرات اللاحقة أو النشر أو مصفوفة أجهزة كاملة
+* `إضافة` إضافة Host capability broker خاص بالتنفيذ في البروتوكول 1.5 عبر JSON ببيانات خالصة مرتبط بـ request UUID وUID الإضافة ومعرفات call متزايدة وحصة 1024 استدعاء ورسائل 64 KiB وحد dispatch للمضيف قدره 5 ثوان
+* `إضافة` إضافة Host API مباشرة: `autojs6.toast` و`autojs6.clip.get/set` و`autojs6.app.launch/launch_app/open_url`
+* `تحسين` إلغاء broker بشكل موحد عند terminal والإلغاء وBinder death والتنظيف، مع أخطاء Python ثابتة للقدرات غير المتاحة وأخطاء Host أو protocol
 
 # v0.2.0-alpha.1
 
@@ -187,16 +198,6 @@ runtime/security/release owner: SuperMonster003
 * `إضافة` ينهي Binder death أثناء التشغيل التنفيذ الحالي دون replay؛ تعيد عمليات التنفيذ الجديدة اكتشاف provider
 * `تحسين` تثبيت Chaquopy كبيئة trusted-local وnon-sandbox؛ ‏SM003 هو signer طويل الأجل وSuperMonster003 هو owner لـ runtime/security/release
 * `اعتماد` قفل Chaquopy 17.0.0 وCPython 3.13.9؛ ترتبط stable APKs بهوية المصدر النهائية وتتحقق كـ exact artifacts
-
-# v0.1.0-alpha.1
-
-###### 2026/08/09
-
-* `ملاحظة` مصادر نموذج R2 أولي؛ لم يتم التحقق من Gradle أو APK أو Binder أو الأجهزة
-* `إضافة` scaffold مستقل لـ provider Python V1 بعملية مخصصة وجلسة واحدة ودون طابور
-* `إضافة` تنفيذ مصدر واحد كـ `__main__` مع stdout/stderr محدودين واستثناءات منظمة وإلغاء بإعادة العملية
-* `إضافة` إنشاء README وسجلات مدمجة بعشر لغات وفق ترتيب ثابت
-* `اعتماد` اختيار أولي لـ Chaquopy 17.0.0 وPython 3.13؛ الإصدارات وhashes تحتاج تحقق البناء
 
 ##### المزيد من الإصدارات
 

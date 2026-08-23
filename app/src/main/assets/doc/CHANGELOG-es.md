@@ -4,6 +4,15 @@
 
 ******
 
+# v0.3.0-alpha.1
+
+###### 2026/08/23
+
+* `Nota` Primer candidato alpha M3 del árbol actual; el protocolo 1.5 y el subconjunto de capacidades Host de bajo riesgo están implementados, sin afirmar capacidades posteriores, publicación ni una matriz completa de dispositivos
+* `Función` Añadir el broker de capacidades Host del protocolo 1.5 ligado a la ejecución mediante JSON de datos puros, UUID de solicitud, UID del complemento, IDs de llamada monótonos, cuota de 1024 llamadas, mensajes de 64 KiB y límite de dispatch Host de 5 segundos
+* `Función` Añadir las API Host en vivo `autojs6.toast`, `autojs6.clip.get/set` y `autojs6.app.launch/launch_app/open_url`
+* `Mejora` Revocar el broker de forma uniforme al terminar, cancelar, morir Binder o limpiar, con errores Python estables
+
 # v0.2.0-alpha.1
 
 ###### 2026/08/13

@@ -50,6 +50,7 @@ Python Runtime is an independent provider for version 1 of the Python protocol. 
 - Select explicit `entryMode=file|module` for an admitted project; module mode uses standard `runpy` metadata, project-root `sys.path[0]`, and package-relative imports while file mode keeps ordinary script semantics.
 - Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.
 - Set an explicit strict JSON result of at most 64 KiB and transfer up to 16 optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.
+- Call live `toast`, `clip.get/set`, and `app.launch/launch_app/open_url` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.
 - Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.
 - Allow one active session in the runtime process with no provider-side queue.
 - Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed.
@@ -87,10 +88,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.4
+protocol: 1.0-1.5
 ```
 
-The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most 1 MiB, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF; standard-library `getpass.getpass()` uses hidden echo. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Direct `sys.stdin` remains finite, background launches never open input UI, and no Context, Binder, host runtime object, or callback sink is injected into script globals.
+The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most 1 MiB, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF; standard-library `getpass.getpass()` uses hidden echo. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Protocol 1.5 adds a pure-data Host capability broker bound to one execution, the plugin UID, call order, and a finite quota. Direct `sys.stdin` remains finite, background launches never open input UI, and user scripts receive no Context, raw Binder, host runtime object, or callback sink.
 
 ******
 
@@ -101,8 +102,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 > Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
-release target: 0.2.0-alpha.1
-release state: 0.2.0 current-tree candidate; M1 and M2 are implemented and smoke-tested on an API 31 arm64 device plus an API 37 x86_64 16 KiB-page emulator; background direct sys.stdin remains finite, and no complete device-matrix, publication, or release evidence is claimed
+release target: 0.3.0-alpha.1
+release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -128,6 +129,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 - SOURCE descriptors adopt complete Binder receiver-side PFD ownership, preserve reliable-pipe error channels, and close at terminal or session close.
 - Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.
 - Structured JSON is capped at 64 KiB; at most 16 artifacts are accepted with 1024 UTF-8 bytes paths, 4 MiB per file, 8 MiB aggregate, and Host verification of exact length, EOF, and SHA-256.
+- Protocol 1.5 admits at most 1024 Host calls per execution, caps each request/response at 64 KiB and text at 32 KiB, and waits at most 5 s for one Host dispatch.
 - Cancellation uses process restart rather than CPython-level cooperation; native extensions and blocking calls still require later Android validation.
 - The plugin grants `INTERNET` for script-initiated standard-library networking; online pip, automatic code downloads, and runtime third-party package installation remain unsupported.
 
@@ -139,7 +141,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 - General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to built-in `input()` and standard-library `getpass.getpass()` after the finite snapshot of at most 1 MiB reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.
 - There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.
-- There is no live AutoJs6 capability broker; the first APIs use only the app/device/execution/project snapshot frozen at execution start and bounded read-only access to the plugin-private workspace.
+- The live broker currently covers only toast, clipboard, and app launch/HTTP(S) URL operations; dynamic device, Host console, notification, files, dialogs, accessibility, screenshot, and OCR APIs remain undeclared.
 - 32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.
 - The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification.
 
@@ -158,6 +160,15 @@ The R6-P2/P3 local RC and concentrated device evidence remain historical. This c
 ### Release history
 
 ******
+
+# v0.3.0-alpha.1
+
+###### 2026/08/23
+
+* `Hint` First M3 current-tree alpha candidate; protocol 1.5 and the low-risk Host capability slice are implemented, while later capabilities, publication, and a complete device matrix remain outside this claim
+* `Feature` Add the protocol 1.5 execution-scoped Host capability broker with pure-data JSON bound to the request UUID, plugin UID, monotonic call IDs, a 1024-call quota, 64 KiB messages, and a 5-second Host dispatch ceiling
+* `Feature` Add live `autojs6.toast`, `autojs6.clip.get/set`, and `autojs6.app.launch/launch_app/open_url` Host APIs
+* `Improvement` Revoke the broker consistently on terminal, cancellation, Binder death, and cleanup paths, with stable Python mappings for unavailable capabilities and Host or protocol errors
 
 # v0.2.0-alpha.1
 
@@ -187,16 +198,6 @@ The R6-P2/P3 local RC and concentrated device evidence remain historical. This c
 * `Feature` In-flight Binder death terminates the current execution without replay; later new executions rediscover the provider
 * `Improvement` Fix Chaquopy as a trusted-local, non-sandbox runtime; SM003 is the long-term signer and SuperMonster003 owns runtime, security, and release
 * `Dependency` Lock Chaquopy 17.0.0 and CPython 3.13.9; stable APKs are bound to the final source identity and verified as exact artifacts
-
-# v0.1.0-alpha.1
-
-###### 2026/08/09
-
-* `Hint` R2 proof-of-concept source; Gradle, APK, Binder, and device acceptance have not run
-* `Feature` Independent Python protocol V1 provider scaffold with a dedicated runtime process, one active session, and no provider queue
-* `Feature` Single-source `__main__` execution, bounded stdout/stderr, structured exceptions, and process-restart cancellation
-* `Feature` Fixed-order generation of README files and in-app changelogs in 10 languages
-* `Dependency` Preselected Chaquopy 17.0.0 and Python 3.13; packaged versions and dependency hashes still require build verification
 
 ##### For more releases
 

@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.2.0-alpha.1, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.3.0-alpha.1 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -51,6 +51,8 @@
   定时任务、Intent (本地 file 路径)、脚本重启。
 - [x] `import autojs6` 只读 API: `app.snapshot()` / `device.snapshot()` /
   `execution.snapshot()` / `project.read_text|read_bytes|exists` (项目执行时)。
+- [x] 协议 1.5 实时 Host API 首批子集: `toast`, `clip.get/set`,
+  `app.launch/launch_app/open_url`; 每次执行独立 broker, 终态自动撤销。
 - [x] 单文件脚本 `ModuleNotFoundError` 时提示用户改用显式 Python 项目。
 
 ### 真机与构建证据 (历史, 保持有效)
@@ -190,8 +192,9 @@
 
 ## M3 —— 兑现初衷: AutoJs6 API 实时能力 broker (目标版本 0.3.0 起)
 
-> 主题: 这是与 "兼容 AutoJs6 API 脚本" 初衷差距最大的一块: 目前 Python 只有 4 个只读快照,
-> 而 JS 有约 45 个模块。方案不必从零设计 —— 宿主已有两个现成参照:
+> 主题: 进入 M3 前, Python 只有 4 个只读快照, 而 JS 有约 45 个模块。当前树已打通
+> 协议 1.5 broker 骨架并交付第一批中的 toast / clipboard / app 子集。后续继续按用户价值
+> 逐批扩面。方案不必从零设计 —— 宿主已有两个现成参照:
 > Lua broker (机制完整: executionId 绑定、防重放、配额、唯一终态, 能力仅 2 项) 与
 > Node.js broker (能力面完整: 31 个模块)。Python 取两者之长:
 > **复用 Lua 的会话绑定机制, 逐批移植 Node 的能力面**。
@@ -201,24 +204,45 @@
 
 ### 协议与骨架
 
-- [ ] [H+P] **协议 1.5: 双向能力通道**: 新增 `IPythonHostCapabilityBroker`
+- [x] [H+P] **协议 1.5: 双向能力通道**: 新增 `IPythonHostCapabilityBroker`
   (`dispatch(requestBytes) -> resultBytes`, 纯数据 JSON, 绑定 executionId + 配额 + 超时),
   随 openSession 传入插件; 终态后调用一律拒绝。
-  宿主重新生成三件 API AAR → 拷贝至插件 `libs/` → 更新 lock (一次性流程, 后续批次不再动协议)。
-- [ ] [P] **Python 同步调用层**: `autojs6._broker` 封装跨进程调用
+  宿主提交: `60118678b`; 三件 API AAR 已重新生成, 插件 `libs/` 与精确 lock 已更新。
+- [x] [P] **Python 同步调用层**: `autojs6._broker` 封装跨进程调用
   (请求-响应, 阻塞式, 超时抛异常), 各能力模块在其上以普通函数暴露。
-- [ ] [H] **宿主 dispatcher**: 参照 `LuaHostCapabilityDispatcher` 实现
-  `PythonHostCapabilityDispatcher`, 按能力名路由到现有 runtime API 实现类。
+- [x] [H] **宿主 dispatcher**: `PythonHostCapabilityDispatcher` 按能力名路由到现有
+  runtime API 实现类, 并在每次执行上绑定 request UUID、插件 UID、1024 次调用配额、
+  64 KiB 请求/响应上限与 5 s 单次 Host 调度上限。宿主提交: `3c94f7f60`。
 
 ### 第一批: 低风险高频 (0.3.0)
 
-- [ ] [H+P] `autojs6.toast(text)` —— Toaster
-- [ ] [H+P] `autojs6.clip.get() / set(text)` —— 剪贴板
-- [ ] [H+P] `autojs6.app.launch(package) / launch_app(name) / open_url(url)` —— AppUtils
+- [x] [H+P] `autojs6.toast(text)` —— Toaster
+- [x] [H+P] `autojs6.clip.get() / set(text)` —— 剪贴板
+- [x] [H+P] `autojs6.app.launch(package) / launch_app(name) / open_url(url)` —— AppUtils
 - [ ] [H+P] `autojs6.device.info()` 动态查询 (电量/屏幕状态/亮度/音量, 区别于启动时快照)
 - [ ] [H+P] `autojs6.console.log/warn/error` 直写宿主控制台 (与 print 并存, 带级别)
 - [ ] [H+P] `autojs6.notice(text)` —— 通知
-- [ ] 示例脚本 + 真机冒烟, 发布 0.3.0-alpha
+- [x] [P] 首批低风险能力示例脚本
+  (`examples/python/m3_low_risk_capabilities.py`)。
+- [x] [H+P] 协议 1.5 公共引擎双设备冒烟 (物理设备 arm64 + 16 KiB page x86_64 模拟器)。
+- [ ] 发布 0.3.0-alpha。
+
+### 2026-08-23 M3 首批 broker 验收记录
+
+- 协议骨架由宿主提交 `60118678b` 引入, dispatcher 与首批能力由 `3c94f7f60` 接通;
+  公共引擎验收用例由宿主提交 `e2a1723d4` 固定。插件锁定该干净 Host HEAD 的三件
+  release API AAR, 协议分发门禁 PASS。
+- 验收脚本经严格 `project.json` 准入 → `ScriptEngineService` →
+  `PythonPluginScriptEngine` → 真实插件 Binder/PFD 会话 → 协议 1.5 Host broker,
+  没有直接调用插件内部接口。
+- 脚本实际调用 `toast`, `clip.set/get`, 对不存在目标调用 `app.launch/launch_app`
+  并得到 `False`, 同时用被准入层拒绝的 `ftp://` URL 验证
+  `HostCapabilityError.code == "INVALID_ARGUMENT"`, 避免验收测试打开外部页面。
+- 结构化结果验证 execution-bound 往返内容; Android 剪贴板内容与 Python 读回一致,
+  测试结束恢复原始 `ClipData`, 项目与私有传输快照均清理。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 用时 1.607 秒,
+  API 37 / x86_64 / 16 KiB page 模拟器用时 7.183 秒, 均为 `OK (1 test)`。
+  这是首批能力的聚焦 current-tree 冒烟, 不代表后续 M3 模块、完整设备矩阵或公开发布。
 
 ### 第二批: 文件与对话框 (0.3.x)
 
@@ -290,7 +314,7 @@
 | --- | --- | --- |
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
-| 0.3.x | M3 broker 骨架 + 第一二批能力 | 计划 |
+| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架及首批 toast/clipboard/app 已完成) |
 | 0.4.0 | M3 自动化核心 + M4 第三方包路径 A/B | 计划 |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |

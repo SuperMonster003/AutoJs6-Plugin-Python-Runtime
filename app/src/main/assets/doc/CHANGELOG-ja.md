@@ -4,6 +4,15 @@
 
 ******
 
+# v0.3.0-alpha.1
+
+###### 2026/08/23
+
+* `注記` M3 最初の current-tree alpha candidate です. protocol 1.5 と低リスク Host capability subset を実装しましたが, 後続 capability、公開、完全な device matrix はこの宣言に含みません
+* `追加` request UUID、plugin UID、単調 call ID、1024 call quota、64 KiB message、5 秒 Host dispatch 上限に結び付く pure-data JSON の protocol 1.5 execution-scoped Host capability broker を追加
+* `追加` live Host API `autojs6.toast`、`autojs6.clip.get/set`、`autojs6.app.launch/launch_app/open_url` を追加
+* `改善` terminal、cancel、Binder death、cleanup の全経路で broker を無効化し、unavailable capability と Host/protocol error を安定した Python error に変換
+
 # v0.2.0-alpha.1
 
 ###### 2026/08/13

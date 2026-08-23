@@ -14,6 +14,7 @@
     "Select explicit `entryMode=file|module` for an admitted project; module mode uses standard `runpy` metadata, project-root `sys.path[0]`, and package-relative imports while file mode keeps ordinary script semantics.",
     "Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.",
     "Set an explicit strict JSON result of at most {{ max_structured_json_bytes }} and transfer up to {{ max_output_artifacts }} optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.",
+    "Call live `toast`, `clip.get/set`, and `app.launch/launch_app/open_url` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.",
     "Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.",
     "Allow one active session in the runtime process with no provider-side queue.",
     "Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed."
@@ -23,7 +24,7 @@
   "p_runtime_version_status": "The build requests Python {{ python_line }}. Frozen local RC artifacts and exact device execution recorded CPython {{ python_version_expected }}; the final 0.1.0 version and hashes must still be rechecked after source freeze.",
   "h3_plugin_interface": "Plugin interface",
   "p_plugin_interface": "The host discovers and calls the plugin with the following identities",
-  "p_plugin_scope": "The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most {{ max_stdin_bytes }}, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF; standard-library `getpass.getpass()` uses hidden echo. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Direct `sys.stdin` remains finite, background launches never open input UI, and no Context, Binder, host runtime object, or callback sink is injected into script globals.",
+  "p_plugin_scope": "The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most {{ max_stdin_bytes }}, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF; standard-library `getpass.getpass()` uses hidden echo. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Protocol 1.5 adds a pure-data Host capability broker bound to one execution, the plugin UID, call order, and a finite quota. Direct `sys.stdin` remains finite, background launches never open input UI, and user scripts receive no Context, raw Binder, host runtime object, or callback sink.",
   "h3_host_integration_status": "Host integration status",
   "p_host_integration_status": "Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.",
   "h3_security": "Security and privacy",
@@ -35,6 +36,7 @@
     "SOURCE descriptors adopt complete Binder receiver-side PFD ownership, preserve reliable-pipe error channels, and close at terminal or session close.",
     "Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.",
     "Structured JSON is capped at {{ max_structured_json_bytes }}; at most {{ max_output_artifacts }} artifacts are accepted with {{ max_output_artifact_path_bytes }} paths, {{ max_output_artifact_bytes }} per file, {{ max_total_output_artifact_bytes }} aggregate, and Host verification of exact length, EOF, and SHA-256.",
+    "Protocol 1.5 admits at most {{ max_host_capability_calls }} Host calls per execution, caps each request/response at {{ max_host_capability_message_bytes }} and text at {{ max_host_capability_text_bytes }}, and waits at most {{ host_capability_call_timeout }} for one Host dispatch.",
     "Cancellation uses process restart rather than CPython-level cooperation; native extensions and blocking calls still require later Android validation.",
     "The plugin grants `INTERNET` for script-initiated standard-library networking; online pip, automatic code downloads, and runtime third-party package installation remain unsupported."
   ],
@@ -42,7 +44,7 @@
   "unsupported_capabilities": [
     "General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to built-in `input()` and standard-library `getpass.getpass()` after the finite snapshot of at most {{ max_stdin_bytes }} reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.",
     "There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.",
-    "There is no live AutoJs6 capability broker; the first APIs use only the app/device/execution/project snapshot frozen at execution start and bounded read-only access to the plugin-private workspace.",
+    "The live broker currently covers only toast, clipboard, and app launch/HTTP(S) URL operations; dynamic device, Host console, notification, files, dialogs, accessibility, screenshot, and OCR APIs remain undeclared.",
     "32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.",
     "The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification."
   ],

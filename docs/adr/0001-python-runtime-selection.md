@@ -46,10 +46,12 @@ Python.
 Containment in `0.1.0` came from an independent Android UID/process, a source
 manifest requesting no Android permissions, same-signer and exact-host Binder
 admission, bounded Binder/PFD transport, and the absence of an ambient host
-capability broker. Starting with `0.2.0`, the plugin intentionally adds only the
+capability broker. Starting with `0.2.0`, the plugin intentionally adds the
 normal `INTERNET` permission so trusted scripts can use Python's standard-library
-network clients. This grants outbound network and local-network reachability to
-the script, but does not enable automatic dependency resolution, online `pip`,
+network clients. Protocol 1.5 then adds the explicitly allow-listed,
+execution-scoped pure-data Host broker decided in ADR 0002. These changes grant
+outbound/local-network reachability and the documented Host actions to the
+script, but do not enable automatic dependency resolution, online `pip`,
 or runtime code downloads. The bootstrap still passes no Android `Context`,
 Binder handle, host callback, `ScriptRuntime`, view, or other host object into
 Python globals. These controls reduce host exposure but do not turn trusted-local
