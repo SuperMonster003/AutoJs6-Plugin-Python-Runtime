@@ -11,7 +11,18 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 PYTHON_SOURCE = ROOT / "app" / "src" / "main" / "python"
 sys.path.insert(0, str(PYTHON_SOURCE))
 
-from autojs6 import app, clip, console, device, dialogs, engines, files, notice, toast  # noqa: E402
+from autojs6 import (  # noqa: E402
+    app,
+    automator,
+    clip,
+    console,
+    device,
+    dialogs,
+    engines,
+    files,
+    notice,
+    toast,
+)
 from autojs6._broker import _install_execution_broker, _reset_execution_broker  # noqa: E402
 from autojs6.errors import (  # noqa: E402
     CapabilityUnavailableError,
@@ -114,6 +125,15 @@ class RecordingBroker:
                 value = ENGINE_INFO
             elif capability == "engines.run":
                 value = {**ENGINE_LAUNCH, "path": arguments["path"]}
+            elif capability in {
+                "automator.click",
+                "automator.long_click",
+                "automator.press",
+                "automator.swipe",
+                "automator.back",
+                "automator.home",
+            }:
+                value = True
             elif capability in {
                 "toast.show",
                 "console.log",
@@ -377,6 +397,86 @@ class HostCapabilityBrokerTest(unittest.TestCase):
         try:
             with self.assertRaises(HostCapabilityError) as captured:
                 dialogs.prompt("prompt")
+            self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_automator_uses_bounded_typed_actions_and_boolean_results(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            self.assertTrue(automator.click(10, 20))
+            self.assertTrue(automator.long_click(11, 21))
+            self.assertTrue(automator.press(12, 22, 75))
+            self.assertTrue(automator.swipe(1, 2, 101, 202, 350))
+            self.assertTrue(automator.back())
+            self.assertTrue(automator.home())
+        finally:
+            _reset_execution_broker(token)
+
+        self.assertEqual(
+            [
+                ("automator.click", {"x": 10, "y": 20}),
+                ("automator.long_click", {"x": 11, "y": 21}),
+                (
+                    "automator.press",
+                    {"x": 12, "y": 22, "durationMillis": 75},
+                ),
+                (
+                    "automator.swipe",
+                    {
+                        "x1": 1,
+                        "y1": 2,
+                        "x2": 101,
+                        "y2": 202,
+                        "durationMillis": 350,
+                    },
+                ),
+                ("automator.back", {}),
+                ("automator.home", {}),
+            ],
+            broker.calls,
+        )
+
+    def test_automator_rejects_invalid_values_before_dispatch(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            invalid_calls = (
+                lambda: automator.click(True, 0),
+                lambda: automator.click(0.5, 0),
+                lambda: automator.click(-1, 0),
+                lambda: automator.click(automator.MAX_COORDINATE + 1, 0),
+                lambda: automator.press(0, 0, False),
+                lambda: automator.press(0, 0, 0),
+                lambda: automator.swipe(0, 0, 1, 1, automator.MAX_DURATION_MILLIS + 1),
+            )
+            for invalid in invalid_calls:
+                with self.subTest(invalid=invalid), self.assertRaises((TypeError, ValueError)):
+                    invalid()
+            self.assertEqual([], broker.calls)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_automator_maps_unavailable_accessibility_and_rejects_malformed_results(self) -> None:
+        unavailable = RecordingBroker()
+        unavailable.failure = (
+            "ACCESSIBILITY_UNAVAILABLE",
+            "AutoJs6 accessibility service is unavailable",
+        )
+        token = _install_execution_broker(unavailable, EXECUTION_ID)
+        try:
+            with self.assertRaises(CapabilityUnavailableError):
+                automator.home()
+        finally:
+            _reset_execution_broker(token)
+
+        malformed = RecordingBroker()
+        malformed.response_mutator = lambda response: response.__setitem__("value", "true")
+        token = _install_execution_broker(malformed, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                automator.back()
             self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
         finally:
             _reset_execution_broker(token)
