@@ -21,6 +21,7 @@ from autojs6 import (  # noqa: E402
     engines,
     files,
     notice,
+    selector,
     toast,
 )
 from autojs6._broker import _install_execution_broker, _reset_execution_broker  # noqa: E402
@@ -57,6 +58,35 @@ ENGINE_LAUNCH = {
     "engineName": "org.autojs.autojs.script.JavaScriptSource.Engine",
     "sourceName": "child",
     "path": "child.js",
+}
+SELECTOR_NODE = {
+    "id": "node-1-1",
+    "parentId": None,
+    "depth": 0,
+    "childCount": 0,
+    "text": "AutoJs6 selector smoke",
+    "description": "Selector smoke description",
+    "resourceId": "org.autojs.autojs6:id/selector_smoke",
+    "className": "android.widget.Button",
+    "packageName": "org.autojs.autojs6",
+    "bounds": {"left": 1, "top": 2, "right": 101, "bottom": 202},
+    "clickable": True,
+    "editable": False,
+    "enabled": True,
+    "focused": False,
+    "selected": False,
+    "checkable": False,
+    "checked": False,
+    "scrollable": False,
+    "password": False,
+    "visibleToUser": True,
+    "truncatedFields": [],
+}
+SELECTOR_SNAPSHOT = {
+    "schema": selector.SNAPSHOT_SCHEMA,
+    "generation": 1,
+    "truncated": False,
+    "nodes": [SELECTOR_NODE],
 }
 
 
@@ -133,6 +163,12 @@ class RecordingBroker:
                 "automator.back",
                 "automator.home",
             }:
+                value = True
+            elif capability == "selector.snapshot":
+                value = SELECTOR_SNAPSHOT
+            elif capability == "selector.find":
+                value = SELECTOR_NODE
+            elif capability in {"selector.click", "selector.set_text"}:
                 value = True
             elif capability in {
                 "toast.show",
@@ -500,6 +536,163 @@ class HostCapabilityBrokerTest(unittest.TestCase):
         try:
             with self.assertRaises(HostCapabilityError) as captured:
                 files.list()
+            self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_selector_uses_bounded_snapshots_queries_and_explicit_node_actions(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            self.assertEqual(SELECTOR_SNAPSHOT, selector.snapshot(max_nodes=2, max_depth=3))
+            node = selector.find(
+                text_contains="smoke",
+                description="Selector smoke description",
+                resource_id="org.autojs.autojs6:id/selector_smoke",
+                class_name="android.widget.Button",
+                clickable=True,
+                editable=False,
+                enabled=True,
+                scrollable=False,
+                max_nodes=12,
+                max_depth=4,
+            )
+            self.assertEqual(SELECTOR_NODE, node)
+            self.assertTrue(selector.click(node))
+            self.assertTrue(selector.click(SELECTOR_NODE["id"]))
+            self.assertTrue(selector.set_text(node, "updated"))
+        finally:
+            _reset_execution_broker(token)
+
+        self.assertEqual(
+            [
+                ("selector.snapshot", {"maxNodes": 2, "maxDepth": 3}),
+                (
+                    "selector.find",
+                    {
+                        "query": {
+                            "textContains": "smoke",
+                            "description": "Selector smoke description",
+                            "resourceId": "org.autojs.autojs6:id/selector_smoke",
+                            "className": "android.widget.Button",
+                            "clickable": True,
+                            "editable": False,
+                            "enabled": True,
+                            "scrollable": False,
+                        },
+                        "maxNodes": 12,
+                        "maxDepth": 4,
+                    },
+                ),
+                ("selector.click", {"nodeId": "node-1-1"}),
+                ("selector.click", {"nodeId": "node-1-1"}),
+                ("selector.set_text", {"nodeId": "node-1-1", "text": "updated"}),
+            ],
+            broker.calls,
+        )
+
+    def test_selector_rejects_invalid_inputs_before_dispatch(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            invalid_calls = (
+                lambda: selector.snapshot(max_nodes=True),
+                lambda: selector.snapshot(max_nodes=0),
+                lambda: selector.snapshot(max_nodes=selector.MAX_SNAPSHOT_NODES + 1),
+                lambda: selector.snapshot(max_depth=-1),
+                lambda: selector.snapshot(max_depth=selector.MAX_DEPTH + 1),
+                lambda: selector.find(),
+                lambda: selector.find(text=""),
+                lambda: selector.find(text="x" * (selector.MAX_QUERY_TEXT_BYTES + 1)),
+                lambda: selector.find(clickable=1),
+                lambda: selector.find(text="target", max_nodes=False),
+                lambda: selector.find(text="target", max_nodes=selector.MAX_FIND_NODES + 1),
+                lambda: selector.click(7),
+                lambda: selector.click({}),
+                lambda: selector.click("raw-handle"),
+                lambda: selector.set_text("node-1-1", 7),
+                lambda: selector.set_text(
+                    "node-1-1",
+                    "x" * (selector.MAX_SET_TEXT_BYTES + 1),
+                ),
+            )
+            for invalid in invalid_calls:
+                with self.subTest(invalid=invalid), self.assertRaises((TypeError, ValueError)):
+                    invalid()
+            self.assertEqual([], broker.calls)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_selector_maps_lifecycle_failures_and_rejects_malformed_results(self) -> None:
+        failure_cases = (
+            (
+                "ACCESSIBILITY_UNAVAILABLE",
+                "AutoJs6 accessibility service is unavailable",
+                CapabilityUnavailableError,
+                lambda: selector.snapshot(),
+            ),
+            (
+                "STALE_NODE",
+                "Host selector node is stale or no longer retained",
+                HostCapabilityError,
+                lambda: selector.click("node-1-1"),
+            ),
+            (
+                "SELECTOR_SCAN_LIMIT_EXCEEDED",
+                "Host selector scan reached its node or depth limit",
+                HostCapabilityError,
+                lambda: selector.find(text="missing"),
+            ),
+        )
+        for code, message, error_type, action in failure_cases:
+            broker = RecordingBroker()
+            broker.failure = (code, message)
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.subTest(code=code), self.assertRaises(error_type) as captured:
+                    action()
+                if isinstance(captured.exception, HostCapabilityError):
+                    self.assertEqual(code, captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
+
+        malformed_snapshots = (
+            {**SELECTOR_SNAPSHOT, "schema": "wrong"},
+            {**SELECTOR_SNAPSHOT, "generation": True},
+            {**SELECTOR_SNAPSHOT, "nodes": []},
+            {
+                **SELECTOR_SNAPSHOT,
+                "nodes": [{**SELECTOR_NODE, "clickable": "true"}],
+            },
+            {
+                **SELECTOR_SNAPSHOT,
+                "nodes": [
+                    {
+                        **SELECTOR_NODE,
+                        "truncatedFields": ["text"],
+                    }
+                ],
+            },
+        )
+        for malformed_value in malformed_snapshots:
+            broker = RecordingBroker()
+            broker.response_mutator = lambda response, value=malformed_value: response.__setitem__(
+                "value", value
+            )
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.assertRaises(HostCapabilityError) as captured:
+                    selector.snapshot()
+                self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
+
+        malformed_find = RecordingBroker()
+        malformed_find.response_mutator = lambda response: response.__setitem__("value", "node")
+        token = _install_execution_broker(malformed_find, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                selector.find(text="target")
             self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
         finally:
             _reset_execution_broker(token)
