@@ -21,7 +21,9 @@ _CAPABILITY = re.compile(r"^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$")
 _SUCCESS_KEYS = frozenset(("version", "executionId", "callId", "ok", "value"))
 _FAILURE_KEYS = frozenset(("version", "executionId", "callId", "ok", "error"))
 _ERROR_KEYS = frozenset(("code", "message"))
-_UNAVAILABLE_CODES = frozenset(("CAPABILITY_UNAVAILABLE", "BROKER_CLOSED"))
+_UNAVAILABLE_CODES = frozenset(
+    ("CAPABILITY_UNAVAILABLE", "BROKER_CLOSED", "ACCESSIBILITY_UNAVAILABLE")
+)
 
 
 @dataclass
