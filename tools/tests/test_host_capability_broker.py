@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import contextvars
+import base64
+import hashlib
 import json
 import pathlib
 import sys
+import tempfile
 import unittest
 
 
@@ -20,6 +23,7 @@ from autojs6 import (  # noqa: E402
     dialogs,
     engines,
     files,
+    images,
     notice,
     selector,
     toast,
@@ -88,6 +92,10 @@ SELECTOR_SNAPSHOT = {
     "truncated": False,
     "nodes": [SELECTOR_NODE],
 }
+PNG_BYTES = b"\x89PNG\r\n\x1a\n" + bytes(
+    index % 251 for index in range(images.MAX_CHUNK_BYTES + 3)
+)
+JPEG_BYTES = b"\xff\xd8" + bytes(index % 251 for index in range(257)) + b"\xff\xd9"
 
 
 class RecordingBroker:
@@ -96,6 +104,8 @@ class RecordingBroker:
         self.raw_requests: list[str] = []
         self.clipboard = ""
         self.failure: tuple[str, str] | None = None
+        self.capability_failures: dict[str, tuple[str, str]] = {}
+        self.capability_mutators: dict[str, object] = {}
         self.response_mutator = None
         self.file_texts = {"seed.txt": "seed"}
         self.file_directories = {".", "nested"}
@@ -105,13 +115,20 @@ class RecordingBroker:
             "dialogs.prompt": "typed value",
             "dialogs.select": 1,
         }
+        self.image_generation = 0
+        self.image_bytes_override: bytes | None = None
+        self.retained_image: tuple[str, bytes, str] | None = None
+        self.image_releases: list[str] = []
 
     def dispatch(self, request_json: str) -> str:
         self.raw_requests.append(request_json)
         request = json.loads(request_json)
-        self.calls.append((request["capability"], request["arguments"]))
-        if self.failure is not None:
-            code, message = self.failure
+        capability = request["capability"]
+        arguments = request["arguments"]
+        self.calls.append((capability, arguments))
+        failure = self.capability_failures.get(capability, self.failure)
+        if failure is not None:
+            code, message = failure
             response: dict[str, object] = {
                 "version": 1,
                 "executionId": request["executionId"],
@@ -120,8 +137,6 @@ class RecordingBroker:
                 "error": {"code": code, "message": message},
             }
         else:
-            capability = request["capability"]
-            arguments = request["arguments"]
             if capability == "clip.set":
                 self.clipboard = arguments["text"]
                 value = None
@@ -170,6 +185,46 @@ class RecordingBroker:
                 value = SELECTOR_NODE
             elif capability in {"selector.click", "selector.set_text"}:
                 value = True
+            elif capability == "images.capture_screen":
+                self.image_generation += 1
+                image_id = f"image-{self.image_generation}"
+                image_format = arguments["format"]
+                image_bytes = self.image_bytes_override or (
+                    PNG_BYTES if image_format == "png" else JPEG_BYTES
+                )
+                self.retained_image = (image_id, image_bytes, image_format)
+                value = {
+                    "schema": images.IMAGE_SCHEMA,
+                    "id": image_id,
+                    "format": image_format,
+                    "width": 1080,
+                    "height": 2400,
+                    "byteLength": len(image_bytes),
+                    "sha256": hashlib.sha256(image_bytes).hexdigest(),
+                }
+            elif capability == "images.read_chunk":
+                retained = self.retained_image
+                if retained is None or arguments["imageId"] != retained[0]:
+                    raise AssertionError("unexpected stale image read")
+                image_id, image_bytes, _ = retained
+                offset = arguments["offset"]
+                chunk = image_bytes[offset : offset + images.MAX_CHUNK_BYTES]
+                next_offset = offset + len(chunk)
+                value = {
+                    "schema": images.CHUNK_SCHEMA,
+                    "imageId": image_id,
+                    "offset": offset,
+                    "data": base64.b64encode(chunk).decode("ascii"),
+                    "nextOffset": next_offset,
+                    "eof": next_offset == len(image_bytes),
+                }
+            elif capability == "images.release":
+                retained = self.retained_image
+                if retained is None or arguments["imageId"] != retained[0]:
+                    raise AssertionError("unexpected stale image release")
+                self.image_releases.append(arguments["imageId"])
+                self.retained_image = None
+                value = None
             elif capability in {
                 "toast.show",
                 "console.log",
@@ -188,6 +243,9 @@ class RecordingBroker:
                 "ok": True,
                 "value": value,
             }
+        capability_mutator = self.capability_mutators.get(capability)
+        if capability_mutator is not None:
+            capability_mutator(response)
         if self.response_mutator is not None:
             self.response_mutator(response)
         return json.dumps(response, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -696,6 +754,185 @@ class HostCapabilityBrokerTest(unittest.TestCase):
             self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
         finally:
             _reset_execution_broker(token)
+
+    def test_images_capture_validates_and_releases_ordered_screen_bytes(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            self.assertEqual(PNG_BYTES, images.capture_screen())
+        finally:
+            _reset_execution_broker(token)
+
+        self.assertEqual(
+            [
+                ("images.capture_screen", {"format": "png", "quality": 100}),
+                ("images.read_chunk", {"imageId": "image-1", "offset": 0}),
+                (
+                    "images.read_chunk",
+                    {"imageId": "image-1", "offset": images.MAX_CHUNK_BYTES},
+                ),
+                ("images.release", {"imageId": "image-1"}),
+            ],
+            broker.calls,
+        )
+        self.assertEqual(["image-1"], broker.image_releases)
+        self.assertIsNone(broker.retained_image)
+
+        jpeg = RecordingBroker()
+        token = _install_execution_broker(jpeg, EXECUTION_ID)
+        try:
+            self.assertEqual(
+                JPEG_BYTES,
+                images.capture_screen(format="jpeg", quality=75),
+            )
+        finally:
+            _reset_execution_broker(token)
+        self.assertEqual(
+            ("images.capture_screen", {"format": "jpeg", "quality": 75}),
+            jpeg.calls[0],
+        )
+        self.assertEqual("images.release", jpeg.calls[-1][0])
+
+    def test_images_capture_atomically_writes_an_output_artifact_after_release(self) -> None:
+        broker = RecordingBroker()
+        with tempfile.TemporaryDirectory() as directory:
+            outcome = run_source(
+                b"from autojs6 import images\n"
+                b"images.capture_screen(path='screens/current.png')\n",
+                "main.py",
+                [],
+                4096,
+                256,
+                128,
+                output_artifact_root=directory,
+                max_output_artifacts=1,
+                max_output_artifact_path_bytes=128,
+                host_capability_broker_input=broker,
+                execution_id=EXECUTION_ID,
+            )
+            target = pathlib.Path(directory, "screens", "current.png")
+            self.assertEqual(PNG_BYTES, target.read_bytes())
+            self.assertEqual([], list(pathlib.Path(directory).rglob(".autojs6-capture-*")))
+
+        self.assertEqual("completed", outcome["status"])
+        self.assertEqual(("screens/current.png",), outcome["artifact_paths"])
+        self.assertEqual("images.release", broker.calls[-1][0])
+        self.assertIsNone(broker.retained_image)
+
+    def test_images_reject_invalid_options_before_dispatch(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            invalid_calls = (
+                lambda: images.capture_screen(format=7),
+                lambda: images.capture_screen(format="PNG"),
+                lambda: images.capture_screen(format="jpg"),
+                lambda: images.capture_screen(quality=True),
+                lambda: images.capture_screen(quality=0),
+                lambda: images.capture_screen(quality=images.MAX_QUALITY + 1),
+                lambda: images.capture_screen(path=7),
+            )
+            for invalid in invalid_calls:
+                with self.subTest(invalid=invalid), self.assertRaises((TypeError, ValueError)):
+                    invalid()
+            self.assertEqual([], broker.calls)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_images_map_capture_lifecycle_failures_and_preserve_primary_errors(self) -> None:
+        for code, error_type in (
+            ("SCREEN_CAPTURE_UNAVAILABLE", CapabilityUnavailableError),
+            ("SCREEN_CAPTURE_FAILED", HostCapabilityError),
+            ("RESULT_LIMIT_EXCEEDED", HostCapabilityError),
+        ):
+            broker = RecordingBroker()
+            broker.failure = (code, "screen capture failure")
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.subTest(code=code), self.assertRaises(error_type) as captured:
+                    images.capture_screen()
+                if isinstance(captured.exception, HostCapabilityError):
+                    self.assertEqual(code, captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
+
+        stale = RecordingBroker()
+        stale.capability_failures["images.read_chunk"] = (
+            "STALE_IMAGE",
+            "image is stale",
+        )
+        stale.capability_failures["images.release"] = (
+            "HOST_FAILURE",
+            "release also failed",
+        )
+        token = _install_execution_broker(stale, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                images.capture_screen()
+            self.assertEqual("STALE_IMAGE", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+        self.assertEqual(
+            ["images.capture_screen", "images.read_chunk", "images.release"],
+            [capability for capability, _ in stale.calls],
+        )
+
+        release_failed = RecordingBroker()
+        release_failed.capability_failures["images.release"] = (
+            "HOST_FAILURE",
+            "release failed",
+        )
+        token = _install_execution_broker(release_failed, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                images.capture_screen(format="jpeg")
+            self.assertEqual("HOST_FAILURE", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_images_reject_malformed_descriptors_chunks_and_signatures(self) -> None:
+        mutations = (
+            (
+                "images.capture_screen",
+                lambda response: response["value"].__setitem__("sha256", "0" * 64),
+            ),
+            (
+                "images.read_chunk",
+                lambda response: response["value"].__setitem__("offset", 1),
+            ),
+            (
+                "images.read_chunk",
+                lambda response: response["value"].__setitem__("data", "%%"),
+            ),
+            (
+                "images.read_chunk",
+                lambda response: response["value"].__setitem__("eof", True),
+            ),
+        )
+        for capability, mutator in mutations:
+            broker = RecordingBroker()
+            broker.capability_mutators[capability] = mutator
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.subTest(capability=capability), self.assertRaises(
+                    HostCapabilityError
+                ) as captured:
+                    images.capture_screen()
+                self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
+            self.assertEqual("images.release", broker.calls[-1][0])
+
+        invalid_signature = RecordingBroker()
+        invalid_signature.image_bytes_override = b"not-a-png"
+        token = _install_execution_broker(invalid_signature, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                images.capture_screen()
+            self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+        self.assertEqual("images.release", invalid_signature.calls[-1][0])
 
     def test_engines_use_typed_identity_scoped_launch_and_nonreturning_self_stop(self) -> None:
         broker = RecordingBroker()
