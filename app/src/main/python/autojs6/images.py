@@ -1,4 +1,4 @@
-"""Bounded execution-local screen capture through Host accessibility."""
+"""Bounded screen capture and color search through Host accessibility."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ from ._broker import _call, _expect_none, _expect_object, _protocol_error
 
 IMAGE_SCHEMA = "autojs6-python-screen-image-v1"
 CHUNK_SCHEMA = "autojs6-python-screen-image-chunk-v1"
+COLOR_MATCH_SCHEMA = "autojs6-python-color-match-v1"
 MAX_IMAGE_BYTES = 4 * 1024 * 1024
 MAX_CHUNK_BYTES = 32 * 1024
 MAX_CHUNKS = MAX_IMAGE_BYTES // MAX_CHUNK_BYTES
@@ -24,16 +25,20 @@ MAX_DIMENSION = 8_192
 MAX_PIXELS = 16 * 1024 * 1024
 MIN_QUALITY = 1
 MAX_QUALITY = 100
+MAX_COLOR = 0xFFFFFF
+MAX_COLOR_THRESHOLD = 255
 
 _FORMATS = frozenset(("png", "jpeg"))
 _IMAGE_ID = re.compile(r"image-[1-9][0-9]*")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+_COLOR = re.compile(r"#[0-9A-Fa-f]{6}")
 _DESCRIPTOR_KEYS = frozenset(
     ("schema", "id", "format", "width", "height", "byteLength", "sha256")
 )
 _CHUNK_KEYS = frozenset(
     ("schema", "imageId", "offset", "data", "nextOffset", "eof")
 )
+_COLOR_MATCH_KEYS = frozenset(("schema", "found", "x", "y"))
 _PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 _JPEG_START = b"\xff\xd8"
 _JPEG_END = b"\xff\xd9"
@@ -60,6 +65,35 @@ def capture_screen(
         return target
     finally:
         _zero(payload)
+
+
+def find_color(
+    color: int | str,
+    *,
+    region: tuple[int, int, int, int] | list[int] | None = None,
+    threshold: int = 0,
+) -> tuple[int, int] | None:
+    """Return the first row-major screen coordinate matching one RGB color."""
+    target_color = _color(color)
+    search_region = _region(region)
+    color_threshold = _integer(
+        threshold,
+        "Screen color threshold",
+        0,
+        MAX_COLOR_THRESHOLD,
+    )
+    value = _expect_object(
+        _call(
+            "images.find_color",
+            {
+                "color": target_color,
+                "threshold": color_threshold,
+                "region": search_region,
+            },
+        ),
+        "images.find_color",
+    )
+    return _color_match(value, search_region)
 
 
 def _download(image_format: str, image_quality: int) -> bytearray:
@@ -214,6 +248,64 @@ def _format(value: Any) -> str:
     return value
 
 
+def _color(value: Any) -> int:
+    if type(value) is int:
+        return _integer(value, "Screen color", 0, MAX_COLOR)
+    if type(value) is not str:
+        raise TypeError("Screen color must be an integer or #RRGGBB text")
+    if _COLOR.fullmatch(value) is None:
+        raise ValueError("Screen color text must use the exact #RRGGBB form")
+    return int(value[1:], 16)
+
+
+def _region(value: Any) -> dict[str, int] | None:
+    if value is None:
+        return None
+    if type(value) not in (tuple, list):
+        raise TypeError("Screen color region must be a tuple, list, or None")
+    if len(value) != 4:
+        raise ValueError("Screen color region must contain x, y, width, and height")
+    x = _integer(value[0], "Screen color region x", 0, MAX_DIMENSION - 1)
+    y = _integer(value[1], "Screen color region y", 0, MAX_DIMENSION - 1)
+    width = _integer(value[2], "Screen color region width", 1, MAX_DIMENSION)
+    height = _integer(value[3], "Screen color region height", 1, MAX_DIMENSION)
+    if x + width > MAX_DIMENSION or y + height > MAX_DIMENSION:
+        raise ValueError("Screen color region exceeds the fixed dimension bound")
+    return {"x": x, "y": y, "width": width, "height": height}
+
+
+def _color_match(
+    value: dict[str, Any],
+    region: dict[str, int] | None,
+) -> tuple[int, int] | None:
+    if set(value) != _COLOR_MATCH_KEYS:
+        _invalid("images.find_color returned invalid fields")
+    if value["schema"] != COLOR_MATCH_SCHEMA:
+        _invalid("images.find_color returned an invalid schema")
+    found = value["found"]
+    if type(found) is not bool:
+        _invalid("images.find_color returned an invalid found flag")
+    x = value["x"]
+    y = value["y"]
+    if not found:
+        if type(x) is not int or type(y) is not int or x != -1 or y != -1:
+            _invalid("images.find_color returned an inconsistent miss")
+        return None
+    if (
+        type(x) is not int
+        or type(y) is not int
+        or not 0 <= x < MAX_DIMENSION
+        or not 0 <= y < MAX_DIMENSION
+    ):
+        _invalid("images.find_color returned invalid coordinates")
+    if region is not None and not (
+        region["x"] <= x < region["x"] + region["width"]
+        and region["y"] <= y < region["y"] + region["height"]
+    ):
+        _invalid("images.find_color returned coordinates outside the requested region")
+    return x, y
+
+
 def _integer(value: Any, label: str, minimum: int, maximum: int) -> int:
     if type(value) is not int:
         raise TypeError(f"{label} must be an integer")
@@ -269,13 +361,17 @@ def _invalid(message: str) -> NoReturn:
 
 __all__ = (
     "CHUNK_SCHEMA",
+    "COLOR_MATCH_SCHEMA",
     "IMAGE_SCHEMA",
     "MAX_CHUNKS",
     "MAX_CHUNK_BYTES",
+    "MAX_COLOR",
+    "MAX_COLOR_THRESHOLD",
     "MAX_DIMENSION",
     "MAX_IMAGE_BYTES",
     "MAX_PIXELS",
     "MAX_QUALITY",
     "MIN_QUALITY",
     "capture_screen",
+    "find_color",
 )
