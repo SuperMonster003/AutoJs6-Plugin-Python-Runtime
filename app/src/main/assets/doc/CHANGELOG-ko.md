@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.3
+
+###### 2026/08/23
+
+* `안내` 세 번째 M3 current-tree alpha candidate입니다. 두 번째 batch의 제한된 Host files가 두 device의 focused acceptance를 통과했지만 dialogs, engines, 이후 capability, 공개 배포 및 전체 device matrix는 포함하지 않습니다
+* `추가` 현재 project root 또는 standalone script directory 안에서 제한된 UTF-8 text access를 제공하는 live `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API 추가
+* `개선` 안전하지 않거나 root를 벗어나는 path를 거부하고 text와 direct listing을 제한하며 안정된 file error를 반환하고 live Host root와 고정된 Plugin workspace snapshot을 명확히 분리
+
 # v0.3.0-alpha.2
 
 ###### 2026/08/23

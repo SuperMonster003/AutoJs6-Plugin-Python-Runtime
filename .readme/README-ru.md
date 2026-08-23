@@ -50,7 +50,7 @@ Python Runtime — независимый provider протокола Python V1.
 - Явный выбор `entryMode=file|module` для допущенного проекта: режим module использует стандартные метаданные `runpy`, корень проекта в `sys.path[0]` и относительные импорты пакета, а режим file сохраняет обычную семантику скрипта.
 - Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.
 - Явное задание строгого JSON-результата до 64 KiB и передача до 16 необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.
-- Вызов live-операций `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error` и учитывающего разрешения `notice` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.
+- Вызов live-операций `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, учитывающего разрешения `notice` и ограниченного `files.read_text/write_text/exists/is_file/is_dir/list` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.
 - Возврат `SystemExit`, синтаксических и runtime ошибок с ограниченным структурированным traceback.
 - Один активный сеанс на процесс без очереди provider.
 - Перезапуск хоста не нужен: следующая новая сессия после установки или повторного включения заново обнаруживает и фиксирует provider, а Binder death во время выполнения завершает его без автоматического повтора.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.3.0-alpha.2
-release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.3
+release state: 0.3.0-alpha.3 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files portion of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; dialogs, engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ Runtime Chaquopy предназначен только для доверенны
 - Полные PFD на стороне получателя Binder принимаются во владение и закрываются при завершении или close.
 - Вывод передаётся по chunks и credits во время выполнения; при исчерпании credits скрипт приостанавливается, принятый вывод предшествует единственному terminal, а вывод после terminal запрещён.
 - Структурированный JSON ограничен 64 KiB; допускается до 16 artifacts с путем до 1024 UTF-8 bytes, 4 MiB на файл, 8 MiB суммарно и проверкой Host точной длины, EOF и SHA-256.
-- Протокол 1.5 допускает до 1024 Host-вызовов на выполнение, ограничивает request/response значением 64 KiB, текст — 32 KiB, а ожидание dispatch — 5 s.
+- Протокол 1.5 допускает до 1024 Host-вызовов на выполнение, ограничивает request/response значением 64 KiB, текст — 32 KiB, а ожидание dispatch — 5 s. Host files использует относительные пути до 4 KiB, UTF-8 текст до 32 KiB и списки до 128 имён размером до 255 UTF-8 bytes каждое.
 - Отмена перезапускает процесс; native extensions и блокирующие вызовы требуют Android-проверки.
 - Разрешение `INTERNET` позволяет скриптам напрямую использовать сетевые клиенты стандартной библиотеки; online pip, автоматическая загрузка кода и установка сторонних пакетов во время выполнения по-прежнему не поддерживаются.
 
@@ -141,7 +141,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 - Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` и стандартному `getpass.getpass()` после EOF конечного snapshot до 1 MiB. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.
 - Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.
-- Live broker охватывает полный первый низкорисковый набор; files, dialogs, accessibility, screenshot и OCR пока не заявлены.
+- Live broker охватывает полный первый низкорисковый набор и ограниченный Host files; dialogs, engines, accessibility, screenshot и OCR пока не заявлены.
 - 32-разрядный Android и произвольные native wheels не гарантируются.
 - Для текущего дерева есть smoke evidence на устройстве API 31 arm64-v8a и эмуляторе API 37 x86_64 со страницами 16 KB; это не выдается за полную матрицу устройств или release qualification.
 
@@ -161,6 +161,14 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
+# v0.3.0-alpha.3
+
+###### 2026/08/23
+
+* `Примечание` Третий M3 current-tree alpha candidate: ограниченная часть Host files второго набора прошла фокусную приёмку на двух устройствах; dialogs, engines, последующие возможности, публикация и полная матрица устройств не входят в это заявление
+* `Добавлено` Добавлены live API `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` для ограниченного доступа к UTF-8 тексту в корне текущего проекта или каталоге отдельного скрипта
+* `Улучшено` Отклоняются небезопасные и выходящие за корень пути, ограничены текст и прямые списки, возвращаются стабильные файловые ошибки, а live Host root отделён от замороженного Plugin workspace snapshot
+
 # v0.3.0-alpha.2
 
 ###### 2026/08/23
@@ -177,24 +185,6 @@ Runtime Chaquopy предназначен только для доверенны
 * `Добавлено` Добавлен execution-scoped Host capability broker протокола 1.5 с pure-data JSON, привязкой к request UUID и UID плагина, монотонными call ID, квотой 1024 вызова, сообщениями 64 KiB и лимитом Host dispatch 5 секунд
 * `Добавлено` Добавлены live Host API `autojs6.toast`, `autojs6.clip.get/set` и `autojs6.app.launch/launch_app/open_url`
 * `Улучшено` Broker единообразно отзывается при terminal, cancel, Binder death и cleanup; ошибки unavailable capabilities и Host/protocol стабильно отображаются в Python
-
-# v0.2.0-alpha.1
-
-###### 2026/08/13
-
-* `Примечание` Alpha-кандидат U1 текущего дерева после 0.1; module entry, live output, встроенный input на переднем плане, явный structured JSON и ограниченные output artifacts U1-R2 покрыты только до E2; фоновые запуски и прямой sys.stdin остаются неинтерактивными, R2 E3 остается открытым, а результаты текущего дерева не доказывают матрицу устройств, выпуск или публикацию
-* `Добавлено` Добавлен конечный заранее предоставленный snapshot stdin до 1 MiB для детерминированного ввода и EOF через `input()` и `sys.stdin`
-* `Добавлено` Завершена семантика project import для модулей workspace, соседних и корневых модулей вложенной точки входа и package-relative imports
-* `Добавлено` Добавлен протокол 1.2 с явным `entryMode=file|module`; выполнение module использует `runpy` с корректными `__package__`, `__spec__`, корнем проекта в `sys.path[0]` и относительными импортами, а режим file не изменён
-* `Добавлено` В протокол 1.3 добавлен ограниченный prompt/reply только на переднем плане после EOF конечного snapshot: видимый ввод для встроенного `input()` и скрытый для `getpass.getpass()`; фоновые запуски не открывают UI ввода, а прямой `sys.stdin` остается конечным
-* `Добавлено` В протокол 1.4 добавлены явные строгие JSON-результаты и необязательные output artifacts с ограничениями количества, нормализованного пути, размера файла/суммы, точных PFD-ссылок и SHA-256 без вывода результата из stdout
-* `Исправлено` Исходник декодируется как strict UTF-8 до выполнения, поэтому encoding cookie с иной кодировкой больше не обходит контракт
-* `Улучшено` Предоставить `INTERNET`, чтобы доверенные скрипты напрямую использовали сетевые клиенты стандартной библиотеки, оставив online pip и автоматическую загрузку кода отключёнными
-* `Улучшено` Увеличить предел выполнения Provider до 30 минут, а ограниченный вывод — до 16 MiB / 16384 chunks
-* `Улучшено` Перенос ограниченных chunks stdout/stderr и backpressure по credits внутрь выполнения скрипта с сохранением упорядоченного частичного вывода до terminal и запретом после него
-* `Улучшено` Каждый запуск получает отдельный `__main__` с восстановлением stdin/stdout/stderr, argv, cwd, `sys.path`, состояния modules и importer cache
-* `Улучшено` Для открытого, но не запущенного session действует lease 5 секунд, после чего освобождаются inputs, descriptors и единственный session slot
-* `Улучшено` Минимальный Host versionCode 5275 проверяется на Binder-границе Provider, а не только при discovery со стороны Host
 
 ##### Другие версии
 

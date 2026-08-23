@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.3.0-alpha.2 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.3.0-alpha.3 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -54,6 +54,8 @@
 - [x] 协议 1.5 实时 Host API 完整首批低风险能力: `toast`, `clip.get/set`,
   `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice`;
   每次执行独立 broker, 终态自动撤销。
+- [x] 协议 1.5 实时 Host files API: 项目根/单文件脚本目录内的 UTF-8 文本读写、
+  存在/类型检查及直接目录枚举; 严格相对路径与容量边界阻止越过执行根目录。
 - [x] 单文件脚本 `ModuleNotFoundError` 时提示用户改用显式 Python 项目。
 
 ### 真机与构建证据 (历史, 保持有效)
@@ -252,14 +254,32 @@
   1.268 秒, 两台都实际发布并核验通知; 原 toast/clipboard/app 用例回归分别用时
   1.567 秒、7.913 秒。四次均为 `OK (1 test)`。
 
-### 第二批: 文件与对话框 (0.3.x)
+### 第二批: 文件、对话框与引擎 (0.3.x)
 
-- [ ] [H+P] `autojs6.files.read/write/exists/list/...` —— 经宿主代理读写用户脚本目录
-  (以宿主已有存储权限为准, 路径策略沿用现有校验风格但不新增流程)
+- [x] [H+P] `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` —— 经宿主
+  broker 访问实时用户脚本目录; 项目执行以项目根为界, 单文件以脚本所在目录为界;
+  仅限 NFC 规范化相对路径与 UTF-8 文本 (≤32 KiB), 枚举最多 128 个直接子项,
+  不提供删除、递归、二进制或自动创建父目录。宿主提交: `3cadd1497`、`6911116bc`;
+  插件提交: `69d24a0`、`be72119`。
+- [x] [P] Host files 示例脚本 (`examples/python/m3_host_files.py`)。
 - [ ] [H+P] `autojs6.dialogs.alert/confirm/prompt/select` —— 前台弹窗 (复用协议 1.3
   的前台授权与回复通道模式)
 - [ ] [H+P] `autojs6.engines` 最小集: 当前引擎信息 / 停止自身 / 运行其他脚本
 - [ ] 发布 0.3.x alpha
+
+### 2026-08-23 M3 Host files 验收记录
+
+- 宿主实现与 JVM 测试分别由提交 `3cadd1497`、`6911116bc` 固定; 插件 façade 与便携
+  测试分别由 `69d24a0`、`be72119` 固定。三件 release AAR 经干净宿主
+  `6911116bc04c21ab82a8d1d8c9676db1ca7d6bdf` 的 distribution gate 重新生成并锁定。
+- 公共引擎用例经真实项目准入、workspace snapshot、插件 Binder 会话和协议 1.5 broker,
+  实际执行 Host seed 读取、实时文件写入/回读、存在与类型检查、项目根直接枚举、
+  `PATH_NOT_FOUND` 稳定错误及本地 `../` 拒绝。
+- 用例同时证明 Host 输出文件在执行后真实存在, 而已冻结的插件 workspace 在同次执行中
+  看不到该写入; 临时项目与私有传输快照均完成清理。
+- `0.3.0-alpha.3` current tree 在 Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a /
+  4 KiB page) 用时 0.811 秒, API 37 / x86_64 / 16 KiB page 模拟器用时 3.295 秒,
+  均为 `OK (1 test)`。这是 files 能力的双设备聚焦验收, 不冒充公开发布或完整设备矩阵。
 
 ### 第三批: 自动化核心 (0.4.0)
 
@@ -322,7 +342,7 @@
 | --- | --- | --- |
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
-| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架及完整第一批低风险能力已完成) |
+| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架、完整第一批及第二批 files 已完成) |
 | 0.4.0 | M3 自动化核心 + M4 第三方包路径 A/B | 计划 |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |

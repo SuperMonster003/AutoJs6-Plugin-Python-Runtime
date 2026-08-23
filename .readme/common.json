@@ -2,8 +2,8 @@
   "repo_url": "https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime",
   "repo_slug": "SuperMonster003/AutoJs6-Plugin-Python-Runtime",
   "default_branch": "master",
-  "release_target": "0.3.0-alpha.2",
-  "release_state": "0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim",
+  "release_target": "0.3.0-alpha.3",
+  "release_state": "0.3.0-alpha.3 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files portion of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; dialogs, engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim",
   "host_pairing": "AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275",
   "long_term_signer": "SM003",
   "release_owner": "SuperMonster003",
@@ -36,6 +36,10 @@
   "max_host_capability_message_bytes": "64 KiB",
   "max_host_capability_text_bytes": "32 KiB",
   "host_capability_call_timeout": "5 s",
+  "max_host_file_path_bytes": "4 KiB",
+  "max_host_file_text_bytes": "32 KiB",
+  "max_host_file_entries": "128",
+  "max_host_file_name_bytes": "255 UTF-8 bytes",
   "max_timeout": "30 min",
   "local_aars": "common-plugin-api.aar\nprotocol-wire-api.aar\npython-runtime-api.aar"
 }

@@ -1,11 +1,11 @@
 # Python execution semantics contract
 
 Status: cumulative U1-R0 through U1-R2 contract plus the first M3 protocol 1.5
-Host capability slice. Historical R2 evidence remains covered through E2; the
-M1/M2 public Host paths and the focused M3 broker path passed an API 31 /
-arm64-v8a / 4 KiB-page physical-device smoke and an API 37 / x86_64 /
-16 KiB-page emulator smoke on 2026-08-23. Those smokes are not a release or
-device-matrix claim.
+Host capability slice and the bounded Host-files portion of its second slice.
+Historical R2 evidence remains covered through E2; the M1/M2 public Host paths
+and focused M3 broker paths passed an API 31 / arm64-v8a / 4 KiB-page physical
+device and an API 37 / x86_64 / 16 KiB-page emulator on 2026-08-23. Those
+smokes are not a release or device-matrix claim.
 
 This document distinguishes three facts which must not be collapsed:
 
@@ -329,6 +329,10 @@ The current public Python surface is:
 - `autojs6.console.log/warn/error(text: str) -> None` for direct level-aware
   Host global-console output;
 - `autojs6.notice(text: str) -> None` for one execution-tagged notification.
+- `autojs6.files.read_text(path, *, encoding="utf-8") -> str` and
+  `autojs6.files.write_text(path, text, *, encoding="utf-8") -> None`;
+- `autojs6.files.exists/is_file/is_dir(path) -> bool` and
+  `autojs6.files.list(path=".") -> list[str]` for the live Host execution root.
 
 These are live Host operations, distinct from the detached launch-time
 `app.snapshot()` and `device.snapshot()` data. Every request is bound to the
@@ -352,8 +356,8 @@ channel denial raises `HostCapabilityError` with code `PERMISSION_DENIED`.
 `HOST_CAPABILITY_BROKER_PROTOCOL.md`; malformed, extra or mistyped result fields
 are rejected as `BROKER_PROTOCOL_ERROR`.
 
-Files, dialogs, accessibility, screenshots and OCR remain planned rather than
-implied by the generic broker transport.
+Dialogs, accessibility, screenshots and OCR remain planned rather than implied
+by the generic broker transport.
 
 The focused public Host acceptance invoked the six current method names through
 a real protocol 1.5 session on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a,
@@ -372,11 +376,28 @@ both devices took the notification-allowed branch. The original six-call test
 also regressed green in 1.567 and 7.913 seconds. All four runs reported
 `OK (1 test)` and retained normal private-snapshot cleanup.
 
+The bounded Host-files public-engine test then read and wrote the live project
+root, checked existence/types/direct listing, required stable `PATH_NOT_FOUND`,
+rejected parent traversal, and proved the write remained absent from the frozen
+Plugin workspace snapshot. On the `0.3.0-alpha.3` current tree it passed on the
+same physical device and emulator in 0.811 and 3.295 seconds respectively; both
+runs reported `OK (1 test)` and removed the temporary Host project.
+
 ## Files, Java bridge and isolation
 
 Project Python can read and write its execution-private workspace using normal
 Python file APIs, but changes are not written back to the Host project. The
 `autojs6.project` API is a separate bounded read-only interface.
+
+`autojs6.files` is an explicit exception to that frozen-copy behavior: it reads
+and writes the live Host project root, or the standalone script's Host parent
+directory. It accepts only NFC-normalized relative paths (`"."` is the root),
+rejects absolute/drive/backslash/control/empty/dot/dot-dot forms, and requires
+canonical resolution to stay inside the execution root. Text is strict UTF-8
+and at most 32 KiB; writes do not create parents. Direct listings are capped at
+128 validated names. No binary, delete, rename, recursive or arbitrary-path API
+is declared. A Host write is therefore deliberately visible after execution but
+does not appear in the already-frozen Plugin workspace during that execution.
 
 The runtime executes trusted local code and is not a hostile-code sandbox.
 Chaquopy's Plugin-local Java bridge may exist, but the Host never sends

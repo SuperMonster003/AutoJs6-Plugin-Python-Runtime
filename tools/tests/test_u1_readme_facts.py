@@ -24,9 +24,10 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.3.0-alpha.2", common["release_target"])
+        self.assertEqual("0.3.0-alpha.3", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("complete first low-risk", common["release_state"])
+        self.assertIn("bounded Host-files", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
         self.assertEqual("1.0-1.5", common["protocol_version"])
         self.assertEqual("64 KiB", common["max_structured_json_bytes"])
@@ -38,6 +39,10 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("64 KiB", common["max_host_capability_message_bytes"])
         self.assertEqual("32 KiB", common["max_host_capability_text_bytes"])
         self.assertEqual("5 s", common["host_capability_call_timeout"])
+        self.assertEqual("4 KiB", common["max_host_file_path_bytes"])
+        self.assertEqual("32 KiB", common["max_host_file_text_bytes"])
+        self.assertEqual("128", common["max_host_file_entries"])
+        self.assertEqual("255 UTF-8 bytes", common["max_host_file_name_bytes"])
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
@@ -59,6 +64,10 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("`device.info`", broker_features[0])
                 self.assertIn("`console.log/warn/error`", broker_features[0])
                 self.assertIn("`notice`", broker_features[0])
+                self.assertIn(
+                    "`files.read_text/write_text/exists/is_file/is_dir/list`",
+                    broker_features[0],
+                )
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
                 self.assertIn("1.3", source["p_plugin_scope"])
                 self.assertIn("1.4", source["p_plugin_scope"])
@@ -84,6 +93,10 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "{{ max_host_capability_message_bytes }}",
                     "{{ max_host_capability_text_bytes }}",
                     "{{ host_capability_call_timeout }}",
+                    "{{ max_host_file_path_bytes }}",
+                    "{{ max_host_file_text_bytes }}",
+                    "{{ max_host_file_entries }}",
+                    "{{ max_host_file_name_bytes }}",
                 ):
                     self.assertIn(placeholder, broker_limits[0])
                 network_limits = [item for item in source["security_limits"] if "INTERNET" in item]
@@ -106,6 +119,21 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                host_files = source["$data"]["v0.3.0-alpha.3"]
+                self.assertEqual("2026/08/23", host_files["released_date"])
+                self.assertEqual(1, len(host_files["feature"]))
+                for method in (
+                    "read_text",
+                    "write_text",
+                    "exists",
+                    "is_file",
+                    "is_dir",
+                    "list",
+                ):
+                    self.assertIn(method, host_files["feature"][0])
+                self.assertIn("Host", host_files["improvement"][0])
+                self.assertIn("workspace", host_files["improvement"][0])
+
                 complete_slice = source["$data"]["v0.3.0-alpha.2"]
                 self.assertEqual("2026/08/23", complete_slice["released_date"])
                 public_api = complete_slice["feature"]
@@ -168,6 +196,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("INTERNET", body)
                 self.assertIn("SHA-256", body)
                 self.assertIn("autojs6.toast", body)
+                self.assertIn("autojs6.files.read_text", body)
                 self.assertNotIn("{{", body)
                 lowered = body.lower()
                 for stale in stale_fragments:
@@ -187,6 +216,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("协议 1.4 增加显式严格 JSON 结果", simplified)
         self.assertIn("协议 1.5 增加绑定单次执行", simplified)
         self.assertIn("`autojs6.toast`", simplified)
+        self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", simplified)
         self.assertIn("绝不被解析为结果", simplified)
         self.assertIn("API 37 x86_64 16 KB page 模拟器的聚焦冒烟", simplified)
         self.assertIn("不等同于完整兼容性 gate", simplified)
@@ -197,6 +227,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("Protocol 1.4 adds explicit strict JSON", english)
         self.assertIn("Protocol 1.5 adds a pure-data Host capability broker", english)
         self.assertIn("`autojs6.toast`", english)
+        self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", english)
         self.assertIn("never parsed as a result", english)
         self.assertIn("API 37 x86_64 16 KB-page emulator smoke has passed", english)
         self.assertIn("not a comprehensive compatibility gate", english)

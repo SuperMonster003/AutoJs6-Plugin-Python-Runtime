@@ -50,7 +50,7 @@ Python Runtime es un proveedor independiente del protocolo Python V1. El host en
 - Seleccionar explícitamente `entryMode=file|module` para un proyecto admitido; el modo module usa metadatos estándar de `runpy`, la raíz del proyecto en `sys.path[0]` e imports relativos al package, mientras el modo file conserva la semántica de script ordinaria.
 - Entregar durante la ejecución chunks acotados de stdout/stderr en su orden original; al agotarse los créditos se aplica contrapresión a la ejecución.
 - Establecer un resultado JSON estricto explícito de hasta 64 KiB y transferir hasta 16 artefactos opcionales con límites de ruta, tamaño y SHA-256 del protocolo 1.4; nunca inferir un resultado desde stdout.
-- Invocar en vivo `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error` y `notice` sensible a permisos mediante el broker de datos puros del protocolo 1.5 ligado a la ejecución y revocado al terminar.
+- Invocar en vivo `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible a permisos y `files.read_text/write_text/exists/is_file/is_dir/list` acotado mediante el broker de datos puros del protocolo 1.5 ligado a la ejecución y revocado al terminar.
 - Informar `SystemExit`, errores de sintaxis y excepciones con traceback estructurado y acotado.
 - Permitir una sesión activa por proceso sin cola del proveedor.
 - No requerir reinicio del host: la siguiente ejecución nueva tras instalar o reactivar redescubre y fija el provider; una muerte Binder en curso termina esa ejecución y nunca la repite automáticamente.
@@ -102,8 +102,8 @@ El complemento acepta una SOURCE independiente, un workspace archive acotado opc
 > La versión 0.1.0 se empareja solo con AutoJs6 6.8.0, con el versionCode mínimo del Host 5275 congelado y aplicado; la revisión final y limpia del código fuente del Host y el manifiesto de distribución de los tres AAR están registrados en el lock. Cada ejecución nueva redescubre el provider; si falta o está desactivado pide instalar o activar sin fallback, y la instalación o reactivación no exige reiniciar el Host. La identidad del APK estable está vinculada a ese código fuente exacto del Plugin y al lock Host.
 
 ```text
-release target: 0.3.0-alpha.2
-release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.3
+release state: 0.3.0-alpha.3 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files portion of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; dialogs, engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ El runtime Chaquopy es solo para scripts locales de confianza, no un sandbox de 
 - Se adopta la propiedad de los PFD completos recibidos por Binder y se cierran al terminar o cerrar la sesión.
 - La salida se entrega chunk a chunk con créditos durante la ejecución; al agotarse se pausa el script, la salida aceptada precede al único terminal y se prohíbe toda salida posterior.
 - El JSON estructurado se limita a 64 KiB; se admiten hasta 16 artefactos con rutas de 1024 UTF-8 bytes, 4 MiB por archivo, 8 MiB en total y verificación Host de longitud exacta, EOF y SHA-256.
-- El protocolo 1.5 admite hasta 1024 llamadas Host por ejecución, limita cada solicitud/respuesta a 64 KiB, el texto a 32 KiB y la espera de cada despacho a 5 s.
+- El protocolo 1.5 admite hasta 1024 llamadas Host por ejecución, limita cada solicitud/respuesta a 64 KiB, el texto a 32 KiB y la espera de cada despacho a 5 s. Host files usa rutas relativas de 4 KiB, texto UTF-8 de 32 KiB y listados de hasta 128 nombres de 255 UTF-8 bytes cada uno.
 - La cancelación reinicia el proceso; las extensiones nativas y llamadas bloqueantes requieren validación Android posterior.
 - El permiso `INTERNET` permite que los scripts usen directamente los clientes de red de la biblioteca estándar; pip en línea, la descarga automática de código y la instalación de paquetes de terceros en ejecución siguen sin admitirse.
 
@@ -141,7 +141,7 @@ El runtime Chaquopy es solo para scripts locales de confianza, no un sandbox de 
 
 - No hay stdin general en vivo ni streaming callback de `sys.stdin` directo. La interacción en primer plano solo se aplica al `input()` integrado y a `getpass.getpass()` después del EOF del snapshot finito de hasta 1 MiB. La escritura de workspace, pip en línea y descarga de wheels siguen sin soporte.
 - No hay scripts UI, depurador, REPL ni acceso arbitrario a objetos Java del host.
-- El broker en vivo cubre la primera entrega completa de bajo riesgo; archivos, diálogos, accesibilidad, capturas y OCR siguen sin declararse.
+- El broker en vivo cubre la primera entrega completa de bajo riesgo y Host files acotado; diálogos, engines, accesibilidad, capturas y OCR siguen sin declararse.
 - No se garantiza Android de 32 bits ni wheels nativas de terceros.
 - El árbol actual tiene evidencia smoke en un dispositivo API 31 arm64-v8a y en un emulador API 37 x86_64 con páginas de 16 KB; ninguna se presenta como matriz completa de dispositivos ni como calificación de release.
 
@@ -161,6 +161,14 @@ La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 permanecen his
 
 ******
 
+# v0.3.0-alpha.3
+
+###### 2026/08/23
+
+* `Nota` Tercer candidato alpha M3 del árbol actual; la parte acotada de Host files de la segunda entrega superó la aceptación focalizada en dos dispositivos, sin afirmar diálogos, engines, capacidades posteriores, publicación ni una matriz completa de dispositivos
+* `Función` Añadir las API en vivo `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` para acceso acotado a texto UTF-8 dentro de la raíz del proyecto actual o el directorio del script independiente
+* `Mejora` Rechazar rutas inseguras o fuera de la raíz, limitar texto y listados directos, devolver errores de archivo estables y separar la raíz Host en vivo de la instantánea workspace congelada del Plugin
+
 # v0.3.0-alpha.2
 
 ###### 2026/08/23
@@ -177,24 +185,6 @@ La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 permanecen his
 * `Función` Añadir el broker de capacidades Host del protocolo 1.5 ligado a la ejecución mediante JSON de datos puros, UUID de solicitud, UID del complemento, IDs de llamada monótonos, cuota de 1024 llamadas, mensajes de 64 KiB y límite de dispatch Host de 5 segundos
 * `Función` Añadir las API Host en vivo `autojs6.toast`, `autojs6.clip.get/set` y `autojs6.app.launch/launch_app/open_url`
 * `Mejora` Revocar el broker de forma uniforme al terminar, cancelar, morir Binder o limpiar, con errores Python estables
-
-# v0.2.0-alpha.1
-
-###### 2026/08/13
-
-* `Nota` Candidato alpha U1 del árbol actual posterior a 0.1; la entrada module, salida live, input integrado en primer plano, JSON estructurado explícito y artefactos acotados de U1-R2 solo están cubiertos hasta E2; los inicios en segundo plano y sys.stdin directo siguen sin interacción, R2 E3 continúa abierto y estos resultados no prueban matriz de dispositivos, lanzamiento ni publicación
-* `Función` Añade un snapshot stdin finito y preproporcionado de hasta 1 MiB para entrada y EOF deterministas mediante `input()` y `sys.stdin`
-* `Función` Completa los imports de proyecto para módulos workspace, módulos hermanos y raíz de una entrada anidada e imports relativos al package
-* `Función` Añade el protocolo 1.2 con `entryMode=file|module` explícito; la ejecución module usa `runpy` con `__package__`, `__spec__`, la raíz del proyecto en `sys.path[0]` e imports relativos correctos, mientras el modo file no cambia
-* `Función` Añade con el protocolo 1.3 prompt/respuesta acotado y solo en primer plano tras el EOF del snapshot finito, con entrada visible para `input()` y oculta para `getpass.getpass()`; los inicios en segundo plano nunca abren UI de entrada y `sys.stdin` directo sigue finito
-* `Función` Añade con el protocolo 1.4 resultados JSON estrictos explícitos y artefactos opcionales acotados por cantidad, ruta normalizada, tamaño por archivo/total, referencias PFD exactas y SHA-256, sin inferir nunca un resultado desde stdout
-* `Corrección` Decodifica el código como UTF-8 estricto antes de ejecutarlo para que un encoding cookie no UTF-8 no eluda el contrato
-* `Mejora` Conceder `INTERNET` para que los scripts de confianza usen directamente los clientes de red de la biblioteca estándar, manteniendo desactivados pip en línea y la descarga automática de código
-* `Mejora` Elevar el límite de ejecución del Provider a 30 minutos y la salida acotada a 16 MiB / 16384 chunks
-* `Mejora` Traslada los chunks acotados de stdout/stderr y la contrapresión por créditos a la ejecución del script, conservando la salida parcial ordenada antes del terminal y prohibiéndola después
-* `Mejora` Usa un `__main__` independiente por ejecución y restaura stdin/stdout/stderr, argv, cwd, `sys.path`, módulos y caché de importadores
-* `Mejora` Aplica un lease de 5 segundos a una sesión abierta que nunca inicia y luego libera entradas, descriptors y el único slot de sesión
-* `Mejora` Impone el Host versionCode mínimo 5275 en el límite Binder del Provider en vez de depender solo del descubrimiento del Host
 
 ##### Más versiones
 

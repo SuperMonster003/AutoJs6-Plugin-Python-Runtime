@@ -5,6 +5,18 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "اعتماد",
   "$data": {
+    "v0.3.0-alpha.3": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "مرشح alpha ثالث من M3 للشجرة الحالية؛ اجتاز الجزء المحدود من Host files في المجموعة الثانية قبولاً مركزاً على جهازين، ولا يشمل ذلك الحوارات أو engines أو القدرات اللاحقة أو النشر أو مصفوفة أجهزة كاملة"
+      ],
+      "feature": [
+        "إضافة API مباشرة `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` للوصول المحدود إلى نص UTF-8 داخل جذر المشروع الحالي أو مجلد السكربت المستقل"
+      ],
+      "improvement": [
+        "رفض المسارات غير الآمنة أو الخارجة من الجذر، وتقييد النص والقوائم المباشرة، وإرجاع أخطاء ملفات مستقرة، وفصل جذر Host المباشر عن workspace snapshot المجمدة في Plugin"
+      ]
+    },
     "v0.3.0-alpha.2": {
       "released_date": "2026/08/23",
       "hint": [

@@ -14,7 +14,7 @@
     "Seleccionar explícitamente `entryMode=file|module` para un proyecto admitido; el modo module usa metadatos estándar de `runpy`, la raíz del proyecto en `sys.path[0]` e imports relativos al package, mientras el modo file conserva la semántica de script ordinaria.",
     "Entregar durante la ejecución chunks acotados de stdout/stderr en su orden original; al agotarse los créditos se aplica contrapresión a la ejecución.",
     "Establecer un resultado JSON estricto explícito de hasta {{ max_structured_json_bytes }} y transferir hasta {{ max_output_artifacts }} artefactos opcionales con límites de ruta, tamaño y SHA-256 del protocolo 1.4; nunca inferir un resultado desde stdout.",
-    "Invocar en vivo `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error` y `notice` sensible a permisos mediante el broker de datos puros del protocolo 1.5 ligado a la ejecución y revocado al terminar.",
+    "Invocar en vivo `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible a permisos y `files.read_text/write_text/exists/is_file/is_dir/list` acotado mediante el broker de datos puros del protocolo 1.5 ligado a la ejecución y revocado al terminar.",
     "Informar `SystemExit`, errores de sintaxis y excepciones con traceback estructurado y acotado.",
     "Permitir una sesión activa por proceso sin cola del proveedor.",
     "No requerir reinicio del host: la siguiente ejecución nueva tras instalar o reactivar redescubre y fija el provider; una muerte Binder en curso termina esa ejecución y nunca la repite automáticamente."
@@ -36,7 +36,7 @@
     "Se adopta la propiedad de los PFD completos recibidos por Binder y se cierran al terminar o cerrar la sesión.",
     "La salida se entrega chunk a chunk con créditos durante la ejecución; al agotarse se pausa el script, la salida aceptada precede al único terminal y se prohíbe toda salida posterior.",
     "El JSON estructurado se limita a {{ max_structured_json_bytes }}; se admiten hasta {{ max_output_artifacts }} artefactos con rutas de {{ max_output_artifact_path_bytes }}, {{ max_output_artifact_bytes }} por archivo, {{ max_total_output_artifact_bytes }} en total y verificación Host de longitud exacta, EOF y SHA-256.",
-    "El protocolo 1.5 admite hasta {{ max_host_capability_calls }} llamadas Host por ejecución, limita cada solicitud/respuesta a {{ max_host_capability_message_bytes }}, el texto a {{ max_host_capability_text_bytes }} y la espera de cada despacho a {{ host_capability_call_timeout }}.",
+    "El protocolo 1.5 admite hasta {{ max_host_capability_calls }} llamadas Host por ejecución, limita cada solicitud/respuesta a {{ max_host_capability_message_bytes }}, el texto a {{ max_host_capability_text_bytes }} y la espera de cada despacho a {{ host_capability_call_timeout }}. Host files usa rutas relativas de {{ max_host_file_path_bytes }}, texto UTF-8 de {{ max_host_file_text_bytes }} y listados de hasta {{ max_host_file_entries }} nombres de {{ max_host_file_name_bytes }} cada uno.",
     "La cancelación reinicia el proceso; las extensiones nativas y llamadas bloqueantes requieren validación Android posterior.",
     "El permiso `INTERNET` permite que los scripts usen directamente los clientes de red de la biblioteca estándar; pip en línea, la descarga automática de código y la instalación de paquetes de terceros en ejecución siguen sin admitirse."
   ],
@@ -44,7 +44,7 @@
   "unsupported_capabilities": [
     "No hay stdin general en vivo ni streaming callback de `sys.stdin` directo. La interacción en primer plano solo se aplica al `input()` integrado y a `getpass.getpass()` después del EOF del snapshot finito de hasta {{ max_stdin_bytes }}. La escritura de workspace, pip en línea y descarga de wheels siguen sin soporte.",
     "No hay scripts UI, depurador, REPL ni acceso arbitrario a objetos Java del host.",
-    "El broker en vivo cubre la primera entrega completa de bajo riesgo; archivos, diálogos, accesibilidad, capturas y OCR siguen sin declararse.",
+    "El broker en vivo cubre la primera entrega completa de bajo riesgo y Host files acotado; diálogos, engines, accesibilidad, capturas y OCR siguen sin declararse.",
     "No se garantiza Android de 32 bits ni wheels nativas de terceros.",
     "El árbol actual tiene evidencia smoke en un dispositivo API 31 arm64-v8a y en un emulador API 37 x86_64 con páginas de 16 KB; ninguna se presenta como matriz completa de dispositivos ni como calificación de release."
   ],

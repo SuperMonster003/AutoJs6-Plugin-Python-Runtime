@@ -36,10 +36,16 @@ The first capability set is deliberately small:
 
 - `toast.show`;
 - `clip.get` and `clip.set`;
-- `app.launch`, `app.launch_app` and `app.open_url`.
+- `app.launch`, `app.launch_app` and `app.open_url`;
 - `device.info`;
 - `console.log`, `console.warn` and `console.error`;
 - `notice.show`.
+
+The first part of the second capability set adds bounded Host-side files:
+
+- `files.read_text` and `files.write_text`;
+- `files.exists`, `files.is_file` and `files.is_dir`;
+- `files.list`.
 
 The Host reuses `ScriptToast`, `ClipboardUtils`, `AppUtils`, Android's bounded
 device-state services, `GlobalConsole` and `NotificationManagerCompat`. Device
@@ -47,6 +53,13 @@ results have one strict pure-data schema. Notice dispatch checks Android runtime
 app and channel permission state and returns a stable denial without opening
 settings. Future capability batches reuse this protocol and dispatcher; they do
 not require another provider Binder method merely to add a method name.
+
+Host file operations bind to the admitted project root or standalone script
+directory. They accept only normalized relative paths, canonicalize inside that
+root, expose UTF-8 text rather than arbitrary descriptors, cap content and
+directory results, and provide no delete, recursive or parent-creation action.
+They deliberately address the live Host tree while ordinary Python file APIs
+continue to address the frozen Plugin-private workspace snapshot.
 
 ## Boundary and consequences
 

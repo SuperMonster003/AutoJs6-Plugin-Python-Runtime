@@ -50,7 +50,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 - 为已准入项目显式选择 `entryMode=file|module`; module 模式使用标准 `runpy` 元数据、项目根目录 `sys.path[0]` 与包相对导入, file 模式保持普通脚本语义.
 - 在脚本执行期间按 stdout/stderr 原始顺序通过有界 chunk 与 credit 传送; credit 耗尽会对执行施加背压.
 - 通过协议 1.4 显式设置最大 64 KiB 的严格 JSON 结果, 并传送最多 16 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.
-- 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error` 与权限感知 `notice`, 终态后自动撤销.
+- 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、权限感知 `notice` 与有界 `files.read_text/write_text/exists/is_file/is_dir/list`, 终态后自动撤销.
 - 返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.
 - 同一运行时进程只允许一个活动会话, provider 侧不排队.
 - Host 无需重启; 安装或重新启用插件后下一次新执行会重新发现并 pin provider 身份, 在途 Binder death 会终止该执行且绝不自动重放.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.3.0-alpha.2
-release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.3
+release state: 0.3.0-alpha.3 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files portion of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; dialogs, engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 - SOURCE 描述符采用 Binder 接收端完整 PFD 所有权, 保留 reliable-pipe 错误通道, 并在终态或关闭时释放.
 - 输出在执行期间按 credit 逐 chunk 发送; credit 耗尽会暂停脚本, 已接受的输出先于唯一终态, 终态后禁止输出.
 - 结构化 JSON 最大 64 KiB; 输出 artifact 最多 16 个, 路径最大 1024 UTF-8 bytes, 单个最大 4 MiB, 合计最大 8 MiB, Host 必须核对精确长度、EOF 与 SHA-256.
-- 协议 1.5 每次执行最多 1024 次 Host 调用, 单个请求/响应最大 64 KiB, 文本最大 32 KiB, 单次 Host 调度等待最多 5 s.
+- 协议 1.5 每次执行最多 1024 次 Host 调用, 单个请求/响应最大 64 KiB, 文本最大 32 KiB, 单次 Host 调度等待最多 5 s. Host files 使用最大 4 KiB 的相对路径、最大 32 KiB 的 UTF-8 文本, 每次最多枚举 128 个名称, 每个最大 255 UTF-8 bytes.
 - 取消模式为进程重启, 不是 CPython 级协作取消; 原生扩展或阻塞调用仍需后续 Android 验证.
 - 插件已授予 `INTERNET` 以支持脚本通过标准库直接联网; 仍不支持在线 pip、自动下载代码或运行时安装第三方包.
 
@@ -141,7 +141,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 - 不提供通用实时 stdin 或直接 `sys.stdin` callback streaming. 前台交互仅适用于最大 1 MiB 的有限 snapshot 到达 EOF 后的内置 `input()` 与标准库 `getpass.getpass()`. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.
 - 不提供 UI 脚本, 调试器, REPL 或任意宿主 Java 对象访问.
-- 实时 broker 已覆盖完整首批低风险能力; 文件、对话框、无障碍、截图及 OCR 仍未声明.
+- 实时 broker 已覆盖完整首批低风险能力与有界 Host files; 对话框、引擎、无障碍、截图及 OCR 仍未声明.
 - 不声明 32 位 Android 支持, 也不保证任意第三方 native wheel 可用.
 - 当前树已有 API 31 arm64-v8a 真机冒烟证据与 API 37 x86_64 16 KB page 模拟器冒烟证据; 两者都不冒充完整设备矩阵或发布资质.
 
@@ -161,6 +161,14 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 
 ******
 
+# v0.3.0-alpha.3
+
+###### 2026/08/23
+
+* `提示` M3 第三个 current-tree alpha 候选; 第二批有界 Host files 能力已通过双设备聚焦验收, 对话框、引擎、后续能力、公开发布和完整设备矩阵仍不在本条声明范围内
+* `新增` 新增实时 `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API, 在当前项目根目录或单文件脚本目录内进行有界 UTF-8 文本访问
+* `优化` 拒绝不安全或越界路径, 限制文本与直接目录枚举, 返回稳定文件错误, 并明确区分实时 Host 根目录与冻结的插件 workspace 快照
+
 # v0.3.0-alpha.2
 
 ###### 2026/08/23
@@ -177,24 +185,6 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 * `新增` 新增协议 1.5 执行级 Host capability broker, 以纯数据 JSON 绑定 request UUID、插件 UID、单调调用序号、1024 次配额、64 KiB 消息及 5 秒 Host 调度上限
 * `新增` 新增 `autojs6.toast`, `autojs6.clip.get/set` 与 `autojs6.app.launch/launch_app/open_url` 实时 Host API
 * `优化` 终态、取消、Binder death 与清理路径统一撤销 broker, Python 侧稳定映射 capability unavailable、Host 与协议错误
-
-# v0.2.0-alpha.1
-
-###### 2026/08/13
-
-* `提示` 0.1 后的 U1 current-tree alpha 候选; U1-R2 module entry、live output、前台内置 input、显式结构化 JSON 与有界输出 artifact 仅完成到 E2, 后台启动与直接 sys.stdin 仍非交互, R2 E3 仍未完成, 且这些当前树结果不属于设备矩阵/发布/公开证据
-* `新增` 新增最大 1 MiB 的有限预置 stdin snapshot, 为 `input()` 与 `sys.stdin` 提供确定性输入和 EOF
-* `新增` 完善项目导入语义, 支持 workspace 模块, 嵌套入口同级与根模块以及 package-relative import
-* `新增` 新增协议 1.2 显式 `entryMode=file|module`; module 执行通过 `runpy` 提供正确的 `__package__`、`__spec__`、项目根目录 `sys.path[0]` 与相对导入, file 模式保持不变
-* `新增` 新增协议 1.3: 有限 snapshot 到达 EOF 后, 仅前台内置 `input()` 使用可见回显、标准库 `getpass.getpass()` 使用隐藏回显的有界 prompt/reply; 后台启动绝不打开输入 UI, 直接 `sys.stdin` 始终有限
-* `新增` 新增协议 1.4 显式严格 JSON 结果与可选输出 artifact, 对数量、规范化路径、单个/合计大小、精确 PFD 引用及 SHA-256 设限, 且绝不从 stdout 推断结果
-* `修复` 执行前按 strict UTF-8 解码源码, 非 UTF-8 encoding cookie 不再绕过契约
-* `优化` 授予 `INTERNET`, 让可信脚本可直接使用标准库网络客户端, 同时仍禁用在线 pip 与自动代码下载
-* `优化` 将 Provider 执行上限提高到 30 分钟, 有界输出提高到 16 MiB / 16384 个 chunk
-* `优化` 将 stdout/stderr 的有界 chunk 与 credit 背压前移到脚本执行期间, 保留终态前的有序部分输出并禁止终态后输出
-* `优化` 每次执行使用独立 `__main__`, 并恢复 stdin/stdout/stderr, argv, cwd, `sys.path`, module 与 importer cache 状态
-* `优化` 为已打开但未 start 的 session 增加 5 秒 lease, 到期释放输入, descriptor 与单会话占位
-* `优化` Provider 在 Binder 入站强制最低 Host versionCode 5275, 不再只依赖 Host 侧发现检查
 
 ##### 更多版本
 

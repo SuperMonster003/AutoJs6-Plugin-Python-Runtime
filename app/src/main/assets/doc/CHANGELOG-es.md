@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.3
+
+###### 2026/08/23
+
+* `Nota` Tercer candidato alpha M3 del árbol actual; la parte acotada de Host files de la segunda entrega superó la aceptación focalizada en dos dispositivos, sin afirmar diálogos, engines, capacidades posteriores, publicación ni una matriz completa de dispositivos
+* `Función` Añadir las API en vivo `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` para acceso acotado a texto UTF-8 dentro de la raíz del proyecto actual o el directorio del script independiente
+* `Mejora` Rechazar rutas inseguras o fuera de la raíz, limitar texto y listados directos, devolver errores de archivo estables y separar la raíz Host en vivo de la instantánea workspace congelada del Plugin
+
 # v0.3.0-alpha.2
 
 ###### 2026/08/23

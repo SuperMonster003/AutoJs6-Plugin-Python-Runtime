@@ -50,7 +50,7 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 - اختيار `entryMode=file|module` صراحة لمشروع مقبول؛ يستخدم وضع module بيانات `runpy` القياسية وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية للحزمة، بينما يحافظ وضع file على دلالات السكربت العادية.
 - إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.
 - تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه 64 KiB ونقل ما يصل إلى 16 من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.
-- استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
+- استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات و`files.read_text/write_text/exists/is_file/is_dir/list` المحدود مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
 - إرجاع `SystemExit` وأخطاء الصياغة والتنفيذ مع traceback منظم ومحدود.
 - السماح بجلسة نشطة واحدة لكل عملية دون طابور لدى provider.
 - لا حاجة لإعادة تشغيل المضيف: يعيد التنفيذ الجديد التالي بعد التثبيت أو إعادة التفعيل اكتشاف provider وتثبيت هويته، بينما ينهي Binder death أثناء التشغيل ذلك التنفيذ دون إعادة تلقائية.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.3.0-alpha.2
-release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.3
+release state: 0.3.0-alpha.3 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files portion of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; dialogs, engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ runtime/security/release owner: SuperMonster003
 - تتملك العملية نسخ PFD الكاملة المستلمة عبر Binder وتغلقها عند النهاية أو close.
 - يرسل الخرج chunk بعد chunk بالـ credits أثناء التنفيذ؛ يوقف نفاد credits السكربت مؤقتا، ويسبق الخرج المقبول الحالة terminal الوحيدة، ويمنع الخرج بعدها.
 - يحد JSON المنظم عند 64 KiB وتقبل حتى 16 artifacts بمسار 1024 UTF-8 bytes و4 MiB لكل ملف و8 MiB إجمالا مع تحقق Host من الطول الدقيق وEOF وSHA-256.
-- يسمح البروتوكول 1.5 بحد أقصى 1024 من استدعاءات Host لكل تنفيذ، ويحد كل request/response عند 64 KiB والنص عند 32 KiB وانتظار dispatch عند 5 s.
+- يسمح البروتوكول 1.5 بحد أقصى 1024 من استدعاءات Host لكل تنفيذ، ويحد كل request/response عند 64 KiB والنص عند 32 KiB وانتظار dispatch عند 5 s. تستخدم Host files مسارات نسبية بحد 4 KiB ونص UTF-8 بحد 32 KiB وقوائم من 128 اسماً بحد 255 UTF-8 bytes لكل اسم.
 - يعيد الإلغاء تشغيل العملية؛ تتطلب native extensions والاستدعاءات الحاجبة تحقق Android لاحقا.
 - يسمح إذن `INTERNET` للنصوص باستخدام عملاء الشبكة في المكتبة القياسية مباشرة؛ ولا يزال pip عبر الإنترنت والتنزيل التلقائي للكود وتثبيت حزم الجهات الخارجية وقت التشغيل غير مدعوم.
 
@@ -141,7 +141,7 @@ runtime/security/release owner: SuperMonster003
 
 - لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة و`getpass.getpass()` بعد EOF للـ snapshot المحدود حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
 - لا توجد نصوص UI أو debugger أو REPL أو صلاحية عشوائية لكائنات Java في المضيف.
-- يغطي broker المباشر أول مجموعة كاملة منخفضة المخاطر؛ ولا تزال الملفات والحوارات وaccessibility وscreenshot وOCR غير معلنة.
+- يغطي broker المباشر أول مجموعة كاملة منخفضة المخاطر وHost files المحدودة؛ ولا تزال الحوارات وengines وaccessibility وscreenshot وOCR غير معلنة.
 - لا يضمن Android ‏32-bit أو أي native wheel خارجي.
 - تتوفر للشجرة الحالية أدلة smoke على جهاز API 31 ‏arm64-v8a وعلى محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يقدم أي منهما كمصفوفة أجهزة كاملة أو كتأهيل release.
 
@@ -161,6 +161,14 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
+# v0.3.0-alpha.3
+
+###### 2026/08/23
+
+* `ملاحظة` مرشح alpha ثالث من M3 للشجرة الحالية؛ اجتاز الجزء المحدود من Host files في المجموعة الثانية قبولاً مركزاً على جهازين، ولا يشمل ذلك الحوارات أو engines أو القدرات اللاحقة أو النشر أو مصفوفة أجهزة كاملة
+* `إضافة` إضافة API مباشرة `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` للوصول المحدود إلى نص UTF-8 داخل جذر المشروع الحالي أو مجلد السكربت المستقل
+* `تحسين` رفض المسارات غير الآمنة أو الخارجة من الجذر، وتقييد النص والقوائم المباشرة، وإرجاع أخطاء ملفات مستقرة، وفصل جذر Host المباشر عن workspace snapshot المجمدة في Plugin
+
 # v0.3.0-alpha.2
 
 ###### 2026/08/23
@@ -177,24 +185,6 @@ runtime/security/release owner: SuperMonster003
 * `إضافة` إضافة Host capability broker خاص بالتنفيذ في البروتوكول 1.5 عبر JSON ببيانات خالصة مرتبط بـ request UUID وUID الإضافة ومعرفات call متزايدة وحصة 1024 استدعاء ورسائل 64 KiB وحد dispatch للمضيف قدره 5 ثوان
 * `إضافة` إضافة Host API مباشرة: `autojs6.toast` و`autojs6.clip.get/set` و`autojs6.app.launch/launch_app/open_url`
 * `تحسين` إلغاء broker بشكل موحد عند terminal والإلغاء وBinder death والتنظيف، مع أخطاء Python ثابتة للقدرات غير المتاحة وأخطاء Host أو protocol
-
-# v0.2.0-alpha.1
-
-###### 2026/08/13
-
-* `ملاحظة` مرشح alpha لشجرة U1 الحالية بعد 0.1؛ تغطى module entry وlive output وinput المضمن في foreground وstructured JSON الصريح وoutput artifacts المحدودة في U1-R2 حتى E2 فقط؛ تظل عمليات background وsys.stdin المباشر غير تفاعلية ويبقى R2 E3 مفتوحا ولا تثبت نتائج الشجرة الحالية مصفوفة اجهزة او اصدارا او نشرا عاما
-* `إضافة` إضافة snapshot محدود ومقدم مسبقا لـ stdin بحجم أقصى 1 MiB لتوفير input وEOF حتميين عبر `input()` و`sys.stdin`
-* `إضافة` إكمال دلالات project import لوحدات workspace ووحدات sibling/root لنقطة دخول متداخلة وعمليات package-relative import
-* `إضافة` إضافة البروتوكول 1.2 مع `entryMode=file|module` الصريح؛ يستخدم تنفيذ module أداة `runpy` مع `__package__` و`__spec__` الصحيحين وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية، بينما يبقى وضع file دون تغيير
-* `إضافة` إضافة prompt/reply محدود في البروتوكول 1.3 ومقصور على foreground بعد EOF للـ snapshot المحدود، بإدخال ظاهر للدالة `input()` ومخفي للدالة `getpass.getpass()`؛ لا تفتح عمليات background واجهة إدخال ويظل `sys.stdin` المباشر محدودا
-* `إضافة` إضافة نتائج JSON صارمة وصريحة وoutput artifacts اختيارية في البروتوكول 1.4 ضمن حدود العدد والمسار المنظم وحجم الملف/الإجمالي ومراجع PFD الدقيقة وSHA-256 دون استنتاج نتيجة من stdout
-* `إصلاح` فك source بترميز strict UTF-8 قبل التنفيذ لمنع encoding cookie بترميز آخر من تجاوز العقد
-* `تحسين` منح `INTERNET` كي تستخدم النصوص الموثوقة عملاء شبكة المكتبة القياسية مباشرة مع إبقاء pip عبر الإنترنت والتنزيل التلقائي للكود معطلين
-* `تحسين` رفع حد تنفيذ Provider إلى 30 دقيقة والإخراج المحدود إلى 16 MiB / 16384 chunks
-* `تحسين` نقل chunks المحدودة من stdout/stderr والضغط العكسي بالـ credits إلى أثناء تنفيذ السكربت، مع حفظ الخرج الجزئي المرتب قبل terminal ومنعه بعدها
-* `تحسين` استخدام `__main__` مستقل لكل تنفيذ واستعادة حالات stdin/stdout/stderr وargv وcwd و`sys.path` وmodule وimporter cache
-* `تحسين` تطبيق lease مدته 5 ثوان على session مفتوحة لم تبدأ ثم تحرير inputs وdescriptors وموضع session الوحيد
-* `تحسين` فرض الحد الأدنى Host versionCode 5275 عند حد Binder الخاص بـ Provider بدلا من الاعتماد فقط على discovery من Host
 
 ##### المزيد من الإصدارات
 

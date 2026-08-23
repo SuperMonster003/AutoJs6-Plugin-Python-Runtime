@@ -50,7 +50,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 - 許可済み project では `entryMode=file|module` を明示的に選択します. module mode は標準 `runpy` metadata, project root の `sys.path[0]`, package-relative import を使用し, file mode は通常の script semantics を維持します.
 - スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.
 - protocol 1.4 で最大 64 KiB の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 16 個転送します. stdout から result を推測しません.
-- 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice` をリアルタイムに呼び出し、terminal 時に無効化します.
+- 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list` をリアルタイムに呼び出し、terminal 時に無効化します.
 - `SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.
 - プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.
 - ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.3.0-alpha.2
-release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.3
+release state: 0.3.0-alpha.3 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files portion of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; dialogs, engines, later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -129,7 +129,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 - Binder 受信側の完全な PFD を所有し, 終端または close 時に閉じます.
 - 出力は実行中に credit ごとに chunk 単位で送信します. credit 枯渇時はスクリプトを停止し, 受理済み出力は唯一の terminal より前に置かれ, terminal 後の出力は禁止されます.
 - 構造化 JSON は 64 KiB, artifact は最大 16 個, path は 1024 UTF-8 bytes, 1 file は 4 MiB, 合計は 8 MiB が上限で, Host が正確な長さ, EOF, SHA-256 を検証します.
-- プロトコル 1.5 は実行ごとに最大 1024 Host call、request/response ごとに 64 KiB、text に 32 KiB、1 dispatch の待機に 5 s の上限を設けます.
+- プロトコル 1.5 は実行ごとに最大 1024 Host call、request/response ごとに 64 KiB、text に 32 KiB、1 dispatch の待機に 5 s の上限を設けます. Host files は 4 KiB の相対 path、32 KiB の UTF-8 text、最大 128 件かつ各 255 UTF-8 bytes の名前に制限されます.
 - キャンセルはプロセス再起動方式です. native extension とブロッキング呼び出しは Android 検証が必要です.
 - `INTERNET` 権限によりスクリプトは標準ライブラリのネットワーク機能を直接利用できますが、online pip、自動コードダウンロード、実行時の第三者パッケージ導入は引き続き非対応です.
 
@@ -141,7 +141,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 - 汎用 live stdin と直接の `sys.stdin` callback streaming は未対応です. foreground 対話は最大 1 MiB の有限 snapshot が EOF に達した後の組み込み `input()` と標準ライブラリの `getpass.getpass()` のみに適用されます. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
 - UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.
-- live broker は最初の低リスク機能一式を提供します. files、dialogs、accessibility、screenshot、OCR は未宣言です.
+- live broker は最初の低リスク機能一式と有界な Host files を提供します. dialogs、engines、accessibility、screenshot、OCR は未宣言です.
 - 32 bit Android と任意の native wheel は保証しません.
 - 現在の tree には API 31 arm64-v8a 実機 smoke evidence と API 37 x86_64 16 KB page emulator smoke evidence がありますが, 完全な device matrix や release qualification とは扱いません.
 
@@ -161,6 +161,14 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 
 ******
 
+# v0.3.0-alpha.3
+
+###### 2026/08/23
+
+* `注記` M3 3 番目の current-tree alpha candidate です. 第 2 batch の有界 Host files が 2 device の focused acceptance を通過しましたが、dialogs、engines、後続 capability、公開、完全な device matrix は含みません
+* `追加` 現在の project root または standalone script directory 内で有界な UTF-8 text access を行う live `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API を追加
+* `改善` unsafe または root 外の path を拒否し、text と direct listing を制限し、安定した file error を返し、live Host root と凍結済み Plugin workspace snapshot を明確に分離
+
 # v0.3.0-alpha.2
 
 ###### 2026/08/23
@@ -177,24 +185,6 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 * `追加` request UUID、plugin UID、単調 call ID、1024 call quota、64 KiB message、5 秒 Host dispatch 上限に結び付く pure-data JSON の protocol 1.5 execution-scoped Host capability broker を追加
 * `追加` live Host API `autojs6.toast`、`autojs6.clip.get/set`、`autojs6.app.launch/launch_app/open_url` を追加
 * `改善` terminal、cancel、Binder death、cleanup の全経路で broker を無効化し、unavailable capability と Host/protocol error を安定した Python error に変換
-
-# v0.2.0-alpha.1
-
-###### 2026/08/13
-
-* `注記` 0.1 後の U1 current-tree alpha candidate. U1-R2 の module entry, live output, foreground 組み込み input, 明示的 structured JSON, 上限付き output artifact は E2 までのみ完了しています. background 起動と直接の sys.stdin は非対話のままで, R2 E3 は未完了であり, current-tree の結果は device matrix/release/public evidence ではありません
-* `追加` 最大 1 MiB の有限な事前提供 stdin snapshot を追加し, `input()` と `sys.stdin` に決定的な入力と EOF を提供
-* `追加` workspace module, nested entry の sibling/root module, package-relative import に対応して project import semantics を完成
-* `追加` プロトコル 1.2 の明示的な `entryMode=file|module` を追加し, module 実行は `runpy` により正しい `__package__`, `__spec__`, project root の `sys.path[0]`, relative import を使用し, file mode は変更しない
-* `追加` プロトコル 1.3 で有限 snapshot の EOF 後に foreground 限定の上限付き prompt/reply を追加し, 組み込み `input()` は表示入力, `getpass.getpass()` は非表示入力を使用し, background 起動では入力 UI を開かず, 直接の `sys.stdin` は有限のままにする
-* `追加` プロトコル 1.4 で明示的な厳密 JSON result と任意 output artifact を追加し, count, normalized path, file/aggregate size, exact PFD reference, SHA-256 を制限して stdout から result を推測しない
-* `修正` 実行前に source を strict UTF-8 で decode し, 非 UTF-8 encoding cookie による contract 回避を防止
-* `改善` `INTERNET` を付与して信頼済みスクリプトが標準ライブラリのネットワーククライアントを直接利用できるようにし、online pip と自動コードダウンロードは引き続き無効化
-* `改善` Provider の実行上限を 30 分、有界出力を 16 MiB / 16384 chunks に拡大
-* `改善` 上限付き stdout/stderr chunk と credit backpressure をスクリプト実行中へ移し, terminal 前の順序付き部分出力を保持して terminal 後の出力を禁止
-* `改善` 実行ごとに独立した `__main__` を使用し, stdin/stdout/stderr, argv, cwd, `sys.path`, module, importer cache の状態を復元
-* `改善` open 後に start されない session に 5 秒 lease を適用し, 期限後に input, descriptor, 単一 session slot を解放
-* `改善` Host 側 discovery だけに依存せず, Provider の Binder 境界で最低 Host versionCode 5275 を強制
 
 ##### その他のバージョン
 

@@ -5,6 +5,18 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v0.3.0-alpha.3": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "M3 第三个 current-tree alpha 候选; 第二批有界 Host files 能力已通过双设备聚焦验收, 对话框、引擎、后续能力、公开发布和完整设备矩阵仍不在本条声明范围内"
+      ],
+      "feature": [
+        "新增实时 `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API, 在当前项目根目录或单文件脚本目录内进行有界 UTF-8 文本访问"
+      ],
+      "improvement": [
+        "拒绝不安全或越界路径, 限制文本与直接目录枚举, 返回稳定文件错误, 并明确区分实时 Host 根目录与冻结的插件 workspace 快照"
+      ]
+    },
     "v0.3.0-alpha.2": {
       "released_date": "2026/08/23",
       "hint": [

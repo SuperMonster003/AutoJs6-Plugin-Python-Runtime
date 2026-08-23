@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.3
+
+###### 2026/08/23
+
+* `注記` M3 3 番目の current-tree alpha candidate です. 第 2 batch の有界 Host files が 2 device の focused acceptance を通過しましたが、dialogs、engines、後続 capability、公開、完全な device matrix は含みません
+* `追加` 現在の project root または standalone script directory 内で有界な UTF-8 text access を行う live `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API を追加
+* `改善` unsafe または root 外の path を拒否し、text と direct listing を制限し、安定した file error を返し、live Host root と凍結済み Plugin workspace snapshot を明確に分離
+
 # v0.3.0-alpha.2
 
 ###### 2026/08/23

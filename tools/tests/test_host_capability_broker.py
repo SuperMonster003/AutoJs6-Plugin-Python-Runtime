@@ -235,7 +235,16 @@ class HostCapabilityBrokerTest(unittest.TestCase):
             self.assertEqual("写入", broker.file_texts["written.txt"])
 
             call_count = len(broker.calls)
-            for unsafe in ("", "../outside", "/absolute", "C:/absolute", "a\\b", "a//b"):
+            for unsafe in (
+                "",
+                "../outside",
+                "/absolute",
+                "C:/absolute",
+                "C:relative",
+                "a\\b",
+                "a//b",
+                "entry\u0085.txt",
+            ):
                 with self.subTest(unsafe=unsafe):
                     with self.assertRaises(ValueError):
                         files.exists(unsafe)
