@@ -120,6 +120,13 @@ class RecordingBroker:
         self.retained_image: tuple[str, bytes, str] | None = None
         self.image_releases: list[str] = []
         self.color_match: tuple[int, int] | None = (17, 29)
+        self.template_generation = 0
+        self.pending_template: dict[str, object] | None = None
+        self.retained_template: tuple[str, bytes, str, int, int] | None = None
+        self.uploaded_templates: list[tuple[str, bytes, str]] = []
+        self.template_releases: list[str] = []
+        self.template_dimensions = (4, 3)
+        self.image_match: tuple[int, int] | None = (17, 29)
 
     def dispatch(self, request_json: str) -> str:
         self.raw_requests.append(request_json)
@@ -241,6 +248,92 @@ class RecordingBroker:
                         "x": self.color_match[0],
                         "y": self.color_match[1],
                     }
+            elif capability == "images.begin_template":
+                self.template_generation += 1
+                template_id = f"template-{self.template_generation}"
+                self.pending_template = {
+                    "id": template_id,
+                    "format": arguments["format"],
+                    "byteLength": arguments["byteLength"],
+                    "sha256": arguments["sha256"],
+                    "payload": bytearray(),
+                }
+                self.retained_template = None
+                value = {
+                    "schema": images.TEMPLATE_SCHEMA,
+                    "id": template_id,
+                    "format": arguments["format"],
+                    "byteLength": arguments["byteLength"],
+                }
+            elif capability == "images.write_template_chunk":
+                pending = self.pending_template
+                if pending is None or arguments["templateId"] != pending["id"]:
+                    raise AssertionError("unexpected stale template upload")
+                payload = pending["payload"]
+                if not isinstance(payload, bytearray):
+                    raise AssertionError("unexpected template upload buffer")
+                if arguments["offset"] != len(payload):
+                    raise AssertionError("unexpected template upload offset")
+                decoded = base64.b64decode(arguments["data"], validate=True)
+                if base64.b64encode(decoded).decode("ascii") != arguments["data"]:
+                    raise AssertionError("unexpected non-canonical template chunk")
+                payload.extend(decoded)
+                byte_length = pending["byteLength"]
+                if type(byte_length) is not int or len(payload) > byte_length:
+                    raise AssertionError("unexpected template upload length")
+                complete = len(payload) == byte_length
+                width, height = self.template_dimensions if complete else (0, 0)
+                if complete:
+                    uploaded = bytes(payload)
+                    if hashlib.sha256(uploaded).hexdigest() != pending["sha256"]:
+                        raise AssertionError("unexpected template upload digest")
+                    retained = (
+                        str(pending["id"]),
+                        uploaded,
+                        str(pending["format"]),
+                        width,
+                        height,
+                    )
+                    self.retained_template = retained
+                    self.uploaded_templates.append((retained[0], retained[1], retained[2]))
+                    self.pending_template = None
+                value = {
+                    "schema": images.TEMPLATE_CHUNK_SCHEMA,
+                    "templateId": arguments["templateId"],
+                    "offset": arguments["offset"],
+                    "nextOffset": len(payload),
+                    "complete": complete,
+                    "width": width,
+                    "height": height,
+                }
+            elif capability == "images.find_image":
+                retained = self.retained_template
+                if retained is None or arguments["templateId"] != retained[0]:
+                    raise AssertionError("unexpected stale template search")
+                if self.image_match is None:
+                    value = {
+                        "schema": images.IMAGE_MATCH_SCHEMA,
+                        "found": False,
+                        "x": -1,
+                        "y": -1,
+                    }
+                else:
+                    value = {
+                        "schema": images.IMAGE_MATCH_SCHEMA,
+                        "found": True,
+                        "x": self.image_match[0],
+                        "y": self.image_match[1],
+                    }
+            elif capability == "images.release_template":
+                template_id = arguments["templateId"]
+                pending_id = None if self.pending_template is None else self.pending_template["id"]
+                retained_id = None if self.retained_template is None else self.retained_template[0]
+                if template_id not in (pending_id, retained_id):
+                    raise AssertionError("unexpected stale template release")
+                self.template_releases.append(template_id)
+                self.pending_template = None
+                self.retained_template = None
+                value = None
             elif capability in {
                 "toast.show",
                 "console.log",
@@ -1000,6 +1093,211 @@ class HostCapabilityBrokerTest(unittest.TestCase):
                 self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
             finally:
                 _reset_execution_broker(token)
+
+    def test_images_find_image_uploads_bounded_templates_and_always_releases(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            self.assertEqual(
+                (17, 29),
+                images.find_image(
+                    memoryview(PNG_BYTES),
+                    region=(10, 20, 100, 200),
+                    threshold=2,
+                ),
+            )
+            broker.image_match = None
+            self.assertIsNone(images.find_image(bytearray(JPEG_BYTES)))
+        finally:
+            _reset_execution_broker(token)
+
+        self.assertEqual(
+            [
+                "images.begin_template",
+                "images.write_template_chunk",
+                "images.write_template_chunk",
+                "images.find_image",
+                "images.release_template",
+                "images.begin_template",
+                "images.write_template_chunk",
+                "images.find_image",
+                "images.release_template",
+            ],
+            [capability for capability, _ in broker.calls],
+        )
+        self.assertEqual(
+            {
+                "format": "png",
+                "byteLength": len(PNG_BYTES),
+                "sha256": hashlib.sha256(PNG_BYTES).hexdigest(),
+            },
+            broker.calls[0][1],
+        )
+        uploaded_chunks = [
+            base64.b64decode(arguments["data"], validate=True)
+            for capability, arguments in broker.calls[1:3]
+            if capability == "images.write_template_chunk"
+        ]
+        self.assertEqual(PNG_BYTES, b"".join(uploaded_chunks))
+        self.assertEqual(images.MAX_TEMPLATE_CHUNK_BYTES, len(uploaded_chunks[0]))
+        self.assertEqual(
+            {
+                "templateId": "template-1",
+                "threshold": 2,
+                "region": {"x": 10, "y": 20, "width": 100, "height": 200},
+            },
+            broker.calls[3][1],
+        )
+        self.assertEqual(
+            [
+                ("template-1", PNG_BYTES, "png"),
+                ("template-2", JPEG_BYTES, "jpeg"),
+            ],
+            broker.uploaded_templates,
+        )
+        self.assertEqual(["template-1", "template-2"], broker.template_releases)
+        self.assertIsNone(broker.pending_template)
+        self.assertIsNone(broker.retained_template)
+
+    def test_images_find_image_rejects_invalid_inputs_before_dispatch(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        invalid_payload = bytearray(b"not-an-image")
+        try:
+            invalid_calls = (
+                lambda: images.find_image("png"),
+                lambda: images.find_image([]),
+                lambda: images.find_image(b""),
+                lambda: images.find_image(
+                    b"\x89PNG\r\n\x1a\n" + b"x" * images.MAX_TEMPLATE_BYTES
+                ),
+                lambda: images.find_image(invalid_payload),
+                lambda: images.find_image(b"\xff\xd8missing-end"),
+                lambda: images.find_image(PNG_BYTES, threshold=True),
+                lambda: images.find_image(PNG_BYTES, threshold=-1),
+                lambda: images.find_image(
+                    PNG_BYTES,
+                    threshold=images.MAX_COLOR_THRESHOLD + 1,
+                ),
+                lambda: images.find_image(PNG_BYTES, region=(0, 0, 0, 1)),
+                lambda: images.find_image(PNG_BYTES, region=(0, 0, 1)),
+            )
+            for invalid in invalid_calls:
+                with self.subTest(invalid=invalid), self.assertRaises((TypeError, ValueError)):
+                    invalid()
+            self.assertEqual(bytearray(b"not-an-image"), invalid_payload)
+            self.assertEqual([], broker.calls)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_images_find_image_maps_host_failures_and_preserves_primary_error(self) -> None:
+        for capability, code, error_type in (
+            ("images.find_image", "ACCESSIBILITY_UNAVAILABLE", CapabilityUnavailableError),
+            ("images.find_image", "SCREEN_CAPTURE_UNAVAILABLE", CapabilityUnavailableError),
+            ("images.find_image", "SCREEN_CAPTURE_FAILED", HostCapabilityError),
+            ("images.find_image", "RESULT_LIMIT_EXCEEDED", HostCapabilityError),
+            ("images.find_image", "STALE_TEMPLATE", HostCapabilityError),
+            ("images.write_template_chunk", "INVALID_IMAGE_TEMPLATE", HostCapabilityError),
+        ):
+            broker = RecordingBroker()
+            broker.capability_failures[capability] = (code, "template search failure")
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.subTest(code=code), self.assertRaises(error_type) as captured:
+                    images.find_image(JPEG_BYTES)
+                if isinstance(captured.exception, HostCapabilityError):
+                    self.assertEqual(code, captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
+            self.assertEqual("images.release_template", broker.calls[-1][0])
+
+        primary = RecordingBroker()
+        primary.capability_failures["images.find_image"] = (
+            "SCREEN_CAPTURE_FAILED",
+            "capture failed",
+        )
+        primary.capability_failures["images.release_template"] = (
+            "HOST_FAILURE",
+            "release also failed",
+        )
+        token = _install_execution_broker(primary, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                images.find_image(JPEG_BYTES)
+            self.assertEqual("SCREEN_CAPTURE_FAILED", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+        self.assertEqual("images.release_template", primary.calls[-1][0])
+
+        release_failed = RecordingBroker()
+        release_failed.capability_failures["images.release_template"] = (
+            "HOST_FAILURE",
+            "release failed",
+        )
+        token = _install_execution_broker(release_failed, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                images.find_image(JPEG_BYTES)
+            self.assertEqual("HOST_FAILURE", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_images_find_image_rejects_malformed_template_protocol_results(self) -> None:
+        def mutate_final_dimensions(response: dict[str, object]) -> None:
+            value = response["value"]
+            if isinstance(value, dict) and value.get("complete") is True:
+                value["width"] = images.MAX_TEMPLATE_DIMENSION + 1
+
+        mutations = (
+            (
+                "images.begin_template",
+                lambda response: response["value"].__setitem__("schema", "wrong"),
+            ),
+            (
+                "images.begin_template",
+                lambda response: response["value"].__setitem__("byteLength", 1),
+            ),
+            (
+                "images.write_template_chunk",
+                lambda response: response["value"].__setitem__("offset", 1),
+            ),
+            (
+                "images.write_template_chunk",
+                lambda response: response["value"].__setitem__(
+                    "complete", not response["value"]["complete"]
+                ),
+            ),
+            ("images.write_template_chunk", mutate_final_dimensions),
+            (
+                "images.find_image",
+                lambda response: response["value"].__setitem__("schema", "wrong"),
+            ),
+            (
+                "images.find_image",
+                lambda response: response["value"].update(
+                    {"found": False, "x": 0, "y": 0}
+                ),
+            ),
+            (
+                "images.find_image",
+                lambda response: response["value"].update(
+                    {"found": True, "x": 109, "y": 20}
+                ),
+            ),
+        )
+        for capability, mutator in mutations:
+            broker = RecordingBroker()
+            broker.capability_mutators[capability] = mutator
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.subTest(capability=capability), self.assertRaises(
+                    HostCapabilityError
+                ) as captured:
+                    images.find_image(PNG_BYTES, region=(10, 20, 100, 200))
+                self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
+            self.assertEqual("images.release_template", broker.calls[-1][0])
 
     def test_images_map_capture_lifecycle_failures_and_preserve_primary_errors(self) -> None:
         for code, error_type in (
