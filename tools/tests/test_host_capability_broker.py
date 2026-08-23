@@ -119,6 +119,7 @@ class RecordingBroker:
         self.image_bytes_override: bytes | None = None
         self.retained_image: tuple[str, bytes, str] | None = None
         self.image_releases: list[str] = []
+        self.color_match: tuple[int, int] | None = (17, 29)
 
     def dispatch(self, request_json: str) -> str:
         self.raw_requests.append(request_json)
@@ -225,6 +226,21 @@ class RecordingBroker:
                 self.image_releases.append(arguments["imageId"])
                 self.retained_image = None
                 value = None
+            elif capability == "images.find_color":
+                if self.color_match is None:
+                    value = {
+                        "schema": images.COLOR_MATCH_SCHEMA,
+                        "found": False,
+                        "x": -1,
+                        "y": -1,
+                    }
+                else:
+                    value = {
+                        "schema": images.COLOR_MATCH_SCHEMA,
+                        "found": True,
+                        "x": self.color_match[0],
+                        "y": self.color_match[1],
+                    }
             elif capability in {
                 "toast.show",
                 "console.log",
@@ -838,6 +854,152 @@ class HostCapabilityBrokerTest(unittest.TestCase):
             self.assertEqual([], broker.calls)
         finally:
             _reset_execution_broker(token)
+
+    def test_images_find_color_uses_bounded_rgb_region_and_threshold(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            self.assertEqual(
+                (17, 29),
+                images.find_color(
+                    "#123456",
+                    region=(10, 20, 100, 200),
+                    threshold=2,
+                ),
+            )
+            broker.color_match = None
+            self.assertIsNone(images.find_color(0xABCDEF, region=None))
+        finally:
+            _reset_execution_broker(token)
+
+        self.assertEqual(
+            [
+                (
+                    "images.find_color",
+                    {
+                        "color": 0x123456,
+                        "threshold": 2,
+                        "region": {"x": 10, "y": 20, "width": 100, "height": 200},
+                    },
+                ),
+                (
+                    "images.find_color",
+                    {"color": 0xABCDEF, "threshold": 0, "region": None},
+                ),
+            ],
+            broker.calls,
+        )
+
+    def test_images_find_color_rejects_invalid_inputs_before_dispatch(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            invalid_calls = (
+                lambda: images.find_color(True),
+                lambda: images.find_color(-1),
+                lambda: images.find_color(images.MAX_COLOR + 1),
+                lambda: images.find_color("123456"),
+                lambda: images.find_color("#12345G"),
+                lambda: images.find_color("#1234567"),
+                lambda: images.find_color(0, threshold=True),
+                lambda: images.find_color(0, threshold=-1),
+                lambda: images.find_color(0, threshold=images.MAX_COLOR_THRESHOLD + 1),
+                lambda: images.find_color(0, region=7),
+                lambda: images.find_color(0, region=(0, 0, 1)),
+                lambda: images.find_color(0, region=(True, 0, 1, 1)),
+                lambda: images.find_color(0, region=(-1, 0, 1, 1)),
+                lambda: images.find_color(0, region=(0, 0, 0, 1)),
+                lambda: images.find_color(0, region=(0, 0, images.MAX_DIMENSION + 1, 1)),
+                lambda: images.find_color(
+                    0,
+                    region=(images.MAX_DIMENSION - 1, 0, 2, 1),
+                ),
+            )
+            for invalid in invalid_calls:
+                with self.subTest(invalid=invalid), self.assertRaises((TypeError, ValueError)):
+                    invalid()
+            self.assertEqual([], broker.calls)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_images_find_color_maps_capture_failures_and_rejects_malformed_results(self) -> None:
+        for code, error_type in (
+            ("ACCESSIBILITY_UNAVAILABLE", CapabilityUnavailableError),
+            ("SCREEN_CAPTURE_UNAVAILABLE", CapabilityUnavailableError),
+            ("SCREEN_CAPTURE_FAILED", HostCapabilityError),
+            ("RESULT_LIMIT_EXCEEDED", HostCapabilityError),
+        ):
+            broker = RecordingBroker()
+            broker.failure = (code, "screen color failure")
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.subTest(code=code), self.assertRaises(error_type) as captured:
+                    images.find_color(0x123456)
+                if isinstance(captured.exception, HostCapabilityError):
+                    self.assertEqual(code, captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
+
+        malformed_values = (
+            "not-an-object",
+            {
+                "schema": "wrong",
+                "found": True,
+                "x": 17,
+                "y": 29,
+            },
+            {
+                "schema": images.COLOR_MATCH_SCHEMA,
+                "found": 1,
+                "x": 17,
+                "y": 29,
+            },
+            {
+                "schema": images.COLOR_MATCH_SCHEMA,
+                "found": False,
+                "x": 0,
+                "y": 0,
+            },
+            {
+                "schema": images.COLOR_MATCH_SCHEMA,
+                "found": True,
+                "x": True,
+                "y": 29,
+            },
+            {
+                "schema": images.COLOR_MATCH_SCHEMA,
+                "found": True,
+                "x": images.MAX_DIMENSION,
+                "y": 29,
+            },
+            {
+                "schema": images.COLOR_MATCH_SCHEMA,
+                "found": True,
+                "x": 0,
+                "y": 0,
+            },
+            {
+                "schema": images.COLOR_MATCH_SCHEMA,
+                "found": True,
+                "x": 10,
+                "y": 20,
+                "unexpected": True,
+            },
+        )
+        for malformed in malformed_values:
+            broker = RecordingBroker()
+            broker.response_mutator = lambda response, value=malformed: response.__setitem__(
+                "value", value
+            )
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.subTest(malformed=malformed), self.assertRaises(
+                    HostCapabilityError
+                ) as captured:
+                    images.find_color(0x123456, region=(10, 20, 2, 2))
+                self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
 
     def test_images_map_capture_lifecycle_failures_and_preserve_primary_errors(self) -> None:
         for code, error_type in (
