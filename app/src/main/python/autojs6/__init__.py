@@ -1,6 +1,6 @@
 """Execution-scoped AutoJs6 data, result and live Host capability APIs."""
 
-from . import app, artifacts, clip, console, device, execution, project, result
+from . import app, artifacts, clip, console, device, execution, files, project, result
 from ._broker import _call, _expect_none, _require_text
 from .errors import (
     AutoJs6Error,
@@ -40,6 +40,7 @@ __all__ = (
     "console",
     "device",
     "execution",
+    "files",
     "project",
     "result",
     "notice",
