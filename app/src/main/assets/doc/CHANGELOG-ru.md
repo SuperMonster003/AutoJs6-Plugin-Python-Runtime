@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.1
+
+###### 2026/08/23
+
+* `Примечание` Первый alpha-кандидат автоматизации M3 текущего дерева; ограниченные координатные/global действия прошли целевую приемку на эмуляторе API 37 с включенной accessibility, а fail-closed прошел на физическом устройстве API 31 без изменения его accessibility services; selector/UI tree, screenshot, OCR, публикация и полная матрица устройств остаются вне заявления
+* `Добавлено` Добавлены live API `autojs6.automator.click/long_click/press/swipe/back/home` через Host accessibility с возвратом фактического логического результата dispatch
+* `Улучшено` Координаты принимают только строгие не-boolean целые от 0 до 1000000, а длительность press/swipe — от 1 до 4000 ms; недоступная Host accessibility вызывает `CapabilityUnavailableError` без открытия настроек
+
 # v0.3.0-alpha.6
 
 ###### 2026/08/23

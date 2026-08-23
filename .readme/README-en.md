@@ -51,7 +51,7 @@ Python Runtime is an independent provider for version 1 of the Python protocol. 
 - Import project-local pure-Python packages and `.dist-info` metadata from the admitted project root without online pip or runtime installation.
 - Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.
 - Set an explicit strict JSON result of at most 64 KiB and transfer up to 16 optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.
-- Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, and `engines.current/run/stop_self` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.
+- Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, and bounded `automator.click/long_click/press/swipe/back/home` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.
 - Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.
 - Allow one active session in the runtime process with no provider-side queue.
 - Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed.
@@ -103,8 +103,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 > Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
-release target: 0.3.0-alpha.6
-release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.1
+release state: 0.4.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator coordinate/global actions passed on the accessibility-enabled emulator, and physical-device fail-closed acceptance passed without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -132,6 +132,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 - Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.
 - Structured JSON is capped at 64 KiB; at most 16 artifacts are accepted with 1024 UTF-8 bytes paths, 4 MiB per file, 8 MiB aggregate, and Host verification of exact length, EOF, and SHA-256.
 - Protocol 1.5 admits at most 1024 Host calls per execution, caps each request/response at 64 KiB and text at 32 KiB, and waits at most 5 s for an ordinary Host main-thread action. Host files use 4 KiB relative paths, 32 KiB UTF-8 text, and listings of at most 128 names of 255 UTF-8 bytes each. Foreground dialogs cap titles at 256 UTF-8 bytes, content at 4 KiB, prompt defaults/replies at 32 KiB, and selection lists at 64 items of 1 KiB each and 32 KiB total; one user response may wait up to 5 min. One execution may successfully launch at most 16 scoped asynchronous non-Python Host child scripts; nested Python returns `NESTED_PYTHON_NOT_ALLOWED`, and `stop_self` cancels through process restart.
+- Automator coordinates are strict integers from 0 through 1000000, while press and swipe durations range from 1 ms through 4 s; unavailable Host accessibility raises `CapabilityUnavailableError` without opening settings.
 - Cancellation uses process restart rather than CPython-level cooperation; native extensions and blocking calls still require later Android validation.
 - The plugin grants `INTERNET` for script-initiated standard-library networking; online pip, automatic code downloads, and runtime third-party package installation remain unsupported.
 
@@ -143,7 +144,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 - General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to built-in `input()` and standard-library `getpass.getpass()` after the finite snapshot of at most 1 MiB reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.
 - There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.
-- The live broker covers the complete first low-risk slice, bounded Host files, foreground dialogs, and bounded engines; accessibility, screenshot, and OCR APIs remain undeclared.
+- The live broker covers the complete first low-risk slice, bounded Host files, foreground dialogs, bounded engines, and explicit coordinate/global automator actions; selector/UI-tree, screenshot, and OCR APIs remain undeclared.
 - 32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.
 - The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification.
 
@@ -153,7 +154,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-M4 Path A is complete: admitted projects may carry pure-Python dependencies, and the expanded three-dimensional workspace profile plus a real requests HTTPS case passed dual-device acceptance. Later M3 automation capabilities and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.
+M4 Path A is complete, and M3 automation has begun with bounded coordinate gestures plus Back and Home actions through Host accessibility. Selector/UI-tree, screenshot, OCR, and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +163,14 @@ M4 Path A is complete: admitted projects may carry pure-Python dependencies, and
 ### Release history
 
 ******
+
+# v0.4.0-alpha.1
+
+###### 2026/08/23
+
+* `Hint` First M3 automation current-tree alpha candidate; bounded coordinate/global actions passed focused acceptance on an accessibility-enabled API 37 emulator and fail-closed passed on an API 31 physical device without changing its accessibility services, while selector/UI-tree, screenshots, OCR, publication, and a complete device matrix remain outside this claim
+* `Feature` Add live `autojs6.automator.click/long_click/press/swipe/back/home` APIs through Host accessibility, returning the actual boolean dispatch result
+* `Improvement` Require strict non-boolean integer coordinates from 0 through 1000000 and press/swipe durations from 1 through 4000 ms; unavailable Host accessibility raises `CapabilityUnavailableError` without opening settings
 
 # v0.3.0-alpha.6
 
@@ -178,14 +187,6 @@ M4 Path A is complete: admitted projects may carry pure-Python dependencies, and
 * `Hint` Fifth M3 current-tree alpha candidate; the bounded Host-engines portion of the second capability slice passed focused dual-device acceptance, while later capabilities, publication, and a complete device matrix remain outside this claim
 * `Feature` Add live `autojs6.engines.current/run/stop_self` APIs for path-free current-engine metadata, asynchronous non-Python Host child-script launch, and deterministic self-stop
 * `Improvement` Accept only normalized execution-root-relative child paths and at most 16 successful launches per execution; fail nested Python with stable `NESTED_PYTHON_NOT_ALLOWED`, while `stop_self` cancels through provider-process restart
-
-# v0.3.0-alpha.4
-
-###### 2026/08/23
-
-* `Hint` Fourth M3 current-tree alpha candidate; foreground Host dialogs passed focused dual-device acceptance, while engines, later capabilities, publication, and a complete device matrix remain outside this claim
-* `Feature` Add foreground-only `autojs6.dialogs.alert/confirm/prompt/select` APIs with typed acknowledgement, confirmation, nullable prompt text, and zero-based nullable selection results
-* `Improvement` Bound dialog titles, content, replies, and items; serialize one Host-owned dialog at a time; and fail background launches closed with stable `INTERACTIVE_NOT_ALLOWED` without opening UI
 
 ##### For more releases
 

@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.1
+
+###### 2026/08/23
+
+* `Hint` First M3 automation current-tree alpha candidate; bounded coordinate/global actions passed focused acceptance on an accessibility-enabled API 37 emulator and fail-closed passed on an API 31 physical device without changing its accessibility services, while selector/UI-tree, screenshots, OCR, publication, and a complete device matrix remain outside this claim
+* `Feature` Add live `autojs6.automator.click/long_click/press/swipe/back/home` APIs through Host accessibility, returning the actual boolean dispatch result
+* `Improvement` Require strict non-boolean integer coordinates from 0 through 1000000 and press/swipe durations from 1 through 4000 ms; unavailable Host accessibility raises `CapabilityUnavailableError` without opening settings
+
 # v0.3.0-alpha.6
 
 ###### 2026/08/23

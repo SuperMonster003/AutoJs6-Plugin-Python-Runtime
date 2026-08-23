@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.1
+
+###### 2026/08/23
+
+* `안내` 첫 M3 automation current-tree alpha candidate. 제한된 좌표/global action은 accessibility를 활성화한 API 37 emulator의 focused acceptance를 통과했고 API 31 physical device는 기존 accessibility service를 변경하지 않고 fail-closed를 통과했습니다. selector/UI tree, screenshot, OCR, publication 및 전체 device matrix는 범위에 포함하지 않습니다
+* `추가` Host accessibility를 통한 live `autojs6.automator.click/long_click/press/swipe/back/home` API를 추가하고 실제 dispatch 결과를 boolean으로 반환
+* `개선` 좌표는 0부터 1000000까지 bool이 아닌 엄격한 정수, press/swipe duration은 1부터 4000 ms로 제한. Host accessibility를 사용할 수 없으면 설정을 열지 않고 `CapabilityUnavailableError`를 발생
+
 # v0.3.0-alpha.6
 
 ###### 2026/08/23

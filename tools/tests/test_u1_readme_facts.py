@@ -24,8 +24,9 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.3.0-alpha.6", common["release_target"])
+        self.assertEqual("0.4.0-alpha.1", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
+        self.assertIn("bounded automator", common["release_state"])
         self.assertIn("M4 Path A", common["release_state"])
         self.assertIn("project-local pure-Python", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
@@ -54,6 +55,8 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("32 KiB", common["max_host_dialog_total_item_bytes"])
         self.assertEqual("5 min", common["host_dialog_wait_timeout"])
         self.assertEqual("16", common["max_host_engine_launches"])
+        self.assertEqual("1000000", common["max_host_automator_coordinate"])
+        self.assertEqual("4 s", common["max_host_automator_duration"])
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
@@ -84,6 +87,10 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 )
                 self.assertIn("`dialogs.alert/confirm/prompt/select`", broker_features[0])
                 self.assertIn("`engines.current/run/stop_self`", broker_features[0])
+                self.assertIn(
+                    "`automator.click/long_click/press/swipe/back/home`",
+                    broker_features[0],
+                )
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
                 self.assertIn("1.3", source["p_plugin_scope"])
                 self.assertIn("1.4", source["p_plugin_scope"])
@@ -124,6 +131,14 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "{{ max_host_engine_launches }}",
                 ):
                     self.assertIn(placeholder, broker_limits[0])
+                automator_limits = [
+                    item
+                    for item in source["security_limits"]
+                    if "{{ max_host_automator_coordinate }}" in item
+                ]
+                self.assertEqual(1, len(automator_limits))
+                self.assertIn("{{ max_host_automator_duration }}", automator_limits[0])
+                self.assertIn("`CapabilityUnavailableError`", automator_limits[0])
                 network_limits = [item for item in source["security_limits"] if "INTERNET" in item]
                 self.assertEqual(1, len(network_limits))
                 self.assertIn("pip", network_limits[0])
@@ -147,6 +162,10 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     f"{code} does not bound the remaining broker surface",
                 )
                 self.assertTrue(
+                    any("selector" in item for item in source["unsupported_capabilities"]),
+                    f"{code} does not leave selector/UI-tree APIs undeclared",
+                )
+                self.assertTrue(
                     any("engines" in item for item in source["unsupported_capabilities"]),
                     f"{code} does not describe the bounded engines surface",
                 )
@@ -154,13 +173,22 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("gate", source["p_build_architecture"].lower())
                 self.assertIn("M4", source["p_roadmap"])
 
-    def test_all_changelog_sources_record_protocol_13_and_14_scoped_features(self) -> None:
+    def test_all_changelog_sources_record_current_scoped_features(self) -> None:
         changelog_dir = ROOT / ".changelog"
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                automator = source["$data"]["v0.4.0-alpha.1"]
+                self.assertEqual("2026/08/23", automator["released_date"])
+                self.assertEqual(1, len(automator["feature"]))
+                for method in ("click", "long_click", "press", "swipe", "back", "home"):
+                    self.assertIn(method, automator["feature"][0])
+                self.assertIn("1000000", automator["improvement"][0])
+                self.assertIn("4000", automator["improvement"][0])
+                self.assertIn("`CapabilityUnavailableError`", automator["improvement"][0])
+
                 project_packages = source["$data"]["v0.3.0-alpha.6"]
                 self.assertEqual("2026/08/23", project_packages["released_date"])
                 self.assertEqual(1, len(project_packages["feature"]))
@@ -275,8 +303,12 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("SHA-256", body)
                 self.assertIn("`toast`", body)
                 self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", body)
-                self.assertIn("autojs6.dialogs.alert", body)
-                self.assertIn("autojs6.engines.current", body)
+                self.assertIn("dialogs.alert/confirm/prompt/select", body)
+                self.assertIn("engines.current/run/stop_self", body)
+                self.assertIn("automator.click/long_click/press/swipe/back/home", body)
+                self.assertIn("1000000", body)
+                self.assertIn("4 s", body)
+                self.assertIn("CapabilityUnavailableError", body)
                 self.assertIn("NESTED_PYTHON_NOT_ALLOWED", body)
                 self.assertIn("INTERACTIVE_NOT_ALLOWED", body)
                 self.assertNotIn("{{", body)
@@ -301,6 +333,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", simplified)
         self.assertIn("`dialogs.alert/confirm/prompt/select`", simplified)
         self.assertIn("`engines.current/run/stop_self`", simplified)
+        self.assertIn("`automator.click/long_click/press/swipe/back/home`", simplified)
+        self.assertIn("0 到 1000000", simplified)
+        self.assertIn("1 ms 到 4 s", simplified)
         self.assertIn("项目本地纯 Python 包与 `.dist-info` 元数据", simplified)
         self.assertIn("项目 workspace 上限为压缩后 64 MiB、8192 个文件条目及解压后 128 MiB", simplified)
         self.assertIn("M4 路径 A 已完成", simplified)
@@ -318,6 +353,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", english)
         self.assertIn("`dialogs.alert/confirm/prompt/select`", english)
         self.assertIn("`engines.current/run/stop_self`", english)
+        self.assertIn("`automator.click/long_click/press/swipe/back/home`", english)
+        self.assertIn("0 through 1000000", english)
+        self.assertIn("1 ms through 4 s", english)
         self.assertIn("project-local pure-Python packages and `.dist-info` metadata", english)
         self.assertIn("64 MiB compressed, 8192 file entries, and 128 MiB extracted", english)
         self.assertIn("M4 Path A is complete", english)

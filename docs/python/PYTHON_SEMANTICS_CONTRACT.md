@@ -370,7 +370,13 @@ The current public Python surface is:
   engine metadata;
 - `autojs6.engines.run(path) -> dict[str, object]` for an asynchronous scoped
   non-Python Host child launch;
-- `autojs6.engines.stop_self() -> NoReturn` for deterministic Host cancellation.
+- `autojs6.engines.stop_self() -> NoReturn` for deterministic Host cancellation;
+- `autojs6.automator.click(x: int, y: int) -> bool` and
+  `autojs6.automator.long_click(x: int, y: int) -> bool`;
+- `autojs6.automator.press(x: int, y: int, duration_ms: int = 100) -> bool`;
+- `autojs6.automator.swipe(x1: int, y1: int, x2: int, y2: int,
+  duration_ms: int = 300) -> bool`;
+- `autojs6.automator.back() -> bool` and `autojs6.automator.home() -> bool`.
 
 These are live Host operations, distinct from the detached launch-time
 `app.snapshot()` and `device.snapshot()` data. Every request is bound to the
@@ -429,8 +435,19 @@ most 16 child scripts; failed launch attempts do not consume the success quota,
 and the existing 1024-call quota remains independent. `engines.stop_self()`
 queues Host `forceStop`, which uses the existing process-restart-only cancellation
 mode. If the broker response wins the race, the Python facade raises
-`SystemExit(0)` before any following statement. Accessibility, screenshots and
-OCR remain planned rather than implied by the generic broker.
+`SystemExit(0)` before any following statement.
+
+Automator coordinates are strict non-boolean integers from 0 through 1,000,000.
+Press and swipe durations are strict non-boolean integers from 1 through 4,000
+milliseconds. The Python facade rejects invalid values before dispatch, and the
+Host repeats the same bounds. Each method returns the actual boolean result from
+the Host accessibility action; false is not rewritten or retried. If the AutoJs6
+accessibility service is missing, disconnected or not operational, the Host
+returns stable `ACCESSIBILITY_UNAVAILABLE`, which the Python facade maps to
+`CapabilityUnavailableError`. The API never enables accessibility or opens
+settings. Selector/UI-tree data, screenshots and OCR remain planned rather than
+implied by the generic broker. The complete bounded surface is documented in
+`HOST_AUTOMATOR.md`.
 
 The focused public Host acceptance invoked the six current method names through
 a real protocol 1.5 session on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a,
@@ -475,6 +492,20 @@ the two tests passed together in 3.122 seconds on the physical device and 4.566
 seconds on the emulator. Four non-interactive first-slice/files/background-dialog
 regressions passed in 3.622 and 12.982 seconds. All runs reported `OK`; installs
 used `adb install -r -t` with the existing signer and retained application data.
+
+The bounded-automator public-engine pair used Host commit `843f528bb` and the
+`0.4.0-alpha.1` Plugin candidate. On the API 37 x86_64 16 KiB-page emulator,
+the accessibility-enabled test required true results from click, press,
+long-click, swipe, Back and Home, and independently observed two controlled
+button activations, one long-click and one swipe. It reported `OK (1 test)` in
+19.713 seconds. On Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages),
+AutoJs6 accessibility deliberately remained disabled; a public Python project
+instead required `CapabilityUnavailableError` with the exact bounded message
+and reported `OK (1 test)` in 0.879 seconds. The physical device's pre-existing
+accessibility-service list was byte-for-byte unchanged, no settings UI opened,
+and no physical-device gesture success is claimed. Test APK replacement used
+`adb install --no-streaming -r -t`; no package was uninstalled and no app data
+was cleared.
 
 ## Files, Java bridge and isolation
 

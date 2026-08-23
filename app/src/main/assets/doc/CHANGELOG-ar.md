@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.1
+
+###### 2026/08/23
+
+* `ملاحظة` اول مرشح alpha للشجرة الحالية لأتمتة M3؛ اجتازت إجراءات الإحداثيات/global المحدودة القبول المركز على محاكي API 37 مع accessibility مفعلة، واجتاز fail-closed جهازا فعليا API 31 دون تغيير accessibility services الحالية، بينما تبقى selector/UI tree وscreenshot وOCR والنشر ومصفوفة الأجهزة الكاملة خارج هذا الادعاء
+* `إضافة` إضافة واجهات live `autojs6.automator.click/long_click/press/swipe/back/home` عبر Host accessibility مع إرجاع نتيجة dispatch المنطقية الفعلية
+* `تحسين` قبول إحداثيات صحيحة صارمة غير boolean من 0 إلى 1000000 ومدد press/swipe من 1 إلى 4000 ms فقط؛ يؤدي غياب Host accessibility إلى `CapabilityUnavailableError` دون فتح الإعدادات
+
 # v0.3.0-alpha.6
 
 ###### 2026/08/23

@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Mejora",
   "changelog_label_dependency": "Dependencia",
   "$data": {
+    "v0.4.0-alpha.1": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "Primer candidato alpha M3 de automatización del árbol actual; las acciones acotadas por coordenadas/globales pasaron la aceptación focalizada en un emulador API 37 con accesibilidad habilitada y fail-closed pasó en un dispositivo físico API 31 sin cambiar sus servicios de accesibilidad, mientras selector/árbol UI, capturas, OCR, publicación y una matriz completa quedan fuera de esta declaración"
+      ],
+      "feature": [
+        "Añadir las API en vivo `autojs6.automator.click/long_click/press/swipe/back/home` mediante la accesibilidad Host, devolviendo el resultado booleano real del envío"
+      ],
+      "improvement": [
+        "Exigir coordenadas enteras estrictas no booleanas de 0 a 1000000 y duraciones press/swipe de 1 a 4000 ms; una accesibilidad Host no disponible lanza `CapabilityUnavailableError` sin abrir ajustes"
+      ]
+    },
     "v0.3.0-alpha.6": {
       "released_date": "2026/08/23",
       "hint": [

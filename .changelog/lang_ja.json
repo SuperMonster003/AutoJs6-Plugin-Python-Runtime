@@ -5,6 +5,18 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v0.4.0-alpha.1": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "最初の M3 automation current-tree alpha candidate. 有界な座標/global action は accessibility を有効にした API 37 emulator の focused acceptance に合格し, API 31 physical device は既存 accessibility service を変更せず fail-closed に合格. selector/UI tree、screenshot、OCR、publication、完全な device matrix は対象外です"
+      ],
+      "feature": [
+        "Host accessibility 経由の live `autojs6.automator.click/long_click/press/swipe/back/home` API を追加し, 実際の dispatch 結果を boolean で返す"
+      ],
+      "improvement": [
+        "座標は 0 から 1000000 までの bool ではない厳密な整数, press/swipe duration は 1 から 4000 ms に限定. Host accessibility が利用できない場合は設定を開かず `CapabilityUnavailableError` を送出"
+      ]
+    },
     "v0.3.0-alpha.6": {
       "released_date": "2026/08/23",
       "hint": [

@@ -15,7 +15,7 @@
     "Import project-local pure-Python packages and `.dist-info` metadata from the admitted project root without online pip or runtime installation.",
     "Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.",
     "Set an explicit strict JSON result of at most {{ max_structured_json_bytes }} and transfer up to {{ max_output_artifacts }} optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.",
-    "Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, and `engines.current/run/stop_self` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.",
+    "Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, and bounded `automator.click/long_click/press/swipe/back/home` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.",
     "Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.",
     "Allow one active session in the runtime process with no provider-side queue.",
     "Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed."
@@ -39,6 +39,7 @@
     "Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.",
     "Structured JSON is capped at {{ max_structured_json_bytes }}; at most {{ max_output_artifacts }} artifacts are accepted with {{ max_output_artifact_path_bytes }} paths, {{ max_output_artifact_bytes }} per file, {{ max_total_output_artifact_bytes }} aggregate, and Host verification of exact length, EOF, and SHA-256.",
     "Protocol 1.5 admits at most {{ max_host_capability_calls }} Host calls per execution, caps each request/response at {{ max_host_capability_message_bytes }} and text at {{ max_host_capability_text_bytes }}, and waits at most {{ host_capability_call_timeout }} for an ordinary Host main-thread action. Host files use {{ max_host_file_path_bytes }} relative paths, {{ max_host_file_text_bytes }} UTF-8 text, and listings of at most {{ max_host_file_entries }} names of {{ max_host_file_name_bytes }} each. Foreground dialogs cap titles at {{ max_host_dialog_title_bytes }}, content at {{ max_host_dialog_text_bytes }}, prompt defaults/replies at {{ max_host_dialog_prompt_reply_bytes }}, and selection lists at {{ max_host_dialog_items }} items of {{ max_host_dialog_item_bytes }} each and {{ max_host_dialog_total_item_bytes }} total; one user response may wait up to {{ host_dialog_wait_timeout }}. One execution may successfully launch at most {{ max_host_engine_launches }} scoped asynchronous non-Python Host child scripts; nested Python returns `NESTED_PYTHON_NOT_ALLOWED`, and `stop_self` cancels through process restart.",
+    "Automator coordinates are strict integers from 0 through {{ max_host_automator_coordinate }}, while press and swipe durations range from 1 ms through {{ max_host_automator_duration }}; unavailable Host accessibility raises `CapabilityUnavailableError` without opening settings.",
     "Cancellation uses process restart rather than CPython-level cooperation; native extensions and blocking calls still require later Android validation.",
     "The plugin grants `INTERNET` for script-initiated standard-library networking; online pip, automatic code downloads, and runtime third-party package installation remain unsupported."
   ],
@@ -46,12 +47,12 @@
   "unsupported_capabilities": [
     "General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to built-in `input()` and standard-library `getpass.getpass()` after the finite snapshot of at most {{ max_stdin_bytes }} reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.",
     "There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.",
-    "The live broker covers the complete first low-risk slice, bounded Host files, foreground dialogs, and bounded engines; accessibility, screenshot, and OCR APIs remain undeclared.",
+    "The live broker covers the complete first low-risk slice, bounded Host files, foreground dialogs, bounded engines, and explicit coordinate/global automator actions; selector/UI-tree, screenshot, and OCR APIs remain undeclared.",
     "32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.",
     "The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification."
   ],
   "h3_roadmap": "Roadmap",
-  "p_roadmap": "M4 Path A is complete: admitted projects may carry pure-Python dependencies, and the expanded three-dimensional workspace profile plus a real requests HTTPS case passed dual-device acceptance. Later M3 automation capabilities and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.",
+  "p_roadmap": "M4 Path A is complete, and M3 automation has begun with bounded coordinate gestures plus Back and Home actions through Host accessibility. Selector/UI-tree, screenshot, OCR, and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.",
   "text_link_roadmap": "View ROADMAP.md",
   "h3_release_history": "Release history",
   "h5_for_more_release_history": "For more releases",

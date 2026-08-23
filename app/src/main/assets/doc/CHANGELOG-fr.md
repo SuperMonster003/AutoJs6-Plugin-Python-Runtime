@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.1
+
+###### 2026/08/23
+
+* `Note` Premier candidat alpha M3 d'automatisation de l'arbre courant; les actions bornées par coordonnées/globales ont réussi l'acceptation ciblée sur un émulateur API 37 avec accessibilité activée et fail-closed a réussi sur un appareil physique API 31 sans modifier ses services d'accessibilité, tandis que selector/arbre UI, captures, OCR, publication et matrice complète restent hors de cette déclaration
+* `Fonction` Ajouter les API temps réel `autojs6.automator.click/long_click/press/swipe/back/home` via l'accessibilité Host, avec retour du résultat booléen réel de l'envoi
+* `Amélioration` Exiger des coordonnées entières strictes non booléennes de 0 à 1000000 et des durées press/swipe de 1 à 4000 ms; une accessibilité Host indisponible lève `CapabilityUnavailableError` sans ouvrir les paramètres
+
 # v0.3.0-alpha.6
 
 ###### 2026/08/23

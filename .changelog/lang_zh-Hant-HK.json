@@ -5,6 +5,18 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "相依項目",
   "$data": {
+    "v0.4.0-alpha.1": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "首個 M3 自動化 current-tree alpha 候選; 有界座標/全域動作已在啟用無障礙的 API 37 模擬器通過聚焦驗收, API 31 實體裝置在不改變既有無障礙服務下通過 fail-closed, selector/UI 樹、截圖、OCR、發佈及完整裝置矩陣不在本次聲明範圍"
+      ],
+      "feature": [
+        "新增經 Host 無障礙執行的即時 `autojs6.automator.click/long_click/press/swipe/back/home` API, 回傳動作實際分發結果布林值"
+      ],
+      "improvement": [
+        "座標只接受 0 至 1000000 的非布林嚴格整數, press/swipe 持續時間只接受 1 至 4000 ms; Host 無障礙不可用時拋出 `CapabilityUnavailableError`, 不開啟設定"
+      ]
+    },
     "v0.3.0-alpha.6": {
       "released_date": "2026/08/23",
       "hint": [

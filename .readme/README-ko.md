@@ -51,7 +51,7 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 - 승인된 project root에서 project-local pure-Python package와 `.dist-info` metadata를 import하며 online pip 또는 runtime install을 수행하지 않습니다.
 - 스크립트 실행 중 stdout/stderr의 원래 순서대로 제한된 chunk를 credit으로 전달하며, credit이 소진되면 실행에 backpressure를 적용합니다.
 - 프로토콜 1.4에서 최대 64 KiB의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 16개 전달하며 stdout에서 결과를 추론하지 않습니다.
-- 실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, 권한 인식 `notice`, 제한된 `files.read_text/write_text/exists/is_file/is_dir/list`, foreground 전용 `dialogs.alert/confirm/prompt/select` 및 `engines.current/run/stop_self`를 실시간 호출하고 terminal에서 폐기합니다.
+- 실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, 권한 인식 `notice`, 제한된 `files.read_text/write_text/exists/is_file/is_dir/list`, foreground 전용 `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self` 및 제한된 `automator.click/long_click/press/swipe/back/home`를 실시간 호출하고 terminal에서 폐기합니다.
 - `SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.
 - 프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.
 - 호스트 재시작이 필요 없습니다. 설치 또는 재활성화 후 다음 새 실행이 provider를 다시 검색하고 pin하며, 실행 중 Binder death는 해당 실행을 종료하고 자동 재실행하지 않습니다.
@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.3.0-alpha.6
-release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.1
+release state: 0.4.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator coordinate/global actions passed on the accessibility-enabled emulator, and physical-device fail-closed acceptance passed without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -132,6 +132,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 - 출력은 실행 중 credit에 따라 chunk 단위로 전달됩니다. credit 소진 시 스크립트가 일시 중지되고, 수락된 출력은 유일한 terminal보다 먼저 전달되며 terminal 이후 출력은 금지됩니다.
 - 구조화 JSON은 64 KiB, artifact는 최대 16개, path는 1024 UTF-8 bytes, file당 4 MiB, 합계 8 MiB로 제한하며 Host가 정확한 길이, EOF 및 SHA-256을 검증합니다.
 - 프로토콜 1.5는 실행당 Host call을 최대 1024회, request/response를 각각 64 KiB, text를 32 KiB, 일반 Host main-thread action 대기를 5 s로 제한합니다. Host files는 4 KiB 상대 경로, 32 KiB UTF-8 text, 최대 128개 및 각 255 UTF-8 bytes의 이름으로 제한됩니다. Foreground dialog는 title 256 UTF-8 bytes, content 4 KiB, prompt default/reply 32 KiB, select 최대 64개·각 1 KiB·합계 32 KiB로 제한되며 사용자 응답을 최대 5 min 기다립니다. 한 실행에서 범위가 제한된 비 Python Host child script를 비동기로 성공 실행할 수 있는 횟수는 16회이며, 중첩 Python은 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self`는 process restart 취소를 사용합니다.
+- Automator 좌표는 0부터 1000000까지의 엄격한 정수이며 press와 swipe 지속 시간은 1 ms부터 4 s까지입니다. Host accessibility를 사용할 수 없으면 설정을 열지 않고 `CapabilityUnavailableError`를 발생시킵니다.
 - 취소는 프로세스 재시작 방식입니다. native extension과 blocking 호출은 Android 검증이 필요합니다.
 - `INTERNET` 권한으로 스크립트가 표준 라이브러리 네트워크 기능을 직접 사용할 수 있지만, online pip, 자동 코드 다운로드, 런타임 타사 패키지 설치는 계속 지원하지 않습니다.
 
@@ -143,7 +144,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 - 일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 1 MiB의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`과 표준 라이브러리 `getpass.getpass()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.
 - UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.
-- live broker는 첫 저위험 기능 전체, 제한된 Host files, foreground dialogs 및 제한된 engines를 제공합니다. accessibility, screenshot 및 OCR은 아직 선언하지 않습니다.
+- live broker는 첫 저위험 기능 전체, 제한된 Host files, foreground dialogs, 제한된 engines 및 명시적 좌표/global automator action을 제공합니다. selector/UI tree, screenshot 및 OCR은 아직 선언하지 않습니다.
 - 32비트 Android와 임의의 native wheel은 보장하지 않습니다.
 - 현재 tree에는 API 31 arm64-v8a 실제 기기 smoke evidence와 API 37 x86_64 16 KB page emulator smoke evidence가 있으며, 어느 쪽도 완전한 기기 matrix나 release qualification으로 제시하지 않습니다.
 
@@ -153,7 +154,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-M4 Path A가 완료되었습니다. 승인된 project는 pure-Python dependency를 포함할 수 있고 확장된 3차원 workspace profile과 실제 requests HTTPS case가 두 device acceptance를 통과했습니다. 이후 M3 automation capability와 M4 build-time/native package path는 user value에 따라 진행하며, 과거 evidence tool은 계속 사용할 수 있지만 자동 release gate로 사용하지 않습니다.
+M4 Path A가 완료되었고 M3 automation은 Host accessibility를 통한 제한된 좌표 gesture와 Back/Home action으로 시작했습니다. selector/UI tree, screenshot, OCR 및 M4 build-time/native package path는 user value에 따라 진행하며, 과거 evidence tool은 계속 사용할 수 있지만 자동 release gate로 사용하지 않습니다.
 
 - [ROADMAP.md 보기](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +163,14 @@ M4 Path A가 완료되었습니다. 승인된 project는 pure-Python dependency�
 ### 변경 이력
 
 ******
+
+# v0.4.0-alpha.1
+
+###### 2026/08/23
+
+* `안내` 첫 M3 automation current-tree alpha candidate. 제한된 좌표/global action은 accessibility를 활성화한 API 37 emulator의 focused acceptance를 통과했고 API 31 physical device는 기존 accessibility service를 변경하지 않고 fail-closed를 통과했습니다. selector/UI tree, screenshot, OCR, publication 및 전체 device matrix는 범위에 포함하지 않습니다
+* `추가` Host accessibility를 통한 live `autojs6.automator.click/long_click/press/swipe/back/home` API를 추가하고 실제 dispatch 결과를 boolean으로 반환
+* `개선` 좌표는 0부터 1000000까지 bool이 아닌 엄격한 정수, press/swipe duration은 1부터 4000 ms로 제한. Host accessibility를 사용할 수 없으면 설정을 열지 않고 `CapabilityUnavailableError`를 발생
 
 # v0.3.0-alpha.6
 
@@ -178,14 +187,6 @@ M4 Path A가 완료되었습니다. 승인된 project는 pure-Python dependency�
 * `안내` 다섯 번째 M3 current-tree alpha candidate입니다. 두 번째 batch의 제한된 Host engines가 두 device의 focused acceptance를 통과했지만 이후 capability, 공개 배포 및 전체 device matrix는 포함하지 않습니다
 * `추가` 경로 없는 현재 engine metadata, 비 Python Host child script 비동기 실행 및 결정적 self-stop을 제공하는 live `autojs6.engines.current/run/stop_self` API 추가
 * `개선` child 경로는 실행 root 상대 정규화 형식만 허용하고 실행당 성공 실행은 최대 16회; 중첩 Python은 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self`는 provider process restart로 취소
-
-# v0.3.0-alpha.4
-
-###### 2026/08/23
-
-* `안내` 네 번째 M3 current-tree alpha candidate입니다. Foreground Host dialogs가 두 device의 focused acceptance를 통과했지만 engines, 이후 capability, 공개 배포 및 전체 device matrix는 포함하지 않습니다
-* `추가` foreground 전용 `autojs6.dialogs.alert/confirm/prompt/select` API를 추가하고 acknowledgement, boolean, nullable text 및 0-based nullable index 결과를 제공합니다
-* `개선` dialog title, content, reply 및 item을 제한하고 Host 소유 dialog를 한 번에 하나씩 직렬화하며 background 실행은 UI를 열지 않고 안정된 `INTERACTIVE_NOT_ALLOWED`로 거부합니다
 
 ##### 다른 버전
 

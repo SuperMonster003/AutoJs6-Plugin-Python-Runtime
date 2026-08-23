@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.1
+
+###### 2026/08/23
+
+* `提示` 首个 M3 自动化 current-tree alpha 候选; 有界坐标/全局动作已在启用无障碍的 API 37 模拟器通过聚焦验收, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed, selector/UI 树、截图、OCR、发布与完整设备矩阵不在本次声明范围
+* `新增` 新增经宿主无障碍执行的实时 `autojs6.automator.click/long_click/press/swipe/back/home` API, 返回动作实际分发结果布尔值
+* `优化` 坐标只接受 0 到 1000000 的非布尔严格整数, press/swipe 持续时间只接受 1 到 4000 ms; 宿主无障碍不可用时抛 `CapabilityUnavailableError`, 不打开设置
+
 # v0.3.0-alpha.6
 
 ###### 2026/08/23

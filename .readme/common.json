@@ -2,8 +2,8 @@
   "repo_url": "https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime",
   "repo_slug": "SuperMonster003/AutoJs6-Plugin-Python-Runtime",
   "default_branch": "master",
-  "release_target": "0.3.0-alpha.6",
-  "release_state": "0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim",
+  "release_target": "0.4.0-alpha.1",
+  "release_state": "0.4.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator coordinate/global actions passed on the accessibility-enabled emulator, and physical-device fail-closed acceptance passed without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim",
   "host_pairing": "AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275",
   "long_term_signer": "SM003",
   "release_owner": "SuperMonster003",
@@ -51,6 +51,8 @@
   "max_host_dialog_total_item_bytes": "32 KiB",
   "host_dialog_wait_timeout": "5 min",
   "max_host_engine_launches": "16",
+  "max_host_automator_coordinate": "1000000",
+  "max_host_automator_duration": "4 s",
   "max_timeout": "30 min",
   "local_aars": "common-plugin-api.aar\nprotocol-wire-api.aar\npython-runtime-api.aar"
 }
