@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.3.0-alpha.5
-release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.6
+release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -153,7 +153,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=11 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. stable APK provenance는 해당 exact identity를 기준으로 평가되며 production receipt도 같은 기준을 사용해야 합니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.
+M4 Path A가 완료되었습니다. 승인된 project는 pure-Python dependency를 포함할 수 있고 확장된 3차원 workspace profile과 실제 requests HTTPS case가 두 device acceptance를 통과했습니다. 이후 M3 automation capability와 M4 build-time/native package path는 user value에 따라 진행하며, 과거 evidence tool은 계속 사용할 수 있지만 자동 release gate로 사용하지 않습니다.
 
 - [ROADMAP.md 보기](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +162,14 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 ### 변경 이력
 
 ******
+
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `안내` 첫 M4 current-tree alpha candidate. Project-local pure-Python dependency path가 두 device의 focused acceptance를 통과했으며 이후 M3/M4 batch, publication 및 전체 device matrix는 이 claim의 범위에 포함되지 않습니다
+* `추가` 승인된 project root의 project-local pure-Python package와 `.dist-info` metadata를 지원하고 version이 고정된 재현 가능한 `requests` example을 제공하며 runtime installer는 추가하지 않음
+* `개선` Workspace 제한을 압축 후 64 MiB, file entry 8192개, 추출 후 128 MiB로 확대하고 dispatch 전에 snapshot의 실제 3차원 요구량을 Provider capability와 대조. Missing import는 online pip 또는 engine fallback 없이 `ModuleNotFoundError`로 유지
 
 # v0.3.0-alpha.5
 
@@ -178,14 +186,6 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 * `안내` 네 번째 M3 current-tree alpha candidate입니다. Foreground Host dialogs가 두 device의 focused acceptance를 통과했지만 engines, 이후 capability, 공개 배포 및 전체 device matrix는 포함하지 않습니다
 * `추가` foreground 전용 `autojs6.dialogs.alert/confirm/prompt/select` API를 추가하고 acknowledgement, boolean, nullable text 및 0-based nullable index 결과를 제공합니다
 * `개선` dialog title, content, reply 및 item을 제한하고 Host 소유 dialog를 한 번에 하나씩 직렬화하며 background 실행은 UI를 열지 않고 안정된 `INTERACTIVE_NOT_ALLOWED`로 거부합니다
-
-# v0.3.0-alpha.3
-
-###### 2026/08/23
-
-* `안내` 세 번째 M3 current-tree alpha candidate입니다. 두 번째 batch의 제한된 Host files가 두 device의 focused acceptance를 통과했지만 dialogs, engines, 이후 capability, 공개 배포 및 전체 device matrix는 포함하지 않습니다
-* `추가` 현재 project root 또는 standalone script directory 안에서 제한된 UTF-8 text access를 제공하는 live `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API 추가
-* `개선` 안전하지 않거나 root를 벗어나는 path를 거부하고 text와 direct listing을 제한하며 안정된 file error를 반환하고 live Host root와 고정된 Plugin workspace snapshot을 명확히 분리
 
 ##### 다른 버전
 

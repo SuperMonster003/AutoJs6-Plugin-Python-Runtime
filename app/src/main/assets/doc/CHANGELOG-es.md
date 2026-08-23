@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `Nota` Primer candidato alpha M4 del árbol actual; la ruta de dependencias Python puras locales al proyecto pasó la aceptación focalizada en dos dispositivos, mientras los siguientes lotes M3/M4, la publicación y una matriz completa quedan fuera de esta declaración
+* `Función` Admitir paquetes Python puros locales al proyecto y metadatos `.dist-info` desde raíces admitidas, con un ejemplo `requests` reproducible y fijado, sin instalador en ejecución
+* `Mejora` Elevar los límites del workspace a 64 MiB comprimidos, 8192 archivos y 128 MiB extraídos, y comparar antes del envío las tres dimensiones reales del snapshot con las capacidades del Provider; un import ausente sigue siendo `ModuleNotFoundError`, sin pip en línea ni respaldo de motor
+
 # v0.3.0-alpha.5
 
 ###### 2026/08/23

@@ -103,8 +103,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 > Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
-release target: 0.3.0-alpha.5
-release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.6
+release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -153,7 +153,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-The R6-P2/P3 local RC and concentrated device evidence remain historical. This clean VERSION_BUILD=11 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; stable APK provenance is evaluated against those exact identities, and any production receipt must use the same basis. A full API-by-ABI matrix and a new soak are not automatic gates.
+M4 Path A is complete: admitted projects may carry pure-Python dependencies, and the expanded three-dimensional workspace profile plus a real requests HTTPS case passed dual-device acceptance. Later M3 automation capabilities and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +162,14 @@ The R6-P2/P3 local RC and concentrated device evidence remain historical. This c
 ### Release history
 
 ******
+
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `Hint` First M4 current-tree alpha candidate; the project-local pure-Python dependency path passed focused dual-device acceptance, while later M3/M4 batches, publication, and a complete device matrix remain outside this claim
+* `Feature` Support project-local pure-Python packages and `.dist-info` metadata from admitted project roots, with a reproducible pinned `requests` example and no runtime installer
+* `Improvement` Raise project workspace limits to 64 MiB compressed, 8192 file entries, and 128 MiB extracted, and match the snapshot's actual three-dimensional requirement against Provider capabilities before dispatch; missing imports remain `ModuleNotFoundError` without online pip or engine fallback
 
 # v0.3.0-alpha.5
 
@@ -178,14 +186,6 @@ The R6-P2/P3 local RC and concentrated device evidence remain historical. This c
 * `Hint` Fourth M3 current-tree alpha candidate; foreground Host dialogs passed focused dual-device acceptance, while engines, later capabilities, publication, and a complete device matrix remain outside this claim
 * `Feature` Add foreground-only `autojs6.dialogs.alert/confirm/prompt/select` APIs with typed acknowledgement, confirmation, nullable prompt text, and zero-based nullable selection results
 * `Improvement` Bound dialog titles, content, replies, and items; serialize one Host-owned dialog at a time; and fail background launches closed with stable `INTERACTIVE_NOT_ALLOWED` without opening UI
-
-# v0.3.0-alpha.3
-
-###### 2026/08/23
-
-* `Hint` Third M3 current-tree alpha candidate; the bounded Host-files portion of the second capability slice passed focused dual-device acceptance, while dialogs, engines, later capabilities, publication, and a complete device matrix remain outside this claim
-* `Feature` Add live `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` APIs for bounded UTF-8 text access within the current project root or standalone script directory
-* `Improvement` Reject unsafe or escaping paths, cap text and direct listings, return stable file errors, and keep the live Host root distinct from the frozen Plugin workspace snapshot
 
 ##### For more releases
 

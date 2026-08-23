@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.3.0-alpha.5
-release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.6
+release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -153,7 +153,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-R6-P2/P3 的本機 RC 及集中裝置證據保留為歷史記錄. 本次 clean VERSION_BUILD=11 freeze commit 固定了穩定 Plugin 原始碼身分及精確 Host 6.8.0/5275 lock; 穩定 APK provenance 按這些精確身分驗證, 任何 production receipt 亦必須使用相同依據. 完整 API×ABI 矩陣及新 soak 不屬自動門禁.
+M4 路徑 A 已完成: 已准入項目可攜帶純 Python 相依套件, 擴展後的三維 workspace 上限及真實 requests HTTPS 用例均通過雙裝置驗收. 後續 M3 自動化能力與 M4 構建期/native 套件路徑按用戶價值繼續推進; 歷史證據工具保留但不作自動發佈門禁.
 
 - [檢視 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +162,14 @@ R6-P2/P3 的本機 RC 及集中裝置證據保留為歷史記錄. 本次 clean V
 ### 版本記錄
 
 ******
+
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `提示` 首個 M4 current-tree alpha 候選; 項目本地純 Python 相依套件路徑已通過雙裝置聚焦驗收, 後續 M3/M4 批次、發佈及完整裝置矩陣不在本次聲明範圍
+* `新增` 支援從已准入項目根目錄匯入項目本地純 Python 套件及 `.dist-info` 元數據, 提供鎖定版本的 `requests` 可重現範例, 且不引入執行時安裝器
+* `改善` 將項目 workspace 上限提高至壓縮 64 MiB、8192 個檔案條目及解壓 128 MiB, 分發前按 snapshot 實際三維需求匹配 Provider 能力; 缺失 import 仍拋出 `ModuleNotFoundError`, 不觸發線上 pip 或引擎回退
 
 # v0.3.0-alpha.5
 
@@ -178,14 +186,6 @@ R6-P2/P3 的本機 RC 及集中裝置證據保留為歷史記錄. 本次 clean V
 * `提示` M3 第四個 current-tree alpha 候選; 前台 Host 對話框已通過雙裝置聚焦驗收, 引擎、後續能力、公開發行及完整裝置矩陣不在本條聲明範圍
 * `新增` 加入僅限前台的 `autojs6.dialogs.alert/confirm/prompt/select` API, 分別回傳確認完成、布林選擇、可空文字及由零開始的可空選項索引
 * `改善` 限制對話框標題、內容、回覆及選項, 串行顯示單一 Host 擁有的對話框, 後台啟動不會開啟 UI 並穩定回傳 `INTERACTIVE_NOT_ALLOWED`
-
-# v0.3.0-alpha.3
-
-###### 2026/08/23
-
-* `提示` M3 第三個 current-tree alpha 候選; 第二批有界 Host files 能力已通過雙裝置聚焦驗收, 對話框、引擎、後續能力、公開發行及完整裝置矩陣不在本條聲明範圍
-* `新增` 加入即時 `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API, 在目前項目根目錄或單檔指令碼目錄內進行有界 UTF-8 文字存取
-* `改善` 拒絕不安全或越界路徑, 限制文字及直接目錄列舉, 回傳穩定檔案錯誤, 並明確區分即時 Host 根目錄與凍結的外掛 workspace snapshot
 
 ##### 更多版本
 

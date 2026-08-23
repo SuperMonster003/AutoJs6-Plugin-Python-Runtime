@@ -51,7 +51,7 @@
     "현재 tree에는 API 31 arm64-v8a 실제 기기 smoke evidence와 API 37 x86_64 16 KB page emulator smoke evidence가 있으며, 어느 쪽도 완전한 기기 matrix나 release qualification으로 제시하지 않습니다."
   ],
   "h3_roadmap": "로드맵",
-  "p_roadmap": "R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. 이 clean VERSION_BUILD=11 freeze commit이 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다. stable APK provenance는 해당 exact identity를 기준으로 평가되며 production receipt도 같은 기준을 사용해야 합니다. 전체 API×ABI matrix와 새 soak는 자동 gate가 아닙니다.",
+  "p_roadmap": "M4 Path A가 완료되었습니다. 승인된 project는 pure-Python dependency를 포함할 수 있고 확장된 3차원 workspace profile과 실제 requests HTTPS case가 두 device acceptance를 통과했습니다. 이후 M3 automation capability와 M4 build-time/native package path는 user value에 따라 진행하며, 과거 evidence tool은 계속 사용할 수 있지만 자동 release gate로 사용하지 않습니다.",
   "text_link_roadmap": "ROADMAP.md 보기",
   "h3_release_history": "변경 이력",
   "h5_for_more_release_history": "다른 버전",

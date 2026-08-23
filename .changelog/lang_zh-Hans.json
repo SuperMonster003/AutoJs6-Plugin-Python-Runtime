@@ -5,6 +5,18 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v0.3.0-alpha.6": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "首个 M4 current-tree alpha 候选; 项目本地纯 Python 依赖路径已通过双设备聚焦验收, 后续 M3/M4 批次、发布及完整设备矩阵不在本次声明范围"
+      ],
+      "feature": [
+        "支持从已准入项目根目录导入项目本地纯 Python 包与 `.dist-info` 元数据, 提供锁定版本的 `requests` 可复现示例, 且不引入运行时安装器"
+      ],
+      "improvement": [
+        "将项目 workspace 上限提高到压缩 64 MiB、8192 个文件条目与解压 128 MiB, 分发前按快照实际三维需求匹配 Provider 能力; 缺失 import 仍抛 `ModuleNotFoundError`, 不触发在线 pip 或引擎回落"
+      ]
+    },
     "v0.3.0-alpha.5": {
       "released_date": "2026/08/23",
       "hint": [

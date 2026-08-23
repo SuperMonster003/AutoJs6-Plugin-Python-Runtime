@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.3.0-alpha.5 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.3.0-alpha.6 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -25,11 +25,12 @@
   支持 arm64-v8a 与 x86_64, 宿主进程零 Python 加载。
 - [x] 单文件脚本执行 (file 模式): 严格 UTF-8 源码, 正确的 `__name__`/`__file__`/`sys.argv`,
   独立 `__main__`, 执行后完整还原解释器状态 (modules/path/cwd/stdio/importer cache)。
-- [x] Python 项目执行: 项目打包为 workspace zip (归档 ≤16 MiB, 解压 ≤32 MiB, ≤1024 条目)
+- [x] Python 项目执行: 项目打包为 workspace zip (归档 ≤64 MiB, 解压 ≤128 MiB, ≤8192 条目)
   传入插件私有目录; 入口同级与项目根导入、常规/命名空间包、相对导入、循环导入均可用。
 - [x] module 入口模式 (`python -m` 语义, 协议 1.2): `runpy` 执行, 正确的
   `__package__`/`__spec__`/`sys.path[0]` —— 插件侧完整, 宿主暂未暴露入口 (见 M2)。
-- [x] 完整 CPython 标准库随包可用; 缺失的第三方包按标准语义抛 `ModuleNotFoundError`。
+- [x] 完整 CPython 标准库随包可用; 已准入项目可随 workspace 携带纯 Python 包与
+  `.dist-info` 元数据; 缺失的第三方包仍按标准语义抛 `ModuleNotFoundError`。
 - [x] stdin 快照 (≤1 MiB, 协议 1.1): 支撑 `input()` 与 `sys.stdin.read*()` 的确定性输入
   —— 插件侧完整, 宿主暂无写入 UI (见 M2)。
 - [x] 前台交互式 `input()` (协议 1.3): 快照 EOF 后经宿主 MaterialDialog 弹框继续输入,
@@ -355,11 +356,23 @@
 > 主题: stdlib-only 是 0.1.0 的发布策略而非产品终点。按成本从低到高三条路径推进,
 > 不做签名 pack manifest / SBOM 全家桶。
 
-- [ ] [P] **路径 A (零协议成本, 文档先行)**: 纯 Python 依赖直接放进项目目录随 workspace
+- [x] [H+P] **路径 A (零协议成本, 项目本地依赖)**: 纯 Python 依赖直接放进项目目录随 workspace
   打包 (`sys.path` 已含项目根, 天然可 import)。
   配套放宽 workspace 限制: 条目 1024 → 8192, 归档 16 → 64 MiB, 解压 32 → 128 MiB。
   验收: 项目内置 `requests` 源码目录 (含 urllib3 等依赖) 后 `import requests` 成功
   (配合 M1 的 INTERNET 权限实测发请求)。
+  - `0.3.0-alpha.6` current tree 使用锁定的 `requests 2.34.2`、`urllib3 2.7.0`、
+    `certifi 2026.7.22`、`charset-normalizer 3.4.9` 与 `idna 3.18`; 依赖夹具含
+    125 个运行文件且无 `.so/.pyd/.dll/.dylib/.exe`, SHA-256 为
+    `880EBB02E4C264F9D8B82521C090F7592ABF0663E67BFC6DC4F224CB636F101B`。
+  - 验收项目构造 1100 个 workspace 文件、33 MiB 可压缩数据及 17 MiB 确定性随机数据,
+    同时跨越旧版 1024 条目、16 MiB 归档与 32 MiB 解压上限; HTTPS 返回 200 且结构化
+    结果精确核对上述五个版本。
+  - Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 用时 5.040 秒,
+    API 37 / x86_64 / 16 KiB page 模拟器用时 5.406 秒, 均为 `OK (1 test)`; 安装采用
+    `adb install -r -t` 并保留应用数据。使用说明与可复现示例见
+    [PROJECT_LOCAL_PACKAGES.md](docs/python/PROJECT_LOCAL_PACKAGES.md) 与
+    [m4_project_local_requests](examples/python/m4_project_local_requests)。
 - [ ] [P] **路径 B (构建期精选包)**: 评估在 `build.gradle.kts` `pip { install(...) }`
   内置少量高频纯 Python 包 (候选: requests, charset_normalizer 等; 更新
   `python-runtime.lock` 的 packages 政策键值与 NOTICE)。按 APK 体积与收益决策。
@@ -392,8 +405,8 @@
 | --- | --- | --- |
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
-| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架、完整第一批及第二批 files/dialogs/engines 已完成) |
-| 0.4.0 | M3 自动化核心 + M4 第三方包路径 A/B | 计划 |
+| 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
+| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 计划 |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 

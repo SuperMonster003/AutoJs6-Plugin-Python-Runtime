@@ -51,7 +51,7 @@
     "El árbol actual tiene evidencia smoke en un dispositivo API 31 arm64-v8a y en un emulador API 37 x86_64 con páginas de 16 KB; ninguna se presenta como matriz completa de dispositivos ni como calificación de release."
   ],
   "h3_roadmap": "Hoja de ruta",
-  "p_roadmap": "La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 permanecen históricas. Este clean VERSION_BUILD=11 freeze commit fija la identidad fuente estable del Plugin y el lock Host exacto 6.8.0/5275; la provenance del APK estable se evalúa contra esas identidades exactas y cualquier production receipt debe usar la misma base. Una matriz API×ABI completa y un soak nuevo no son gates automáticos.",
+  "p_roadmap": "La ruta A de M4 está terminada: los proyectos admitidos pueden incluir dependencias Python puras, y el perfil tridimensional ampliado del workspace junto con un caso HTTPS real de requests pasaron la aceptación en dos dispositivos. Las capacidades de automatización M3 y las rutas M4 de paquetes integrados/native continuarán según el valor para el usuario; las herramientas históricas de evidencia siguen disponibles sin ser gates automáticos de publicación.",
   "text_link_roadmap": "Ver ROADMAP.md",
   "h3_release_history": "Historial de versiones",
   "h5_for_more_release_history": "Más versiones",

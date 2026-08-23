@@ -24,13 +24,14 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.3.0-alpha.5", common["release_target"])
+        self.assertEqual("0.3.0-alpha.6", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
-        self.assertIn("complete first low-risk", common["release_state"])
-        self.assertIn("bounded Host-files", common["release_state"])
-        self.assertIn("foreground-dialog", common["release_state"])
-        self.assertIn("engines", common["release_state"])
+        self.assertIn("M4 Path A", common["release_state"])
+        self.assertIn("project-local pure-Python", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
+        self.assertEqual("64 MiB", common["max_workspace_archive_bytes"])
+        self.assertEqual("8192", common["max_workspace_entries"])
+        self.assertEqual("128 MiB", common["max_workspace_uncompressed_bytes"])
         self.assertEqual("1.0-1.5", common["protocol_version"])
         self.assertEqual("64 KiB", common["max_structured_json_bytes"])
         self.assertEqual("16", common["max_output_artifacts"])
@@ -61,6 +62,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("{{ max_stdin_bytes }}", source["features"][1])
                 self.assertIn("1.3", source["features"][1])
                 self.assertIn("`getpass.getpass()`", source["features"][1])
+                package_features = [item for item in source["features"] if ".dist-info" in item]
+                self.assertEqual(1, len(package_features))
+                self.assertIn("pip", package_features[0])
                 result_features = [item for item in source["features"] if "1.4" in item]
                 self.assertEqual(1, len(result_features))
                 self.assertIn("{{ max_structured_json_bytes }}", result_features[0])
@@ -123,6 +127,18 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 network_limits = [item for item in source["security_limits"] if "INTERNET" in item]
                 self.assertEqual(1, len(network_limits))
                 self.assertIn("pip", network_limits[0])
+                workspace_limits = [
+                    item
+                    for item in source["security_limits"]
+                    if "{{ max_workspace_archive_bytes }}" in item
+                ]
+                self.assertEqual(1, len(workspace_limits))
+                for placeholder in (
+                    "{{ max_workspace_archive_bytes }}",
+                    "{{ max_workspace_entries }}",
+                    "{{ max_workspace_uncompressed_bytes }}",
+                ):
+                    self.assertIn(placeholder, workspace_limits[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["unsupported_capabilities"][0])
                 self.assertIn("`sys.stdin`", source["unsupported_capabilities"][0])
                 self.assertIn("`getpass.getpass()`", source["unsupported_capabilities"][0])
@@ -136,6 +152,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 )
                 self.assertIn("16 KB", source["p_build_architecture"])
                 self.assertIn("gate", source["p_build_architecture"].lower())
+                self.assertIn("M4", source["p_roadmap"])
 
     def test_all_changelog_sources_record_protocol_13_and_14_scoped_features(self) -> None:
         changelog_dir = ROOT / ".changelog"
@@ -144,6 +161,16 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                project_packages = source["$data"]["v0.3.0-alpha.6"]
+                self.assertEqual("2026/08/23", project_packages["released_date"])
+                self.assertEqual(1, len(project_packages["feature"]))
+                self.assertIn("`.dist-info`", project_packages["feature"][0])
+                self.assertIn("`requests`", project_packages["feature"][0])
+                self.assertIn("64 MiB", project_packages["improvement"][0])
+                self.assertIn("8192", project_packages["improvement"][0])
+                self.assertIn("128 MiB", project_packages["improvement"][0])
+                self.assertIn("`ModuleNotFoundError`", project_packages["improvement"][0])
+
                 host_engines = source["$data"]["v0.3.0-alpha.5"]
                 self.assertEqual("2026/08/23", host_engines["released_date"])
                 self.assertEqual(1, len(host_engines["feature"]))
@@ -240,10 +267,14 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("16 MiB", body)
                 self.assertIn("16384", body)
                 self.assertIn("30 min", body)
+                self.assertIn("64 MiB", body)
+                self.assertIn("8192", body)
+                self.assertIn("128 MiB", body)
+                self.assertIn(".dist-info", body)
                 self.assertIn("INTERNET", body)
                 self.assertIn("SHA-256", body)
                 self.assertIn("`toast`", body)
-                self.assertIn("autojs6.files.read_text", body)
+                self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", body)
                 self.assertIn("autojs6.dialogs.alert", body)
                 self.assertIn("autojs6.engines.current", body)
                 self.assertIn("NESTED_PYTHON_NOT_ALLOWED", body)
@@ -270,6 +301,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", simplified)
         self.assertIn("`dialogs.alert/confirm/prompt/select`", simplified)
         self.assertIn("`engines.current/run/stop_self`", simplified)
+        self.assertIn("项目本地纯 Python 包与 `.dist-info` 元数据", simplified)
+        self.assertIn("项目 workspace 上限为压缩后 64 MiB、8192 个文件条目及解压后 128 MiB", simplified)
+        self.assertIn("M4 路径 A 已完成", simplified)
         self.assertIn("`INTERACTIVE_NOT_ALLOWED`", simplified)
         self.assertIn("绝不被解析为结果", simplified)
         self.assertIn("API 37 x86_64 16 KB page 模拟器的聚焦冒烟", simplified)
@@ -284,6 +318,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", english)
         self.assertIn("`dialogs.alert/confirm/prompt/select`", english)
         self.assertIn("`engines.current/run/stop_self`", english)
+        self.assertIn("project-local pure-Python packages and `.dist-info` metadata", english)
+        self.assertIn("64 MiB compressed, 8192 file entries, and 128 MiB extracted", english)
+        self.assertIn("M4 Path A is complete", english)
         self.assertIn("`INTERACTIVE_NOT_ALLOWED`", english)
         self.assertIn("never parsed as a result", english)
         self.assertIn("API 37 x86_64 16 KB-page emulator smoke has passed", english)

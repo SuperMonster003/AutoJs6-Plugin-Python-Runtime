@@ -51,7 +51,7 @@
     "The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification."
   ],
   "h3_roadmap": "Roadmap",
-  "p_roadmap": "The R6-P2/P3 local RC and concentrated device evidence remain historical. This clean VERSION_BUILD=11 freeze commit fixes the stable Plugin source identity and exact Host 6.8.0/5275 lock; stable APK provenance is evaluated against those exact identities, and any production receipt must use the same basis. A full API-by-ABI matrix and a new soak are not automatic gates.",
+  "p_roadmap": "M4 Path A is complete: admitted projects may carry pure-Python dependencies, and the expanded three-dimensional workspace profile plus a real requests HTTPS case passed dual-device acceptance. Later M3 automation capabilities and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.",
   "text_link_roadmap": "View ROADMAP.md",
   "h3_release_history": "Release history",
   "h5_for_more_release_history": "For more releases",

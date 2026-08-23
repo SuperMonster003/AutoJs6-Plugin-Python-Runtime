@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Amélioration",
   "changelog_label_dependency": "Dépendance",
   "$data": {
+    "v0.3.0-alpha.6": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "Premier candidat alpha M4 de l'arbre courant; le chemin des dépendances Python pures locales au projet a réussi l'acceptation ciblée sur deux appareils, tandis que les lots M3/M4 suivants, la publication et une matrice complète restent hors de cette déclaration"
+      ],
+      "feature": [
+        "Prendre en charge les paquets Python purs locaux au projet et les métadonnées `.dist-info` depuis les racines admises, avec un exemple `requests` reproductible et verrouillé, sans installateur à l'exécution"
+      ],
+      "improvement": [
+        "Porter les limites du workspace à 64 MiB compressés, 8192 fichiers et 128 MiB extraits, puis comparer avant l'envoi les trois dimensions réelles du snapshot aux capacités du Provider; un import absent reste `ModuleNotFoundError`, sans pip en ligne ni repli de moteur"
+      ]
+    },
     "v0.3.0-alpha.5": {
       "released_date": "2026/08/23",
       "hint": [

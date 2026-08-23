@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `Hint` First M4 current-tree alpha candidate; the project-local pure-Python dependency path passed focused dual-device acceptance, while later M3/M4 batches, publication, and a complete device matrix remain outside this claim
+* `Feature` Support project-local pure-Python packages and `.dist-info` metadata from admitted project roots, with a reproducible pinned `requests` example and no runtime installer
+* `Improvement` Raise project workspace limits to 64 MiB compressed, 8192 file entries, and 128 MiB extracted, and match the snapshot's actual three-dimensional requirement against Provider capabilities before dispatch; missing imports remain `ModuleNotFoundError` without online pip or engine fallback
+
 # v0.3.0-alpha.5
 
 ###### 2026/08/23

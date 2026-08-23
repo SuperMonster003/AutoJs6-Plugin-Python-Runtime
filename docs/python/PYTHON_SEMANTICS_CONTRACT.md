@@ -3,7 +3,7 @@
 Status: cumulative U1-R0 through U1-R2 contract plus the first M3 protocol 1.5
 Host capability slice and the bounded Host-files and foreground-dialog portions
 of its second slice, plus bounded current-engine/self-stop/non-Python child
-launch operations.
+launch operations, plus M4 Path A project-local pure-Python packages.
 Historical R2 evidence remains covered through E2; the M1/M2 public Host paths
 and focused M3 broker paths passed an API 31 / arm64-v8a / 4 KiB-page physical
 device and an API 37 / x86_64 / 16 KiB-page emulator on 2026-08-23. Those
@@ -325,6 +325,18 @@ package has a separate Android, ABI and page-size admission path.
 
 Preparation instructions, reproducibility guidance and failure behavior are
 defined in `docs/python/PROJECT_LOCAL_PACKAGES.md`.
+
+The focused public Host acceptance used a pinned five-distribution `requests`
+tree and constructed 1100 workspace files, 33 MiB of compressible content and
+17 MiB of deterministic random content. A successful dispatch therefore
+crossed the former 1024-entry, 16 MiB compressed and 32 MiB extracted bounds.
+It imported all five project-local distributions, completed HTTPS with status
+200 and matched their exact metadata versions. On the `0.3.0-alpha.6` current
+tree the test passed in 5.040 seconds on Sony XQ-AT72 (`QV710AF65F`, API 31,
+arm64-v8a, 4 KiB pages) and 5.406 seconds on the API 37 x86_64 emulator with
+16 KiB pages. Both runs reported `OK (1 test)` after `adb install -r -t` and
+retained application data; this is focused current-tree acceptance rather than
+a complete package, ABI or release matrix.
 
 ## Live Host capabilities (protocol 1.5)
 

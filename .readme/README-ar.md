@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.3.0-alpha.5
-release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.6
+release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -153,7 +153,7 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
-تبقى أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=11 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ تقيم stable APK provenance مقابل هذه exact identities ويجب أن يستخدم أي production receipt الأساس نفسه. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.
+اكتمل المسار A من M4: يمكن للمشاريع المقبولة حمل تبعيات pure-Python, وقد اجتاز ملف workspace الموسع ثلاثي الابعاد وحالة HTTPS حقيقية باستخدام requests قبولا على جهازين. تستمر قدرات automation في M3 ومسارات الحزم build-time/native في M4 حسب قيمة المستخدم; تبقى ادوات الادلة التاريخية متاحة لكنها ليست بوابات اصدار تلقائية.
 
 - [عرض ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +162,14 @@ runtime/security/release owner: SuperMonster003
 ### سجل الإصدارات
 
 ******
+
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `ملاحظة` اول مرشح alpha من M4 للشجرة الحالية؛ اجتاز مسار تبعيات pure-Python المحلية للمشروع قبولا مركزا على جهازين، بينما تبقى دفعات M3/M4 اللاحقة والنشر ومصفوفة الاجهزة الكاملة خارج هذا الادعاء
+* `إضافة` دعم حزم pure-Python المحلية للمشروع وبيانات `.dist-info` من جذور المشاريع المقبولة، مع مثال `requests` قابل لاعادة الانتاج باصدارات مثبتة ودون مثبت وقت التشغيل
+* `تحسين` رفع حدود workspace إلى 64 MiB مضغوطة و8192 ملفا و128 MiB بعد الاستخراج، ومطابقة الابعاد الفعلية الثلاثة للـ snapshot مع قدرات Provider قبل dispatch؛ يبقى import المفقود `ModuleNotFoundError` دون pip عبر الانترنت او رجوع إلى محرك اخر
 
 # v0.3.0-alpha.5
 
@@ -178,14 +186,6 @@ runtime/security/release owner: SuperMonster003
 * `ملاحظة` مرشح alpha رابع من M3 للشجرة الحالية؛ اجتازت حوارات Host في foreground قبولاً مركزاً على جهازين، ولا يشمل ذلك engines أو القدرات اللاحقة أو النشر أو مصفوفة أجهزة كاملة
 * `إضافة` إضافة API المقصورة على foreground وهي `autojs6.dialogs.alert/confirm/prompt/select` مع نتائج typed للإقرار والتأكيد والنص nullable وفهرس nullable يبدأ من الصفر
 * `تحسين` تقييد العناوين والمحتوى والردود والعناصر، وتسلسل حوار واحد تملكه Host في كل مرة، ورفض تشغيل background بالرمز المستقر `INTERACTIVE_NOT_ALLOWED` من دون فتح UI
-
-# v0.3.0-alpha.3
-
-###### 2026/08/23
-
-* `ملاحظة` مرشح alpha ثالث من M3 للشجرة الحالية؛ اجتاز الجزء المحدود من Host files في المجموعة الثانية قبولاً مركزاً على جهازين، ولا يشمل ذلك الحوارات أو engines أو القدرات اللاحقة أو النشر أو مصفوفة أجهزة كاملة
-* `إضافة` إضافة API مباشرة `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` للوصول المحدود إلى نص UTF-8 داخل جذر المشروع الحالي أو مجلد السكربت المستقل
-* `تحسين` رفض المسارات غير الآمنة أو الخارجة من الجذر، وتقييد النص والقوائم المباشرة، وإرجاع أخطاء ملفات مستقرة، وفصل جذر Host المباشر عن workspace snapshot المجمدة في Plugin
 
 ##### المزيد من الإصدارات
 

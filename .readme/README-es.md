@@ -103,8 +103,8 @@ El complemento acepta una SOURCE independiente, un workspace archive acotado opc
 > La versión 0.1.0 se empareja solo con AutoJs6 6.8.0, con el versionCode mínimo del Host 5275 congelado y aplicado; la revisión final y limpia del código fuente del Host y el manifiesto de distribución de los tres AAR están registrados en el lock. Cada ejecución nueva redescubre el provider; si falta o está desactivado pide instalar o activar sin fallback, y la instalación o reactivación no exige reiniciar el Host. La identidad del APK estable está vinculada a ese código fuente exacto del Plugin y al lock Host.
 
 ```text
-release target: 0.3.0-alpha.5
-release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.6
+release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -153,7 +153,7 @@ El runtime Chaquopy es solo para scripts locales de confianza, no un sandbox de 
 
 ******
 
-La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 permanecen históricas. Este clean VERSION_BUILD=11 freeze commit fija la identidad fuente estable del Plugin y el lock Host exacto 6.8.0/5275; la provenance del APK estable se evalúa contra esas identidades exactas y cualquier production receipt debe usar la misma base. Una matriz API×ABI completa y un soak nuevo no son gates automáticos.
+La ruta A de M4 está terminada: los proyectos admitidos pueden incluir dependencias Python puras, y el perfil tridimensional ampliado del workspace junto con un caso HTTPS real de requests pasaron la aceptación en dos dispositivos. Las capacidades de automatización M3 y las rutas M4 de paquetes integrados/native continuarán según el valor para el usuario; las herramientas históricas de evidencia siguen disponibles sin ser gates automáticos de publicación.
 
 - [Ver ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +162,14 @@ La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 permanecen his
 ### Historial de versiones
 
 ******
+
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `Nota` Primer candidato alpha M4 del árbol actual; la ruta de dependencias Python puras locales al proyecto pasó la aceptación focalizada en dos dispositivos, mientras los siguientes lotes M3/M4, la publicación y una matriz completa quedan fuera de esta declaración
+* `Función` Admitir paquetes Python puros locales al proyecto y metadatos `.dist-info` desde raíces admitidas, con un ejemplo `requests` reproducible y fijado, sin instalador en ejecución
+* `Mejora` Elevar los límites del workspace a 64 MiB comprimidos, 8192 archivos y 128 MiB extraídos, y comparar antes del envío las tres dimensiones reales del snapshot con las capacidades del Provider; un import ausente sigue siendo `ModuleNotFoundError`, sin pip en línea ni respaldo de motor
 
 # v0.3.0-alpha.5
 
@@ -178,14 +186,6 @@ La RC local y la evidencia concentrada de dispositivo de R6-P2/P3 permanecen his
 * `Nota` Cuarto candidato alpha M3 del árbol actual; los diálogos Host en primer plano superaron la aceptación focalizada en dos dispositivos, sin afirmar engines, capacidades posteriores, publicación ni una matriz completa de dispositivos
 * `Función` Añadir las API solo en primer plano `autojs6.dialogs.alert/confirm/prompt/select`, con resultados tipados de acuse, confirmación, texto anulable e índice anulable desde cero
 * `Mejora` Limitar títulos, contenido, respuestas y elementos, serializar un diálogo propiedad del Host a la vez y rechazar inicios en segundo plano con `INTERACTIVE_NOT_ALLOWED` sin abrir UI
-
-# v0.3.0-alpha.3
-
-###### 2026/08/23
-
-* `Nota` Tercer candidato alpha M3 del árbol actual; la parte acotada de Host files de la segunda entrega superó la aceptación focalizada en dos dispositivos, sin afirmar diálogos, engines, capacidades posteriores, publicación ni una matriz completa de dispositivos
-* `Función` Añadir las API en vivo `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` para acceso acotado a texto UTF-8 dentro de la raíz del proyecto actual o el directorio del script independiente
-* `Mejora` Rechazar rutas inseguras o fuera de la raíz, limitar texto y listados directos, devolver errores de archivo estables y separar la raíz Host en vivo de la instantánea workspace congelada del Plugin
 
 ##### Más versiones
 

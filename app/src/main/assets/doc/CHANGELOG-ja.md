@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `注記` 最初の M4 current-tree alpha candidate. Project-local pure-Python dependency path は 2 device の focused acceptance に合格し, 後続の M3/M4 batch, publication, 完全な device matrix はこの claim の対象外です
+* `追加` 許可済み project root の project-local pure-Python package と `.dist-info` metadata に対応し, version 固定済みの再現可能な `requests` example を提供しつつ runtime installer は追加しない
+* `改善` Workspace 上限を圧縮後 64 MiB、file entry 8192 件、展開後 128 MiB に拡張し, dispatch 前に snapshot の実際の 3 次元要件と Provider capability を照合. Missing import は online pip や engine fallback を行わず `ModuleNotFoundError` のまま維持
+
 # v0.3.0-alpha.5
 
 ###### 2026/08/23

@@ -51,7 +51,7 @@
     "目前樹已有 API 31 arm64-v8a 實機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格."
   ],
   "h3_roadmap": "路線圖",
-  "p_roadmap": "R6-P2/P3 的本機 RC 與集中裝置證據保留為歷史記錄. 本次 clean VERSION_BUILD=11 freeze commit 固定了穩定 Plugin 原始碼身分與精確 Host 6.8.0/5275 lock; 穩定 APK provenance 按這些精確身分驗證, 任何 production receipt 也必須使用相同依據. 完整 API×ABI 矩陣與新 soak 不屬自動門禁.",
+  "p_roadmap": "M4 路徑 A 已完成: 已准入專案可攜帶純 Python 相依套件, 擴展後的三維 workspace 上限與真實 requests HTTPS 用例均通過雙裝置驗收. 後續 M3 自動化能力與 M4 建置期/native 套件路徑依使用者價值繼續推進; 歷史證據工具保留但不作自動發佈門禁.",
   "text_link_roadmap": "檢視 ROADMAP.md",
   "h3_release_history": "版本記錄",
   "h5_for_more_release_history": "更多版本",

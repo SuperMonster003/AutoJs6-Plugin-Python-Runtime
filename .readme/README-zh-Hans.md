@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.3.0-alpha.5
-release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.6
+release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -153,7 +153,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 ******
 
-R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean VERSION_BUILD=11 freeze commit 固定了稳定 Plugin 源码身份和精确 Host 6.8.0/5275 lock; 稳定 APK provenance 按这些精确身份核验, 任何 production receipt 也必须使用相同依据. 完整 API×ABI 矩阵和新 soak 不作为自动门禁.
+M4 路径 A 已完成: 已准入项目可携带纯 Python 依赖, 扩展后的三维 workspace 上限与真实 requests HTTPS 用例均通过双设备验收. 后续 M3 自动化能力与 M4 构建期/native 包路径按用户价值继续推进; 历史证据工具保留但不作为自动发布门禁.
 
 - [查看 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +162,14 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 ### 版本历史
 
 ******
+
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `提示` 首个 M4 current-tree alpha 候选; 项目本地纯 Python 依赖路径已通过双设备聚焦验收, 后续 M3/M4 批次、发布及完整设备矩阵不在本次声明范围
+* `新增` 支持从已准入项目根目录导入项目本地纯 Python 包与 `.dist-info` 元数据, 提供锁定版本的 `requests` 可复现示例, 且不引入运行时安装器
+* `优化` 将项目 workspace 上限提高到压缩 64 MiB、8192 个文件条目与解压 128 MiB, 分发前按快照实际三维需求匹配 Provider 能力; 缺失 import 仍抛 `ModuleNotFoundError`, 不触发在线 pip 或引擎回落
 
 # v0.3.0-alpha.5
 
@@ -178,14 +186,6 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 * `提示` M3 第四个 current-tree alpha 候选; 前台 Host 对话框已通过双设备聚焦验收, 引擎、后续能力、公开发布和完整设备矩阵仍不在本条声明范围内
 * `新增` 新增仅限前台的 `autojs6.dialogs.alert/confirm/prompt/select` API, 分别返回确认完成、布尔选择、可空文本与从零开始的可空选项索引
 * `优化` 限制对话框标题、正文、回复与选项, 串行显示单个 Host 所有的对话框, 后台启动不会打开 UI 并稳定返回 `INTERACTIVE_NOT_ALLOWED`
-
-# v0.3.0-alpha.3
-
-###### 2026/08/23
-
-* `提示` M3 第三个 current-tree alpha 候选; 第二批有界 Host files 能力已通过双设备聚焦验收, 对话框、引擎、后续能力、公开发布和完整设备矩阵仍不在本条声明范围内
-* `新增` 新增实时 `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API, 在当前项目根目录或单文件脚本目录内进行有界 UTF-8 文本访问
-* `优化` 拒绝不安全或越界路径, 限制文本与直接目录枚举, 返回稳定文件错误, 并明确区分实时 Host 根目录与冻结的插件 workspace 快照
 
 ##### 更多版本
 

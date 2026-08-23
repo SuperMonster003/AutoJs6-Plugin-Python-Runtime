@@ -51,7 +51,7 @@
     "L'arbre courant dispose d'un smoke sur appareil API 31 arm64-v8a et d'un smoke sur émulateur API 37 x86_64 à pages de 16 KB; aucun ne constitue une matrice complète d'appareils ni une qualification de release."
   ],
   "h3_roadmap": "Feuille de route",
-  "p_roadmap": "Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques. Ce clean VERSION_BUILD=11 freeze commit fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275; la provenance des APK stables est évaluée par rapport à ces identités exactes et tout production receipt doit utiliser la même base. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.",
+  "p_roadmap": "Le chemin A de M4 est terminé: les projets admis peuvent embarquer des dépendances Python pures, et le profil workspace tridimensionnel étendu ainsi qu'un cas HTTPS réel avec requests ont réussi l'acceptation sur deux appareils. Les capacités d'automatisation M3 et les chemins M4 de paquets intégrés/native suivront la valeur utilisateur; les outils de preuve historiques restent disponibles sans être des portes de publication automatiques.",
   "text_link_roadmap": "Voir ROADMAP.md",
   "h3_release_history": "Historique des versions",
   "h5_for_more_release_history": "Autres versions",

@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.3.0-alpha.5
-release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.6
+release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -153,7 +153,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持されます. この clean VERSION_BUILD=11 freeze commit が stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します. stable APK provenance はそれらの exact identity に対して評価され, production receipt も同じ基準を使用しなければなりません. 完全な API×ABI matrix と新 soak は自動 gate ではありません.
+M4 Path A は完了しました. 許可済み project は pure-Python dependency を同梱でき, 拡張した 3 次元 workspace profile と実際の requests HTTPS case が 2 device acceptance に合格しています. 後続の M3 automation capability と M4 build-time/native package path は user value に従って進め, 歴史的 evidence tool は利用可能なままですが自動 release gate にはしません.
 
 - [ROADMAP.md を表示](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +162,14 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 ### 更新履歴
 
 ******
+
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `注記` 最初の M4 current-tree alpha candidate. Project-local pure-Python dependency path は 2 device の focused acceptance に合格し, 後続の M3/M4 batch, publication, 完全な device matrix はこの claim の対象外です
+* `追加` 許可済み project root の project-local pure-Python package と `.dist-info` metadata に対応し, version 固定済みの再現可能な `requests` example を提供しつつ runtime installer は追加しない
+* `改善` Workspace 上限を圧縮後 64 MiB、file entry 8192 件、展開後 128 MiB に拡張し, dispatch 前に snapshot の実際の 3 次元要件と Provider capability を照合. Missing import は online pip や engine fallback を行わず `ModuleNotFoundError` のまま維持
 
 # v0.3.0-alpha.5
 
@@ -178,14 +186,6 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 * `注記` M3 4 番目の current-tree alpha candidate です. Foreground Host dialogs が 2 device の focused acceptance を通過しましたが、engines、後続 capability、公開、完全な device matrix は含みません
 * `追加` foreground 限定の `autojs6.dialogs.alert/confirm/prompt/select` API を追加し、acknowledgement、boolean、nullable text、0-based nullable index を型付きで返します
 * `改善` dialog title、content、reply、item を制限し、Host 所有 dialog を 1 件ずつ直列化し、background 起動は UI を開かず安定した `INTERACTIVE_NOT_ALLOWED` で拒否します
-
-# v0.3.0-alpha.3
-
-###### 2026/08/23
-
-* `注記` M3 3 番目の current-tree alpha candidate です. 第 2 batch の有界 Host files が 2 device の focused acceptance を通過しましたが、dialogs、engines、後続 capability、公開、完全な device matrix は含みません
-* `追加` 現在の project root または standalone script directory 内で有界な UTF-8 text access を行う live `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API を追加
-* `改善` unsafe または root 外の path を拒否し、text と direct listing を制限し、安定した file error を返し、live Host root と凍結済み Plugin workspace snapshot を明確に分離
 
 ##### その他のバージョン
 

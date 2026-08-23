@@ -51,7 +51,7 @@
     "تتوفر للشجرة الحالية أدلة smoke على جهاز API 31 ‏arm64-v8a وعلى محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يقدم أي منهما كمصفوفة أجهزة كاملة أو كتأهيل release."
   ],
   "h3_roadmap": "خارطة الطريق",
-  "p_roadmap": "تبقى أدلة RC المحلية والجهاز المركزة في R6-P2/P3 تاريخية. يثبت clean VERSION_BUILD=11 freeze commit هذا stable Plugin source identity وexact Host 6.8.0/5275 lock؛ تقيم stable APK provenance مقابل هذه exact identities ويجب أن يستخدم أي production receipt الأساس نفسه. ليست مصفوفة API×ABI الكاملة أو soak جديد بوابات تلقائية.",
+  "p_roadmap": "اكتمل المسار A من M4: يمكن للمشاريع المقبولة حمل تبعيات pure-Python, وقد اجتاز ملف workspace الموسع ثلاثي الابعاد وحالة HTTPS حقيقية باستخدام requests قبولا على جهازين. تستمر قدرات automation في M3 ومسارات الحزم build-time/native في M4 حسب قيمة المستخدم; تبقى ادوات الادلة التاريخية متاحة لكنها ليست بوابات اصدار تلقائية.",
   "text_link_roadmap": "عرض ROADMAP.md",
   "h3_release_history": "سجل الإصدارات",
   "h5_for_more_release_history": "المزيد من الإصدارات",

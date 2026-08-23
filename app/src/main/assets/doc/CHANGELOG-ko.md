@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `안내` 첫 M4 current-tree alpha candidate. Project-local pure-Python dependency path가 두 device의 focused acceptance를 통과했으며 이후 M3/M4 batch, publication 및 전체 device matrix는 이 claim의 범위에 포함되지 않습니다
+* `추가` 승인된 project root의 project-local pure-Python package와 `.dist-info` metadata를 지원하고 version이 고정된 재현 가능한 `requests` example을 제공하며 runtime installer는 추가하지 않음
+* `개선` Workspace 제한을 압축 후 64 MiB, file entry 8192개, 추출 후 128 MiB로 확대하고 dispatch 전에 snapshot의 실제 3차원 요구량을 Provider capability와 대조. Missing import는 online pip 또는 engine fallback 없이 `ModuleNotFoundError`로 유지
+
 # v0.3.0-alpha.5
 
 ###### 2026/08/23

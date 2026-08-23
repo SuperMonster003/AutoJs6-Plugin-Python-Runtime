@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.3.0-alpha.5
-release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.6
+release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -153,7 +153,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
-Локальные RC- и концентрированные device-свидетельства R6-P2/P3 сохраняются как история. Этот clean VERSION_BUILD=11 freeze commit фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock; provenance стабильных APK оценивается относительно этих exact identities, и любой production receipt должен использовать ту же основу. Полная API×ABI matrix и новый soak не являются автоматическими gates.
+Путь A этапа M4 завершен: допущенные проекты могут включать pure-Python зависимости, а расширенный трехмерный профиль workspace и реальный HTTPS-сценарий requests прошли приемку на двух устройствах. Дальнейшие возможности автоматизации M3 и пути M4 для встроенных/native пакетов развиваются по пользовательской ценности; исторические инструменты доказательств остаются доступными, но не служат автоматическими воротами выпуска.
 
 - [Открыть ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +162,14 @@ Runtime Chaquopy предназначен только для доверенны
 ### История версий
 
 ******
+
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `Примечание` Первый alpha-кандидат M4 текущего дерева; локальные pure-Python зависимости проекта прошли целевую приемку на двух устройствах, а последующие этапы M3/M4, публикация и полная матрица устройств остаются вне этого заявления
+* `Добавлено` Поддержка локальных pure-Python пакетов проекта и метаданных `.dist-info` из допущенного корня с воспроизводимым примером `requests` на фиксированных версиях и без установщика во время выполнения
+* `Улучшено` Пределы workspace увеличены до 64 MiB в сжатом виде, 8192 файлов и 128 MiB после извлечения; перед dispatch три фактических измерения snapshot сопоставляются с возможностями Provider, а отсутствующий import остается `ModuleNotFoundError` без online pip или отката к другому движку
 
 # v0.3.0-alpha.5
 
@@ -178,14 +186,6 @@ Runtime Chaquopy предназначен только для доверенны
 * `Примечание` Четвёртый M3 current-tree alpha candidate: foreground-диалоги Host прошли фокусную приёмку на двух устройствах; engines, последующие возможности, публикация и полная матрица устройств не входят в это заявление
 * `Добавлено` Добавлены доступные только на переднем плане API `autojs6.dialogs.alert/confirm/prompt/select` с типизированными результатами подтверждения, boolean, nullable text и nullable индекса с нуля
 * `Улучшено` Ограничены заголовки, содержимое, ответы и элементы, диалоги Host сериализуются по одному, а фоновые запуски отклоняются стабильным `INTERACTIVE_NOT_ALLOWED` без открытия UI
-
-# v0.3.0-alpha.3
-
-###### 2026/08/23
-
-* `Примечание` Третий M3 current-tree alpha candidate: ограниченная часть Host files второго набора прошла фокусную приёмку на двух устройствах; dialogs, engines, последующие возможности, публикация и полная матрица устройств не входят в это заявление
-* `Добавлено` Добавлены live API `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` для ограниченного доступа к UTF-8 тексту в корне текущего проекта или каталоге отдельного скрипта
-* `Улучшено` Отклоняются небезопасные и выходящие за корень пути, ограничены текст и прямые списки, возвращаются стабильные файловые ошибки, а live Host root отделён от замороженного Plugin workspace snapshot
 
 ##### Другие версии
 

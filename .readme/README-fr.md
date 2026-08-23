@@ -103,8 +103,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.3.0-alpha.5
-release state: 0.3.0-alpha.5 current-tree candidate; M1 and M2, the complete first low-risk protocol 1.5 Host capability slice, and the bounded Host-files, foreground-dialog, and engines portions of the second slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.6
+release state: 0.3.0-alpha.6 current-tree candidate; M1 and M2, the implemented protocol 1.5 Host capability slices, and M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -153,7 +153,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 ******
 
-Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques. Ce clean VERSION_BUILD=11 freeze commit fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275; la provenance des APK stables est évaluée par rapport à ces identités exactes et tout production receipt doit utiliser la même base. Une matrice API×ABI complète et un nouveau soak ne sont pas des portes automatiques.
+Le chemin A de M4 est terminé: les projets admis peuvent embarquer des dépendances Python pures, et le profil workspace tridimensionnel étendu ainsi qu'un cas HTTPS réel avec requests ont réussi l'acceptation sur deux appareils. Les capacités d'automatisation M3 et les chemins M4 de paquets intégrés/native suivront la valeur utilisateur; les outils de preuve historiques restent disponibles sans être des portes de publication automatiques.
 
 - [Voir ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -162,6 +162,14 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 ### Historique des versions
 
 ******
+
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `Note` Premier candidat alpha M4 de l'arbre courant; le chemin des dépendances Python pures locales au projet a réussi l'acceptation ciblée sur deux appareils, tandis que les lots M3/M4 suivants, la publication et une matrice complète restent hors de cette déclaration
+* `Fonction` Prendre en charge les paquets Python purs locaux au projet et les métadonnées `.dist-info` depuis les racines admises, avec un exemple `requests` reproductible et verrouillé, sans installateur à l'exécution
+* `Amélioration` Porter les limites du workspace à 64 MiB compressés, 8192 fichiers et 128 MiB extraits, puis comparer avant l'envoi les trois dimensions réelles du snapshot aux capacités du Provider; un import absent reste `ModuleNotFoundError`, sans pip en ligne ni repli de moteur
 
 # v0.3.0-alpha.5
 
@@ -178,14 +186,6 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 * `Note` Quatrième candidat alpha M3 de l'arbre courant; les dialogues Host au premier plan ont passé l'acceptation ciblée sur deux appareils, sans revendiquer engines, capacités suivantes, publication ni matrice complète d'appareils
 * `Fonction` Ajouter les API réservées au premier plan `autojs6.dialogs.alert/confirm/prompt/select`, avec résultats typés pour acquittement, confirmation, texte nullable et index nullable à partir de zéro
 * `Amélioration` Borner titres, contenus, réponses et éléments, sérialiser un dialogue détenu par Host à la fois et refuser les lancements en arrière-plan avec `INTERACTIVE_NOT_ALLOWED` sans ouvrir d'UI
-
-# v0.3.0-alpha.3
-
-###### 2026/08/23
-
-* `Note` Troisième candidat alpha M3 de l'arbre courant; la partie Host files bornée du deuxième lot a passé l'acceptation ciblée sur deux appareils, sans revendiquer dialogues, engines, capacités suivantes, publication ni matrice complète d'appareils
-* `Fonction` Ajouter les API en direct `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` pour l'accès borné au texte UTF-8 dans la racine du projet courant ou le dossier du script autonome
-* `Amélioration` Refuser les chemins dangereux ou sortant de la racine, borner le texte et les listes directes, renvoyer des erreurs de fichier stables et distinguer la racine Host active du snapshot workspace Plugin figé
 
 ##### Autres versions
 

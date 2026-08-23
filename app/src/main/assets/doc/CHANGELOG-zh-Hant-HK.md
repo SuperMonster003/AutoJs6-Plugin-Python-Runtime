@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.6
+
+###### 2026/08/23
+
+* `提示` 首個 M4 current-tree alpha 候選; 項目本地純 Python 相依套件路徑已通過雙裝置聚焦驗收, 後續 M3/M4 批次、發佈及完整裝置矩陣不在本次聲明範圍
+* `新增` 支援從已准入項目根目錄匯入項目本地純 Python 套件及 `.dist-info` 元數據, 提供鎖定版本的 `requests` 可重現範例, 且不引入執行時安裝器
+* `改善` 將項目 workspace 上限提高至壓縮 64 MiB、8192 個檔案條目及解壓 128 MiB, 分發前按 snapshot 實際三維需求匹配 Provider 能力; 缺失 import 仍拋出 `ModuleNotFoundError`, 不觸發線上 pip 或引擎回退
+
 # v0.3.0-alpha.5
 
 ###### 2026/08/23
