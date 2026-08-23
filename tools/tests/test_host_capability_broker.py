@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 PYTHON_SOURCE = ROOT / "app" / "src" / "main" / "python"
 sys.path.insert(0, str(PYTHON_SOURCE))
 
-from autojs6 import app, clip, toast  # noqa: E402
+from autojs6 import app, clip, console, device, notice, toast  # noqa: E402
 from autojs6._broker import _install_execution_broker, _reset_execution_broker  # noqa: E402
 from autojs6.errors import (  # noqa: E402
     CapabilityUnavailableError,
@@ -21,6 +21,16 @@ from autojs6_runtime.bootstrap import run_source  # noqa: E402
 
 
 EXECUTION_ID = "12345678-1234-5678-9abc-def012345678"
+DEVICE_INFO = {
+    "schema": "autojs6-python-device-info-v1",
+    "battery": {"percent": 88.5, "charging": True},
+    "screen": {"on": True, "brightness": 127},
+    "volume": {
+        "music": {"current": 7, "max": 15},
+        "notification": {"current": 4, "max": 7},
+        "alarm": {"current": 5, "max": 7},
+    },
+}
 
 
 class RecordingBroker:
@@ -54,7 +64,15 @@ class RecordingBroker:
                 value = self.clipboard
             elif capability in {"app.launch", "app.launch_app", "app.open_url"}:
                 value = True
-            elif capability == "toast.show":
+            elif capability == "device.info":
+                value = DEVICE_INFO
+            elif capability in {
+                "toast.show",
+                "console.log",
+                "console.warn",
+                "console.error",
+                "notice.show",
+            }:
                 value = None
             else:
                 raise AssertionError(f"unexpected capability: {capability}")
@@ -81,6 +99,11 @@ class HostCapabilityBrokerTest(unittest.TestCase):
             self.assertTrue(app.launch("org.example.app"))
             self.assertTrue(app.launch_app("Example"))
             self.assertTrue(app.open_url("https://example.org/path"))
+            self.assertEqual(DEVICE_INFO, device.info())
+            self.assertIsNone(console.log("log"))
+            self.assertIsNone(console.warn("warn"))
+            self.assertIsNone(console.error("error"))
+            self.assertIsNone(notice("notice"))
         finally:
             _reset_execution_broker(token)
 
@@ -92,11 +115,16 @@ class HostCapabilityBrokerTest(unittest.TestCase):
                 "app.launch",
                 "app.launch_app",
                 "app.open_url",
+                "device.info",
+                "console.log",
+                "console.warn",
+                "console.error",
+                "notice.show",
             ],
             [capability for capability, _ in broker.calls],
         )
         decoded = [json.loads(value) for value in broker.raw_requests]
-        self.assertEqual(list(range(1, 7)), [value["callId"] for value in decoded])
+        self.assertEqual(list(range(1, 12)), [value["callId"] for value in decoded])
         self.assertTrue(all(value["executionId"] == EXECUTION_ID for value in decoded))
         self.assertEqual(
             broker.raw_requests,
@@ -131,12 +159,12 @@ class HostCapabilityBrokerTest(unittest.TestCase):
             _reset_execution_broker(token)
 
         failed = RecordingBroker()
-        failed.failure = ("HOST_TIMEOUT", "timed out")
+        failed.failure = ("PERMISSION_DENIED", "notifications denied")
         token = _install_execution_broker(failed, EXECUTION_ID)
         try:
             with self.assertRaises(HostCapabilityError) as captured:
-                clip.get()
-            self.assertEqual("HOST_TIMEOUT", captured.exception.code)
+                notice("permission")
+            self.assertEqual("PERMISSION_DENIED", captured.exception.code)
         finally:
             _reset_execution_broker(token)
 
@@ -146,6 +174,26 @@ class HostCapabilityBrokerTest(unittest.TestCase):
         try:
             with self.assertRaises(HostCapabilityError) as captured:
                 clip.get()
+            self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_live_api_argument_and_device_result_validation_is_local_and_strict(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            with self.assertRaises(ValueError):
+                notice("")
+            with self.assertRaises(TypeError):
+                console.log(7)  # type: ignore[arg-type]
+            self.assertEqual([], broker.calls)
+
+            broker.response_mutator = lambda response: response.__setitem__(
+                "value",
+                {**DEVICE_INFO, "unexpected": True},
+            )
+            with self.assertRaises(HostCapabilityError) as captured:
+                device.info()
             self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
         finally:
             _reset_execution_broker(token)
