@@ -130,10 +130,13 @@
   `<项目根或脚本目录>/.python-artifacts/execution-<执行id>-<request UUID>/`,
   并以 `[artifact] <绝对路径>` 打印。保留输出目录不进入后续项目 workspace 快照;
   发布失败不覆盖旧结果且以稳定宿主错误终止。宿主提交: `c4066c8e9`。
-- [ ] [H] **交互式 `input()` 多入口冒烟**: 编辑器运行与 Explorer 运行均可弹出输入框,
-  隐藏回显 (`getpass` 场景) 表现正确。
-- [ ] [H] **清理陈旧注释与文档漂移**: `PythonProjectLaunchPolicy` "workspace 未落地" 注释、
-  `R5_CAPABILITY_PREVIEW.md` 的退役 flag 描述等, 与代码事实对齐 (顺手项, 不阻塞)。
+- [x] [H+P] **交互式输入多入口冒烟**: 编辑器运行的 `input()` 与 Explorer 运行的
+  `getpass.getpass()` 均弹出 Host 输入框; 后者使用密码输入类型且回复不写入全局控制台。
+  插件补齐执行局部 `getpass` patch/restore。插件提交: `d8747c3`; 宿主提交:
+  `70ea17097`。
+- [x] [H] **清理陈旧注释与文档漂移**: `PythonProjectLaunchPolicy` 的历史 workspace
+  fail-closed 注释与 `R5_CAPABILITY_PREVIEW.md` 的退役 Gradle flag 已和稳定通道事实对齐;
+  宿主提交: `70ea17097`。
 
 ### 2026-08-23 M2 module 入口验收记录
 
@@ -170,6 +173,18 @@
 - Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 用时 0.891 秒,
   API 37 / x86_64 / 16 KiB page 模拟器用时 1.054 秒, 均为 `OK (1 test)`;
   验收覆盖真实插件会话、控制台前缀、二进制字节、用户可见目录与无 staging 残留。
+
+### 2026-08-23 M2 前台交互输入验收记录
+
+- 插件执行期同时临时替换 `builtins.input` 与标准库 `getpass.getpass`; 两者都先消费有限
+  stdin snapshot, EOF 后才请求一次有界前台回复。`input()` 使用 visible echo 并把提示写入
+  stdout; `getpass.getpass()` 使用 hidden echo 并把提示写入显式 stream 或 stderr。
+- 宿主测试直接调用编辑器使用的 `Scripts.runWithBroadcastSenderInteractive` 与 Explorer
+  使用的 `Scripts.runInteractive`, 没有绕过统一 Launch、脚本引擎或真实插件 Binder 会话。
+- Android 无障碍测试节点确认编辑器输入框 `isPassword=false`, Explorer/getpass 输入框
+  `isPassword=true`; 两次回复均得到预期结构化结果, 且回复文本未出现在全局控制台。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 用时 2.232 秒,
+  API 37 / x86_64 / 16 KiB page 模拟器用时 8.853 秒, 均为 `OK (1 test)`。
 
 ******
 
