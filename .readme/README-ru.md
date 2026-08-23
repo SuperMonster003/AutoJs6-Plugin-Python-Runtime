@@ -50,7 +50,7 @@ Python Runtime — независимый provider протокола Python V1.
 - Явный выбор `entryMode=file|module` для допущенного проекта: режим module использует стандартные метаданные `runpy`, корень проекта в `sys.path[0]` и относительные импорты пакета, а режим file сохраняет обычную семантику скрипта.
 - Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.
 - Явное задание строгого JSON-результата до 64 KiB и передача до 16 необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.
-- Вызов live-операций `toast`, `clip.get/set` и `app.launch/launch_app/open_url` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.
+- Вызов live-операций `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error` и учитывающего разрешения `notice` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.
 - Возврат `SystemExit`, синтаксических и runtime ошибок с ограниченным структурированным traceback.
 - Один активный сеанс на процесс без очереди provider.
 - Перезапуск хоста не нужен: следующая новая сессия после установки или повторного включения заново обнаруживает и фиксирует provider, а Binder death во время выполнения завершает его без автоматического повтора.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.3.0-alpha.1
-release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.2
+release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -141,7 +141,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 - Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` и стандартному `getpass.getpass()` после EOF конечного snapshot до 1 MiB. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.
 - Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.
-- Live broker сейчас охватывает только toast, clipboard и запуск приложений/HTTP(S) URL; dynamic device, Host console, notifications, files, dialogs, accessibility, screenshot и OCR пока не заявлены.
+- Live broker охватывает полный первый низкорисковый набор; files, dialogs, accessibility, screenshot и OCR пока не заявлены.
 - 32-разрядный Android и произвольные native wheels не гарантируются.
 - Для текущего дерева есть smoke evidence на устройстве API 31 arm64-v8a и эмуляторе API 37 x86_64 со страницами 16 KB; это не выдается за полную матрицу устройств или release qualification.
 
@@ -160,6 +160,14 @@ Runtime Chaquopy предназначен только для доверенны
 ### История версий
 
 ******
+
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `Примечание` Второй M3 current-tree alpha candidate: полный первый низкорисковый набор Host capabilities реализован; последующие наборы, публикация и полная матрица устройств не входят в это заявление
+* `Добавлено` Добавлены live-данные батареи/экрана/яркости/громкости `autojs6.device.info()`, уровни Host console `autojs6.console.log/warn/error` и уведомления `autojs6.notice`
+* `Улучшено` Строго проверяется схема результата device, а нехватка разрешений уведомлений возвращает стабильный `PERMISSION_DENIED` без открытия настроек и изменения разрешений устройства
 
 # v0.3.0-alpha.1
 
@@ -187,17 +195,6 @@ Runtime Chaquopy предназначен только для доверенны
 * `Улучшено` Каждый запуск получает отдельный `__main__` с восстановлением stdin/stdout/stderr, argv, cwd, `sys.path`, состояния modules и importer cache
 * `Улучшено` Для открытого, но не запущенного session действует lease 5 секунд, после чего освобождаются inputs, descriptors и единственный session slot
 * `Улучшено` Минимальный Host versionCode 5275 проверяется на Binder-границе Provider, а не только при discovery со стороны Host
-
-# v0.1.0
-
-###### 2026/08/12
-
-* `Примечание` Версия 0.1.0 фиксирует stable Plugin source identity и exact Host 6.8.0/5275 lock
-* `Добавлено` Протокол Python 1.0-1.1 для AutoJs6 6.8.0 / versionCode 5275, ограниченный project workspace и read-only snapshots app/device/execution/project
-* `Добавлено` Hot-plug без перезапуска хоста: install или повторное включение позволяет следующему запуску заново найти и pin ID, без fallback при отсутствии или отключении
-* `Добавлено` Binder death во время работы завершает текущий запуск без replay; новые запуски заново обнаруживают provider
-* `Улучшено` Chaquopy закреплен как trusted-local, non-sandbox runtime; долгосрочный signer — SM003, owner runtime/security/release — SuperMonster003
-* `Зависимость` Зафиксированы Chaquopy 17.0.0 и CPython 3.13.9; стабильные APK привязаны к финальной идентичности исходников и проверены как точные artifacts
 
 ##### Другие версии
 

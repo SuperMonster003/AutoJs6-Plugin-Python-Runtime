@@ -14,7 +14,7 @@
     "Sélectionner explicitement `entryMode=file|module` pour un projet admis; le mode module emploie les métadonnées standard de `runpy`, la racine du projet dans `sys.path[0]` et les imports relatifs au package, tandis que le mode file conserve la sémantique d'un script ordinaire.",
     "Livrer pendant l'exécution des chunks stdout/stderr bornés dans leur ordre d'origine; l'épuisement des crédits applique une contre-pression à l'exécution.",
     "Définir un résultat JSON strict explicite de {{ max_structured_json_bytes }} au maximum et transférer jusqu'à {{ max_output_artifacts }} artefacts facultatifs sous les limites de chemin, taille et SHA-256 du protocole 1.4; ne jamais déduire un résultat de stdout.",
-    "Appeler en direct `toast`, `clip.get/set` et `app.launch/launch_app/open_url` via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.",
+    "Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error` et `notice` sensible aux autorisations via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.",
     "Signaler `SystemExit`, les erreurs de syntaxe et les exceptions avec une traceback structurée bornée.",
     "Autoriser une session active par processus sans file d'attente côté fournisseur.",
     "Ne pas redémarrer l'hôte: la prochaine nouvelle exécution après installation ou réactivation redécouvre et épingle le provider; une mort Binder en cours termine cette exécution sans jamais la rejouer."
@@ -44,7 +44,7 @@
   "unsupported_capabilities": [
     "Le stdin général en direct et le streaming callback de `sys.stdin` direct sont indisponibles. L'interaction au premier plan s'applique uniquement au `input()` intégré et à `getpass.getpass()` après l'EOF du snapshot fini de {{ max_stdin_bytes }} au maximum. L'écriture dans le workspace, pip en ligne et les téléchargements de wheel restent indisponibles.",
     "Aucun script UI, débogueur, REPL ou accès arbitraire aux objets Java de l'hôte.",
-    "Le broker temps réel couvre actuellement seulement toast, presse-papiers et lancement d'application/URL HTTP(S); device dynamique, console hôte, notifications, fichiers, dialogues, accessibilité, capture d'écran et OCR restent non déclarés.",
+    "Le broker temps réel couvre le premier lot complet à faible risque; fichiers, dialogues, accessibilité, capture d'écran et OCR restent non déclarés.",
     "Le support Android 32 bits et les wheels natives tierces ne sont pas garantis.",
     "L'arbre courant dispose d'un smoke sur appareil API 31 arm64-v8a et d'un smoke sur émulateur API 37 x86_64 à pages de 16 KB; aucun ne constitue une matrice complète d'appareils ni une qualification de release."
   ],

@@ -50,7 +50,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 - 許可済み project では `entryMode=file|module` を明示的に選択します. module mode は標準 `runpy` metadata, project root の `sys.path[0]`, package-relative import を使用し, file mode は通常の script semantics を維持します.
 - スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.
 - protocol 1.4 で最大 64 KiB の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 16 個転送します. stdout から result を推測しません.
-- 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url` をリアルタイムに呼び出し、terminal 時に無効化します.
+- 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice` をリアルタイムに呼び出し、terminal 時に無効化します.
 - `SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.
 - プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.
 - ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.3.0-alpha.1
-release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.2
+release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -141,7 +141,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 - 汎用 live stdin と直接の `sys.stdin` callback streaming は未対応です. foreground 対話は最大 1 MiB の有限 snapshot が EOF に達した後の組み込み `input()` と標準ライブラリの `getpass.getpass()` のみに適用されます. workspace への書き戻し, online pip, wheel ダウンロードも引き続き未対応です.
 - UI スクリプト, debugger, REPL, ホスト Java オブジェクトへの任意アクセスはありません.
-- live broker は現在 toast、clipboard、app launch/HTTP(S) URL のみです. dynamic device、Host console、notification、files、dialogs、accessibility、screenshot、OCR は未宣言です.
+- live broker は最初の低リスク機能一式を提供します. files、dialogs、accessibility、screenshot、OCR は未宣言です.
 - 32 bit Android と任意の native wheel は保証しません.
 - 現在の tree には API 31 arm64-v8a 実機 smoke evidence と API 37 x86_64 16 KB page emulator smoke evidence がありますが, 完全な device matrix や release qualification とは扱いません.
 
@@ -160,6 +160,14 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 ### 更新履歴
 
 ******
+
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `注記` M3 2 番目の current-tree alpha candidate です. 最初の低リスク Host capability 一式を実装しましたが, 後続 batch、公開、完全な device matrix はこの宣言に含みません
+* `追加` live `autojs6.device.info()` のバッテリー/画面/明るさ/音量データ、`autojs6.console.log/warn/error` Host console レベル、`autojs6.notice` 通知を追加
+* `改善` device result schema を厳密に検証し、通知権限不足を設定画面や権限状態の変更なしで安定した `PERMISSION_DENIED` として返す
 
 # v0.3.0-alpha.1
 
@@ -187,17 +195,6 @@ R6-P2/P3 のローカル RC と集中端末証拠は履歴として保持され�
 * `改善` 実行ごとに独立した `__main__` を使用し, stdin/stdout/stderr, argv, cwd, `sys.path`, module, importer cache の状態を復元
 * `改善` open 後に start されない session に 5 秒 lease を適用し, 期限後に input, descriptor, 単一 session slot を解放
 * `改善` Host 側 discovery だけに依存せず, Provider の Binder 境界で最低 Host versionCode 5275 を強制
-
-# v0.1.0
-
-###### 2026/08/12
-
-* `注記` 0.1.0 は stable Plugin source identity と exact Host 6.8.0/5275 lock を固定します
-* `追加` AutoJs6 6.8.0 / versionCode 5275 と組み合わせる Python プロトコル 1.0-1.1, 上限付き project workspace, 読み取り専用 app/device/execution/project snapshot
-* `追加` ホスト再起動なしの hot-plug: install または再有効化後の次の新規実行で ID を再検出・pin し, 不在・無効時は fallback しません
-* `追加` 実行中の Binder death は replay せず現在の実行を終了し, 後続の新規実行で provider を再検出します
-* `改善` Chaquopy を trusted-local, non-sandbox runtime として固定. 長期 signer は SM003, runtime/security/release owner は SuperMonster003
-* `依存関係` Chaquopy 17.0.0 と CPython 3.13.9 を lock. stable APK は final source identity に紐づき, exact artifact として検証されます
 
 ##### その他のバージョン
 

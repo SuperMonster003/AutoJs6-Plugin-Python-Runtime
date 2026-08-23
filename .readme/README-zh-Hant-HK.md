@@ -50,7 +50,7 @@ Python Runtime 是獨立的 Python 協議 V1 provider. 宿主將單一 Python �
 - 為已准入項目明確選擇 `entryMode=file|module`; module 模式使用標準 `runpy` 元數據、項目根目錄 `sys.path[0]` 及 package-relative import, file 模式保留普通指令碼語義.
 - 在腳本執行期間按 stdout/stderr 原始次序透過有界 chunk 與 credit 傳送; credit 用盡會對執行施加背壓.
 - 透過協議 1.4 明確設定最大 64 KiB 的嚴格 JSON 結果, 並傳送最多 16 個具有路徑、大小及 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.
-- 透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set` 及 `app.launch/launch_app/open_url`, 終態後自動撤銷.
+- 透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error` 及權限感知 `notice`, 終態後自動撤銷.
 - 傳回 `SystemExit`, 語法錯誤和執行階段例外, 包括有界結構化 traceback.
 - 同一執行環境程序只允許一個使用中工作階段, provider 端不排隊.
 - 宿主毋須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.3.0-alpha.1
-release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.2
+release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -141,7 +141,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 - 不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前台互動只適用於最大 1 MiB 的有限 snapshot 到達 EOF 後的內置 `input()` 與標準庫 `getpass.getpass()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.
 - 不提供 UI 指令碼, 除錯器, REPL 或任意宿主 Java 物件存取.
-- 即時 broker 目前只涵蓋 toast、剪貼簿及應用程式啟動/HTTP(S) URL; 動態 device、宿主 console、通知、檔案、對話框、無障礙、截圖及 OCR 仍未聲明.
+- 即時 broker 已涵蓋完整首批低風險能力; 檔案、對話框、無障礙、截圖及 OCR 仍未聲明.
 - 不聲明 32 位元 Android 支援, 亦不保證任何第三方 native wheel 可用.
 - 目前樹已有 API 31 arm64-v8a 真機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格.
 
@@ -160,6 +160,14 @@ R6-P2/P3 的本機 RC 及集中裝置證據保留為歷史記錄. 本次 clean V
 ### 版本記錄
 
 ******
+
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `提示` M3 第二個 current-tree alpha 候選; 完整首批低風險 Host 能力已實作, 後續能力批次、公開發行及完整裝置矩陣不在本條聲明範圍
+* `新增` 加入即時 `autojs6.device.info()` 電量/螢幕/亮度/音量資料、`autojs6.console.log/warn/error` 宿主控制台級別及 `autojs6.notice` 通知
+* `改善` 嚴格校驗 device 結果結構, 通知權限不足時穩定傳回 `PERMISSION_DENIED`, 不開啟設定或變更裝置權限狀態
 
 # v0.3.0-alpha.1
 
@@ -187,17 +195,6 @@ R6-P2/P3 的本機 RC 及集中裝置證據保留為歷史記錄. 本次 clean V
 * `改善` 每次執行使用獨立 `__main__`, 並還原 stdin/stdout/stderr, argv, cwd, `sys.path`, module 及 importer cache 狀態
 * `改善` 為已開啟但未 start 的 session 加入 5 秒 lease, 到期釋放輸入, descriptor 及單一工作階段佔位
 * `改善` Provider 在 Binder 傳入邊界強制最低 Host versionCode 5275, 不再只依賴 Host 端探索檢查
-
-# v0.1.0
-
-###### 2026/08/12
-
-* `提示` 0.1.0 固定了穩定 Plugin 原始碼身分及精確 Host 6.8.0/5275 lock
-* `新增` 面向 AutoJs6 6.8.0 / versionCode 5275 的 Python 協議 1.0-1.1, 有界專案 workspace 及唯讀 app/device/execution/project 能力快照
-* `新增` 毋須重新啟動 Host 的熱插拔: 安裝或重新啟用後下一次新執行重新發現並 pin 身分, 缺失或停用時絕不 fallback
-* `新增` 執行中的 Binder death 終止目前執行且不得重播, 後續新執行重新發現 provider
-* `改善` 將 Chaquopy 固定為 trusted-local, non-sandbox 執行環境; SM003 為長期 signer, SuperMonster003 為 runtime/security/release owner
-* `相依項目` 鎖定 Chaquopy 17.0.0 及 CPython 3.13.9; 穩定 APK 與最終原始碼身分綁定並通過精確產物驗證
 
 ##### 更多版本
 

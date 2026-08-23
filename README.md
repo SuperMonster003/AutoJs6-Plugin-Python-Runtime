@@ -50,7 +50,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 - 为已准入项目显式选择 `entryMode=file|module`; module 模式使用标准 `runpy` 元数据、项目根目录 `sys.path[0]` 与包相对导入, file 模式保持普通脚本语义.
 - 在脚本执行期间按 stdout/stderr 原始顺序通过有界 chunk 与 credit 传送; credit 耗尽会对执行施加背压.
 - 通过协议 1.4 显式设置最大 64 KiB 的严格 JSON 结果, 并传送最多 16 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.
-- 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set` 与 `app.launch/launch_app/open_url`, 终态后自动撤销.
+- 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error` 与权限感知 `notice`, 终态后自动撤销.
 - 返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.
 - 同一运行时进程只允许一个活动会话, provider 侧不排队.
 - Host 无需重启; 安装或重新启用插件后下一次新执行会重新发现并 pin provider 身份, 在途 Binder death 会终止该执行且绝不自动重放.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.3.0-alpha.1
-release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.2
+release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -141,7 +141,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 - 不提供通用实时 stdin 或直接 `sys.stdin` callback streaming. 前台交互仅适用于最大 1 MiB 的有限 snapshot 到达 EOF 后的内置 `input()` 与标准库 `getpass.getpass()`. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.
 - 不提供 UI 脚本, 调试器, REPL 或任意宿主 Java 对象访问.
-- 实时 broker 当前仅覆盖 toast、剪贴板和应用启动/HTTP(S) URL; 动态 device、宿主 console、通知、文件、对话框、无障碍、截图及 OCR 仍未声明.
+- 实时 broker 已覆盖完整首批低风险能力; 文件、对话框、无障碍、截图及 OCR 仍未声明.
 - 不声明 32 位 Android 支持, 也不保证任意第三方 native wheel 可用.
 - 当前树已有 API 31 arm64-v8a 真机冒烟证据与 API 37 x86_64 16 KB page 模拟器冒烟证据; 两者都不冒充完整设备矩阵或发布资质.
 
@@ -160,6 +160,14 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 ### 版本历史
 
 ******
+
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `提示` M3 第二个 current-tree alpha 候选; 完整首批低风险 Host 能力已实现, 后续能力批次、公开发布和完整设备矩阵仍不在本条声明范围内
+* `新增` 新增实时 `autojs6.device.info()` 电量/屏幕/亮度/音量数据、`autojs6.console.log/warn/error` 宿主控制台级别及 `autojs6.notice` 通知
+* `优化` 严格校验 device 结果结构, 通知权限不足时稳定返回 `PERMISSION_DENIED`, 不打开设置或更改设备权限状态
 
 # v0.3.0-alpha.1
 
@@ -187,17 +195,6 @@ R6-P2/P3 的本地 RC 与集中设备证据保留为历史记录. 本次 clean V
 * `优化` 每次执行使用独立 `__main__`, 并恢复 stdin/stdout/stderr, argv, cwd, `sys.path`, module 与 importer cache 状态
 * `优化` 为已打开但未 start 的 session 增加 5 秒 lease, 到期释放输入, descriptor 与单会话占位
 * `优化` Provider 在 Binder 入站强制最低 Host versionCode 5275, 不再只依赖 Host 侧发现检查
-
-# v0.1.0
-
-###### 2026/08/12
-
-* `提示` 0.1.0 固定了稳定 Plugin 源码身份和精确 Host 6.8.0/5275 lock
-* `新增` 面向 AutoJs6 6.8.0 / versionCode 5275 的 Python 协议 1.0-1.1, 有界项目 workspace 与只读 app/device/execution/project 能力快照
-* `新增` 无需重启 Host 的热插拔: 安装或重新启用后下次新执行重新发现并 pin 身份, 缺失或禁用绝不 fallback
-* `新增` 在途 Binder death 终止当前执行且不得重放, 后续新执行重新发现 provider
-* `优化` 将 Chaquopy 固定为 trusted-local, non-sandbox 运行时; SM003 为长期 signer, SuperMonster003 为 runtime/security/release owner
-* `依赖` 锁定 Chaquopy 17.0.0 与 CPython 3.13.9; 稳定 APK 与最终源码身份绑定并通过精确产物验证
 
 ##### 更多版本
 

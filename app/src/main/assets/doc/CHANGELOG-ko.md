@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `안내` 두 번째 M3 current-tree alpha candidate입니다. 첫 저위험 Host capability 전체를 구현했지만 이후 batch, 공개 배포 및 전체 device matrix는 이 선언에 포함하지 않습니다
+* `추가` live `autojs6.device.info()` 배터리/화면/밝기/볼륨 데이터, `autojs6.console.log/warn/error` Host console 레벨 및 `autojs6.notice` 알림 추가
+* `개선` device 결과 schema를 엄격히 검증하고 알림 권한 부족을 설정 화면이나 기기 권한 변경 없이 안정된 `PERMISSION_DENIED`로 반환
+
 # v0.3.0-alpha.1
 
 ###### 2026/08/23

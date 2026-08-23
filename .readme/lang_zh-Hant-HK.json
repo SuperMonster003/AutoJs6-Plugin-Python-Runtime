@@ -14,7 +14,7 @@
     "為已准入項目明確選擇 `entryMode=file|module`; module 模式使用標準 `runpy` 元數據、項目根目錄 `sys.path[0]` 及 package-relative import, file 模式保留普通指令碼語義.",
     "在腳本執行期間按 stdout/stderr 原始次序透過有界 chunk 與 credit 傳送; credit 用盡會對執行施加背壓.",
     "透過協議 1.4 明確設定最大 {{ max_structured_json_bytes }} 的嚴格 JSON 結果, 並傳送最多 {{ max_output_artifacts }} 個具有路徑、大小及 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.",
-    "透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set` 及 `app.launch/launch_app/open_url`, 終態後自動撤銷.",
+    "透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error` 及權限感知 `notice`, 終態後自動撤銷.",
     "傳回 `SystemExit`, 語法錯誤和執行階段例外, 包括有界結構化 traceback.",
     "同一執行環境程序只允許一個使用中工作階段, provider 端不排隊.",
     "宿主毋須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播."
@@ -44,7 +44,7 @@
   "unsupported_capabilities": [
     "不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前台互動只適用於最大 {{ max_stdin_bytes }} 的有限 snapshot 到達 EOF 後的內置 `input()` 與標準庫 `getpass.getpass()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.",
     "不提供 UI 指令碼, 除錯器, REPL 或任意宿主 Java 物件存取.",
-    "即時 broker 目前只涵蓋 toast、剪貼簿及應用程式啟動/HTTP(S) URL; 動態 device、宿主 console、通知、檔案、對話框、無障礙、截圖及 OCR 仍未聲明.",
+    "即時 broker 已涵蓋完整首批低風險能力; 檔案、對話框、無障礙、截圖及 OCR 仍未聲明.",
     "不聲明 32 位元 Android 支援, 亦不保證任何第三方 native wheel 可用.",
     "目前樹已有 API 31 arm64-v8a 真機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格."
   ],

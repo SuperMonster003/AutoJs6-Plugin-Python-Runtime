@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.3.0-alpha.1 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.3.0-alpha.2 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -51,8 +51,9 @@
   定时任务、Intent (本地 file 路径)、脚本重启。
 - [x] `import autojs6` 只读 API: `app.snapshot()` / `device.snapshot()` /
   `execution.snapshot()` / `project.read_text|read_bytes|exists` (项目执行时)。
-- [x] 协议 1.5 实时 Host API 首批子集: `toast`, `clip.get/set`,
-  `app.launch/launch_app/open_url`; 每次执行独立 broker, 终态自动撤销。
+- [x] 协议 1.5 实时 Host API 完整首批低风险能力: `toast`, `clip.get/set`,
+  `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice`;
+  每次执行独立 broker, 终态自动撤销。
 - [x] 单文件脚本 `ModuleNotFoundError` 时提示用户改用显式 Python 项目。
 
 ### 真机与构建证据 (历史, 保持有效)
@@ -193,7 +194,7 @@
 ## M3 —— 兑现初衷: AutoJs6 API 实时能力 broker (目标版本 0.3.0 起)
 
 > 主题: 进入 M3 前, Python 只有 4 个只读快照, 而 JS 有约 45 个模块。当前树已打通
-> 协议 1.5 broker 骨架并交付第一批中的 toast / clipboard / app 子集。后续继续按用户价值
+> 协议 1.5 broker 骨架并交付完整第一批低风险能力。后续继续按用户价值
 > 逐批扩面。方案不必从零设计 —— 宿主已有两个现成参照:
 > Lua broker (机制完整: executionId 绑定、防重放、配额、唯一终态, 能力仅 2 项) 与
 > Node.js broker (能力面完整: 31 个模块)。Python 取两者之长:
@@ -219,9 +220,9 @@
 - [x] [H+P] `autojs6.toast(text)` —— Toaster
 - [x] [H+P] `autojs6.clip.get() / set(text)` —— 剪贴板
 - [x] [H+P] `autojs6.app.launch(package) / launch_app(name) / open_url(url)` —— AppUtils
-- [ ] [H+P] `autojs6.device.info()` 动态查询 (电量/屏幕状态/亮度/音量, 区别于启动时快照)
-- [ ] [H+P] `autojs6.console.log/warn/error` 直写宿主控制台 (与 print 并存, 带级别)
-- [ ] [H+P] `autojs6.notice(text)` —— 通知
+- [x] [H+P] `autojs6.device.info()` 动态查询 (电量/屏幕状态/亮度/音量, 区别于启动时快照)
+- [x] [H+P] `autojs6.console.log/warn/error` 直写宿主控制台 (与 print 并存, 带级别)
+- [x] [H+P] `autojs6.notice(text)` —— 权限不足时稳定返回 `PERMISSION_DENIED`, 不主动打开设置
 - [x] [P] 首批低风险能力示例脚本
   (`examples/python/m3_low_risk_capabilities.py`)。
 - [x] [H+P] 协议 1.5 公共引擎双设备冒烟 (物理设备 arm64 + 16 KiB page x86_64 模拟器)。
@@ -243,6 +244,13 @@
 - Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 用时 1.607 秒,
   API 37 / x86_64 / 16 KiB page 模拟器用时 7.183 秒, 均为 `OK (1 test)`。
   这是首批能力的聚焦 current-tree 冒烟, 不代表后续 M3 模块、完整设备矩阵或公开发布。
+- 完整首批剩余能力由宿主提交 `ce721077e` 接通, 测试由 `19ec9b894` 固定;
+  插件 API 与测试分别由 `6f0785a`、`20305cf` 引入。新增公共引擎用例严格校验
+  `device.info()` schema/range、宿主 D/W/E 日志级别与 execution-tagged 通知; 测试仅取消
+  自己的 UUID 通知, 不改通知权限或设置。
+- `0.3.0-alpha.2` current tree 上, 新增用例在上述物理机与模拟器分别用时 1.047 秒、
+  1.268 秒, 两台都实际发布并核验通知; 原 toast/clipboard/app 用例回归分别用时
+  1.567 秒、7.913 秒。四次均为 `OK (1 test)`。
 
 ### 第二批: 文件与对话框 (0.3.x)
 
@@ -314,7 +322,7 @@
 | --- | --- | --- |
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
-| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架及首批 toast/clipboard/app 已完成) |
+| 0.3.x | M3 broker 骨架 + 第一二批能力 | 进行中 (骨架及完整第一批低风险能力已完成) |
 | 0.4.0 | M3 自动化核心 + M4 第三方包路径 A/B | 计划 |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |

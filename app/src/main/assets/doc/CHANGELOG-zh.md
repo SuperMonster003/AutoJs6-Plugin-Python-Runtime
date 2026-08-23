@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `提示` M3 第二个 current-tree alpha 候选; 完整首批低风险 Host 能力已实现, 后续能力批次、公开发布和完整设备矩阵仍不在本条声明范围内
+* `新增` 新增实时 `autojs6.device.info()` 电量/屏幕/亮度/音量数据、`autojs6.console.log/warn/error` 宿主控制台级别及 `autojs6.notice` 通知
+* `优化` 严格校验 device 结果结构, 通知权限不足时稳定返回 `PERMISSION_DENIED`, 不打开设置或更改设备权限状态
+
 # v0.3.0-alpha.1
 
 ###### 2026/08/23

@@ -14,7 +14,7 @@
     "为已准入项目显式选择 `entryMode=file|module`; module 模式使用标准 `runpy` 元数据、项目根目录 `sys.path[0]` 与包相对导入, file 模式保持普通脚本语义.",
     "在脚本执行期间按 stdout/stderr 原始顺序通过有界 chunk 与 credit 传送; credit 耗尽会对执行施加背压.",
     "通过协议 1.4 显式设置最大 {{ max_structured_json_bytes }} 的严格 JSON 结果, 并传送最多 {{ max_output_artifacts }} 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.",
-    "通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set` 与 `app.launch/launch_app/open_url`, 终态后自动撤销.",
+    "通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error` 与权限感知 `notice`, 终态后自动撤销.",
     "返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.",
     "同一运行时进程只允许一个活动会话, provider 侧不排队.",
     "Host 无需重启; 安装或重新启用插件后下一次新执行会重新发现并 pin provider 身份, 在途 Binder death 会终止该执行且绝不自动重放."
@@ -44,7 +44,7 @@
   "unsupported_capabilities": [
     "不提供通用实时 stdin 或直接 `sys.stdin` callback streaming. 前台交互仅适用于最大 {{ max_stdin_bytes }} 的有限 snapshot 到达 EOF 后的内置 `input()` 与标准库 `getpass.getpass()`. 仍不支持 workspace 写回, 在线 pip 或运行时下载 wheel.",
     "不提供 UI 脚本, 调试器, REPL 或任意宿主 Java 对象访问.",
-    "实时 broker 当前仅覆盖 toast、剪贴板和应用启动/HTTP(S) URL; 动态 device、宿主 console、通知、文件、对话框、无障碍、截图及 OCR 仍未声明.",
+    "实时 broker 已覆盖完整首批低风险能力; 文件、对话框、无障碍、截图及 OCR 仍未声明.",
     "不声明 32 位 Android 支持, 也不保证任意第三方 native wheel 可用.",
     "当前树已有 API 31 arm64-v8a 真机冒烟证据与 API 37 x86_64 16 KB page 模拟器冒烟证据; 两者都不冒充完整设备矩阵或发布资质."
   ],

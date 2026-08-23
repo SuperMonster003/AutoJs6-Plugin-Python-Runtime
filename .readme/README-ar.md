@@ -50,7 +50,7 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 - اختيار `entryMode=file|module` صراحة لمشروع مقبول؛ يستخدم وضع module بيانات `runpy` القياسية وجذر المشروع في `sys.path[0]` وعمليات الاستيراد النسبية للحزمة، بينما يحافظ وضع file على دلالات السكربت العادية.
 - إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.
 - تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه 64 KiB ونقل ما يصل إلى 16 من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.
-- استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
+- استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
 - إرجاع `SystemExit` وأخطاء الصياغة والتنفيذ مع traceback منظم ومحدود.
 - السماح بجلسة نشطة واحدة لكل عملية دون طابور لدى provider.
 - لا حاجة لإعادة تشغيل المضيف: يعيد التنفيذ الجديد التالي بعد التثبيت أو إعادة التفعيل اكتشاف provider وتثبيت هويته، بينما ينهي Binder death أثناء التشغيل ذلك التنفيذ دون إعادة تلقائية.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.3.0-alpha.1
-release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.2
+release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -141,7 +141,7 @@ runtime/security/release owner: SuperMonster003
 
 - لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة و`getpass.getpass()` بعد EOF للـ snapshot المحدود حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
 - لا توجد نصوص UI أو debugger أو REPL أو صلاحية عشوائية لكائنات Java في المضيف.
-- يغطي broker المباشر حاليا toast وclipboard وتشغيل التطبيقات/روابط HTTP(S) فقط؛ ولا تزال dynamic device وHost console والإشعارات والملفات والحوارات وaccessibility وscreenshot وOCR غير معلنة.
+- يغطي broker المباشر أول مجموعة كاملة منخفضة المخاطر؛ ولا تزال الملفات والحوارات وaccessibility وscreenshot وOCR غير معلنة.
 - لا يضمن Android ‏32-bit أو أي native wheel خارجي.
 - تتوفر للشجرة الحالية أدلة smoke على جهاز API 31 ‏arm64-v8a وعلى محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يقدم أي منهما كمصفوفة أجهزة كاملة أو كتأهيل release.
 
@@ -160,6 +160,14 @@ runtime/security/release owner: SuperMonster003
 ### سجل الإصدارات
 
 ******
+
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `ملاحظة` ثاني مرشح alpha من M3 للشجرة الحالية؛ اكتملت أول مجموعة قدرات Host منخفضة المخاطر، ولا يشمل هذا الادعاء الدفعات اللاحقة أو النشر أو مصفوفة أجهزة كاملة
+* `إضافة` إضافة بيانات البطارية/الشاشة/السطوع/الصوت المباشرة عبر `autojs6.device.info()` ومستويات وحدة تحكم Host عبر `autojs6.console.log/warn/error` وإشعارات `autojs6.notice`
+* `تحسين` التحقق الصارم من مخطط نتيجة device وإرجاع `PERMISSION_DENIED` ثابت عند نقص إذن الإشعارات من دون فتح الإعدادات أو تغيير أذونات الجهاز
 
 # v0.3.0-alpha.1
 
@@ -187,17 +195,6 @@ runtime/security/release owner: SuperMonster003
 * `تحسين` استخدام `__main__` مستقل لكل تنفيذ واستعادة حالات stdin/stdout/stderr وargv وcwd و`sys.path` وmodule وimporter cache
 * `تحسين` تطبيق lease مدته 5 ثوان على session مفتوحة لم تبدأ ثم تحرير inputs وdescriptors وموضع session الوحيد
 * `تحسين` فرض الحد الأدنى Host versionCode 5275 عند حد Binder الخاص بـ Provider بدلا من الاعتماد فقط على discovery من Host
-
-# v0.1.0
-
-###### 2026/08/12
-
-* `ملاحظة` يثبت الإصدار 0.1.0 stable Plugin source identity وexact Host 6.8.0/5275 lock
-* `إضافة` بروتوكول Python ‏1.0-1.1 مقترن بـ AutoJs6 6.8.0 / versionCode 5275 وproject workspace محدود وsnapshots ‏app/device/execution/project للقراءة فقط
-* `إضافة` Hot-plug دون إعادة تشغيل المضيف: يسمح التثبيت أو إعادة التفعيل للتنفيذ الجديد التالي بإعادة اكتشاف الهوية وpin دون fallback عند الفقد أو التعطيل
-* `إضافة` ينهي Binder death أثناء التشغيل التنفيذ الحالي دون replay؛ تعيد عمليات التنفيذ الجديدة اكتشاف provider
-* `تحسين` تثبيت Chaquopy كبيئة trusted-local وnon-sandbox؛ ‏SM003 هو signer طويل الأجل وSuperMonster003 هو owner لـ runtime/security/release
-* `اعتماد` قفل Chaquopy 17.0.0 وCPython 3.13.9؛ ترتبط stable APKs بهوية المصدر النهائية وتتحقق كـ exact artifacts
 
 ##### المزيد من الإصدارات
 

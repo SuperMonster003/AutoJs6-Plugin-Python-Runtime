@@ -50,7 +50,7 @@ Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte t
 - Sélectionner explicitement `entryMode=file|module` pour un projet admis; le mode module emploie les métadonnées standard de `runpy`, la racine du projet dans `sys.path[0]` et les imports relatifs au package, tandis que le mode file conserve la sémantique d'un script ordinaire.
 - Livrer pendant l'exécution des chunks stdout/stderr bornés dans leur ordre d'origine; l'épuisement des crédits applique une contre-pression à l'exécution.
 - Définir un résultat JSON strict explicite de 64 KiB au maximum et transférer jusqu'à 16 artefacts facultatifs sous les limites de chemin, taille et SHA-256 du protocole 1.4; ne jamais déduire un résultat de stdout.
-- Appeler en direct `toast`, `clip.get/set` et `app.launch/launch_app/open_url` via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
+- Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error` et `notice` sensible aux autorisations via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
 - Signaler `SystemExit`, les erreurs de syntaxe et les exceptions avec une traceback structurée bornée.
 - Autoriser une session active par processus sans file d'attente côté fournisseur.
 - Ne pas redémarrer l'hôte: la prochaine nouvelle exécution après installation ou réactivation redécouvre et épingle le provider; une mort Binder en cours termine cette exécution sans jamais la rejouer.
@@ -102,8 +102,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.3.0-alpha.1
-release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.2
+release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -141,7 +141,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 - Le stdin général en direct et le streaming callback de `sys.stdin` direct sont indisponibles. L'interaction au premier plan s'applique uniquement au `input()` intégré et à `getpass.getpass()` après l'EOF du snapshot fini de 1 MiB au maximum. L'écriture dans le workspace, pip en ligne et les téléchargements de wheel restent indisponibles.
 - Aucun script UI, débogueur, REPL ou accès arbitraire aux objets Java de l'hôte.
-- Le broker temps réel couvre actuellement seulement toast, presse-papiers et lancement d'application/URL HTTP(S); device dynamique, console hôte, notifications, fichiers, dialogues, accessibilité, capture d'écran et OCR restent non déclarés.
+- Le broker temps réel couvre le premier lot complet à faible risque; fichiers, dialogues, accessibilité, capture d'écran et OCR restent non déclarés.
 - Le support Android 32 bits et les wheels natives tierces ne sont pas garantis.
 - L'arbre courant dispose d'un smoke sur appareil API 31 arm64-v8a et d'un smoke sur émulateur API 37 x86_64 à pages de 16 KB; aucun ne constitue une matrice complète d'appareils ni une qualification de release.
 
@@ -160,6 +160,14 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 ### Historique des versions
 
 ******
+
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `Note` Deuxième candidat alpha M3 de l'arbre courant; le premier lot complet de capacités Host à faible risque est implémenté, sans revendiquer les lots suivants, la publication ni une matrice complète d'appareils
+* `Fonction` Ajouter les données batterie/écran/luminosité/volume en direct de `autojs6.device.info()`, les niveaux de console Host `autojs6.console.log/warn/error` et les notifications `autojs6.notice`
+* `Amélioration` Valider strictement le schéma device et renvoyer un `PERMISSION_DENIED` stable sans ouvrir les réglages ni modifier les autorisations de l'appareil
 
 # v0.3.0-alpha.1
 
@@ -187,17 +195,6 @@ Les preuves RC locales et appareil concentrées de R6-P2/P3 restent historiques.
 * `Amélioration` Utilisation d'un `__main__` indépendant par exécution et restauration de stdin/stdout/stderr, argv, cwd, `sys.path`, des modules et du cache d'importeurs
 * `Amélioration` Application d'un lease de 5 secondes à une session ouverte mais jamais démarrée, puis libération des entrées, descriptors et de l'emplacement de session unique
 * `Amélioration` Application du Host versionCode minimal 5275 à la frontière Binder du Provider au lieu de dépendre uniquement de la découverte côté Host
-
-# v0.1.0
-
-###### 2026/08/12
-
-* `Note` La version 0.1.0 fixe l'identité source stable du Plugin et le lock Host exact 6.8.0/5275
-* `Fonction` Protocole Python 1.0-1.1 associé à AutoJs6 6.8.0 / versionCode 5275, workspace projet borné et snapshots app/device/execution/project en lecture seule
-* `Fonction` Hot-plug sans redémarrage hôte: installation ou réactivation permet à la prochaine exécution de redécouvrir et épingler l'identité, sans fallback si absent ou désactivé
-* `Fonction` La mort Binder en cours termine l'exécution sans replay; les nouvelles exécutions redécouvrent le provider
-* `Amélioration` Chaquopy est fixé comme runtime trusted-local et non-sandbox; SM003 est le signer à long terme et SuperMonster003 possède runtime, sécurité et release
-* `Dépendance` Verrouillage de Chaquopy 17.0.0 et CPython 3.13.9; les APK stables sont liés à l'identité source finale et vérifiés comme artefacts exacts
 
 ##### Autres versions
 

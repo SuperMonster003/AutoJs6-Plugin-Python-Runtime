@@ -50,7 +50,7 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 - 승인된 project에서 `entryMode=file|module`을 명시적으로 선택합니다. module mode는 표준 `runpy` metadata, project root의 `sys.path[0]` 및 package-relative import를 사용하고 file mode는 일반 script semantics를 유지합니다.
 - 스크립트 실행 중 stdout/stderr의 원래 순서대로 제한된 chunk를 credit으로 전달하며, credit이 소진되면 실행에 backpressure를 적용합니다.
 - 프로토콜 1.4에서 최대 64 KiB의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 16개 전달하며 stdout에서 결과를 추론하지 않습니다.
-- 실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`을 실시간 호출하고 terminal에서 폐기합니다.
+- 실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error` 및 권한 인식 `notice`를 실시간 호출하고 terminal에서 폐기합니다.
 - `SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.
 - 프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.
 - 호스트 재시작이 필요 없습니다. 설치 또는 재활성화 후 다음 새 실행이 provider를 다시 검색하고 pin하며, 실행 중 Binder death는 해당 실행을 종료하고 자동 재실행하지 않습니다.
@@ -102,8 +102,8 @@ protocol: 1.0-1.5
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.3.0-alpha.1
-release state: 0.3.0 current-tree candidate; M1 and M2 are complete, and protocol 1.5 plus the first toast/clipboard/app Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 capabilities, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.3.0-alpha.2
+release state: 0.3.0-alpha.2 current-tree candidate; M1 and M2 are complete, and the complete first low-risk protocol 1.5 Host capability slice passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; later M3 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -141,7 +141,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 - 일반 live stdin과 직접 `sys.stdin` callback streaming은 제공하지 않습니다. foreground 상호작용은 최대 1 MiB의 유한 snapshot이 EOF에 도달한 뒤 내장 `input()`과 표준 라이브러리 `getpass.getpass()`에만 적용됩니다. workspace 쓰기, online pip 및 wheel 다운로드는 계속 지원하지 않습니다.
 - UI 스크립트, debugger, REPL 또는 호스트 Java 객체 임의 접근이 없습니다.
-- live broker는 현재 toast, clipboard 및 app launch/HTTP(S) URL만 제공합니다. dynamic device, Host console, notification, files, dialogs, accessibility, screenshot, OCR은 아직 선언하지 않습니다.
+- live broker는 첫 저위험 기능 전체를 제공합니다. files, dialogs, accessibility, screenshot 및 OCR은 아직 선언하지 않습니다.
 - 32비트 Android와 임의의 native wheel은 보장하지 않습니다.
 - 현재 tree에는 API 31 arm64-v8a 실제 기기 smoke evidence와 API 37 x86_64 16 KB page emulator smoke evidence가 있으며, 어느 쪽도 완전한 기기 matrix나 release qualification으로 제시하지 않습니다.
 
@@ -160,6 +160,14 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 ### 변경 이력
 
 ******
+
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `안내` 두 번째 M3 current-tree alpha candidate입니다. 첫 저위험 Host capability 전체를 구현했지만 이후 batch, 공개 배포 및 전체 device matrix는 이 선언에 포함하지 않습니다
+* `추가` live `autojs6.device.info()` 배터리/화면/밝기/볼륨 데이터, `autojs6.console.log/warn/error` Host console 레벨 및 `autojs6.notice` 알림 추가
+* `개선` device 결과 schema를 엄격히 검증하고 알림 권한 부족을 설정 화면이나 기기 권한 변경 없이 안정된 `PERMISSION_DENIED`로 반환
 
 # v0.3.0-alpha.1
 
@@ -187,17 +195,6 @@ R6-P2/P3의 로컬 RC와 집중 기기 증거는 이력으로 보존됩니다. �
 * `개선` 실행마다 독립 `__main__`을 사용하고 stdin/stdout/stderr, argv, cwd, `sys.path`, module 및 importer cache 상태 복원
 * `개선` open 후 start되지 않은 session에 5초 lease를 적용하고 만료 시 input, descriptor 및 단일 session slot 해제
 * `개선` Host 측 discovery에만 의존하지 않고 Provider Binder 경계에서 최소 Host versionCode 5275 강제
-
-# v0.1.0
-
-###### 2026/08/12
-
-* `안내` 0.1.0은 stable Plugin source identity와 exact Host 6.8.0/5275 lock을 고정합니다
-* `추가` AutoJs6 6.8.0 / versionCode 5275와 함께 사용하는 Python 프로토콜 1.0-1.1, 제한된 project workspace 및 읽기 전용 app/device/execution/project snapshot
-* `추가` 호스트 재시작 없는 hot-plug: install 또는 재활성화 후 다음 새 실행이 ID를 다시 검색하고 pin하며 없거나 비활성 상태면 fallback하지 않습니다
-* `추가` 실행 중 Binder death는 replay 없이 현재 실행을 종료하고 이후 새 실행이 provider를 다시 검색합니다
-* `개선` Chaquopy를 trusted-local, non-sandbox runtime으로 고정. 장기 signer는 SM003이며 runtime/security/release owner는 SuperMonster003
-* `의존성` Chaquopy 17.0.0과 CPython 3.13.9를 lock. stable APK는 final source identity에 결속되고 exact artifact로 검증됩니다
 
 ##### 다른 버전
 

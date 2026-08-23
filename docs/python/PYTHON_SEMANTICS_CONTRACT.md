@@ -324,6 +324,11 @@ The current public Python surface is:
 - `autojs6.app.launch(package_name: str) -> bool`;
 - `autojs6.app.launch_app(name: str) -> bool`;
 - `autojs6.app.open_url(url: str) -> bool` for HTTP(S) URLs.
+- `autojs6.device.info() -> dict[str, object]` for current battery, charging,
+  screen-on, brightness and music/notification/alarm volume pairs;
+- `autojs6.console.log/warn/error(text: str) -> None` for direct level-aware
+  Host global-console output;
+- `autojs6.notice(text: str) -> None` for one execution-tagged notification.
 
 These are live Host operations, distinct from the detached launch-time
 `app.snapshot()` and `device.snapshot()` data. Every request is bound to the
@@ -340,9 +345,15 @@ copied contexts; a call is never replayed after cancellation or connection
 loss. The detailed JSON schemas, error codes, lifecycle and exact capability
 mapping are in `HOST_CAPABILITY_BROKER_PROTOCOL.md`.
 
-Dynamic device information, direct Host console levels, notifications, files,
-dialogs, accessibility, screenshots and OCR remain planned rather than implied
-by the generic broker transport.
+Notice text is non-empty and at most 4 KiB UTF-8. The API never requests a
+permission or opens settings: Android permission, app-level notification or
+channel denial raises `HostCapabilityError` with code `PERMISSION_DENIED`.
+`device.info()` uses the strict schema documented in
+`HOST_CAPABILITY_BROKER_PROTOCOL.md`; malformed, extra or mistyped result fields
+are rejected as `BROKER_PROTOCOL_ERROR`.
+
+Files, dialogs, accessibility, screenshots and OCR remain planned rather than
+implied by the generic broker transport.
 
 The focused public Host acceptance invoked the six current method names through
 a real protocol 1.5 session on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a,
@@ -352,6 +363,14 @@ missing targets, a stable `INVALID_ARGUMENT` result for a rejected non-HTTP(S)
 URL, strict structured output and private transport cleanup. The runs completed
 in 1.607 and 7.183 seconds respectively with `OK (1 test)`; this is focused
 current-tree acceptance, not a release claim.
+
+The paired complete-first-slice test queried and schema-validated live device
+state, wrote distinct debug/warn/error Host console entries, and posted then
+removed an execution-tagged notice. On the `0.3.0-alpha.2` current tree it
+passed on the same physical device and emulator in 1.047 and 1.268 seconds;
+both devices took the notification-allowed branch. The original six-call test
+also regressed green in 1.567 and 7.913 seconds. All four runs reported
+`OK (1 test)` and retained normal private-snapshot cleanup.
 
 ## Files, Java bridge and isolation
 

@@ -24,9 +24,9 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.3.0-alpha.1", common["release_target"])
+        self.assertEqual("0.3.0-alpha.2", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
-        self.assertIn("16 KiB-page emulator", common["release_state"])
+        self.assertIn("complete first low-risk", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
         self.assertEqual("1.0-1.5", common["protocol_version"])
         self.assertEqual("64 KiB", common["max_structured_json_bytes"])
@@ -56,6 +56,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("`toast`", broker_features[0])
                 self.assertIn("`clip.get/set`", broker_features[0])
                 self.assertIn("`app.launch/launch_app/open_url`", broker_features[0])
+                self.assertIn("`device.info`", broker_features[0])
+                self.assertIn("`console.log/warn/error`", broker_features[0])
+                self.assertIn("`notice`", broker_features[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
                 self.assertIn("1.3", source["p_plugin_scope"])
                 self.assertIn("1.4", source["p_plugin_scope"])
@@ -103,6 +106,15 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                complete_slice = source["$data"]["v0.3.0-alpha.2"]
+                self.assertEqual("2026/08/23", complete_slice["released_date"])
+                public_api = complete_slice["feature"]
+                self.assertEqual(1, len(public_api))
+                self.assertIn("`autojs6.device.info()`", public_api[0])
+                self.assertIn("`autojs6.console.log/warn/error`", public_api[0])
+                self.assertIn("`autojs6.notice`", public_api[0])
+                self.assertIn("`PERMISSION_DENIED`", complete_slice["improvement"][0])
+
                 broker = source["$data"]["v0.3.0-alpha.1"]
                 self.assertEqual("2026/08/23", broker["released_date"])
                 protocol_15 = [item for item in broker["feature"] if "1.5" in item]

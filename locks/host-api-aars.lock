@@ -1,12 +1,12 @@
 # AutoJs6 host protocol distribution lock.
 # Source gate: verifyPythonReleaseApiDistributionGate
-# Host HEAD: e2a1723d48abbd464b7ea4c8ab5496f2bc85dc4f (clean source tree)
-# Host source fingerprint: d1ec1f6667cbd8688d05b1b643e7423368904ce845f24a8fec3dd3746c9c8ff8
-# Distribution manifest SHA-256: 2eaea4868299c4676d982b5eb2d2274e6c3eb302b4d4507258f5f2b5c29735db
+# Host HEAD: 19ec9b89470e2adbe57f2e6bdb989a4734dc34f8 (clean source tree)
+# Host source fingerprint: 6fd409c181514be7e0dc6859ab6855b0b3e3c24792c351960ddd23d4736b6b56
+# Distribution manifest SHA-256: ebed7b7358224c0237087ce490d07842b5878d023bc7bfb49fb0bbc35c75ed48
 format=1
 common-plugin-api.file=common-plugin-api.aar
 common-plugin-api.sha256=6d75eb2350aa56ed412dabf84b34c0f65b9a6f6cfce3f3c23f79b9b198c24a63
 protocol-wire-api.file=protocol-wire-api.aar
-protocol-wire-api.sha256=fff8a79b3eb35a7b719b23b7893093bd6496228bb20adc38f2663e8322855577
+protocol-wire-api.sha256=e044dd3cc9bed84e844174e0963b57a1f67902cf021ccb42d1031d3511ce46da
 python-runtime-api.file=python-runtime-api.aar
 python-runtime-api.sha256=2ef41e43945192aec743800f4bcb1a17f58058de37666b0900bebc57bf1d5008

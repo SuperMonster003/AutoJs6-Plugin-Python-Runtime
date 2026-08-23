@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `Hint` Second M3 current-tree alpha candidate; the complete first low-risk Host capability slice is implemented, while later capability batches, publication, and a complete device matrix remain outside this claim
+* `Feature` Add live `autojs6.device.info()` battery/screen/brightness/volume data, `autojs6.console.log/warn/error` Host console levels, and `autojs6.notice` notifications
+* `Improvement` Validate the exact device result schema and return stable `PERMISSION_DENIED` notification errors without opening settings or changing device permission state
+
 # v0.3.0-alpha.1
 
 ###### 2026/08/23

@@ -14,7 +14,7 @@
     "Явный выбор `entryMode=file|module` для допущенного проекта: режим module использует стандартные метаданные `runpy`, корень проекта в `sys.path[0]` и относительные импорты пакета, а режим file сохраняет обычную семантику скрипта.",
     "Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.",
     "Явное задание строгого JSON-результата до {{ max_structured_json_bytes }} и передача до {{ max_output_artifacts }} необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.",
-    "Вызов live-операций `toast`, `clip.get/set` и `app.launch/launch_app/open_url` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.",
+    "Вызов live-операций `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error` и учитывающего разрешения `notice` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.",
     "Возврат `SystemExit`, синтаксических и runtime ошибок с ограниченным структурированным traceback.",
     "Один активный сеанс на процесс без очереди provider.",
     "Перезапуск хоста не нужен: следующая новая сессия после установки или повторного включения заново обнаруживает и фиксирует provider, а Binder death во время выполнения завершает его без автоматического повтора."
@@ -44,7 +44,7 @@
   "unsupported_capabilities": [
     "Общий live stdin и callback streaming прямого `sys.stdin` недоступны. Интерактивность на переднем плане применяется только к встроенному `input()` и стандартному `getpass.getpass()` после EOF конечного snapshot до {{ max_stdin_bytes }}. Запись в workspace, online pip и загрузка wheels по-прежнему не поддерживаются.",
     "Нет UI-сценариев, debugger, REPL и произвольного доступа к Java-объектам хоста.",
-    "Live broker сейчас охватывает только toast, clipboard и запуск приложений/HTTP(S) URL; dynamic device, Host console, notifications, files, dialogs, accessibility, screenshot и OCR пока не заявлены.",
+    "Live broker охватывает полный первый низкорисковый набор; files, dialogs, accessibility, screenshot и OCR пока не заявлены.",
     "32-разрядный Android и произвольные native wheels не гарантируются.",
     "Для текущего дерева есть smoke evidence на устройстве API 31 arm64-v8a и эмуляторе API 37 x86_64 со страницами 16 KB; это не выдается за полную матрицу устройств или release qualification."
   ],

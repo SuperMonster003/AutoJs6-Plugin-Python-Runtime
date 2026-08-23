@@ -5,6 +5,18 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "اعتماد",
   "$data": {
+    "v0.3.0-alpha.2": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "ثاني مرشح alpha من M3 للشجرة الحالية؛ اكتملت أول مجموعة قدرات Host منخفضة المخاطر، ولا يشمل هذا الادعاء الدفعات اللاحقة أو النشر أو مصفوفة أجهزة كاملة"
+      ],
+      "feature": [
+        "إضافة بيانات البطارية/الشاشة/السطوع/الصوت المباشرة عبر `autojs6.device.info()` ومستويات وحدة تحكم Host عبر `autojs6.console.log/warn/error` وإشعارات `autojs6.notice`"
+      ],
+      "improvement": [
+        "التحقق الصارم من مخطط نتيجة device وإرجاع `PERMISSION_DENIED` ثابت عند نقص إذن الإشعارات من دون فتح الإعدادات أو تغيير أذونات الجهاز"
+      ]
+    },
     "v0.3.0-alpha.1": {
       "released_date": "2026/08/23",
       "hint": [

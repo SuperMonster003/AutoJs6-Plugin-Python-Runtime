@@ -37,10 +37,16 @@ The first capability set is deliberately small:
 - `toast.show`;
 - `clip.get` and `clip.set`;
 - `app.launch`, `app.launch_app` and `app.open_url`.
+- `device.info`;
+- `console.log`, `console.warn` and `console.error`;
+- `notice.show`.
 
-The Host uses its existing `ScriptToast`, `ClipboardUtils` and `AppUtils`
-implementations. Future capability batches reuse this protocol and dispatcher;
-they do not require another provider Binder method merely to add a method name.
+The Host reuses `ScriptToast`, `ClipboardUtils`, `AppUtils`, Android's bounded
+device-state services, `GlobalConsole` and `NotificationManagerCompat`. Device
+results have one strict pure-data schema. Notice dispatch checks Android runtime,
+app and channel permission state and returns a stable denial without opening
+settings. Future capability batches reuse this protocol and dispatcher; they do
+not require another provider Binder method merely to add a method name.
 
 ## Boundary and consequences
 

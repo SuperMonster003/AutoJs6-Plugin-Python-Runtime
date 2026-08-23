@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Amélioration",
   "changelog_label_dependency": "Dépendance",
   "$data": {
+    "v0.3.0-alpha.2": {
+      "released_date": "2026/08/23",
+      "hint": [
+        "Deuxième candidat alpha M3 de l'arbre courant; le premier lot complet de capacités Host à faible risque est implémenté, sans revendiquer les lots suivants, la publication ni une matrice complète d'appareils"
+      ],
+      "feature": [
+        "Ajouter les données batterie/écran/luminosité/volume en direct de `autojs6.device.info()`, les niveaux de console Host `autojs6.console.log/warn/error` et les notifications `autojs6.notice`"
+      ],
+      "improvement": [
+        "Valider strictement le schéma device et renvoyer un `PERMISSION_DENIED` stable sans ouvrir les réglages ni modifier les autorisations de l'appareil"
+      ]
+    },
     "v0.3.0-alpha.1": {
       "released_date": "2026/08/23",
       "hint": [

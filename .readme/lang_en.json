@@ -14,7 +14,7 @@
     "Select explicit `entryMode=file|module` for an admitted project; module mode uses standard `runpy` metadata, project-root `sys.path[0]`, and package-relative imports while file mode keeps ordinary script semantics.",
     "Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.",
     "Set an explicit strict JSON result of at most {{ max_structured_json_bytes }} and transfer up to {{ max_output_artifacts }} optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.",
-    "Call live `toast`, `clip.get/set`, and `app.launch/launch_app/open_url` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.",
+    "Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, and permission-aware `notice` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.",
     "Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.",
     "Allow one active session in the runtime process with no provider-side queue.",
     "Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed."
@@ -44,7 +44,7 @@
   "unsupported_capabilities": [
     "General live stdin and direct `sys.stdin` callback streaming are unavailable. Foreground interaction applies only to built-in `input()` and standard-library `getpass.getpass()` after the finite snapshot of at most {{ max_stdin_bytes }} reaches EOF. Workspace write-back, online pip, and runtime wheel downloads remain unsupported.",
     "There is no UI scripting, debugger, REPL, or arbitrary access to host Java objects.",
-    "The live broker currently covers only toast, clipboard, and app launch/HTTP(S) URL operations; dynamic device, Host console, notification, files, dialogs, accessibility, screenshot, and OCR APIs remain undeclared.",
+    "The live broker covers the complete first low-risk slice; files, dialogs, accessibility, screenshot, and OCR APIs remain undeclared.",
     "32-bit Android support is not declared, and arbitrary third-party native wheels are not guaranteed.",
     "The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification."
   ],

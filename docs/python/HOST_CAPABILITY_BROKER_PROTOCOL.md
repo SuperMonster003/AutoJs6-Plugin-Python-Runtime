@@ -1,11 +1,12 @@
 # Python Host Capability Broker Protocol 1.5
 
 Status: implemented in the current Host and Plugin development trees. The first
-capability slice is toast, clipboard and application launch/navigation. Its
-public engine path passed one API 31 arm64 physical-device smoke and one API 37
+capability slice covers toast, clipboard, application launch/navigation, live
+device state, level-aware Host console output and permission-aware notices. The
+complete slice passed one API 31 arm64 physical-device smoke and one API 37
 x86_64 16 KiB-page emulator smoke on 2026-08-23. This document describes the
 reusable broker contract; it does not claim that later Roadmap capability
-batches, a complete device matrix or a published release already exist.
+batches, a complete device matrix or a published release exist.
 
 ## Negotiation and Binder compatibility
 
@@ -106,6 +107,7 @@ exact object defined by the selected capability.
 | Encoded request | 64 KiB |
 | Encoded response | 64 KiB |
 | One text argument | 32 KiB UTF-8 |
+| One notice text argument | 4 KiB UTF-8, non-empty |
 | One Host main-thread action wait | 5 s |
 
 The overall Python execution deadline still applies independently. Exhausting
@@ -121,6 +123,7 @@ The Host dispatcher can return:
 | `INVALID_ARGUMENT` | Exact argument fields, text bounds, package name or URL shape failed |
 | `HOST_FAILURE` | The existing Host action failed without exposing internal details |
 | `HOST_TIMEOUT` | Dispatch to the Host main thread exceeded 5 seconds |
+| `PERMISSION_DENIED` | Android notification permission, app notification switch or Python channel is disabled |
 | `BROKER_CLOSED` | The execution-scoped dispatcher is already closed |
 | `REPLAYED_CALL` | A positive call ID was reused |
 | `CALL_LIMIT_EXCEEDED` | The execution consumed all 1024 calls |
@@ -143,16 +146,43 @@ code. A dead Binder, closed private bridge or missing negotiated broker becomes
 | `autojs6.app.launch(package_name: str) -> bool` | `app.launch` | `{"package": package_name}` | whether an activity launched |
 | `autojs6.app.launch_app(name: str) -> bool` | `app.launch_app` | `{"name": name}` | whether an application label resolved and launched |
 | `autojs6.app.open_url(url: str) -> bool` | `app.open_url` | `{"url": url}` | whether an activity accepted the URL |
+| `autojs6.device.info() -> dict[str, object]` | `device.info` | `{}` | strict `autojs6-python-device-info-v1` object |
+| `autojs6.console.log(text: str) -> None` | `console.log` | `{"text": text}` | `null` |
+| `autojs6.console.warn(text: str) -> None` | `console.warn` | `{"text": text}` | `null` |
+| `autojs6.console.error(text: str) -> None` | `console.error` | `{"text": text}` | `null` |
+| `autojs6.notice(text: str) -> None` | `notice.show` | `{"text": text}` | `null` |
 
 Package names must use ordinary dotted Android identifier segments. URLs must
-start with `http://` or `https://`. Empty toast/clipboard text is allowed;
-package, application name and URL text must be non-empty.
+start with `http://` or `https://`. Empty toast/clipboard/console text is
+allowed; package, application name, URL and notice text must be non-empty. A
+notice is tagged with its execution UUID, uses the dedicated `autojs6-python`
+channel and never opens a permission/settings UI. Missing Android permission or
+a disabled app/channel returns `PERMISSION_DENIED`.
+
+`device.info()` returns only the following strict pure-data shape:
+
+```json
+{
+  "schema": "autojs6-python-device-info-v1",
+  "battery": {"percent": 88.5, "charging": true},
+  "screen": {"on": true, "brightness": 127},
+  "volume": {
+    "music": {"current": 7, "max": 15},
+    "notification": {"current": 4, "max": 7},
+    "alarm": {"current": 5, "max": 7}
+  }
+}
+```
+
+Battery percentage is in `[0, 100]`; brightness is the Android system value or
+`-1` when unavailable. Every volume current/max pair is a non-negative integer
+with `current <= max`. The Python facade rejects missing, extra or mistyped
+fields as `BROKER_PROTOCOL_ERROR`.
 
 The launch-time `app.snapshot()` and `device.snapshot()` APIs remain detached
 immutable snapshots. The broker does not change project workspace semantics,
-grant arbitrary files, expose a general Java bridge, or add dynamic device,
-console, notification, accessibility, screenshot or OCR APIs. Those are
-separate Roadmap items.
+grant arbitrary files, expose a general Java bridge, or add file, dialog,
+accessibility, screenshot or OCR APIs. Those are separate Roadmap items.
 
 ## Trust boundary
 
@@ -179,3 +209,17 @@ The test passed on Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages)
 in 1.607 seconds and on an API 37 x86_64 emulator with 16 KiB pages in 7.183
 seconds. Both reported `OK (1 test)`. These are focused current-tree smokes, not
 release or full-device-matrix evidence.
+
+`PythonU1R2AcceptanceInstrumentationTest#remainingFirstBatchHostCapabilitiesRoundTripThroughProtocol15Broker`
+launches the same public engine path for live device data, all three console
+levels and notice dispatch. It validates the exact device schema/ranges and
+actual global-console levels. When notifications are allowed it verifies and
+then cancels only the execution-tagged notification; otherwise it requires the
+stable `PERMISSION_DENIED` result without changing device permission state.
+
+On the `0.3.0-alpha.2` current tree, this second test passed in 1.047 seconds on
+Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages) and 1.268 seconds on
+the API 37 x86_64 16 KiB-page emulator. Both devices took the allowed branch,
+verified an active execution-tagged notification and removed only that test
+notification. The paired original-slice regression also passed in 1.567 and
+7.913 seconds respectively. Every run reported `OK (1 test)`.

@@ -4,6 +4,14 @@
 
 ******
 
+# v0.3.0-alpha.2
+
+###### 2026/08/23
+
+* `Nota` Segundo candidato alpha M3 del árbol actual; se implementó la primera entrega completa de capacidades Host de bajo riesgo, sin afirmar entregas posteriores, publicación ni una matriz completa de dispositivos
+* `Función` Añadir datos en vivo de batería/pantalla/brillo/volumen con `autojs6.device.info()`, niveles de consola Host `autojs6.console.log/warn/error` y notificaciones `autojs6.notice`
+* `Mejora` Validar estrictamente el esquema de device y devolver `PERMISSION_DENIED` estable sin abrir ajustes ni cambiar permisos del dispositivo
+
 # v0.3.0-alpha.1
 
 ###### 2026/08/23
