@@ -1,15 +1,23 @@
 # U1-R2 explicit module-entry protocol
 
-Status: implemented and covered through E2 on the current Host and Plugin
-trees. This document does not claim Android Binder/device evidence or stable
-release provenance.
+Status: implemented on the current Host and Plugin trees. The public Host
+project path passed Android Binder/device acceptance on an API 31 arm64-v8a
+physical device with 4 KiB pages and an API 37 x86_64 emulator with 16 KiB
+pages. This document does not claim stable release provenance.
 
 ## User and Host selection
 
-The Host execution configuration key is `autojs6.python.entryMode`. Its only
-accepted string values are `file` and `module`; an absent value selects `file`.
-No spelling, case, numeric, Boolean, or implicit-source heuristic is accepted.
-An invalid value fails with the stable Host code
+Ordinary project launches select module mode in `project.json` with a strict
+declaration such as
+`{"type":"python","entryMode":"module","main":"pkg.main"}`. The Host maps
+that dotted name to the admitted source path `pkg/main.py` and writes the
+existing execution configuration key `autojs6.python.entryMode`. Its only
+accepted string values are `file` and `module`; an absent manifest field
+selects `file`. No alternate spelling, case, numeric, Boolean, or
+implicit-source heuristic is accepted.
+
+Direct internal callers may still supply the execution configuration key. An
+invalid value fails with the stable Host code
 `PYTHON_RUNTIME_ENTRY_MODE_INVALID` before provider dispatch.
 
 Module mode is valid only for an explicitly admitted Python project. Given the

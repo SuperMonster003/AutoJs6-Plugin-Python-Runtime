@@ -152,7 +152,10 @@ class U1R2DeviceEvidenceSourceTest(unittest.TestCase):
 
     def test_public_selector_uses_module_mode_and_host_owned_explicit_results(self) -> None:
         for marker in (
-            'setArgument(ENTRY_MODE_ARGUMENT, "module")',
+            'entryMode":"module","main":"$PACKAGE_NAME.main',
+            "val launch = admittedProjectLaunch(projectRoot)",
+            "val config = launch.createExecutionConfig()",
+            "execution.config.getArgument(ENTRY_MODE_ARGUMENT)",
             "PythonRuntimeExecutionResult",
             "result.structuredJson",
             "result.outputArtifacts.single()",

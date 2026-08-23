@@ -116,9 +116,10 @@
 
 > 主题: 插件侧早已实现、但宿主没有入口或没有消费的通道, 逐个接通。全部为宿主侧改动。
 
-- [ ] [H] **module 入口模式暴露**: Python 项目 `project.json` 支持声明 module 入口
+- [x] [H] **module 入口模式暴露**: Python 项目 `project.json` 支持声明 module 入口
   (如 `"entryMode": "module", "main": "pkg.main"`), 写入 `ENTRY_MODE_ARGUMENT`。
-  验收: 含相对导入的包项目以 module 语义运行成功。
+  含相对导入的包项目已在物理设备与 16 KiB page 模拟器以 module 语义运行成功;
+  宿主提交: `d3f623217`。
 - [ ] [H] **stdin 快照入口**: `project.json` 支持 `"stdin"` 字段 (内联文本或文件路径),
   写入 `STDIN_SNAPSHOT_ARGUMENT`; 单文件脚本暂不提供 UI (需求出现再加)。
   验收: 依赖 `sys.stdin.read()` 的脚本以预置输入运行成功。
@@ -130,6 +131,15 @@
   隐藏回显 (`getpass` 场景) 表现正确。
 - [ ] [H] **清理陈旧注释与文档漂移**: `PythonProjectLaunchPolicy` "workspace 未落地" 注释、
   `R5_CAPABILITY_PREVIEW.md` 的退役 flag 描述等, 与代码事实对齐 (顺手项, 不阻塞)。
+
+### 2026-08-23 M2 module 入口验收记录
+
+- `project.json` 使用 `{"type":"python","entryMode":"module","main":"pkg.main"}`，
+  经严格项目准入和统一 Launch 配置写入现有 `autojs6.python.entryMode` 参数。
+- 公共宿主路径继续复用协议 1.2 与插件 `runpy.run_module` 实现，没有新增跨进程协议字段。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 与 API 37 /
+  x86_64 / 16 KiB page 模拟器均 PASS; 验收覆盖 `__package__`、`__spec__`、包内相对导入、
+  结构化 JSON 与二进制 artifact。
 
 ******
 

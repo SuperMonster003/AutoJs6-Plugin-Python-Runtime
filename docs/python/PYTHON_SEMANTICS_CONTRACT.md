@@ -80,6 +80,12 @@ For file-mode execution:
 
 For module-mode execution:
 
+- the current Host exposes this mode through a strictly admitted project
+  manifest such as `{"type":"python","entryMode":"module","main":"pkg.main"}`;
+  an absent `entryMode` or the exact string `file` keeps the existing
+  project-relative `.py` path form for `main`, while `module` requires the
+  normalized dotted name and writes `autojs6.python.entryMode=module` into the
+  execution configuration;
 - the execution must have an explicitly admitted project workspace and a
   provider which advertises protocol 1.2 module-entry support;
 - the request entry point is a normalized dotted ASCII module name such as
