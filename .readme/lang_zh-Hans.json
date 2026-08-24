@@ -55,7 +55,7 @@
     "当前树已有 API 31 arm64-v8a 真机冒烟证据与 API 37 x86_64 16 KB page 模拟器冒烟证据; 两者都不冒充完整设备矩阵或发布资质."
   ],
   "h3_roadmap": "路线图",
-  "p_roadmap": "M4 路径 A 已完成, M3 自动化现已接通有界坐标/全局动作、有界 selector/UI 树数据面、有界屏幕截图、单次 RGB 找色、有界 PNG/JPEG 模板找图, 以及通过已配置宿主 OCR 引擎执行的行级识别. 更丰富的图像/OCR 操作与 M4 构建期/native 包路径继续按用户价值推进; 历史证据工具保留但不作为自动发布门禁.",
+  "p_roadmap": "M4 路径 A 已完成; M4 Path B 构建期包评估结论为 `NOT_ADMITTED`, 内置运行时继续保持 `stdlib-only`; M4 Path C native 包评估仍按用户价值推进. M3 自动化已接通有界坐标/全局动作、selector/UI 树、截图、找色、PNG/JPEG 模板找图与宿主 OCR. 历史证据工具保留但不作为自动发布门禁.",
   "text_link_roadmap": "查看 ROADMAP.md",
   "h3_release_history": "版本历史",
   "h5_for_more_release_history": "更多版本",

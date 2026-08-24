@@ -55,7 +55,7 @@
     "The current tree has API 31 arm64-v8a device smoke evidence and API 37 x86_64 16 KB-page emulator smoke evidence; neither is presented as a complete device matrix or release qualification."
   ],
   "h3_roadmap": "Roadmap",
-  "p_roadmap": "M4 Path A is complete, and M3 automation now includes bounded coordinate/global actions, the bounded selector/UI-tree data plane, screen capture, one-shot RGB color search, bounded PNG/JPEG template matching, and line-oriented recognition through the configured Host OCR engine. Richer image/OCR operations and M4 build-time/native package paths continue by user value; historical evidence tools remain available but are not automatic release gates.",
+  "p_roadmap": "M4 Path A is complete; the M4 Path B build-time package evaluation concluded `NOT_ADMITTED`, so the embedded runtime remains `stdlib-only`; M4 Path C native-package evaluation continues by user value. M3 automation now includes bounded coordinate/global actions, selector/UI-tree operations, screen capture, color search, PNG/JPEG template matching, and Host OCR. Historical evidence tools remain available but are not automatic release gates.",
   "text_link_roadmap": "View ROADMAP.md",
   "h3_release_history": "Release history",
   "h5_for_more_release_history": "For more releases",

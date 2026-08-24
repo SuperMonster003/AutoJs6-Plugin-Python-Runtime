@@ -5,6 +5,15 @@
   "changelog_label_improvement": "개선",
   "changelog_label_dependency": "의존성",
   "$data": {
+    "v0.4.0-alpha.8": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "여덟 번째 current-tree alpha 후보입니다. M4 Path B build-time package 평가를 `NOT_ADMITTED`로 완료하고 내장 runtime을 `stdlib-only`로 유지하며 `requests`를 포함한 후보 의존성을 추가하지 않고 새로운 device acceptance도 주장하지 않습니다"
+      ],
+      "improvement": [
+        "ADR 0003은 stdlib-only debug APK 기준을 arm64-v8a 23,709,688 bytes, x86_64 23,726,048 bytes, universal 34,622,039 bytes로 기록합니다. 감사된 offline wheelhouse 없이 거짓 size delta를 보고하지 않으며 향후 채택에는 Gradle `--offline`, `--no-index`, `--require-hashes`, license/hash lock, 세 APK size delta와 dual ABI public-engine acceptance를 요구합니다"
+      ]
+    },
     "v0.4.0-alpha.7": {
       "released_date": "2026/08/24",
       "hint": [

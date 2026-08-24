@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.4.0-alpha.7 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.4.0-alpha.8 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -585,7 +585,7 @@
   只是免去选择该库的项目准备步骤, 而标准库联网与项目本地依赖均已可用。内置后却会让
   每个 APK 无条件承担体积、五包更新/安全维护及许可证成本, `charset_normalizer` 单独
   内置也没有足够通用价值。
-  - `0.4.0-alpha.7` stdlib-only release 输出基线为 arm64-v8a 23,709,688 bytes、
+  - `0.4.0-alpha.7` stdlib-only debug APK 输出基线为 arm64-v8a 23,709,688 bytes、
     x86_64 23,726,048 bytes、universal 34,622,039 bytes。仓库没有经审计的离线 wheelhouse
     与哈希锁, 而 Gradle `--offline` 不会自动约束 Chaquopy 的独立 pip 子进程; 本次拒绝
     联网临时下载, 因此不伪造不可复现的候选体积差值。缺少 hermetic 输入本身即为准入阻断。

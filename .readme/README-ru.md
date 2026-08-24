@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.4.0-alpha.7
-release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.8
+release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
-Путь A этапа M4 завершен, а автоматизация M3 теперь включает ограниченные координатные/global actions, слой данных selector/UI tree, screen capture, разовый RGB color search, ограниченный PNG/JPEG template matching и построчное распознавание через настроенный Host OCR engine. Более широкие image/OCR операции и пути M4 для встроенных/native пакетов развиваются по пользовательской ценности; исторические инструменты доказательств остаются доступными, но не служат автоматическими воротами выпуска.
+M4 Path A завершен; оценка встроенных пакетов M4 Path B завершилась решением `NOT_ADMITTED`, поэтому встроенный runtime остается `stdlib-only`; оценка native-пакетов M4 Path C продолжится по пользовательской ценности. Автоматизация M3 включает ограниченные actions, selector/UI tree, screen capture, color search, PNG/JPEG template matching и Host OCR. Исторические инструменты доказательств не являются автоматическими воротами выпуска.
 
 - [Открыть ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,13 @@ Runtime Chaquopy предназначен только для доверенны
 ### История версий
 
 ******
+
+# v0.4.0-alpha.8
+
+###### 2026/08/24
+
+* `Примечание` Восьмой alpha-кандидат текущего дерева; оценка встроенных пакетов M4 Path B закрыта решением `NOT_ADMITTED`, встроенный runtime остается `stdlib-only`, `requests` и другие кандидаты не добавлены, новые заявления о приемке на устройствах не делаются
+* `Улучшено` ADR 0003 фиксирует stdlib-only debug APK базы: 23,709,688 bytes для arm64-v8a, 23,726,048 bytes для x86_64 и 34,622,039 bytes для universal; без проверенного offline wheelhouse ложная разница размеров не публикуется, а будущий допуск требует Gradle `--offline`, `--no-index`, `--require-hashes`, license/hash locks, разницы трех APK и приемки публичного пути dual ABI
 
 # v0.4.0-alpha.7
 
@@ -183,14 +190,6 @@ Runtime Chaquopy предназначен только для доверенны
 * `Примечание` Шестой current-tree alpha-кандидат автоматизации M3; распознавание настроенного Host OCR прошло на API 37 emulator с подходящим сервисом и завершилось fail-closed на физическом устройстве API 31 без изменения его accessibility services; расширенный OCR, публикация и полная матрица устройств не входят в это заявление
 * `Добавлено` Добавить `autojs6.ocr.recognize(image)` для ограниченных PNG/JPEG bytes и неизменяемого упорядоченного tuple текстовых строк настроенного Host OCR engine
 * `Улучшено` Повторно использовать PNG/JPEG upload до 1 MiB, raw chunks по 24 KiB и проверку SHA-256, выбирать только enabled/authorized/compatible Host OCR service, ограничить результат 256 строками, 4 KiB strict UTF-8 на строку и 48 KiB суммарно, всегда release и обнулять buffers, стабильно сообщать `OCR_UNAVAILABLE` или `OCR_FAILED`
-
-# v0.4.0-alpha.5
-
-###### 2026/08/24
-
-* `Примечание` Пятый alpha-кандидат автоматизации M3 текущего дерева; ограниченный поиск по шаблону прошел на эмуляторе API 37 с включенной accessibility и корректно отказал на физическом устройстве API 31 без изменения его служб accessibility; OCR, публикация и полная матрица устройств не входят в это утверждение
-* `Добавлено` Добавить `autojs6.images.find_image(template, *, region=None, threshold=0)` для байтов PNG/JPEG, необязательной ограниченной области и результата в виде координаты левого верхнего угла или `None`
-* `Улучшено` Загружать один template на выполнение размером до 1 MiB raw-блоками по 24 KiB с проверкой SHA-256, декодировать не более 2048 пикселей на сторону, детерминированно сканировать в порядке row-major по `autojs6-python-image-match-v1`, учитывать полностью непрозрачные пиксели и считать остальные wildcard, не требовать OpenCV, всегда выполнять release с обнулением buffers и повторять только Android-ограничение 333 ms после ограниченного ожидания 350 ms
 
 ##### Другие версии
 

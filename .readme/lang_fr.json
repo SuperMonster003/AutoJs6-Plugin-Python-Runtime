@@ -55,7 +55,7 @@
     "L'arbre courant dispose d'un smoke sur appareil API 31 arm64-v8a et d'un smoke sur émulateur API 37 x86_64 à pages de 16 KB; aucun ne constitue une matrice complète d'appareils ni une qualification de release."
   ],
   "h3_roadmap": "Feuille de route",
-  "p_roadmap": "Le chemin A de M4 est terminé, et l'automatisation M3 comprend maintenant les actions bornées par coordonnées/globales, le plan de données selector/arbre UI, la capture d'écran, la recherche RGB ponctuelle, la recherche bornée par modèle PNG/JPEG et la reconnaissance par lignes via le moteur OCR Host configuré. Des opérations image/OCR plus riches et les chemins M4 de paquets intégrés/native suivront la valeur utilisateur; les outils de preuve historiques restent disponibles sans être des portes de publication automatiques.",
+  "p_roadmap": "Le chemin A de M4 est terminé; l'évaluation des paquets intégrés de M4 Path B conclut `NOT_ADMITTED`, donc le runtime intégré reste `stdlib-only`; l'évaluation native de M4 Path C continue selon la valeur utilisateur. L'automatisation M3 comprend les actions bornées, selector/arbre UI, la capture, la recherche de couleur, les modèles PNG/JPEG et l'OCR Host. Les outils de preuve historiques restent disponibles sans être des portes de publication automatiques.",
   "text_link_roadmap": "Voir ROADMAP.md",
   "h3_release_history": "Historique des versions",
   "h5_for_more_release_history": "Autres versions",

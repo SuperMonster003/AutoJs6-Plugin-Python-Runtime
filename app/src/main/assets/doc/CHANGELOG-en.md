@@ -4,6 +4,13 @@
 
 ******
 
+# v0.4.0-alpha.8
+
+###### 2026/08/24
+
+* `Hint` Eighth current-tree alpha candidate; close the M4 Path B build-time package evaluation as `NOT_ADMITTED`, keep the embedded runtime `stdlib-only`, add neither `requests` nor any candidate dependency, and make no new device-acceptance claim
+* `Improvement` ADR 0003 records stdlib-only debug APK baselines of 23,709,688 bytes for arm64-v8a, 23,726,048 bytes for x86_64, and 34,622,039 bytes for universal; avoid a fabricated size delta without an audited offline wheelhouse, and require Gradle `--offline`, `--no-index`, `--require-hashes`, license/hash locks, three-APK size deltas, and dual ABI public-engine acceptance for future admission
+
 # v0.4.0-alpha.7
 
 ###### 2026/08/24

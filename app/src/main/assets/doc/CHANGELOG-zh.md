@@ -4,6 +4,13 @@
 
 ******
 
+# v0.4.0-alpha.8
+
+###### 2026/08/24
+
+* `提示` 第八个 current-tree alpha 候选版; M4 Path B 构建期包评估以 `NOT_ADMITTED` 关闭, 内置运行时保持 `stdlib-only`, 未内置 `requests` 或任何候选依赖, 也不新增设备验收声明
+* `优化` ADR 0003 固定 stdlib-only debug APK 的 arm64-v8a 23,709,688 bytes、x86_64 23,726,048 bytes 与 universal 34,622,039 bytes 基线; 没有经审计的离线 wheelhouse 时不报告伪造体积差值, 未来准入必须同时具备 Gradle `--offline`、`--no-index`、`--require-hashes`、许可证/哈希锁、三 APK 体积差值与 dual ABI 公共引擎验收
+
 # v0.4.0-alpha.7
 
 ###### 2026/08/24

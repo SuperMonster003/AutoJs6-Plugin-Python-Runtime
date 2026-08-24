@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.4.0-alpha.7
-release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.8
+release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-M4 路徑 A 已完成, M3 自動化現已接通有界座標/全域動作、有界 selector/UI 樹數據面、有界螢幕截圖、單次 RGB 找色、有界 PNG/JPEG 模板找圖, 以及透過已配置 Host OCR 引擎執行的行級識別. 更豐富的圖像/OCR 操作與 M4 構建期/native 套件路徑繼續按用戶價值推進; 歷史證據工具保留但不作自動發佈門禁.
+M4 路徑 A 已完成; M4 Path B 構建期套件評估結論為 `NOT_ADMITTED`, 內置 runtime 繼續保持 `stdlib-only`; M4 Path C native 套件評估仍按用戶價值推進. M3 自動化已接通有界座標/全域動作、selector/UI 樹、截圖、找色、PNG/JPEG 模板找圖與 Host OCR. 歷史證據工具保留但不作自動發佈門禁.
 
 - [檢視 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,13 @@ M4 路徑 A 已完成, M3 自動化現已接通有界座標/全域動作、有�
 ### 版本記錄
 
 ******
+
+# v0.4.0-alpha.8
+
+###### 2026/08/24
+
+* `提示` 第八個 current-tree alpha 候選版; M4 Path B 構建期套件評估以 `NOT_ADMITTED` 關閉, 內置 runtime 保持 `stdlib-only`, 未內置 `requests` 或任何候選依賴, 亦不新增裝置驗收聲明
+* `改善` ADR 0003 固定 stdlib-only debug APK 的 arm64-v8a 23,709,688 bytes、x86_64 23,726,048 bytes 與 universal 34,622,039 bytes 基線; 沒有經審計的離線 wheelhouse 時不報告虛假體積差值, 未來准入必須同時具備 Gradle `--offline`、`--no-index`、`--require-hashes`、許可證/哈希鎖、三 APK 體積差值與 dual ABI 公共引擎驗收
 
 # v0.4.0-alpha.7
 
@@ -183,14 +190,6 @@ M4 路徑 A 已完成, M3 自動化現已接通有界座標/全域動作、有�
 * `提示` 第六個 M3 automation current-tree alpha 候選版; 已配置 Host OCR 的正向識別在具備合資格服務的 API 37 模擬器通過, API 31 實機在不改動其無障礙服務的前提下完成故障關閉; 更豐富的 OCR、發佈及完整裝置矩陣不在本聲明範圍內
 * `新增` 新增 `autojs6.ocr.recognize(image)`, 接受有界 PNG/JPEG 字節, 並從已配置 Host OCR 引擎返回有序不可變文字行 tuple
 * `改善` 重用 1 MiB PNG/JPEG 上傳、24 KiB 原始分塊及 SHA-256 校驗, 僅選擇已啟用、已授權且兼容的 Host OCR 服務, 結果限制為 256 行、每行 4 KiB 嚴格 UTF-8、合計 48 KiB, 始終 release 並清零緩衝區, 以穩定 `OCR_UNAVAILABLE` 或 `OCR_FAILED` 報告失敗
-
-# v0.4.0-alpha.5
-
-###### 2026/08/24
-
-* `提示` 當前樹第五個 M3 自動化 alpha 候選; 有界模板找圖已在啟用無障礙的 API 37 模擬器通過, API 31 實體機在不改變既有無障礙服務的前提下通過 fail-closed; OCR、發佈及完整裝置矩陣仍不在本次聲明範圍
-* `新增` 新增 `autojs6.images.find_image(template, *, region=None, threshold=0)`, 接受 PNG/JPEG 位元組與可選有界區域, 返回左上角座標或 `None`
-* `改善` 每次執行上傳一個最大 1 MiB 的模板, 以 24 KiB 原始區塊傳輸並核對 SHA-256, 單邊解碼不超過 2048 像素, 按 row-major 確定性掃描並核對 `autojs6-python-image-match-v1`; 僅全不透明像素參與、其餘為通配, 無需 OpenCV, 始終 release 並清零緩衝區, 且僅對 Android 333 ms 截圖節流執行有界 350 ms 等待重試
 
 ##### 更多版本
 

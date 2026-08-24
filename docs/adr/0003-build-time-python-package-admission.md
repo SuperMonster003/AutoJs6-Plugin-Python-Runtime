@@ -34,7 +34,7 @@ network state and would contradict the project's normal offline build claim.
 ## Evidence and value assessment
 
 The `0.4.0-alpha.7` stdlib-only current-tree candidate produced these locally
-built release APK baselines. They are candidate build measurements, not a
+built debug APK baselines. They are candidate build measurements, not a
 publication or stable-release claim.
 
 | APK output | Baseline bytes |

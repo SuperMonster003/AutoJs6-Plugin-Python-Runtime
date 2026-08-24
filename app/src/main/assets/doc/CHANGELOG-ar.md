@@ -4,6 +4,13 @@
 
 ******
 
+# v0.4.0-alpha.8
+
+###### 2026/08/24
+
+* `ملاحظة` مرشح alpha الثامن للشجرة الحالية؛ يُغلق تقييم حزم build-time في M4 Path B بقرار `NOT_ADMITTED`، ويبقى runtime المضمّن `stdlib-only`، ولا تُضاف `requests` أو أي تبعية مرشحة ولا يُقدّم ادعاء قبول جديد على الأجهزة
+* `تحسين` يسجل ADR 0003 خطوط stdlib-only debug APK الأساسية: 23,709,688 bytes لـ arm64-v8a و23,726,048 bytes لـ x86_64 و34,622,039 bytes لـ universal؛ لا يُختلق فرق حجم دون wheelhouse offline مدقق، ويتطلب القبول المستقبلي Gradle `--offline` و`--no-index` و`--require-hashes` وأقفال license/hash وفروق أحجام ثلاثة APK وقبول المسار العام dual ABI
+
 # v0.4.0-alpha.7
 
 ###### 2026/08/24

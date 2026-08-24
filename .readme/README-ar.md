@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.4.0-alpha.7
-release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.8
+release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
-اكتمل المسار A من M4، وتشمل automation في M3 الآن إجراءات إحداثيات/global محدودة وطبقة بيانات selector/UI tree وscreen capture وبحث RGB لمرة واحدة ومطابقة قالب PNG/JPEG محدودة والتعرف السطري عبر Host OCR engine المضبوط. تستمر عمليات image/OCR الأوسع ومسارات الحزم build-time/native في M4 حسب قيمة المستخدم؛ تبقى أدوات الأدلة التاريخية متاحة لكنها ليست بوابات إصدار تلقائية.
+اكتمل M4 Path A؛ وانتهى تقييم حزم build-time في M4 Path B بقرار `NOT_ADMITTED`، لذلك يبقى runtime المضمّن `stdlib-only`؛ ويستمر تقييم حزم native في M4 Path C حسب قيمة المستخدم. تشمل automation في M3 الإجراءات المحدودة وselector/UI tree وscreen capture والبحث اللوني وقوالب PNG/JPEG وHost OCR. لا تُعد أدوات الأدلة التاريخية بوابات إصدار تلقائية.
 
 - [عرض ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,13 @@ runtime/security/release owner: SuperMonster003
 ### سجل الإصدارات
 
 ******
+
+# v0.4.0-alpha.8
+
+###### 2026/08/24
+
+* `ملاحظة` مرشح alpha الثامن للشجرة الحالية؛ يُغلق تقييم حزم build-time في M4 Path B بقرار `NOT_ADMITTED`، ويبقى runtime المضمّن `stdlib-only`، ولا تُضاف `requests` أو أي تبعية مرشحة ولا يُقدّم ادعاء قبول جديد على الأجهزة
+* `تحسين` يسجل ADR 0003 خطوط stdlib-only debug APK الأساسية: 23,709,688 bytes لـ arm64-v8a و23,726,048 bytes لـ x86_64 و34,622,039 bytes لـ universal؛ لا يُختلق فرق حجم دون wheelhouse offline مدقق، ويتطلب القبول المستقبلي Gradle `--offline` و`--no-index` و`--require-hashes` وأقفال license/hash وفروق أحجام ثلاثة APK وقبول المسار العام dual ABI
 
 # v0.4.0-alpha.7
 
@@ -183,14 +190,6 @@ runtime/security/release owner: SuperMonster003
 * `ملاحظة` مرشح alpha السادس لشجرة M3 automation الحالية؛ نجح Host OCR recognition المضبوط على API 37 emulator بخدمة مؤهلة وفشل مغلقا على جهاز API 31 فعلي من دون تغيير accessibility services؛ تبقى OCR الأوسع والنشر ومصفوفة الأجهزة الكاملة خارج هذا الادعاء
 * `إضافة` إضافة `autojs6.ocr.recognize(image)` لبايتات PNG/JPEG محدودة وtuple ثابت ومرتب من أسطر النص يعيده Host OCR engine المضبوط
 * `تحسين` إعادة استخدام PNG/JPEG upload بحجم 1 MiB وraw chunks بحجم 24 KiB والتحقق SHA-256، واختيار Host OCR service مفعلة ومصرحا بها ومتوافقة فقط، وتحديد النتيجة عند 256 سطرا و4 KiB من strict UTF-8 لكل سطر و48 KiB إجمالا، ودائما release وتصفير buffers، والإبلاغ الثابت بـ `OCR_UNAVAILABLE` أو `OCR_FAILED`
-
-# v0.4.0-alpha.5
-
-###### 2026/08/24
-
-* `ملاحظة` مرشح alpha الخامس لأتمتة M3 في الشجرة الحالية؛ نجحت مطابقة القالب المحدودة على محاكي API 37 مع accessibility مفعلة وفشلت بشكل مغلق على جهاز فعلي API 31 من دون تغيير خدمات accessibility؛ ولا تشمل هذه المطالبة OCR أو النشر أو مصفوفة أجهزة كاملة
-* `إضافة` إضافة `autojs6.images.find_image(template, *, region=None, threshold=0)` لبايتات PNG/JPEG ومنطقة محدودة اختيارية ونتيجة إحداثي الزاوية العليا اليسرى أو `None`
-* `تحسين` رفع template واحد لكل تنفيذ حتى 1 MiB في raw chunks بحجم 24 KiB مع تحقق SHA-256، وفك ترميز لا يتجاوز 2048 بكسل لكل جانب، ومسح deterministic بترتيب row-major وفق `autojs6-python-image-match-v1`؛ تشارك البكسلات المعتمة بالكامل فقط والبقية wildcard، ولا حاجة إلى OpenCV، مع تنفيذ release وتصفير buffers دائمًا، وإعادة محاولة حد Android البالغ 333 ms فقط بعد انتظار محدود قدره 350 ms
 
 ##### المزيد من الإصدارات
 

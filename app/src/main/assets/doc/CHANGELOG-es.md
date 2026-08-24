@@ -4,6 +4,13 @@
 
 ******
 
+# v0.4.0-alpha.8
+
+###### 2026/08/24
+
+* `Nota` Octavo candidato alpha del árbol actual; cerrar la evaluación de paquetes integrados M4 Path B como `NOT_ADMITTED`, mantener el runtime `stdlib-only`, no añadir `requests` ni ninguna dependencia candidata y no formular una nueva afirmación de aceptación en dispositivos
+* `Mejora` ADR 0003 registra bases stdlib-only debug APK de 23,709,688 bytes para arm64-v8a, 23,726,048 bytes para x86_64 y 34,622,039 bytes para universal; no inventar una diferencia de tamaño sin un wheelhouse offline auditado, y exigir Gradle `--offline`, `--no-index`, `--require-hashes`, bloqueos de licencia/hash, diferencias de tres APK y aceptación pública dual ABI para una admisión futura
+
 # v0.4.0-alpha.7
 
 ###### 2026/08/24

@@ -24,7 +24,7 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.4.0-alpha.7", common["release_target"])
+        self.assertEqual("0.4.0-alpha.8", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
         self.assertIn("selector/UI-tree", common["release_state"])
@@ -35,6 +35,12 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("complete Settings", common["release_state"])
         self.assertIn("M4 Path A", common["release_state"])
         self.assertIn("project-local pure-Python", common["release_state"])
+        self.assertIn("M4 Path B", common["release_state"])
+        self.assertIn("NOT_ADMITTED", common["release_state"])
+        self.assertIn("stdlib-only", common["release_state"])
+        self.assertIn("zero packages", common["release_state"])
+        self.assertIn("no candidate dependency payload", common["release_state"])
+        self.assertIn("no new device claim", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
         self.assertEqual("64 MiB", common["max_workspace_archive_bytes"])
         self.assertEqual("8192", common["max_workspace_entries"])
@@ -282,6 +288,13 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("16 KB", source["p_build_architecture"])
                 self.assertIn("gate", source["p_build_architecture"].lower())
                 self.assertIn("M4", source["p_roadmap"])
+                for decision_marker in (
+                    "M4 Path B",
+                    "`NOT_ADMITTED`",
+                    "`stdlib-only`",
+                    "M4 Path C",
+                ):
+                    self.assertIn(decision_marker, source["p_roadmap"])
 
     def test_all_changelog_sources_record_current_scoped_features(self) -> None:
         changelog_dir = ROOT / ".changelog"
@@ -290,6 +303,30 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                package_policy = source["$data"]["v0.4.0-alpha.8"]
+                self.assertEqual("2026/08/24", package_policy["released_date"])
+                self.assertNotIn("feature", package_policy)
+                self.assertEqual(1, len(package_policy["hint"]))
+                for marker in (
+                    "M4 Path B",
+                    "`NOT_ADMITTED`",
+                    "`stdlib-only`",
+                    "`requests`",
+                ):
+                    self.assertIn(marker, package_policy["hint"][0])
+                self.assertEqual(1, len(package_policy["improvement"]))
+                for marker in (
+                    "debug APK",
+                    "23,709,688",
+                    "23,726,048",
+                    "34,622,039",
+                    "Gradle `--offline`",
+                    "`--no-index`",
+                    "`--require-hashes`",
+                    "dual ABI",
+                ):
+                    self.assertIn(marker, package_policy["improvement"][0])
+
                 complete_automation = source["$data"]["v0.4.0-alpha.7"]
                 self.assertEqual("2026/08/24", complete_automation["released_date"])
                 self.assertEqual(1, len(complete_automation["feature"]))

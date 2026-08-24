@@ -4,6 +4,13 @@
 
 ******
 
+# v0.4.0-alpha.8
+
+###### 2026/08/24
+
+* `注記` 8 番目の current-tree alpha 候補. M4 Path B build-time package 評価を `NOT_ADMITTED` で完了し、組み込み runtime は `stdlib-only` を維持します. `requests` を含む候補依存関係は追加せず、新しい device acceptance も主張しません
+* `改善` ADR 0003 は stdlib-only debug APK baseline を arm64-v8a 23,709,688 bytes、x86_64 23,726,048 bytes、universal 34,622,039 bytes と記録します. 監査済み offline wheelhouse なしの虚偽の差分を避け、将来の採用には Gradle `--offline`、`--no-index`、`--require-hashes`、license/hash lock、3 APK の size delta と dual ABI public-engine acceptance を要求します
+
 # v0.4.0-alpha.7
 
 ###### 2026/08/24

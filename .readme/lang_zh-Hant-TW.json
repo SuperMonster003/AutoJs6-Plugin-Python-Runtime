@@ -55,7 +55,7 @@
     "目前樹已有 API 31 arm64-v8a 實機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格."
   ],
   "h3_roadmap": "路線圖",
-  "p_roadmap": "M4 路徑 A 已完成, M3 自動化現已接通有界座標/全域動作、有界 selector/UI 樹資料面、有界螢幕擷取、單次 RGB 找色、有界 PNG/JPEG 模板找圖, 以及透過已設定 Host OCR 引擎執行的行級辨識. 更豐富的影像/OCR 操作與 M4 建置期/native 套件路徑依使用者價值繼續推進; 歷史證據工具保留但不作自動發佈門禁.",
+  "p_roadmap": "M4 路徑 A 已完成; M4 Path B 建置期套件評估結論為 `NOT_ADMITTED`, 內嵌 runtime 繼續保持 `stdlib-only`; M4 Path C native 套件評估仍依使用者價值推進. M3 自動化已接通有界座標/全域動作、selector/UI 樹、螢幕擷取、找色、PNG/JPEG 模板找圖與 Host OCR. 歷史證據工具保留但不作自動發佈門禁.",
   "text_link_roadmap": "檢視 ROADMAP.md",
   "h3_release_history": "版本記錄",
   "h5_for_more_release_history": "更多版本",

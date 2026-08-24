@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.4.0-alpha.7
-release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.8
+release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-M4 Path A は完了し, M3 automation は有界な座標/global action、有界な selector/UI tree data plane、screen capture、one-shot RGB color search、有界な PNG/JPEG template matching、設定済み Host OCR engine による line-oriented recognition を提供します. より高度な image/OCR operation と M4 build-time/native package path は user value に従って進め, 歴史的 evidence tool は利用可能なままですが自動 release gate にはしません.
+M4 Path A は完了しました. M4 Path B の build-time package 評価は `NOT_ADMITTED` と結論し、組み込み runtime は `stdlib-only` を維持します. M4 Path C の native package 評価は user value に応じて継続します. M3 automation は有界 action、selector/UI tree、screen capture、color search、PNG/JPEG template matching、Host OCR を提供します. 歴史的 evidence tool は自動 release gate にはしません.
 
 - [ROADMAP.md を表示](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,13 @@ M4 Path A は完了し, M3 automation は有界な座標/global action、有界�
 ### 更新履歴
 
 ******
+
+# v0.4.0-alpha.8
+
+###### 2026/08/24
+
+* `注記` 8 番目の current-tree alpha 候補. M4 Path B build-time package 評価を `NOT_ADMITTED` で完了し、組み込み runtime は `stdlib-only` を維持します. `requests` を含む候補依存関係は追加せず、新しい device acceptance も主張しません
+* `改善` ADR 0003 は stdlib-only debug APK baseline を arm64-v8a 23,709,688 bytes、x86_64 23,726,048 bytes、universal 34,622,039 bytes と記録します. 監査済み offline wheelhouse なしの虚偽の差分を避け、将来の採用には Gradle `--offline`、`--no-index`、`--require-hashes`、license/hash lock、3 APK の size delta と dual ABI public-engine acceptance を要求します
 
 # v0.4.0-alpha.7
 
@@ -183,14 +190,6 @@ M4 Path A は完了し, M3 automation は有界な座標/global action、有界�
 * `注記` 6 番目の M3 automation current-tree alpha candidate. 設定済み Host OCR recognition は eligible service のある API 37 emulator で成功し、API 31 physical device では accessibility service を変更せず fail-closed しました. より高度な OCR、publication、完全な device matrix はこの claim の対象外です
 * `追加` 有界な PNG/JPEG bytes を受け取り、設定済み Host OCR engine の ordered immutable text-line tuple を返す `autojs6.ocr.recognize(image)` を追加
 * `改善` 1 MiB の PNG/JPEG upload、24 KiB raw chunk、SHA-256 verification を再利用し、enabled/authorized/compatible な Host OCR service だけを選択します. 結果を 256 行、1 行 4 KiB strict UTF-8、合計 48 KiB に制限し、buffer を常に release/zeroize し、`OCR_UNAVAILABLE` または `OCR_FAILED` を安定して報告します
-
-# v0.4.0-alpha.5
-
-###### 2026/08/24
-
-* `注記` 現行 tree の第 5 M3 automation alpha candidate です. 有界 template matching は accessibility 有効の API 37 emulator で成功し、API 31 実機では accessibility service を変更せず fail-closed しました. OCR、公開、完全な device matrix はこの主張に含みません
-* `追加` PNG/JPEG bytes、任意の有界 region、左上座標または `None` を扱う `autojs6.images.find_image(template, *, region=None, threshold=0)` を追加
-* `改善` 実行ごとに最大 1 MiB の template 1 個を 24 KiB raw chunk と SHA-256 検証で upload し、各辺 2048 pixel 以下で decode、`autojs6-python-image-match-v1` の row-major 順で deterministic scan します. 完全 opaque pixel だけを対象、他を wildcard とし、OpenCV は不要で、必ず release と buffer の zero 化を行い、Android の 333 ms screenshot throttle だけを有界な 350 ms 待機後に retry します
 
 ##### その他のバージョン
 
