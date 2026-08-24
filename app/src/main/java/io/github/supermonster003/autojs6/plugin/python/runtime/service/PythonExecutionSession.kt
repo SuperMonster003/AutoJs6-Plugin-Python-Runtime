@@ -31,6 +31,7 @@ import org.autojs.plugin.python.runtime.api.PythonCancellationReason
 import org.autojs.plugin.python.runtime.api.PythonErrorCode
 import org.autojs.plugin.python.runtime.api.PythonExecutionCancellation
 import org.autojs.plugin.python.runtime.api.PythonExecutionError
+import org.autojs.plugin.python.runtime.api.PythonExecutionMode
 import org.autojs.plugin.python.runtime.api.PythonExecutionRequest
 import org.autojs.plugin.python.runtime.api.PythonExecutionResult
 import org.autojs.plugin.python.runtime.api.PythonFailurePhase
@@ -41,6 +42,7 @@ import org.autojs.plugin.python.runtime.api.PythonPromptId
 import org.autojs.plugin.python.runtime.api.PythonOutputChunk
 import org.autojs.plugin.python.runtime.api.PythonOutputStream
 import org.autojs.plugin.python.runtime.api.PythonRuntimeCodec
+import org.autojs.plugin.python.runtime.api.PythonRuntimeContract
 import org.autojs.plugin.python.runtime.api.PythonRuntimeValidation
 import org.autojs.plugin.python.runtime.api.PythonSessionStarted
 import java.util.concurrent.CountDownLatch
@@ -86,10 +88,12 @@ internal class PythonExecutionSession(
 
     @Volatile private var workerFuture: Future<*>? = null
     @Volatile private var deadlineFuture: Future<*>? = null
+    @Volatile private var heartbeatFuture: Future<*>? = null
     @Volatile private var terminalLeaseFuture: Future<*>? = null
     @Volatile private var encodedStarted: ByteArray? = null
     private val inputs = AtomicReference<ExecutionInputs?>()
     private val startLease = SessionStartLease(scheduler, START_LEASE_MILLIS, ::startLeaseExpired)
+    private val heartbeatPolicy = PythonHeartbeatPolicy(request.requestId, createdAtMillis)
 
     private var outstandingCredits = 0
     private var nextSequence = PythonRuntimeMetadata.FIRST_OUTPUT_SEQUENCE
@@ -125,20 +129,22 @@ internal class PythonExecutionSession(
             dispatched.set(true)
             this.encodedStarted = encodedStarted
             if (state.get() != State.STARTED) return
-            try {
-                deadlineFuture = scheduler.schedule(
-                    ::deadlineReached,
-                    request.timeoutMillis,
-                    TimeUnit.MILLISECONDS,
-                )
-            } catch (_: RuntimeException) {
-                finishFailure(
-                    PythonErrorCode.INTERNAL,
-                    PythonFailurePhase.RUNTIME_START,
-                    "Runtime deadline scheduler unavailable",
-                    retireProcess = true,
-                )
-                return
+            if (request.executionMode == PythonExecutionMode.BOUNDED) {
+                try {
+                    deadlineFuture = scheduler.schedule(
+                        ::deadlineReached,
+                        request.timeoutMillis,
+                        TimeUnit.MILLISECONDS,
+                    )
+                } catch (_: RuntimeException) {
+                    finishFailure(
+                        PythonErrorCode.INTERNAL,
+                        PythonFailurePhase.RUNTIME_START,
+                        "Runtime deadline scheduler unavailable",
+                        retireProcess = true,
+                    )
+                    return
+                }
             }
             if (state.get() != State.STARTED) return
             try {
@@ -278,6 +284,7 @@ internal class PythonExecutionSession(
     private fun cleanupClosed() {
         startLease.close()
         deadlineFuture?.cancel(false)
+        heartbeatFuture?.cancel(false)
         terminalLeaseFuture?.cancel(false)
         hostCapabilityBridge?.close()
         workerFuture?.cancel(true)
@@ -311,6 +318,7 @@ internal class PythonExecutionSession(
         }
 
         if (!publishStartedAndWait() || isStopped()) return
+        if (!armHeartbeat() || isStopped()) return
 
         try {
             runtime.prepare()
@@ -609,9 +617,9 @@ internal class PythonExecutionSession(
 
     /**
      * Publishes `onStarted` only after the complete immutable input snapshot set has passed every
-     * length, EOF, reliable-pipe, digest and workspace extraction check. The timeout still begins at the
-     * first accepted [start], so an input-validation failure remains non-replayable even when it
-     * terminates without `onStarted`.
+     * length, EOF, reliable-pipe, digest and workspace extraction check. A bounded timeout begins at
+     * the first accepted [start]; long-running execution instead arms its heartbeat only after this
+     * callback is delivered. Either mode remains non-replayable after dispatch.
      */
     private fun publishStartedAndWait(): Boolean {
         val done = CountDownLatch(1)
@@ -650,6 +658,45 @@ internal class PythonExecutionSession(
             return false
         }
         return state.get() == State.STARTED
+    }
+
+    private fun armHeartbeat(): Boolean {
+        if (request.executionMode != PythonExecutionMode.LONG_RUNNING) return true
+        return try {
+            heartbeatFuture = scheduler.scheduleAtFixedRate(
+                ::publishHeartbeat,
+                PythonRuntimeContract.LONG_RUNNING_HEARTBEAT_INTERVAL_MILLIS,
+                PythonRuntimeContract.LONG_RUNNING_HEARTBEAT_INTERVAL_MILLIS,
+                TimeUnit.MILLISECONDS,
+            )
+            true
+        } catch (_: RuntimeException) {
+            finishFailure(
+                PythonErrorCode.INTERNAL,
+                PythonFailurePhase.RUNTIME_START,
+                "Runtime heartbeat scheduler unavailable",
+                retireProcess = true,
+            )
+            false
+        }
+    }
+
+    private fun publishHeartbeat() {
+        synchronized(callbackOrder) {
+            if (state.get() != State.STARTED) return
+            val encoded = try {
+                PythonRuntimeCodec.encodeExecutionHeartbeat(
+                    heartbeatPolicy.next(SystemClock.elapsedRealtime()),
+                )
+            } catch (_: RuntimeException) {
+                hardRetire()
+                return
+            }
+            callbackLane.dispatch(
+                callback = { executionCallback.onHeartbeat(encoded) },
+                onFailure = { hardRetire() },
+            )
+        }
     }
 
     private fun emitOutput(record: BufferedOutputRecord) {
@@ -828,6 +875,7 @@ internal class PythonExecutionSession(
                 return
             }
             deadlineFuture?.cancel(false)
+            heartbeatFuture?.cancel(false)
             hostCapabilityBridge?.close()
             descriptors.close()
             inputs.getAndSet(null)?.close()
@@ -886,6 +934,7 @@ internal class PythonExecutionSession(
 
     private fun finishCancellation(encoded: ByteArray, retireProcess: Boolean) {
         deadlineFuture?.cancel(false)
+        heartbeatFuture?.cancel(false)
         hostCapabilityBridge?.close()
         descriptors.close()
         inputs.getAndSet(null)?.close()

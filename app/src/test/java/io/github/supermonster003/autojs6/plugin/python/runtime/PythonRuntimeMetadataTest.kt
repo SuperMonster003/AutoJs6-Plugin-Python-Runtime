@@ -58,6 +58,7 @@ class PythonRuntimeMetadataTest {
         assertTrue(capabilities.supportsStructuredJsonResult)
         assertTrue(capabilities.supportsOutputArtifacts)
         assertTrue(capabilities.supportsHostCapabilityBroker)
+        assertTrue(capabilities.supportsLongRunningExecution)
         assertEquals(PythonCancellationMode.PROCESS_RESTART_ONLY, capabilities.cancellationMode)
         assertEquals(
             PythonRuntimeResourceLimits(

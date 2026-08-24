@@ -57,6 +57,7 @@ internal object PythonRuntimeMetadata {
             supportsStructuredJsonResult = true,
             supportsOutputArtifacts = true,
             supportsHostCapabilityBroker = true,
+            supportsLongRunningExecution = true,
             limits = PythonRuntimeResourceLimits(
                 maxSourceBytes = 4L * 1024L * 1024L,
                 maxWorkspaceArchiveBytes = 64L * 1024L * 1024L,
