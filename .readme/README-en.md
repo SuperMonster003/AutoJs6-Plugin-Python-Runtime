@@ -103,8 +103,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 > Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
-release target: 0.4.0-alpha.6
-release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.7
+release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -167,6 +167,15 @@ M4 Path A is complete, and M3 automation now includes bounded coordinate/global 
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `Hint` Seventh M3 automation current-tree alpha candidate; the complete real-Settings workflow passed on the API 37 emulator, while publication, M4 Paths B/C, and a complete device matrix remain outside this claim
+* `Feature` Add `m3_complete_automation`, a bounded real-Settings workflow using `app.launch`, `selector.find`, `selector.click`, and `images.capture_screen`, with strict PNG and destination-control containment assertions
+* `Fix` Normalize platform accessibility bounds with `right < left` or `bottom < top` to anchored zero-area axes before Python serialization, while exact selector queries avoid unrelated tree nodes
+* `Improvement` Pass the exported `RunIntentActivity` public project path on an API 37 emulator with a 1080x2424 PNG and SHA-256-verified artifact, then restore accessibility to 0/null and remove all exact test staging
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24
@@ -182,14 +191,6 @@ M4 Path A is complete, and M3 automation now includes bounded coordinate/global 
 * `Hint` Fifth M3 automation current-tree alpha candidate; bounded template matching passed on an accessibility-enabled API 37 emulator and failed closed on an API 31 physical device without changing its accessibility services; OCR, publication, and a complete device matrix remain outside this claim
 * `Feature` Add `autojs6.images.find_image(template, *, region=None, threshold=0)` for PNG/JPEG bytes, an optional bounded region, and a top-left coordinate-or-`None` result
 * `Improvement` Upload one execution-local template up to 1 MiB in 24 KiB raw chunks with SHA-256 verification, decode at most 2048 pixels per side, scan deterministically in row-major order under `autojs6-python-image-match-v1`, use exact-alpha pixels as participants and other pixels as wildcards, require no OpenCV, always release and zero buffers, and retry only Android's 333 ms screenshot throttle after a bounded 350 ms wait
-
-# v0.4.0-alpha.4
-
-###### 2026/08/24
-
-* `Hint` Fourth M3 automation current-tree alpha candidate; bounded screen color search passed on an accessibility-enabled API 37 emulator and failed closed on an API 31 physical device without changing its accessibility services; template image matching, OCR, publication, and a complete device matrix remain outside this claim
-* `Feature` Add `autojs6.images.find_color(color, *, region=None, threshold=0)` for strict RGB integers or `#RRGGBB` text, an optional bounded region, and a coordinate-or-`None` result
-* `Improvement` Capture one fresh Android 11+ accessibility screenshot per call, scan it in deterministic row-major order with a per-channel threshold from 0 through 255, validate exact `autojs6-python-color-match-v1`, and transfer no image bytes or handles to Python
 
 ##### For more releases
 

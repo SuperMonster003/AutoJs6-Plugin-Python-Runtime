@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.4.0-alpha.6
-release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.7
+release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -167,6 +167,15 @@ M4 Path A가 완료되었고 M3 automation은 제한된 좌표/global action, �
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `안내` 일곱 번째 M3 자동화 current-tree alpha 후보이며 실제 Settings 전체 워크플로가 API 37 에뮬레이터에서 통과했습니다. 게시, M4 경로 B/C 및 전체 기기 매트릭스는 이 선언 범위 밖입니다
+* `추가` `app.launch`, `selector.find`, `selector.click`, `images.capture_screen`을 사용하고 PNG 구조와 대상 컨트롤 포함 관계를 엄격히 검증하는 실제 Settings 유한 워크플로 `m3_complete_automation` 추가
+* `수정` Python 직렬화 전에 `right < left` 또는 `bottom < top` 접근성 경계를 앵커를 유지하는 zero-area 축으로 정규화하고 정확한 selector 쿼리로 무관한 트리 노드를 격리
+* `개선` 내보낸 `RunIntentActivity` 공개 프로젝트 경로를 API 37 에뮬레이터에서 통과시키고 1080x2424 PNG와 SHA-256 검증 아티팩트를 확인한 뒤 접근성을 0/null로 복원하고 정확한 테스트 staging을 모두 제거
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24
@@ -182,14 +191,6 @@ M4 Path A가 완료되었고 M3 automation은 제한된 좌표/global action, �
 * `안내` 현재 tree의 다섯 번째 M3 automation alpha candidate입니다. 제한된 template matching은 accessibility가 활성화된 API 37 emulator에서 통과했고 API 31 실제 기기에서는 accessibility service를 바꾸지 않고 fail-closed했습니다. OCR, 공개 및 전체 device matrix는 이 주장에 포함하지 않습니다
 * `추가` PNG/JPEG bytes, 선택적 제한 region, 왼쪽 위 좌표 또는 `None` 결과를 위한 `autojs6.images.find_image(template, *, region=None, threshold=0)` 추가
 * `개선` 실행당 최대 1 MiB template 하나를 24 KiB raw chunk와 SHA-256 검증으로 업로드하고 변당 최대 2048 pixel로 decode하며 `autojs6-python-image-match-v1` 아래 deterministic row-major로 스캔합니다. 완전 불투명 pixel만 참여하고 나머지는 wildcard이며 OpenCV가 필요 없고 항상 release 후 buffer를 0으로 지우며 Android 333 ms screenshot throttle만 제한된 350 ms 대기 후 retry합니다
-
-# v0.4.0-alpha.4
-
-###### 2026/08/24
-
-* `안내` 현재 tree의 네 번째 M3 automation alpha candidate; 제한된 screen color search는 accessibility가 활성화된 API 37 emulator에서 통과하고 API 31 실제 기기에서는 기존 service를 변경하지 않고 fail-closed 통과; template image matching, OCR, 공개 및 전체 device matrix는 범위 밖
-* `추가` 엄격한 RGB integer 또는 `#RRGGBB` text, 선택적 제한 region, 좌표 또는 `None` 결과를 제공하는 `autojs6.images.find_color(color, *, region=None, threshold=0)` 추가
-* `개선` 호출마다 새 Android 11+ accessibility screenshot 한 장을 캡처하고 0..255 채널별 threshold로 deterministic row-major 순서로 스캔하며 정확한 `autojs6-python-color-match-v1`을 검증하고 image byte나 handle을 Python으로 전송하지 않음
 
 ##### 다른 버전
 

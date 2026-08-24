@@ -4,6 +4,15 @@
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `Nota` Séptimo candidato alfa current-tree de automatización M3; el flujo completo de Settings real pasó en el emulador API 37, mientras que la publicación, las rutas M4 B/C y la matriz completa de dispositivos quedan fuera de esta declaración
+* `Función` Añade `m3_complete_automation`, un flujo acotado sobre Settings real que usa `app.launch`, `selector.find`, `selector.click` e `images.capture_screen`, con aserciones estrictas de PNG y contención del control de destino
+* `Corrección` Normaliza antes de serializar a Python los límites de accesibilidad con `right < left` o `bottom < top` como ejes zero-area anclados, mientras las consultas selector exactas aíslan nodos no relacionados
+* `Mejora` La ruta pública de proyecto exportada `RunIntentActivity` pasa en un emulador API 37 con PNG 1080x2424 y artefacto verificado por SHA-256; después restaura accesibilidad a 0/null y elimina todo staging exacto de prueba
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24

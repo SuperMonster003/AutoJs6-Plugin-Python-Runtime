@@ -4,6 +4,15 @@
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `注記` M3 自動化の第 7 current-tree alpha 候補。実 Settings の完全ワークフローは API 37 エミュレーターで合格し、公開、M4 パス B/C、完全な端末マトリクスは本宣言の対象外です
+* `追加` `app.launch`、`selector.find`、`selector.click`、`images.capture_screen` を使い、PNG 構造と対象コントロールの包含を厳密に検証する有界な実 Settings ワークフロー `m3_complete_automation` を追加
+* `修正` Python シリアライズ前に `right < left` または `bottom < top` のアクセシビリティ境界をアンカー保持の zero-area 軸へ正規化し、正確な selector クエリで無関係なツリーノードを隔離
+* `改善` エクスポートされた `RunIntentActivity` 公開プロジェクト経路を API 37 エミュレーターで検証し、1080x2424 PNG と SHA-256 検証済み成果物を確認後、アクセシビリティを 0/null に戻して正確なテスト staging をすべて削除
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24

@@ -24,7 +24,7 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.4.0-alpha.6", common["release_target"])
+        self.assertEqual("0.4.0-alpha.7", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
         self.assertIn("selector/UI-tree", common["release_state"])
@@ -32,6 +32,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("find_color", common["release_state"])
         self.assertIn("find_image", common["release_state"])
         self.assertIn("Host OCR", common["release_state"])
+        self.assertIn("complete Settings", common["release_state"])
         self.assertIn("M4 Path A", common["release_state"])
         self.assertIn("project-local pure-Python", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
@@ -289,6 +290,30 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                complete_automation = source["$data"]["v0.4.0-alpha.7"]
+                self.assertEqual("2026/08/24", complete_automation["released_date"])
+                self.assertEqual(1, len(complete_automation["feature"]))
+                for method in (
+                    "m3_complete_automation",
+                    "app.launch",
+                    "selector.find",
+                    "selector.click",
+                    "images.capture_screen",
+                ):
+                    self.assertIn(method, complete_automation["feature"][0])
+                self.assertEqual(1, len(complete_automation["fix"]))
+                for boundary in ("right < left", "bottom < top", "zero-area"):
+                    self.assertIn(boundary, complete_automation["fix"][0])
+                self.assertEqual(1, len(complete_automation["improvement"]))
+                for evidence in (
+                    "RunIntentActivity",
+                    "API 37",
+                    "1080x2424",
+                    "SHA-256",
+                    "0/null",
+                ):
+                    self.assertIn(evidence, complete_automation["improvement"][0])
+
                 host_ocr = source["$data"]["v0.4.0-alpha.6"]
                 self.assertEqual("2026/08/24", host_ocr["released_date"])
                 self.assertEqual(1, len(host_ocr["feature"]))

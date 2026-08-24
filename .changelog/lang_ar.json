@@ -5,6 +5,21 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "اعتماد",
   "$data": {
+    "v0.4.0-alpha.7": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "مرشح alpha السابع من current-tree لأتمتة M3؛ نجح مسار Settings الحقيقي الكامل على محاكي API 37، بينما يبقى النشر ومسارا M4 B/C ومصفوفة الأجهزة الكاملة خارج نطاق هذا الإقرار"
+      ],
+      "feature": [
+        "إضافة `m3_complete_automation`، وهو مسار محدود على Settings الحقيقي يستخدم `app.launch` و`selector.find` و`selector.click` و`images.capture_screen` مع تحقق صارم من PNG واحتواء عنصر الوجهة"
+      ],
+      "fix": [
+        "تطبيع حدود إمكانية الوصول ذات `right < left` أو `bottom < top` قبل تسلسل Python إلى محاور zero-area مرتبطة بنقطة الأصل، مع عزل عقد الشجرة غير المرتبطة عبر استعلامات selector الدقيقة"
+      ],
+      "improvement": [
+        "نجح مسار المشروع العام المصدّر `RunIntentActivity` على محاكي API 37 مع PNG بدقة 1080x2424 وأثر متحقق منه عبر SHA-256، ثم أُعيدت إمكانية الوصول إلى 0/null وأزيل كل staging اختباري محدد"
+      ]
+    },
     "v0.4.0-alpha.6": {
       "released_date": "2026/08/24",
       "hint": [

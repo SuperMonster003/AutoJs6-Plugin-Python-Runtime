@@ -103,8 +103,8 @@ El complemento acepta una SOURCE independiente, un workspace archive acotado opc
 > La versión 0.1.0 se empareja solo con AutoJs6 6.8.0, con el versionCode mínimo del Host 5275 congelado y aplicado; la revisión final y limpia del código fuente del Host y el manifiesto de distribución de los tres AAR están registrados en el lock. Cada ejecución nueva redescubre el provider; si falta o está desactivado pide instalar o activar sin fallback, y la instalación o reactivación no exige reiniciar el Host. La identidad del APK estable está vinculada a ese código fuente exacto del Plugin y al lock Host.
 
 ```text
-release target: 0.4.0-alpha.6
-release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.7
+release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -167,6 +167,15 @@ La ruta A de M4 está terminada, y la automatización M3 ya incluye acciones aco
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `Nota` Séptimo candidato alfa current-tree de automatización M3; el flujo completo de Settings real pasó en el emulador API 37, mientras que la publicación, las rutas M4 B/C y la matriz completa de dispositivos quedan fuera de esta declaración
+* `Función` Añade `m3_complete_automation`, un flujo acotado sobre Settings real que usa `app.launch`, `selector.find`, `selector.click` e `images.capture_screen`, con aserciones estrictas de PNG y contención del control de destino
+* `Corrección` Normaliza antes de serializar a Python los límites de accesibilidad con `right < left` o `bottom < top` como ejes zero-area anclados, mientras las consultas selector exactas aíslan nodos no relacionados
+* `Mejora` La ruta pública de proyecto exportada `RunIntentActivity` pasa en un emulador API 37 con PNG 1080x2424 y artefacto verificado por SHA-256; después restaura accesibilidad a 0/null y elimina todo staging exacto de prueba
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24
@@ -182,14 +191,6 @@ La ruta A de M4 está terminada, y la automatización M3 ya incluye acciones aco
 * `Nota` Quinto candidato alpha de automatización M3 del árbol actual; la búsqueda acotada por plantilla pasó en un emulador API 37 con accesibilidad y falló de forma cerrada en un dispositivo físico API 31 sin cambiar sus servicios de accesibilidad; OCR, publicación y una matriz completa quedan fuera de esta afirmación
 * `Función` Añadir `autojs6.images.find_image(template, *, region=None, threshold=0)` para bytes PNG/JPEG, una región acotada opcional y un resultado de coordenada superior izquierda o `None`
 * `Mejora` Subir una plantilla por ejecución de hasta 1 MiB en bloques brutos de 24 KiB con verificación SHA-256, decodificar como máximo 2048 píxeles por lado, recorrer de forma determinista en row-major bajo `autojs6-python-image-match-v1`, usar píxeles totalmente opacos como participantes y los demás como comodines, no requerir OpenCV, siempre hacer release y borrar los búferes, y reintentar solo el límite Android de 333 ms tras una espera acotada de 350 ms
-
-# v0.4.0-alpha.4
-
-###### 2026/08/24
-
-* `Nota` Cuarto candidato alpha de automatización M3 del árbol actual; la búsqueda acotada de color pasó en un emulador API 37 con accesibilidad y falló de forma cerrada en un dispositivo físico API 31 sin cambiar sus servicios; búsqueda por plantilla, OCR, publicación y matriz completa quedan fuera de esta declaración
-* `Función` Añadir `autojs6.images.find_color(color, *, region=None, threshold=0)` para enteros RGB estrictos o texto `#RRGGBB`, región acotada opcional y resultado coordenada o `None`
-* `Mejora` Capturar una nueva pantalla de accesibilidad Android 11+ por llamada, recorrerla en orden row-major determinista con umbral por canal de 0 a 255, validar `autojs6-python-color-match-v1` exacto y no transferir bytes ni handles de imagen a Python
 
 ##### Más versiones
 

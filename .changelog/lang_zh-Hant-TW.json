@@ -5,6 +5,21 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "相依性",
   "$data": {
+    "v0.4.0-alpha.7": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "第七個 M3 自動化 current-tree alpha 候選版本；真實 Settings 完整工作流程已在 API 37 模擬器通過，發布、M4 路徑 B/C 與完整裝置矩陣不在本聲明範圍內"
+      ],
+      "feature": [
+        "新增 `m3_complete_automation`：使用 `app.launch`、`selector.find`、`selector.click` 與 `images.capture_screen` 的有界真實 Settings 工作流程，嚴格斷言 PNG 結構及目標控制項包含關係"
+      ],
+      "fix": [
+        "Python 序列化前將平台回報的 `right < left` 或 `bottom < top` 無障礙邊界收斂為保留錨點的 zero-area 軸，並以精確 selector 查詢隔離無關樹節點"
+      ],
+      "improvement": [
+        "匯出的 `RunIntentActivity` 公開專案路徑已在 API 37 模擬器通過，產生 1080x2424 PNG 與經 SHA-256 驗證的產物，之後將無障礙恢復為 0/null 並移除全部精確測試暫存"
+      ]
+    },
     "v0.4.0-alpha.6": {
       "released_date": "2026/08/24",
       "hint": [

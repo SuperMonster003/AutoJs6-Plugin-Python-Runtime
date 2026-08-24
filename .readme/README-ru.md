@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.4.0-alpha.6
-release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.7
+release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -167,6 +167,15 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `Примечание` Седьмой alpha-кандидат current-tree автоматизации M3; полный сценарий реального Settings прошёл на эмуляторе API 37, а публикация, пути M4 B/C и полная матрица устройств остаются вне этого заявления
+* `Добавлено` Добавлен `m3_complete_automation`: ограниченный сценарий реального Settings с `app.launch`, `selector.find`, `selector.click` и `images.capture_screen`, строгой проверкой PNG и попадания целевого элемента в снимок
+* `Исправлено` Перед сериализацией Python границы доступности с `right < left` или `bottom < top` нормализуются в привязанные оси zero-area, а точные запросы selector изолируют посторонние узлы дерева
+* `Улучшено` Экспортированный публичный путь проекта `RunIntentActivity` прошёл на эмуляторе API 37 с PNG 1080x2424 и артефактом, проверенным SHA-256; затем доступность восстановлена до 0/null и всё точное тестовое staging удалено
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24
@@ -182,14 +191,6 @@ Runtime Chaquopy предназначен только для доверенны
 * `Примечание` Пятый alpha-кандидат автоматизации M3 текущего дерева; ограниченный поиск по шаблону прошел на эмуляторе API 37 с включенной accessibility и корректно отказал на физическом устройстве API 31 без изменения его служб accessibility; OCR, публикация и полная матрица устройств не входят в это утверждение
 * `Добавлено` Добавить `autojs6.images.find_image(template, *, region=None, threshold=0)` для байтов PNG/JPEG, необязательной ограниченной области и результата в виде координаты левого верхнего угла или `None`
 * `Улучшено` Загружать один template на выполнение размером до 1 MiB raw-блоками по 24 KiB с проверкой SHA-256, декодировать не более 2048 пикселей на сторону, детерминированно сканировать в порядке row-major по `autojs6-python-image-match-v1`, учитывать полностью непрозрачные пиксели и считать остальные wildcard, не требовать OpenCV, всегда выполнять release с обнулением buffers и повторять только Android-ограничение 333 ms после ограниченного ожидания 350 ms
-
-# v0.4.0-alpha.4
-
-###### 2026/08/24
-
-* `Примечание` Четвертый alpha-кандидат автоматизации M3 текущего дерева; ограниченный поиск цвета прошел на эмуляторе API 37 с accessibility и fail-closed на физическом API 31 без изменения его служб; поиск по шаблону, OCR, публикация и полная матрица устройств не входят в заявление
-* `Добавлено` Добавить `autojs6.images.find_color(color, *, region=None, threshold=0)` для строгого RGB-целого или текста `#RRGGBB`, необязательной ограниченной области и результата-координаты либо `None`
-* `Улучшено` Получать один новый accessibility-снимок Android 11+ на вызов, сканировать его детерминированно в row-major порядке с поканальным порогом 0..255, проверять точную схему `autojs6-python-color-match-v1` и не передавать в Python байты или дескрипторы изображения
 
 ##### Другие версии
 

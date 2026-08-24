@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.4.0-alpha.6 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.4.0-alpha.7 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -396,7 +396,7 @@
   `337841107`、`4961ac13a`; 插件 façade 与 36 项聚焦 broker 测试提交:
   `1923992`、`7538d4d`; 示例与完整契约分别为 `examples/python/m3_ocr.py` 和
   `docs/python/HOST_OCR.md`。
-- [ ] 完整自动化示例: 一个真实的 "打开应用 → 找控件 → 点击 → 截图断言" Python 脚本
+- [x] 完整自动化示例: 一个真实的 "打开应用 → 找控件 → 点击 → 截图断言" Python 脚本
 - [ ] 发布 0.4.0
 
 ### 2026-08-23 M3 automator 基础动作验收记录
@@ -527,6 +527,30 @@
   `adb install --no-streaming -r -t` 覆盖安装, 未卸载、未清数据、未访问非授权设备。
   用户已确认 QV710AF65F 定时任务成功, 本轮 OCR 验收未修改其定时任务或无障碍配置。
 
+### 2026-08-24 M3 完整自动化示例验收记录
+
+- `examples/python/m3_complete_automation` 由插件提交 `36cf965`、`ce951df`、
+  `4a19ba9`、`5ff3282` 固定: 通过 `app.launch` 打开真实 Android Settings, 以有界
+  `selector.find` 精确查找并通过 `selector.click` 点击搜索控件, 验证目标 EditText,
+  再用 `images.capture_screen` 发布 PNG 并断言目标控件完整落在截图内。所有等待、
+  Back 归一化与截图解析均有界; 3 项便携测试覆盖成功路径、转场期节点先隐藏后可见、
+  以及截图尺寸不包含目标控件时的 fail-closed。
+- 首次设备探索发现 Settings 树中存在平台上报的 `right < left` 离屏节点。宿主提交
+  `4d13653fd` 在 `PythonHostSelectorBounds.fromPlatform` 将异常轴收敛为保持锚点的
+  zero-area 边界, 不交换坐标或虚构面积; 聚焦单元测试离线通过, 并由 `6f33bf4cb`
+  非快进合并到宿主主分支。示例同时改用精确 `find`, 避免无关节点决定整条工作流。
+- API 37 / x86_64 / 16 KiB page 模拟器安装 Host 5276 的 SM003 x86_64 修复 APK,
+  通过导出的 `RunIntentActivity` 及 `path` / `source_kind=python_project_v1` /
+  `project_root` 公开参数进入真实项目准入、workspace、Binder 会话和协议 1.5 broker。
+  工作流得到 `backSteps=0`、点击成功、目标边界 `(126,195)-(1080,384)` 与结构化
+  `[result]`; `[artifact]` PNG 为 1080 x 2424、54,453 字节, SHA-256 为
+  `9dee9783b6677f47d966c69be8d164f94eea64ff7aca10c1d972e1c6691ab572`, IHDR CRC、
+  目标资源 ID 与截图包含关系均通过。
+- 验收仅使用 `emulator-5554`; 未访问 QV710AF65F。事务结束后模拟器恢复
+  `accessibility_enabled=0`、服务列表 `null`、Launcher 前台, Host 私有项目、执行产物、
+  UI dump 与 `/data/local/tmp` 精确暂存目录均已删除。覆盖安装未卸载、未清数据; 用户
+  已确认 QV710AF65F 定时任务成功。
+
 ### 后续批次 (需求驱动, 出现用例再排期)
 
 - [ ] [H+P] `shell` (root/shizuku)、`sensors`、`media`、`sqlite`、`storages`、
@@ -589,7 +613,7 @@
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
-| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (automator/selector/截图/找色/找图/OCR 已完成) |
+| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (automator/selector/截图/找色/找图/OCR/完整自动化示例已完成) |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 

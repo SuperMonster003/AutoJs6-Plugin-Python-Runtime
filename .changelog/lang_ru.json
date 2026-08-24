@@ -5,6 +5,21 @@
   "changelog_label_improvement": "Улучшено",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v0.4.0-alpha.7": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "Седьмой alpha-кандидат current-tree автоматизации M3; полный сценарий реального Settings прошёл на эмуляторе API 37, а публикация, пути M4 B/C и полная матрица устройств остаются вне этого заявления"
+      ],
+      "feature": [
+        "Добавлен `m3_complete_automation`: ограниченный сценарий реального Settings с `app.launch`, `selector.find`, `selector.click` и `images.capture_screen`, строгой проверкой PNG и попадания целевого элемента в снимок"
+      ],
+      "fix": [
+        "Перед сериализацией Python границы доступности с `right < left` или `bottom < top` нормализуются в привязанные оси zero-area, а точные запросы selector изолируют посторонние узлы дерева"
+      ],
+      "improvement": [
+        "Экспортированный публичный путь проекта `RunIntentActivity` прошёл на эмуляторе API 37 с PNG 1080x2424 и артефактом, проверенным SHA-256; затем доступность восстановлена до 0/null и всё точное тестовое staging удалено"
+      ]
+    },
     "v0.4.0-alpha.6": {
       "released_date": "2026/08/24",
       "hint": [

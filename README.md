@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.4.0-alpha.6
-release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.7
+release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -167,6 +167,15 @@ M4 路径 A 已完成, M3 自动化现已接通有界坐标/全局动作、有�
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `提示` 第七个 M3 自动化 current-tree alpha 候选版; 真实 Settings 完整工作流已在 API 37 模拟器通过, 发布、M4 路径 B/C 与完整设备矩阵不在本声明范围内
+* `新增` 新增 `m3_complete_automation`: 使用 `app.launch`、`selector.find`、`selector.click` 与 `images.capture_screen` 的有界真实 Settings 工作流, 严格断言 PNG 结构及目标控件包含关系
+* `修复` Python 序列化前将平台上报的 `right < left` 或 `bottom < top` 无障碍边界收敛为保持锚点的 zero-area 轴, 同时以精确 selector 查询隔离无关树节点
+* `优化` 导出的 `RunIntentActivity` 公开项目路径已在 API 37 模拟器通过, 产出 1080x2424 PNG 与经 SHA-256 验证的产物, 随后将无障碍恢复为 0/null 并移除全部精确测试暂存
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24
@@ -182,14 +191,6 @@ M4 路径 A 已完成, M3 自动化现已接通有界坐标/全局动作、有�
 * `提示` 当前树第五个 M3 自动化 alpha 候选; 有界模板找图已在启用无障碍的 API 37 模拟器通过, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; OCR、发布及完整设备矩阵仍不在本次声明范围
 * `新增` 新增 `autojs6.images.find_image(template, *, region=None, threshold=0)`, 接受 PNG/JPEG 字节与可选有界区域, 返回左上角坐标或 `None`
 * `优化` 每次执行上传一个最大 1 MiB 的模板, 以 24 KiB 原始块传输并校验 SHA-256, 单边解码不超过 2048 像素, 按 row-major 确定性扫描并校验 `autojs6-python-image-match-v1`; 仅全不透明像素参与、其余为通配, 无需 OpenCV, 始终 release 并清零缓冲区, 且仅对 Android 333 ms 截图节流执行有界 350 ms 等待重试
-
-# v0.4.0-alpha.4
-
-###### 2026/08/24
-
-* `提示` 当前树第四个 M3 自动化 alpha 候选; 有界屏幕找色已在启用无障碍的 API 37 模拟器通过, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; 模板找图、OCR、发布及完整设备矩阵仍不在本次声明范围
-* `新增` 新增 `autojs6.images.find_color(color, *, region=None, threshold=0)`, 接受严格 RGB 整数或 `#RRGGBB` 文本、可选有界区域, 返回坐标或 `None`
-* `优化` 每次调用只捕获一张最新 Android 11+ 无障碍截图, 以确定性 row-major 顺序和 0..255 逐通道阈值扫描, 校验精确 `autojs6-python-color-match-v1`, 不向 Python 传输图像字节或句柄
 
 ##### 更多版本
 

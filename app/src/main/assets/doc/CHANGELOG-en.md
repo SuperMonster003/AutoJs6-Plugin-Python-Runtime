@@ -4,6 +4,15 @@
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `Hint` Seventh M3 automation current-tree alpha candidate; the complete real-Settings workflow passed on the API 37 emulator, while publication, M4 Paths B/C, and a complete device matrix remain outside this claim
+* `Feature` Add `m3_complete_automation`, a bounded real-Settings workflow using `app.launch`, `selector.find`, `selector.click`, and `images.capture_screen`, with strict PNG and destination-control containment assertions
+* `Fix` Normalize platform accessibility bounds with `right < left` or `bottom < top` to anchored zero-area axes before Python serialization, while exact selector queries avoid unrelated tree nodes
+* `Improvement` Pass the exported `RunIntentActivity` public project path on an API 37 emulator with a 1080x2424 PNG and SHA-256-verified artifact, then restore accessibility to 0/null and remove all exact test staging
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24

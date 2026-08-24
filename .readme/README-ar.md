@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.4.0-alpha.6
-release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.7
+release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -167,6 +167,15 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `ملاحظة` مرشح alpha السابع من current-tree لأتمتة M3؛ نجح مسار Settings الحقيقي الكامل على محاكي API 37، بينما يبقى النشر ومسارا M4 B/C ومصفوفة الأجهزة الكاملة خارج نطاق هذا الإقرار
+* `إضافة` إضافة `m3_complete_automation`، وهو مسار محدود على Settings الحقيقي يستخدم `app.launch` و`selector.find` و`selector.click` و`images.capture_screen` مع تحقق صارم من PNG واحتواء عنصر الوجهة
+* `إصلاح` تطبيع حدود إمكانية الوصول ذات `right < left` أو `bottom < top` قبل تسلسل Python إلى محاور zero-area مرتبطة بنقطة الأصل، مع عزل عقد الشجرة غير المرتبطة عبر استعلامات selector الدقيقة
+* `تحسين` نجح مسار المشروع العام المصدّر `RunIntentActivity` على محاكي API 37 مع PNG بدقة 1080x2424 وأثر متحقق منه عبر SHA-256، ثم أُعيدت إمكانية الوصول إلى 0/null وأزيل كل staging اختباري محدد
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24
@@ -182,14 +191,6 @@ runtime/security/release owner: SuperMonster003
 * `ملاحظة` مرشح alpha الخامس لأتمتة M3 في الشجرة الحالية؛ نجحت مطابقة القالب المحدودة على محاكي API 37 مع accessibility مفعلة وفشلت بشكل مغلق على جهاز فعلي API 31 من دون تغيير خدمات accessibility؛ ولا تشمل هذه المطالبة OCR أو النشر أو مصفوفة أجهزة كاملة
 * `إضافة` إضافة `autojs6.images.find_image(template, *, region=None, threshold=0)` لبايتات PNG/JPEG ومنطقة محدودة اختيارية ونتيجة إحداثي الزاوية العليا اليسرى أو `None`
 * `تحسين` رفع template واحد لكل تنفيذ حتى 1 MiB في raw chunks بحجم 24 KiB مع تحقق SHA-256، وفك ترميز لا يتجاوز 2048 بكسل لكل جانب، ومسح deterministic بترتيب row-major وفق `autojs6-python-image-match-v1`؛ تشارك البكسلات المعتمة بالكامل فقط والبقية wildcard، ولا حاجة إلى OpenCV، مع تنفيذ release وتصفير buffers دائمًا، وإعادة محاولة حد Android البالغ 333 ms فقط بعد انتظار محدود قدره 350 ms
-
-# v0.4.0-alpha.4
-
-###### 2026/08/24
-
-* `ملاحظة` مرشح alpha رابع لأتمتة M3 في الشجرة الحالية؛ نجح بحث اللون المحدود على محاكي API 37 مع accessibility وفشل بشكل مغلق على جهاز API 31 من دون تغيير خدماته؛ يظل بحث القالب وOCR والنشر ومصفوفة الأجهزة الكاملة خارج هذا الادعاء
-* `إضافة` إضافة `autojs6.images.find_color(color, *, region=None, threshold=0)` لعدد RGB صحيح صارم أو نص `#RRGGBB` ومنطقة محدودة اختيارية ونتيجة إحداثي أو `None`
-* `تحسين` التقاط شاشة accessibility جديدة واحدة على Android 11+ لكل استدعاء ومسحها بترتيب row-major حتمي وحد لكل قناة من 0 إلى 255 والتحقق من `autojs6-python-color-match-v1` الدقيق وعدم نقل بايتات الصورة أو مقابضها إلى Python
 
 ##### المزيد من الإصدارات
 

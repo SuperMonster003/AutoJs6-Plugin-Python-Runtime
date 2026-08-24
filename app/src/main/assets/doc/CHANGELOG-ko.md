@@ -4,6 +4,15 @@
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `안내` 일곱 번째 M3 자동화 current-tree alpha 후보이며 실제 Settings 전체 워크플로가 API 37 에뮬레이터에서 통과했습니다. 게시, M4 경로 B/C 및 전체 기기 매트릭스는 이 선언 범위 밖입니다
+* `추가` `app.launch`, `selector.find`, `selector.click`, `images.capture_screen`을 사용하고 PNG 구조와 대상 컨트롤 포함 관계를 엄격히 검증하는 실제 Settings 유한 워크플로 `m3_complete_automation` 추가
+* `수정` Python 직렬화 전에 `right < left` 또는 `bottom < top` 접근성 경계를 앵커를 유지하는 zero-area 축으로 정규화하고 정확한 selector 쿼리로 무관한 트리 노드를 격리
+* `개선` 내보낸 `RunIntentActivity` 공개 프로젝트 경로를 API 37 에뮬레이터에서 통과시키고 1080x2424 PNG와 SHA-256 검증 아티팩트를 확인한 뒤 접근성을 0/null로 복원하고 정확한 테스트 staging을 모두 제거
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24

@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.4.0-alpha.6
-release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.7
+release state: 0.4.0-alpha.7 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; later demand-driven M3 batches, M4 Paths B/C, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -167,6 +167,15 @@ M4 Path A は完了し, M3 automation は有界な座標/global action、有界�
 
 ******
 
+# v0.4.0-alpha.7
+
+###### 2026/08/24
+
+* `注記` M3 自動化の第 7 current-tree alpha 候補。実 Settings の完全ワークフローは API 37 エミュレーターで合格し、公開、M4 パス B/C、完全な端末マトリクスは本宣言の対象外です
+* `追加` `app.launch`、`selector.find`、`selector.click`、`images.capture_screen` を使い、PNG 構造と対象コントロールの包含を厳密に検証する有界な実 Settings ワークフロー `m3_complete_automation` を追加
+* `修正` Python シリアライズ前に `right < left` または `bottom < top` のアクセシビリティ境界をアンカー保持の zero-area 軸へ正規化し、正確な selector クエリで無関係なツリーノードを隔離
+* `改善` エクスポートされた `RunIntentActivity` 公開プロジェクト経路を API 37 エミュレーターで検証し、1080x2424 PNG と SHA-256 検証済み成果物を確認後、アクセシビリティを 0/null に戻して正確なテスト staging をすべて削除
+
 # v0.4.0-alpha.6
 
 ###### 2026/08/24
@@ -182,14 +191,6 @@ M4 Path A は完了し, M3 automation は有界な座標/global action、有界�
 * `注記` 現行 tree の第 5 M3 automation alpha candidate です. 有界 template matching は accessibility 有効の API 37 emulator で成功し、API 31 実機では accessibility service を変更せず fail-closed しました. OCR、公開、完全な device matrix はこの主張に含みません
 * `追加` PNG/JPEG bytes、任意の有界 region、左上座標または `None` を扱う `autojs6.images.find_image(template, *, region=None, threshold=0)` を追加
 * `改善` 実行ごとに最大 1 MiB の template 1 個を 24 KiB raw chunk と SHA-256 検証で upload し、各辺 2048 pixel 以下で decode、`autojs6-python-image-match-v1` の row-major 順で deterministic scan します. 完全 opaque pixel だけを対象、他を wildcard とし、OpenCV は不要で、必ず release と buffer の zero 化を行い、Android の 333 ms screenshot throttle だけを有界な 350 ms 待機後に retry します
-
-# v0.4.0-alpha.4
-
-###### 2026/08/24
-
-* `注記` 現行 tree の第 4 M3 automation alpha candidate; 有界 screen color search は accessibility 有効の API 37 emulator で成功し、API 31 実機では既存 service を変更せず fail-closed を確認; template image matching、OCR、公開、完全な device matrix は対象外
-* `追加` 厳密な RGB integer または `#RRGGBB` text、任意の有界 region、座標または `None` result を持つ `autojs6.images.find_color(color, *, region=None, threshold=0)` を追加
-* `改善` 呼び出しごとに新しい Android 11+ accessibility screenshot を 1 枚取得し、0..255 の channel 別 threshold で deterministic row-major 順に走査し、厳密な `autojs6-python-color-match-v1` を検証して image byte や handle を Python へ転送しない
 
 ##### その他のバージョン
 
