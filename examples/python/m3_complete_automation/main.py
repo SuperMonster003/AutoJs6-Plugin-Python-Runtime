@@ -52,8 +52,12 @@ def _find_exact(
             "Selector returned a resource match from an unexpected package: "
             f"resource={node['resourceId']!r}, package={node['packageName']!r}"
         )
-    if node["enabled"] is not True or node["visibleToUser"] is not True:
-        raise RuntimeError(f"Selector returned a non-operational node for {resource_id}")
+    if node["enabled"] is not True:
+        raise RuntimeError(f"Selector returned a disabled node for {resource_id}")
+    # Android may expose the destination node before its enter animation makes it visible.
+    # Treat that honest transient as "not ready yet" and let the bounded caller poll again.
+    if node["visibleToUser"] is not True:
+        return None
     return node
 
 

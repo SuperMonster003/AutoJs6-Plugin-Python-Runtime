@@ -84,7 +84,12 @@ class _FakeSelector:
             clickable=True,
             bounds=(126, 142, 1080, 331),
         )
+        self.entering_destination_editor = {
+            **self.destination_editor,
+            "visibleToUser": False,
+        }
         self.destination_visible = False
+        self.destination_queries = 0
         self.find_calls: list[dict[str, object]] = []
         self.clicked: list[dict[str, object]] = []
 
@@ -96,6 +101,9 @@ class _FakeSelector:
         if resource_id == HOME_SEARCH_RESOURCE_ID and not self.destination_visible:
             return self.home_control
         if resource_id == OPEN_SEARCH_RESOURCE_ID and self.destination_visible:
+            self.destination_queries += 1
+            if self.destination_queries == 1:
+                return self.entering_destination_editor
             return self.destination_editor
         return None
 
@@ -172,7 +180,7 @@ class M3CompleteAutomationExampleTest(unittest.TestCase):
 
         self.assertEqual([fake_selector.home_control], fake_selector.clicked)
         self.assertEqual(
-            [HOME_SEARCH_RESOURCE_ID, OPEN_SEARCH_RESOURCE_ID],
+            [HOME_SEARCH_RESOURCE_ID, OPEN_SEARCH_RESOURCE_ID, OPEN_SEARCH_RESOURCE_ID],
             [call["resource_id"] for call in fake_selector.find_calls],
         )
         self.assertEqual(
