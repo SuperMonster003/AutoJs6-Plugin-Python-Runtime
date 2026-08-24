@@ -118,7 +118,10 @@ Using an unknown, evicted, invalidated, or unrefreshable ID raises
 execution and are never replayed after cancellation.
 
 See [`m3_selector.py`](../../examples/python/m3_selector.py) for a guarded
-example, [`HOST_AUTOMATOR.md`](HOST_AUTOMATOR.md) for coordinate/global actions,
+example,
+[`m3_complete_automation`](../../examples/python/m3_complete_automation) for a
+real launch/find/click/screenshot-assertion workflow,
+[`HOST_AUTOMATOR.md`](HOST_AUTOMATOR.md) for coordinate/global actions,
 [`HOST_IMAGES.md`](HOST_IMAGES.md) for bounded screen capture, and
 [`PYTHON_SEMANTICS_CONTRACT.md`](PYTHON_SEMANTICS_CONTRACT.md) for normative broker
 and execution semantics.

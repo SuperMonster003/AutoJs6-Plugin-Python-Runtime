@@ -66,5 +66,8 @@ Bounded accessibility screen capture is documented in
 Roadmap items; coordinate actions do not imply either capability.
 
 See [`m3_automator.py`](../../examples/python/m3_automator.py) for a minimal
-script and [`PYTHON_SEMANTICS_CONTRACT.md`](PYTHON_SEMANTICS_CONTRACT.md) for the
-normative execution and error semantics.
+script,
+[`m3_complete_automation`](../../examples/python/m3_complete_automation) for a
+bounded end-to-end workflow against the real Android Settings application, and
+[`PYTHON_SEMANTICS_CONTRACT.md`](PYTHON_SEMANTICS_CONTRACT.md) for the normative
+execution and error semantics.
