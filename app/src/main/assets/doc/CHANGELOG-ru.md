@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.2
+
+###### 2026/08/24
+
+* `Примечание` Второй M5 current-tree alpha-кандидат; FIFO Host и offline JVM/portable gates проходят, без заявления Android concurrency smoke, настоящего параллельного CPython, prewarm, публикации или release
+* `Добавлено` Конкурентные запуски Python принимаются справедливой FIFO Host с одним active owner и максимум 32 ожидающими до обнаружения Provider; queued Stop прерываем и не связывает Plugin, не расходует request timeout и не создаёт заранее long-task уведомление
+* `Улучшено` Binding Provider сохраняется до 3 секунд после закрытия dispatched session для подтверждения retirement поколения до FIFO handoff; протокол 1.6, три AAR и граница Plugin single-session/no-provider-queue не меняются
+
 # v0.5.0-alpha.1
 
 ###### 2026/08/24

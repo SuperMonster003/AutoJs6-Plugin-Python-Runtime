@@ -17,6 +17,7 @@
     "프로토콜 1.4에서 최대 {{ max_structured_json_bytes }}의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 {{ max_output_artifacts }}개 전달하며 stdout에서 결과를 추론하지 않습니다.",
     "실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, 권한 인식 `notice`, 제한된 `files.read_text/write_text/exists/is_file/is_dir/list`, foreground 전용 `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, 제한된 `automator.click/long_click/press/swipe/back/home`, 제한된 `selector.snapshot/find/click/set_text`, `images.capture_screen`, `images.find_color`, `images.find_image` 및 `ocr.recognize`를 실시간 호출하고 terminal에서 폐기합니다.",
     "프로토콜 1.6은 명시적 `executionMode=long-running` project에 실행 deadline 없는 mode, Host foreground 알림, Stop action, {{ long_running_heartbeat_interval }} 간격의 순서 있는 Provider heartbeat를 추가합니다. background 실행 surface는 downgrade 없이 fail closed합니다.",
+    "연동 Host는 Provider discovery 전에 공정한 FIFO로 동시 Python launch를 접수합니다: active owner 1개와 최대 {{ max_host_python_pending_executions }} waiter, queued Stop은 interrupt 가능하며 dispatch된 generation은 handoff 전에 최대 {{ python_process_retirement_wait }} Binder exit를 기다립니다. Provider는 queue 없는 single-session을 유지합니다.",
     "`SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.",
     "프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.",
     "호스트 재시작이 필요 없습니다. 설치 또는 재활성화 후 다음 새 실행이 provider를 다시 검색하고 pin하며, 실행 중 Binder death는 해당 실행을 종료하고 자동 재실행하지 않습니다."

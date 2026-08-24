@@ -636,8 +636,20 @@
     再运行普通有界脚本确认进程退休后可干净重绑; 记录精确 Host/Plugin 身份。
 - [ ] [P] **进程预热评估**: 实测 CPython 冷启动耗时; 若显著 (>1 s), 提供
   "执行后保留进程" 选项 (放弃 per-execution 退休, 状态污染问题出现再修)。
-- [ ] [H+P] **并发执行**: 多脚本同时运行 (多会话或宿主侧排队, 按实现成本选择;
-  当前限制为全局单会话)。
+- [ ] [H] **多脚本并发准入**: 采用宿主全局 FIFO 排队而不是在单个 Chaquopy/CPython
+  解释器中并行执行; 源码与离线门禁已完成, 真机双脚本 FIFO 冒烟待执行。
+  - [x] 一个 active owner + 最多 32 个 pending execution; 公平 FIFO、防插队、队满以
+    `PYTHON_RUNTIME_BUSY` fail closed, 不扰动既有 owner/waiter。
+  - [x] 排队发生在 snapshot、Provider bind、PFD、交互 controller 与长任务前台服务之前;
+    等待不消耗 Provider execution timeout, Stop/engine destroy 可中断并精确移除 waiter。
+  - [x] 已 dispatch 会话 close 后保留 binding 最多 3 s 等待 Binder death, 再把队列所有权
+    交给下一项; Plugin 原有 `RETIRING` 与单会话 gate 继续作为跨进程最终防线。
+  - [x] 协议保持 1.6、三件 AAR 与 Plugin 二进制无需变化; Provider 仍无队列且一次只运行
+    一个 Python body, `engines.run()` 嵌套 Python 继续稳定拒绝以避免自等待死锁。
+  - [x] 新增 `docs/python/CONCURRENT_EXECUTION.md`、`examples/python/m5_concurrency`
+    与 Host/便携回归, 明确“并发提交、串行隔离执行”而不宣称 true parallel CPython。
+  - [ ] 在真机先后快速启动 `first.py`/`second.py`, 核对第二项 FIFO 等待、进程代际干净
+    交接与 queued Stop 隔离; 记录精确 Host/Plugin 身份后再关闭本条。
 - [ ] [H] **异常修复通道**: 用户脚本报错场景收集 (issue 驱动), 每个真实异常配一个
   回归脚本, 修复即关闭 —— 这是本项目唯一持续增长的 "测试集"。
 
@@ -653,7 +665,7 @@
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
 | 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (自动化核心已完成; 路径 B/C 均已评估且不接纳) |
-| 0.5.x | M5 长任务/并发/预热 | 进行中 (长任务源码完成, 真机冒烟待执行) |
+| 0.5.x | M5 长任务/并发/预热 | 进行中 (长任务与并发源码完成, 双项真机冒烟待执行; 预热待评估) |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 
 ### 轻量验证约定 (代替证据等级流程)

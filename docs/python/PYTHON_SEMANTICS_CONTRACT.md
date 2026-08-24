@@ -79,6 +79,17 @@ cancellation contract. This mode removes only the elapsed execution deadline:
 output, workspace, result, artifact, input and Host capability quotas still
 apply, and the Provider still admits only one active session.
 
+The paired M5 Host accepts concurrent launch submissions through one fair,
+process-local FIFO queue before source/workspace snapshot creation or Provider
+binding. One execution owns the slot and at most 32 pending executions wait;
+later submissions fail with stable `PYTHON_RUNTIME_BUSY`. Queue waiting does not
+consume the Provider execution timeout, queued Stop is interruptible, and a
+dispatched owner completes a bounded process-generation handoff before the next
+waiter enters. The Provider remains single-session with no Provider-side queue,
+so this is serialized admission rather than parallel CPython execution. See
+[`CONCURRENT_EXECUTION.md`](CONCURRENT_EXECUTION.md); its offline checks do not
+claim an Android device smoke.
+
 The complete selection, wire compatibility, lease and Android foreground
 lifetime contract is in
 [`LONG_RUNNING_EXECUTION.md`](LONG_RUNNING_EXECUTION.md). Its portable and JVM
@@ -480,9 +491,10 @@ resolver. It returns a strict `autojs6-python-engine-launch-v1` handle immediate
 after a non-Python child is submitted; the handle is not a completion result and
 does not grant control of the child.
 
-The provider still admits only one active Python session. Selecting a Python
-target from `engines.run` therefore raises `HostCapabilityError` with stable code
-`NESTED_PYTHON_NOT_ALLOWED`. One parent execution may successfully submit at
+The provider still admits only one active Python session. Independent Host
+launches may wait in the M5 FIFO queue, but selecting a Python target from
+`engines.run` would queue behind its own active caller and deadlock. It therefore
+raises `HostCapabilityError` with stable code `NESTED_PYTHON_NOT_ALLOWED`. One parent execution may successfully submit at
 most 16 child scripts; failed launch attempts do not consume the success quota,
 and the existing 1024-call quota remains independent. `engines.stop_self()`
 queues Host `forceStop`, which uses the existing process-restart-only cancellation

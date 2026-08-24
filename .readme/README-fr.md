@@ -53,6 +53,7 @@ Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte t
 - Définir un résultat JSON strict explicite de 64 KiB au maximum et transférer jusqu'à 16 artefacts facultatifs sous les limites de chemin, taille et SHA-256 du protocole 1.4; ne jamais déduire un résultat de stdout.
 - Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible aux autorisations, `files.read_text/write_text/exists/is_file/is_dir/list` borné, `dialogs.alert/confirm/prompt/select` réservé au premier plan, `engines.current/run/stop_self`, `automator.click/long_click/press/swipe/back/home` borné, `selector.snapshot/find/click/set_text` borné, `images.capture_screen`, `images.find_color`, `images.find_image` et `ocr.recognize` via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
 - Le protocole 1.6 ajoute les projets explicites `executionMode=long-running` sans échéance d'exécution, avec notification Host de premier plan, action Stop et heartbeats Provider ordonnés toutes les 15 s; les surfaces d'arrière-plan échouent de façon fermée sans rétrogradation.
+- Le Host associé admet les lancements Python concurrents par une FIFO équitable avant la découverte du Provider : un propriétaire actif et au plus 32 attentes; l'arrêt en file est interruptible et une génération dispatchée attend jusqu'à 3 s la sortie Binder avant la relève, tandis que le Provider reste mono-session sans file.
 - Signaler `SystemExit`, les erreurs de syntaxe et les exceptions avec une traceback structurée bornée.
 - Autoriser une session active par processus sans file d'attente côté fournisseur.
 - Ne pas redémarrer l'hôte: la prochaine nouvelle exécution après installation ou réactivation redécouvre et épingle le provider; une mort Binder en cours termine cette exécution sans jamais la rejouer.
@@ -104,8 +105,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.5.0-alpha.1
-release state: 0.5.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; Host and Plugin offline JVM plus portable source gates passed, but no M5 Android device smoke has run and no new device claim is made; concurrency, prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-alpha.2
+release state: 0.5.0-alpha.2 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; the paired Host now admits concurrent Python launches through one fair FIFO owner plus 32 bounded waiters before Provider binding, supports interruptible queued Stop, and waits up to 3 seconds for dispatched process-generation retirement before handoff while the Plugin remains single-session with no provider queue; Host and Plugin offline JVM plus portable source gates passed, but no M5 long-running or concurrency Android device smoke has run and no new device claim is made; prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -168,6 +169,14 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 
 ******
 
+# v0.5.0-alpha.2
+
+###### 2026/08/24
+
+* `Note` Deuxième candidat alpha M5 current-tree ; la FIFO Host et les portes JVM/portables hors ligne passent, sans revendiquer de smoke Android concurrent, CPython réellement parallèle, préchauffage, publication ni release
+* `Fonction` Admettre les lancements Python concurrents par une FIFO Host équitable avec un propriétaire actif et au plus 32 attentes avant la découverte du Provider ; Stop en file est interruptible sans liaison Plugin, consommation du timeout ni notification long-task anticipée
+* `Amélioration` Conserver la liaison Provider jusqu'à 3 secondes après la fermeture d'une session dispatchée pour confirmer la retraite de génération avant la relève FIFO ; le protocole 1.6, les trois AAR et la limite Plugin mono-session sans file restent inchangés
+
 # v0.5.0-alpha.1
 
 ###### 2026/08/24
@@ -183,13 +192,6 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 * `Note` Neuvième candidat alpha de l'arbre courant; clore M4 Path C native avec `NOT_ADMITTED`, conserver le runtime `stdlib-only`, n'ajouter aucun payload Pillow, NumPy, OpenCV ou native transitif et ne faire aucune nouvelle déclaration d'acceptation sur appareil
 * `Amélioration` ADR 0004 consigne les debug builds offline dual ABI avec `--no-index --find-links`: Pillow 11.0.0 ajoute 2,054,483 bytes à chaque APK, NumPy 1.26.2 ajoute 21,931,164 bytes, et les six sorties passent `zipalign -c -P 16 4`
 * `Amélioration` L'audit ELF NDK 29 de la clôture complète refuse FreeType à `0x1000` sur les deux ABI et OpenBLAS/libgfortran à `0x1000` sur x86_64; OpenCV n'a pas de wheel Android `cp313` officiel, et la réouverture exige des wheels NDK r28+ reproductibles et une acceptation publique 16 KiB
-
-# v0.4.0-alpha.8
-
-###### 2026/08/24
-
-* `Note` Huitième candidat alpha de l'arbre courant; clore l'évaluation des paquets intégrés M4 Path B avec `NOT_ADMITTED`, conserver le runtime `stdlib-only`, n'ajouter ni `requests` ni aucune dépendance candidate et ne faire aucune nouvelle déclaration d'acceptation sur appareil
-* `Amélioration` ADR 0003 fixe les bases stdlib-only debug APK à 23,709,688 bytes pour arm64-v8a, 23,726,048 bytes pour x86_64 et 34,622,039 bytes pour universal; aucun faux écart de taille sans wheelhouse hors ligne audité, et toute admission future exige Gradle `--offline`, `--no-index`, `--require-hashes`, les verrous licence/hash, les écarts des trois APK et une acceptation publique dual ABI
 
 ##### Autres versions
 

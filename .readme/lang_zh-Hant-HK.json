@@ -17,6 +17,7 @@
     "透過協議 1.4 明確設定最大 {{ max_structured_json_bytes }} 的嚴格 JSON 結果, 並傳送最多 {{ max_output_artifacts }} 個具有路徑、大小及 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.",
     "透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、僅限前台的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界 `automator.click/long_click/press/swipe/back/home`、有界 `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color`、`images.find_image` 及 `ocr.recognize`, 終態後自動撤銷.",
     "協議 1.6 透過 `executionMode=long-running` 為明確前台項目加入無執行 deadline 的長任務模式, 由 Host 前台通知及 Stop action 維持生命週期, Provider 每 {{ long_running_heartbeat_interval }} 發佈有序心跳; 後台入口會穩定拒絕且絕不降級.",
+    "配對 Host 在 Provider 探索前以公平 FIFO 准入並發 Python 啟動: 1 個 active owner 及最多 {{ max_host_python_pending_executions }} 個 waiter; queued Stop 可中斷, 已 dispatch 代際最多等待 {{ python_process_retirement_wait }} Binder 退出後交接, Provider 仍維持單會話且無隊列.",
     "傳回 `SystemExit`, 語法錯誤和執行階段例外, 包括有界結構化 traceback.",
     "同一執行環境程序只允許一個使用中工作階段, provider 端不排隊.",
     "宿主毋須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播."

@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.2
+
+###### 2026/08/24
+
+* `提示` 第二个 M5 current-tree alpha 候选版; Host FIFO 并发准入源码与离线 JVM/便携门禁已通过, 但尚未执行 Android 并发冒烟, 不声明 true parallel CPython、预热、发布或 release 完成
+* `新增` 在 Provider 发现前以公平 Host FIFO 接纳并发 Python 启动: 1 个 active owner 加最多 32 个 waiter; queued Stop 可中断, 不绑定插件、不消耗请求 timeout, 也不提前创建长任务前台通知
+* `优化` 已 dispatch 会话 close 后最多保留 Provider binding 3 秒, 确认进程代际退休再进行 FIFO 交接; 协议 1.6、三件 AAR 以及 Plugin 单会话/无 provider 队列边界均保持不变
+
 # v0.5.0-alpha.1
 
 ###### 2026/08/24

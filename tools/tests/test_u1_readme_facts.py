@@ -24,12 +24,21 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_current_protocol_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0-alpha.1", common["release_target"])
+        self.assertEqual("0.5.0-alpha.2", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("protocol 1.6", common["release_state"])
         self.assertIn("foreground-only long-running", common["release_state"])
         self.assertIn("15-second Provider heartbeats", common["release_state"])
-        self.assertIn("no M5 Android device smoke", common["release_state"])
+        self.assertIn("concurrent Python launches", common["release_state"])
+        self.assertIn("fair FIFO", common["release_state"])
+        self.assertIn("32 bounded waiters", common["release_state"])
+        self.assertIn("3 seconds", common["release_state"])
+        self.assertIn("single-session", common["release_state"])
+        self.assertIn("no provider queue", common["release_state"])
+        self.assertIn(
+            "no M5 long-running or concurrency Android device smoke",
+            common["release_state"],
+        )
         self.assertIn("bounded automator", common["release_state"])
         self.assertIn("selector/UI-tree", common["release_state"])
         self.assertIn("screen capture", common["release_state"])
@@ -63,6 +72,8 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("15 s", common["long_running_heartbeat_interval"])
         self.assertEqual("45 s", common["long_running_heartbeat_lease"])
         self.assertEqual("2 min", common["long_running_start_lease"])
+        self.assertEqual("32", common["max_host_python_pending_executions"])
+        self.assertEqual("3 s", common["python_process_retirement_wait"])
         self.assertEqual("1024", common["max_host_capability_calls"])
         self.assertEqual("64 KiB", common["max_host_capability_message_bytes"])
         self.assertEqual("32 KiB", common["max_host_capability_text_bytes"])
@@ -157,6 +168,17 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "{{ long_running_heartbeat_interval }}", long_running_features[0]
                 )
                 self.assertIn("Stop", long_running_features[0])
+                concurrency_features = [
+                    item
+                    for item in source["features"]
+                    if "{{ max_host_python_pending_executions }}" in item
+                ]
+                self.assertEqual(1, len(concurrency_features))
+                self.assertIn("FIFO", concurrency_features[0])
+                self.assertIn(
+                    "{{ python_process_retirement_wait }}", concurrency_features[0]
+                )
+                self.assertIn("Provider", concurrency_features[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
                 self.assertIn("1.3", source["p_plugin_scope"])
                 self.assertIn("1.4", source["p_plugin_scope"])
@@ -355,6 +377,17 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     self.assertIn(marker, long_running["feature"][0])
                 for marker in ("15 s", "2 min", "45 s", "1.0-1.5"):
                     self.assertIn(marker, long_running["improvement"][0])
+
+                concurrency = source["$data"]["v0.5.0-alpha.2"]
+                self.assertEqual("2026/08/24", concurrency["released_date"])
+                self.assertEqual(1, len(concurrency["hint"]))
+                self.assertEqual(1, len(concurrency["feature"]))
+                self.assertEqual(1, len(concurrency["improvement"]))
+                self.assertIn("M5", concurrency["hint"][0])
+                for marker in ("Host", "FIFO", "32"):
+                    self.assertIn(marker, concurrency["feature"][0])
+                for marker in ("3", "1.6", "AAR", "Plugin"):
+                    self.assertIn(marker, concurrency["improvement"][0])
 
                 native_policy = source["$data"]["v0.4.0-alpha.9"]
                 self.assertEqual("2026/08/24", native_policy["released_date"])

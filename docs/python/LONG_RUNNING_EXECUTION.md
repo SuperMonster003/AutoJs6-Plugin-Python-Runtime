@@ -26,8 +26,10 @@ a manifest which contains both instead of silently ignoring one. Standalone
 The long-running mode has no elapsed execution deadline. All existing resource
 ceilings still apply, including output bytes/chunks, workspace size, interactive
 input, structured results, artifacts, and Host capability call quotas. It also
-retains the current single-active-session limit; protocol 1.6 is not concurrent
-execution.
+retains the Provider's single-active-session limit; protocol 1.6 itself is not
+concurrent execution. A paired M5 Host places independent submissions in a
+bounded Host FIFO queue before it creates a long-running foreground controller,
+as specified by [`CONCURRENT_EXECUTION.md`](CONCURRENT_EXECUTION.md).
 
 ## Foreground-only authorization
 

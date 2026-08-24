@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.2
+
+###### 2026/08/24
+
+* `Hint` Second M5 current-tree alpha candidate; Host FIFO concurrency source and offline JVM/portable gates pass, but no Android concurrency smoke, true parallel CPython, prewarm, publication, or release claim is made
+* `Feature` Admit concurrent Python launches through one fair Host FIFO owner plus at most 32 waiters before Provider discovery; queued Stop is interruptible and does not bind the Plugin, consume request timeout, or create a long-task foreground notification
+* `Improvement` Keep a dispatched Provider binding for up to 3 seconds after session close to confirm process-generation retirement before FIFO handoff; protocol 1.6, all three AARs, and the Plugin single-session/no-provider-queue boundary remain unchanged
+
 # v0.5.0-alpha.1
 
 ###### 2026/08/24

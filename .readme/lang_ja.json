@@ -17,6 +17,7 @@
     "protocol 1.4 で最大 {{ max_structured_json_bytes }} の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 {{ max_output_artifacts }} 個転送します. stdout から result を推測しません.",
     "実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list`、foreground 限定の `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界な `automator.click/long_click/press/swipe/back/home`、有界な `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color`、`images.find_image`、`ocr.recognize` をリアルタイムに呼び出し、terminal 時に無効化します.",
     "プロトコル 1.6 は明示的な `executionMode=long-running` project に実行 deadline のない mode、Host foreground 通知、Stop action、{{ long_running_heartbeat_interval }} ごとの順序付き Provider heartbeat を追加します. background 起動 surface は downgrade せず fail closed します.",
+    "対応 Host は Provider discovery 前の公平な FIFO で同時 Python launch を受け付けます: active owner 1 件と最大 {{ max_host_python_pending_executions }} waiter、queued Stop は interrupt 可能で、dispatch 済み generation は handoff 前に最大 {{ python_process_retirement_wait }} Binder exit を待ちます。Provider は queue なしの single-session のままです.",
     "`SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.",
     "プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.",
     "ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません."

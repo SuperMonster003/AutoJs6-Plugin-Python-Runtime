@@ -17,6 +17,7 @@
     "通过协议 1.4 显式设置最大 {{ max_structured_json_bytes }} 的严格 JSON 结果, 并传送最多 {{ max_output_artifacts }} 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.",
     "通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、权限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、仅限前台的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界 `automator.click/long_click/press/swipe/back/home`、有界 `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color`、`images.find_image` 与 `ocr.recognize`, 终态后自动撤销.",
     "协议 1.6 通过 `executionMode=long-running` 为显式前台项目增加无执行 deadline 的长任务档位, 由 Host 前台通知与 Stop action 持有生命周期, Provider 每 {{ long_running_heartbeat_interval }} 发布有序心跳; 后台入口稳定拒绝且绝不降级.",
+    "配对 Host 在 Provider 发现前以公平 FIFO 准入并发 Python 启动: 1 个 active owner 与最多 {{ max_host_python_pending_executions }} 个 waiter; queued Stop 可中断, 已 dispatch 代际最多等待 {{ python_process_retirement_wait }} Binder 退出后交接, Provider 仍保持单会话且无队列.",
     "返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.",
     "同一运行时进程只允许一个活动会话, provider 侧不排队.",
     "Host 无需重启; 安装或重新启用插件后下一次新执行会重新发现并 pin provider 身份, 在途 Binder death 会终止该执行且绝不自动重放."

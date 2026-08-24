@@ -5,6 +5,18 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v0.5.0-alpha.2": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "2 番目の M5 current-tree alpha candidate。Host FIFO と offline JVM/portable gate は通過済みですが、Android concurrency smoke、true parallel CPython、prewarm、publication、release は主張しません"
+      ],
+      "feature": [
+        "Provider discovery 前に active owner 1 件と最大 32 waiter の公平な Host FIFO で同時 Python launch を受け付けます。queued Stop は interrupt 可能で、Plugin binding、request timeout 消費、long-task 通知の先行作成を行いません"
+      ],
+      "improvement": [
+        "dispatch 済み session close 後に Provider binding を最大 3 秒保持し、process generation retirement を確認してから FIFO handoff します。protocol 1.6、3 AAR、Plugin single-session/no-provider-queue 境界は変更しません"
+      ]
+    },
     "v0.5.0-alpha.1": {
       "released_date": "2026/08/24",
       "hint": [

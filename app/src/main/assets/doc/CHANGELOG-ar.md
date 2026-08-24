@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.2
+
+###### 2026/08/24
+
+* `ملاحظة` مرشح alpha ثانٍ من M5 current-tree؛ تنجح FIFO في Host وبوابات JVM/portable دون اتصال، من دون ادعاء Android concurrency smoke أو CPython متوازٍ فعلي أو prewarm أو نشر أو release
+* `إضافة` قبول تشغيلات Python المتزامنة عبر FIFO عادلة في Host بمالك active واحد وحتى 32 منتظرًا قبل اكتشاف Provider؛ يمكن مقاطعة queued Stop من دون ربط Plugin أو استهلاك request timeout أو إنشاء إشعار long-task مبكرًا
+* `تحسين` الاحتفاظ بـ Provider binding حتى 3 ثوانٍ بعد إغلاق dispatched session لتأكيد retirement للجيل قبل FIFO handoff؛ يبقى البروتوكول 1.6 وملفات AAR الثلاثة وحد Plugin single-session/no-provider-queue دون تغيير
+
 # v0.5.0-alpha.1
 
 ###### 2026/08/24

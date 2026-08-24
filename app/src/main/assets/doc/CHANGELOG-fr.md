@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.2
+
+###### 2026/08/24
+
+* `Note` Deuxième candidat alpha M5 current-tree ; la FIFO Host et les portes JVM/portables hors ligne passent, sans revendiquer de smoke Android concurrent, CPython réellement parallèle, préchauffage, publication ni release
+* `Fonction` Admettre les lancements Python concurrents par une FIFO Host équitable avec un propriétaire actif et au plus 32 attentes avant la découverte du Provider ; Stop en file est interruptible sans liaison Plugin, consommation du timeout ni notification long-task anticipée
+* `Amélioration` Conserver la liaison Provider jusqu'à 3 secondes après la fermeture d'une session dispatchée pour confirmer la retraite de génération avant la relève FIFO ; le protocole 1.6, les trois AAR et la limite Plugin mono-session sans file restent inchangés
+
 # v0.5.0-alpha.1
 
 ###### 2026/08/24
