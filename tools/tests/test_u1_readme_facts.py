@@ -35,10 +35,17 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("3 seconds", common["release_state"])
         self.assertIn("single-session", common["release_state"])
         self.assertIn("no provider queue", common["release_state"])
-        self.assertIn(
-            "no M5 long-running or concurrency Android device smoke",
-            common["release_state"],
-        )
+        for marker in (
+            "QV710AF65F",
+            "Host versionCode 5276",
+            "Plugin versionCode 81",
+            "tick=70",
+            "focused long-running Android smoke passes",
+            "BUSY/SESSION_OPEN",
+            "afca7b14c",
+            "concurrency Android retest remains pending",
+        ):
+            self.assertIn(marker, common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
         self.assertIn("selector/UI-tree", common["release_state"])
         self.assertIn("screen capture", common["release_state"])
@@ -58,7 +65,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("OpenCV", common["release_state"])
         self.assertIn("16 KiB gate", common["release_state"])
         self.assertIn("no candidate dependency payload", common["release_state"])
-        self.assertIn("no new device claim", common["release_state"])
+        self.assertIn("publication, and release evidence remain outside", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
         self.assertEqual("64 MiB", common["max_workspace_archive_bytes"])
         self.assertEqual("8192", common["max_workspace_entries"])

@@ -1,9 +1,12 @@
 # Host-queued Python execution
 
-This document describes the M5 concurrent-admission behavior paired with
-AutoJs6 Host commit `b8cd0d01c`. It records a current-tree source and offline
-JVM contract. It does not claim Android device acceptance, publication, true
-parallel CPython execution, or release qualification.
+This document describes the M5 concurrent-admission behavior introduced by
+AutoJs6 Host commits `afe6f3c73` and `b8cd0d01c`, then integrated into current
+Host `master` at `afca7b14c`. It records a current-tree source and offline JVM
+contract. The first device attempt described below used an older Host build
+without that integration and therefore does not constitute Android acceptance.
+Publication, true parallel CPython execution, and release qualification are not
+claimed.
 
 ## Decision
 
@@ -70,6 +73,26 @@ rejects unsafe admission instead of running two sessions.
 - This is not simultaneous CPython execution. True parallelism would require
   separately isolated runtime processes or a future interpreter architecture,
   plus independent process-retirement ownership.
+
+## 2026-08-24 first device attempt
+
+On physical device `QV710AF65F`, the user launched `first.py` and immediately
+launched `second.py` with AutoJs6 versionCode 5276 and Python Runtime
+versionCode 81. The second launch failed at Provider session admission with
+`PYTHON_RUNTIME_BUSY: BUSY/SESSION_OPEN`.
+
+That result exactly matches the legacy Host behavior: the installed Host source
+did not contain `PythonRuntimeExecutionCoordinator`, so the second execution
+reached `PythonRuntimeClient.openSession` instead of waiting before Provider
+discovery. It is not evidence that the new FIFO admitted and then failed a
+waiter. After this diagnosis, the two queue commits were merged with the current
+Host identity-refactor tree and fast-forwarded to Host `master` at `afca7b14c`;
+the seven focused Python JVM suites and `assembleAppDebug` pass there.
+
+The Android FIFO retest remains pending. It must use a Host APK built from
+`afca7b14c` or a descendant containing `PythonRuntimeExecutionQueue`; Plugin
+versionCode 81 is sufficient because protocol 1.6, the AARs, and the Provider
+binary did not change for Host-side queuing.
 
 ## Manual smoke
 

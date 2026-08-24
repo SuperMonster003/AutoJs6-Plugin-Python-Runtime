@@ -2,8 +2,9 @@
 
 Status: implemented on the current AutoJs6 Host and Python Runtime Plugin
 source trees. Host API and focused Host/Plugin JVM tests pass offline. The
-checked-in example and portable source checks are complete; this document does
-not claim an Android device smoke, publication, or release acceptance.
+checked-in example and portable source checks are complete, and the focused
+Android device smoke described below is accepted. Publication and release
+acceptance remain outside this claim.
 
 ## User selection
 
@@ -119,6 +120,25 @@ Official Android references:
   and cancellation, timeout of a bounded session, Binder death, or a liveness
   failure is never automatically replayed.
 
+## 2026-08-24 Android device acceptance
+
+The user completed the foreground project smoke on physical device
+`QV710AF65F` with AutoJs6 versionCode 5276 and Python Runtime versionCode 81:
+
+- the first run created the foreground notification, and its Stop action
+  stopped the Python script normally;
+- the same project then started again without reinstalling or restarting the
+  Host, confirming that Stop retired the previous runtime generation and a new
+  execution could bind cleanly;
+- the second run was left running through `tick=70`. The example sleeps for
+  five seconds per tick, so this represents roughly 350 seconds of continuous
+  execution, well beyond the original 60-second acceptance threshold.
+
+This closes the focused M5 long-running Android smoke. The supplied identity is
+the exact pair of installed version codes; no source commit, publication,
+release artifact, scheduled/background authorization, or broader device matrix
+is inferred from it.
+
 ## Manual smoke
 
 Use [`examples/python/m5_long_running`](../../examples/python/m5_long_running).
@@ -129,5 +149,5 @@ Finally run an ordinary bounded Python script to confirm that cancellation
 retired and rebound the Plugin runtime cleanly.
 
 Do not run this smoke through a scheduled task or Intent: rejection there is the
-intended security behavior. Record the exact Host/Plugin APK identities and the
-device API/ABI/page-size only when promoting the remaining Roadmap device item.
+intended security behavior. Future device-matrix or release checks should still
+record source commits, APK hashes, API/ABI, and page size independently.

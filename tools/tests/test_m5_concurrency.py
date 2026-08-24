@@ -42,14 +42,16 @@ class M5ConcurrencyTest(unittest.TestCase):
             "three-second handoff",
             "NESTED_PYTHON_NOT_ALLOWED",
             "not simultaneous CPython execution",
-            "does not claim Android device acceptance",
+            "BUSY/SESSION_OPEN",
+            "afca7b14c",
+            "Android FIFO retest remains pending",
         ):
             self.assertIn(marker, guide)
         for marker in ("32 pending", "FIFO", "process-generation handoff"):
             self.assertIn(marker, semantics)
         self.assertIn("Host FIFO queue", long_running)
         self.assertIn("并发准入", roadmap)
-        self.assertIn("真机双脚本 FIFO 冒烟", roadmap)
+        self.assertIn("并发首次尝试未形成 FIFO 验收", roadmap)
 
 
 if __name__ == "__main__":

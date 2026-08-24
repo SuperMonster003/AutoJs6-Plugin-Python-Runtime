@@ -71,7 +71,7 @@ class M5LongRunningTest(unittest.TestCase):
         self.assertIn("time.sleep(5)", source)
         self.assertNotIn("import autojs6", source)
 
-    def test_contract_documents_authorization_liveness_and_non_claims(self) -> None:
+    def test_contract_documents_authorization_liveness_and_device_acceptance(self) -> None:
         guide = GUIDE.read_text(encoding="utf-8")
         semantics = SEMANTICS.read_text(encoding="utf-8")
         roadmap = ROADMAP.read_text(encoding="utf-8")
@@ -86,7 +86,12 @@ class M5LongRunningTest(unittest.TestCase):
             "2 minutes",
             "Stop action",
             "process-restart cancellation",
-            "does not claim an Android device smoke",
+            "QV710AF65F",
+            "versionCode 5276",
+            "versionCode 81",
+            "tick=70",
+            "roughly 350 seconds",
+            "closes the focused M5 long-running Android smoke",
         ):
             self.assertIn(marker, normalized_guide)
         for marker in (
@@ -97,7 +102,8 @@ class M5LongRunningTest(unittest.TestCase):
         ):
             self.assertIn(marker, semantics)
         self.assertIn("长任务模式", roadmap)
-        self.assertIn("真机冒烟", roadmap)
+        self.assertIn("**长任务 PASS**", roadmap)
+        self.assertIn("Host versionCode 5276 / Plugin versionCode 81", roadmap)
 
 
 if __name__ == "__main__":
