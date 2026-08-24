@@ -16,6 +16,7 @@
     "スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.",
     "protocol 1.4 で最大 {{ max_structured_json_bytes }} の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 {{ max_output_artifacts }} 個転送します. stdout から result を推測しません.",
     "実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list`、foreground 限定の `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界な `automator.click/long_click/press/swipe/back/home`、有界な `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color`、`images.find_image`、`ocr.recognize` をリアルタイムに呼び出し、terminal 時に無効化します.",
+    "プロトコル 1.6 は明示的な `executionMode=long-running` project に実行 deadline のない mode、Host foreground 通知、Stop action、{{ long_running_heartbeat_interval }} ごとの順序付き Provider heartbeat を追加します. background 起動 surface は downgrade せず fail closed します.",
     "`SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.",
     "プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.",
     "ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません."
@@ -33,7 +34,7 @@
   "h3_security_limits": "動作制限",
   "security_limits": [
     "ソースは {{ max_source_bytes }}, 総出力は {{ max_output_bytes }}, 1 chunk は {{ max_output_chunk_bytes }}, chunk 数は {{ max_output_chunks }} が上限です.",
-    "timeout は最大 {{ max_timeout }}, 同時セッションは 1, provider キューはありません.",
+    "有界 request の timeout は最大 {{ max_timeout }} です. 明示的 long-running project に実行 deadline はありませんが, Host foreground lifetime、{{ long_running_start_lease }} の start lease、{{ long_running_heartbeat_lease }} の heartbeat lease が必要です. active session は 1 つのままで provider queue はありません.",
     "Project workspace は圧縮後 {{ max_workspace_archive_bytes }}, file entry {{ max_workspace_entries }} 件, 展開後 {{ max_workspace_uncompressed_bytes }} が上限です. Dispatch 前の Provider 選択では snapshot の実際の 3 次元要件をすべて満たす必要があります.",
     "Binder 受信側の完全な PFD を所有し, 終端または close 時に閉じます.",
     "出力は実行中に credit ごとに chunk 単位で送信します. credit 枯渇時はスクリプトを停止し, 受理済み出力は唯一の terminal より前に置かれ, terminal 後の出力は禁止されます.",

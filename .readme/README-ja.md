@@ -52,6 +52,7 @@ Python Runtime は Python プロトコル V1 の独立 provider です. ホス�
 - スクリプト実行中に stdout/stderr の元の順序を保って上限付き chunk を credit で送信し, credit 枯渇時は実行に backpressure をかけます.
 - protocol 1.4 で最大 64 KiB の明示的な厳密 JSON result を設定し, path, size, SHA-256 上限付きの任意 output artifact を最大 16 個転送します. stdout から result を推測しません.
 - 実行単位の pure-data protocol 1.5 broker を通して `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、権限を考慮した `notice`、有界な `files.read_text/write_text/exists/is_file/is_dir/list`、foreground 限定の `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界な `automator.click/long_click/press/swipe/back/home`、有界な `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color`、`images.find_image`、`ocr.recognize` をリアルタイムに呼び出し、terminal 時に無効化します.
+- プロトコル 1.6 は明示的な `executionMode=long-running` project に実行 deadline のない mode、Host foreground 通知、Stop action、15 s ごとの順序付き Provider heartbeat を追加します. background 起動 surface は downgrade せず fail closed します.
 - `SystemExit`, 構文エラー, 実行時例外を上限付き構造化 traceback とともに返します.
 - プロセスごとに 1 セッションのみ許可し, provider 側ではキューを持ちません.
 - ホスト再起動は不要です. インストールまたは再有効化後の次の新規実行で provider を再検出して pin し, 実行中の Binder death はその実行を終了して自動再実行しません.
@@ -89,7 +90,7 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.5
+protocol: 1.0-1.6
 ```
 
 独立 SOURCE, 任意の上限付き workspace archive, 最大 1 MiB の有限な事前供給 stdin snapshot, プロトコル 1.1 の読み取り専用ホスト能力 snapshot を受け付けます. プロトコル 1.2 は許可済み project に明示的な file/module entry negotiation を追加します. プロトコル 1.3 は snapshot EOF 後の組み込み `input()` に, Host 所有かつ foreground 限定の prompt/reply を追加し, 標準ライブラリの `getpass.getpass()` は非表示入力を使用します. プロトコル 1.4 は明示的な厳密 JSON と任意の SHA-256 manifest output artifact を追加し, stdout は診断のままで result として解析しません. プロトコル 1.5 は 1 回の実行、plugin UID、call 順序、有限 quota に結び付く pure-data Host broker を追加します. Host dialog にも live Activity に裏付けられた foreground 認可が必要で, background 起動は UI を開かず `INTERACTIVE_NOT_ALLOWED` を返します. 直接の `sys.stdin` は有限のままで, background 起動は入力 UI を開かず, user script に Context、raw Binder、Host runtime object、callback sink は渡しません.
@@ -103,8 +104,8 @@ protocol: 1.0-1.5
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.4.0-alpha.9
-release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-alpha.1
+release state: 0.5.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; Host and Plugin offline JVM plus portable source gates passed, but no M5 Android device smoke has run and no new device claim is made; concurrency, prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -126,7 +127,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 ******
 
 - ソースは 4 MiB, 総出力は 16 MiB, 1 chunk は 16 KiB, chunk 数は 16384 が上限です.
-- timeout は最大 30 min, 同時セッションは 1, provider キューはありません.
+- 有界 request の timeout は最大 30 min です. 明示的 long-running project に実行 deadline はありませんが, Host foreground lifetime、2 min の start lease、45 s の heartbeat lease が必要です. active session は 1 つのままで provider queue はありません.
 - Project workspace は圧縮後 64 MiB, file entry 8192 件, 展開後 128 MiB が上限です. Dispatch 前の Provider 選択では snapshot の実際の 3 次元要件をすべて満たす必要があります.
 - Binder 受信側の完全な PFD を所有し, 終端または close 時に閉じます.
 - 出力は実行中に credit ごとに chunk 単位で送信します. credit 枯渇時はスクリプトを停止し, 受理済み出力は唯一の terminal より前に置かれ, terminal 後の出力は禁止されます.
@@ -167,6 +168,14 @@ M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMI
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `注記` 最初の M5 current-tree alpha 候補です. protocol 1.6 foreground long-running source と offline Host/Plugin JVM・portable gate は成功しましたが, M5 Android smoke は未実行で publication、concurrency、process prewarm は主張しません
+* `追加` project 単位の `executionMode=long-running` を追加し実行 deadline をなくします. Host `specialUse` foreground service、常駐 notification、Stop action が lifetime を所有し, schedule、background/Intent、developer launch は downgrade せず拒否します
+* `改善` Provider は 15 s ごとに順序付き heartbeat を送信し, Host は start 2 min、heartbeat 45 s、独立 foreground-service lease を強制します. liveness loss と Stop は process-restart cancellation で fail closed し, bounded protocol 1.0-1.5 は互換のままです
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24
@@ -181,15 +190,6 @@ M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMI
 
 * `注記` 8 番目の current-tree alpha 候補. M4 Path B build-time package 評価を `NOT_ADMITTED` で完了し、組み込み runtime は `stdlib-only` を維持します. `requests` を含む候補依存関係は追加せず、新しい device acceptance も主張しません
 * `改善` ADR 0003 は stdlib-only debug APK baseline を arm64-v8a 23,709,688 bytes、x86_64 23,726,048 bytes、universal 34,622,039 bytes と記録します. 監査済み offline wheelhouse なしの虚偽の差分を避け、将来の採用には Gradle `--offline`、`--no-index`、`--require-hashes`、license/hash lock、3 APK の size delta と dual ABI public-engine acceptance を要求します
-
-# v0.4.0-alpha.7
-
-###### 2026/08/24
-
-* `注記` M3 自動化の第 7 current-tree alpha 候補。実 Settings の完全ワークフローは API 37 エミュレーターで合格し、公開、M4 パス B/C、完全な端末マトリクスは本宣言の対象外です
-* `追加` `app.launch`、`selector.find`、`selector.click`、`images.capture_screen` を使い、PNG 構造と対象コントロールの包含を厳密に検証する有界な実 Settings ワークフロー `m3_complete_automation` を追加
-* `修正` Python シリアライズ前に `right < left` または `bottom < top` のアクセシビリティ境界をアンカー保持の zero-area 軸へ正規化し、正確な selector クエリで無関係なツリーノードを隔離
-* `改善` エクスポートされた `RunIntentActivity` 公開プロジェクト経路を API 37 エミュレーターで検証し、1080x2424 PNG と SHA-256 検証済み成果物を確認後、アクセシビリティを 0/null に戻して正確なテスト staging をすべて削除
 
 ##### その他のバージョン
 

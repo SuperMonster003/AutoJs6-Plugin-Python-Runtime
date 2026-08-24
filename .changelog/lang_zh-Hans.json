@@ -5,6 +5,18 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v0.5.0-alpha.1": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "首个 M5 current-tree alpha 候选版; 协议 1.6 前台长任务源码与 Host/Plugin 离线 JVM、便携门禁已通过, 但尚未执行 M5 真机冒烟, 不声明发布、并发或进程预热完成"
+      ],
+      "feature": [
+        "新增项目级 `executionMode=long-running`: 移除执行 deadline, 由 Host `specialUse` 前台服务、常驻通知与 Stop action 持有生命周期; 定时任务、后台/Intent/开发者入口稳定拒绝且不降级"
+      ],
+      "improvement": [
+        "Provider 每 15 s 发布有序心跳, Host 强制 2 min 启动租约、45 s 心跳租约与独立前台服务租约; 丢失存活性和手动停止均 fail closed 并沿用进程重启取消, 有界协议 1.0-1.5 保持兼容"
+      ]
+    },
     "v0.4.0-alpha.9": {
       "released_date": "2026/08/24",
       "hint": [

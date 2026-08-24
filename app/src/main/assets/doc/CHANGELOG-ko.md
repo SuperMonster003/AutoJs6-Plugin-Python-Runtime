@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `안내` 첫 M5 current-tree alpha 후보입니다. 프로토콜 1.6 foreground long-running source와 offline Host/Plugin JVM 및 portable gate는 통과했지만 M5 Android smoke는 실행하지 않았으며 publication, concurrency, process prewarm을 주장하지 않습니다
+* `추가` project 단위 `executionMode=long-running`을 추가하여 실행 deadline을 없애고 Host `specialUse` foreground service, 지속 알림 및 Stop action이 lifetime을 소유합니다. schedule, background/Intent 및 developer launch는 downgrade 없이 거부됩니다
+* `개선` Provider가 15 s마다 순서 있는 heartbeat를 보내고 Host가 start 2 min, heartbeat 45 s 및 독립 foreground-service lease를 강제합니다. liveness loss와 Stop은 process-restart cancellation으로 fail closed하며 bounded protocol 1.0-1.5는 호환됩니다
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24

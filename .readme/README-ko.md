@@ -52,6 +52,7 @@ Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트�
 - 스크립트 실행 중 stdout/stderr의 원래 순서대로 제한된 chunk를 credit으로 전달하며, credit이 소진되면 실행에 backpressure를 적용합니다.
 - 프로토콜 1.4에서 최대 64 KiB의 명시적 엄격 JSON 결과를 설정하고 path, size 및 SHA-256 제한이 있는 선택적 output artifact를 최대 16개 전달하며 stdout에서 결과를 추론하지 않습니다.
 - 실행 범위 pure-data 프로토콜 1.5 broker를 통해 `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, 권한 인식 `notice`, 제한된 `files.read_text/write_text/exists/is_file/is_dir/list`, foreground 전용 `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, 제한된 `automator.click/long_click/press/swipe/back/home`, 제한된 `selector.snapshot/find/click/set_text`, `images.capture_screen`, `images.find_color`, `images.find_image` 및 `ocr.recognize`를 실시간 호출하고 terminal에서 폐기합니다.
+- 프로토콜 1.6은 명시적 `executionMode=long-running` project에 실행 deadline 없는 mode, Host foreground 알림, Stop action, 15 s 간격의 순서 있는 Provider heartbeat를 추가합니다. background 실행 surface는 downgrade 없이 fail closed합니다.
 - `SystemExit`, 구문 오류 및 런타임 예외를 제한된 구조화 traceback과 함께 반환합니다.
 - 프로세스마다 활성 세션 하나만 허용하며 provider 큐를 두지 않습니다.
 - 호스트 재시작이 필요 없습니다. 설치 또는 재활성화 후 다음 새 실행이 provider를 다시 검색하고 pin하며, 실행 중 Binder death는 해당 실행을 종료하고 자동 재실행하지 않습니다.
@@ -89,7 +90,7 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.5
+protocol: 1.0-1.6
 ```
 
 독립 SOURCE, 선택적인 제한 workspace archive, 최대 1 MiB의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. 프로토콜 1.2는 승인된 project에 명시적인 file/module entry negotiation을 추가합니다. 프로토콜 1.3은 snapshot EOF 뒤 내장 `input()`에 Host 소유의 foreground 전용 prompt/reply를 추가하고 표준 라이브러리 `getpass.getpass()`는 숨김 입력을 사용합니다. 프로토콜 1.4는 명시적 엄격 JSON과 선택적 SHA-256 manifest output artifact를 추가하며 stdout은 진단 텍스트로 유지되고 결과로 분석되지 않습니다. 프로토콜 1.5는 단일 실행, plugin UID, call 순서 및 유한 quota에 묶인 pure-data Host broker를 추가합니다. Host dialog도 live Activity 기반 foreground 승인이 필요하며 background 실행은 UI를 열지 않고 `INTERACTIVE_NOT_ALLOWED`를 반환합니다. 직접 `sys.stdin`은 계속 유한하며 background 실행은 입력 UI를 열지 않고 user script에 Context, raw Binder, Host runtime 객체 또는 callback sink를 제공하지 않습니다.
@@ -103,8 +104,8 @@ protocol: 1.0-1.5
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.4.0-alpha.9
-release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-alpha.1
+release state: 0.5.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; Host and Plugin offline JVM plus portable source gates passed, but no M5 Android device smoke has run and no new device claim is made; concurrency, prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -126,7 +127,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 ******
 
 - 소스는 4 MiB, 전체 출력은 16 MiB, chunk는 16 KiB, 개수는 16384로 제한합니다.
-- timeout은 최대 30 min, 활성 세션은 하나이며 provider 큐가 없습니다.
+- 제한 실행 timeout은 최대 30 min입니다. 명시적 long-running project에는 실행 deadline이 없지만 Host foreground lifetime, 2 min start lease 및 45 s heartbeat lease가 필요합니다. active session은 여전히 하나이며 provider queue는 없습니다.
 - Project workspace는 압축 후 64 MiB, file entry 8192개, 추출 후 128 MiB로 제한되며 dispatch 전에 Provider 선택이 snapshot의 실제 3차원 요구량을 모두 충족해야 합니다.
 - Binder 수신 측의 완전한 PFD 소유권을 채택하고 종료 또는 close 시 닫습니다.
 - 출력은 실행 중 credit에 따라 chunk 단위로 전달됩니다. credit 소진 시 스크립트가 일시 중지되고, 수락된 출력은 유일한 terminal보다 먼저 전달되며 terminal 이후 출력은 금지됩니다.
@@ -167,6 +168,14 @@ M4 Path A가 완료되었습니다. M4 Paths B/C 평가는 모두 `NOT_ADMITTED`
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `안내` 첫 M5 current-tree alpha 후보입니다. 프로토콜 1.6 foreground long-running source와 offline Host/Plugin JVM 및 portable gate는 통과했지만 M5 Android smoke는 실행하지 않았으며 publication, concurrency, process prewarm을 주장하지 않습니다
+* `추가` project 단위 `executionMode=long-running`을 추가하여 실행 deadline을 없애고 Host `specialUse` foreground service, 지속 알림 및 Stop action이 lifetime을 소유합니다. schedule, background/Intent 및 developer launch는 downgrade 없이 거부됩니다
+* `개선` Provider가 15 s마다 순서 있는 heartbeat를 보내고 Host가 start 2 min, heartbeat 45 s 및 독립 foreground-service lease를 강제합니다. liveness loss와 Stop은 process-restart cancellation으로 fail closed하며 bounded protocol 1.0-1.5는 호환됩니다
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24
@@ -181,15 +190,6 @@ M4 Path A가 완료되었습니다. M4 Paths B/C 평가는 모두 `NOT_ADMITTED`
 
 * `안내` 여덟 번째 current-tree alpha 후보입니다. M4 Path B build-time package 평가를 `NOT_ADMITTED`로 완료하고 내장 runtime을 `stdlib-only`로 유지하며 `requests`를 포함한 후보 의존성을 추가하지 않고 새로운 device acceptance도 주장하지 않습니다
 * `개선` ADR 0003은 stdlib-only debug APK 기준을 arm64-v8a 23,709,688 bytes, x86_64 23,726,048 bytes, universal 34,622,039 bytes로 기록합니다. 감사된 offline wheelhouse 없이 거짓 size delta를 보고하지 않으며 향후 채택에는 Gradle `--offline`, `--no-index`, `--require-hashes`, license/hash lock, 세 APK size delta와 dual ABI public-engine acceptance를 요구합니다
-
-# v0.4.0-alpha.7
-
-###### 2026/08/24
-
-* `안내` 일곱 번째 M3 자동화 current-tree alpha 후보이며 실제 Settings 전체 워크플로가 API 37 에뮬레이터에서 통과했습니다. 게시, M4 경로 B/C 및 전체 기기 매트릭스는 이 선언 범위 밖입니다
-* `추가` `app.launch`, `selector.find`, `selector.click`, `images.capture_screen`을 사용하고 PNG 구조와 대상 컨트롤 포함 관계를 엄격히 검증하는 실제 Settings 유한 워크플로 `m3_complete_automation` 추가
-* `수정` Python 직렬화 전에 `right < left` 또는 `bottom < top` 접근성 경계를 앵커를 유지하는 zero-area 축으로 정규화하고 정확한 selector 쿼리로 무관한 트리 노드를 격리
-* `개선` 내보낸 `RunIntentActivity` 공개 프로젝트 경로를 API 37 에뮬레이터에서 통과시키고 1080x2424 PNG와 SHA-256 검증 아티팩트를 확인한 뒤 접근성을 0/null로 복원하고 정확한 테스트 staging을 모두 제거
 
 ##### 다른 버전
 

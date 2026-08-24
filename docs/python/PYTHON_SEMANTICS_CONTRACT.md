@@ -3,7 +3,8 @@
 Status: cumulative U1-R0 through U1-R2 contract plus the first M3 protocol 1.5
 Host capability slice and the bounded Host-files and foreground-dialog portions
 of its second slice, plus bounded current-engine/self-stop/non-Python child
-launch operations, plus M4 Path A project-local pure-Python packages.
+launch operations, plus M4 Path A project-local pure-Python packages and the M5
+protocol 1.6 foreground long-running source implementation.
 Historical R2 evidence remains covered through E2; the M1/M2 public Host paths
 and focused M3 broker paths passed an API 31 / arm64-v8a / 4 KiB-page physical
 device and an API 37 / x86_64 / 16 KiB-page emulator on 2026-08-23. Those
@@ -50,19 +51,38 @@ The Host and Provider must validate the exact SOURCE length and SHA-256. U1-R1
 adds strict text admission; it must not silently reinterpret Latin-1 or another
 encoding merely because a PEP 263 cookie is present.
 
-## Host project timeout admission
+## Host project execution-mode and timeout admission
 
-The current Host accepts an optional `timeout` property in an admitted Python
-project's `project.json`. Its value is an exact positive JSON integer in
-milliseconds. Strings, booleans, null, zero, negative values, decimals and
-scientific notation are invalid project configuration. The Host default is
-5 minutes and the largest configured value is 30 minutes. At dispatch, the
-effective timeout is the smaller of the configured/default Host value and the
-Provider's advertised maximum; the current Plugin maximum is also 30 minutes.
+An admitted Python project's `project.json` accepts an optional exact
+`executionMode` string. An absent value or `bounded` preserves the existing
+bounded mode. Bounded projects may also declare `timeout` as an exact positive
+JSON integer in milliseconds. Strings, booleans, null, zero, negative values,
+decimals and scientific notation are invalid. The Host default is 5 minutes and
+the largest configured value is 30 minutes. At dispatch, the effective timeout
+is the smaller of the configured/default Host value and the Provider's
+advertised maximum; the current Plugin maximum is also 30 minutes.
 
-This property changes only the bounded execution deadline. It does not enable
-background UI, interactive stdin, replay, concurrency or an unbounded
-long-task mode. Standalone file launches continue to use the Host default.
+Protocol 1.6 adds the exact `long-running` execution mode. It is mutually
+exclusive with `timeout`, carries wire `timeoutMillis=0`, and requires both a
+protocol 1.6 Provider capability and an opaque authorization minted by a live
+foreground user launch. Scheduled tasks, background/developer launches and
+Intent launches fail before dispatch; they are never silently downgraded to
+bounded execution. Standalone file launches also remain bounded.
+
+An admitted long-running execution owns a dedicated Host `specialUse`
+foreground service and persistent notification with a manual Stop action. The
+Plugin publishes ordered heartbeats every 15 seconds after `onStarted`; the Host
+requires the start within 2 minutes and each later Provider signal within a
+45-second lease, while independently checking the foreground service. Liveness
+loss and manual stop cancel the session and retain the process-restart-only
+cancellation contract. This mode removes only the elapsed execution deadline:
+output, workspace, result, artifact, input and Host capability quotas still
+apply, and the Provider still admits only one active session.
+
+The complete selection, wire compatibility, lease and Android foreground
+lifetime contract is in
+[`LONG_RUNNING_EXECUTION.md`](LONG_RUNNING_EXECUTION.md). Its portable and JVM
+checks do not by themselves claim an Android device smoke.
 
 ## Execution globals and process state
 

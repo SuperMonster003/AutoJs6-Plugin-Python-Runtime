@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Mejora",
   "changelog_label_dependency": "Dependencia",
   "$data": {
+    "v0.5.0-alpha.1": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "Primer candidato alpha M5 del árbol actual; el modo long-running foreground del protocolo 1.6 y las pruebas JVM Host/Plugin offline y portables pasan, pero no se ejecutó smoke Android M5 ni se afirman publicación, concurrencia o precalentamiento"
+      ],
+      "feature": [
+        "Añadir `executionMode=long-running` por proyecto sin fecha límite, propiedad de un servicio Host `specialUse` en primer plano, notificación persistente y acción Stop; los inicios programados, background/Intent y de desarrollador se rechazan sin degradación"
+      ],
+      "improvement": [
+        "Emitir heartbeats Provider ordenados cada 15 s y aplicar leases Host de 2 min para inicio, 45 s para heartbeat y uno independiente del servicio foreground; la pérdida de vida y Stop fallan cerrados mediante reinicio de proceso mientras el protocolo acotado 1.0-1.5 conserva compatibilidad"
+      ]
+    },
     "v0.4.0-alpha.9": {
       "released_date": "2026/08/24",
       "hint": [

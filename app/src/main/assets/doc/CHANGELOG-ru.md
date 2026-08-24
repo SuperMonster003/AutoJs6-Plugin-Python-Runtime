@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `Примечание` Первый M5 current-tree alpha-кандидат; foreground long-running протокола 1.6 и offline JVM-тесты Host/Plugin с portable gate проходят, но M5 Android smoke не запускался и публикация, concurrency и prewarm процесса не заявляются
+* `Добавлено` Добавлен проектный `executionMode=long-running` без deadline, которым владеют Host `specialUse` foreground service, постоянное уведомление и действие Stop; плановые, background/Intent и developer-запуски отклоняются без downgrade
+* `Улучшено` Provider отправляет упорядоченные heartbeat каждые 15 s, Host проверяет start lease 2 min, heartbeat lease 45 s и независимую аренду foreground service; потеря liveness и Stop fail closed через перезапуск процесса, а bounded protocol 1.0-1.5 остается совместимым
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24

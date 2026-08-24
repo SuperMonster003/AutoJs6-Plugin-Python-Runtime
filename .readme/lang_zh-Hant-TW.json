@@ -16,6 +16,7 @@
     "在腳本執行期間依 stdout/stderr 原始順序透過有界 chunk 與 credit 傳送; credit 耗盡會對執行施加背壓.",
     "透過協定 1.4 明確設定最大 {{ max_structured_json_bytes }} 的嚴格 JSON 結果, 並傳送最多 {{ max_output_artifacts }} 個具有路徑、大小與 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.",
     "透過協定 1.5 的執行級純資料 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、僅限前景的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界 `automator.click/long_click/press/swipe/back/home`、有界 `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color`、`images.find_image` 與 `ocr.recognize`, 終態後自動撤銷.",
+    "協定 1.6 透過 `executionMode=long-running` 為明確前景專案加入無執行 deadline 的長任務模式, 由 Host 前景通知與 Stop action 維持生命週期, Provider 每 {{ long_running_heartbeat_interval }} 發布有序心跳; 背景入口會穩定拒絕且絕不降級.",
     "回傳 `SystemExit`, 語法錯誤與執行階段例外, 包含有界結構化 traceback.",
     "同一執行環境程序只允許一個作用中工作階段, provider 端不排隊.",
     "宿主無須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播."
@@ -33,7 +34,7 @@
   "h3_security_limits": "執行限制",
   "security_limits": [
     "原始碼最大 {{ max_source_bytes }}, 總輸出最大 {{ max_output_bytes }}, 每個輸出 chunk 最大 {{ max_output_chunk_bytes }}, 最多 {{ max_output_chunks }} 個 chunk.",
-    "要求逾時最大 {{ max_timeout }}, 同一程序最多一個作用中工作階段, provider 端不排隊.",
+    "有界要求逾時最大 {{ max_timeout }}. 明確長任務不設執行 deadline, 但必須維持 Host 前景生命週期、{{ long_running_start_lease }} 啟動租約與 {{ long_running_heartbeat_lease }} 心跳租約; 同一程序仍最多一個作用中工作階段, provider 端不排隊.",
     "專案 workspace 上限為壓縮後 {{ max_workspace_archive_bytes }}、{{ max_workspace_entries }} 個檔案項目及解壓後 {{ max_workspace_uncompressed_bytes }}; 分發前 Provider 選擇必須同時滿足 snapshot 的實際三維需求.",
     "SOURCE 描述元採用 Binder 接收端完整 PFD 所有權, 保留 reliable-pipe 錯誤通道, 並於終態或關閉時釋放.",
     "輸出在執行期間依 credit 逐 chunk 傳送; credit 耗盡會暫停腳本, 已接受的輸出先於唯一終態, 終態後禁止輸出.",

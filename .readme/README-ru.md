@@ -52,6 +52,7 @@ Python Runtime — независимый provider протокола Python V1.
 - Передача ограниченных chunks stdout/stderr в исходном порядке во время выполнения; исчерпание credits создаёт backpressure для выполнения.
 - Явное задание строгого JSON-результата до 64 KiB и передача до 16 необязательных output artifacts с ограничениями пути, размера и SHA-256 протокола 1.4; результат никогда не выводится из stdout.
 - Вызов live-операций `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, учитывающего разрешения `notice`, ограниченного `files.read_text/write_text/exists/is_file/is_dir/list`, доступного только на переднем плане `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, ограниченного `automator.click/long_click/press/swipe/back/home`, ограниченного `selector.snapshot/find/click/set_text`, `images.capture_screen`, `images.find_color`, `images.find_image` и `ocr.recognize` через привязанный к выполнению pure-data broker протокола 1.5, который отзывается при завершении.
+- Протокол 1.6 добавляет явные проекты `executionMode=long-running` без deadline выполнения, с foreground-уведомлением Host, действием Stop и упорядоченными heartbeat Provider каждые 15 s; фоновые поверхности завершаются fail closed без downgrade.
 - Возврат `SystemExit`, синтаксических и runtime ошибок с ограниченным структурированным traceback.
 - Один активный сеанс на процесс без очереди provider.
 - Перезапуск хоста не нужен: следующая новая сессия после установки или повторного включения заново обнаруживает и фиксирует provider, а Binder death во время выполнения завершает его без автоматического повтора.
@@ -89,7 +90,7 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.5
+protocol: 1.0-1.6
 ```
 
 Принимаются отдельный SOURCE, необязательный ограниченный workspace archive, конечный заранее переданный stdin snapshot размером до 1 MiB и read-only snapshot возможностей хоста протокола 1.1. Протокол 1.2 добавляет явное согласование входа file/module для допущенных проектов. Протокол 1.3 добавляет после EOF snapshot принадлежащий Host prompt/reply только для встроенного `input()` на переднем плане, а стандартный `getpass.getpass()` использует скрытый ввод. Протокол 1.4 добавляет явный строгий JSON и необязательные output artifacts с манифестом SHA-256; stdout остается диагностикой и никогда не разбирается как результат. Протокол 1.5 добавляет pure-data Host broker, привязанный к одному выполнению, UID плагина, порядку вызовов и конечной квоте. Диалоги Host также требуют foreground-разрешения с активной Activity; фоновый запуск не открывает UI и возвращает `INTERACTIVE_NOT_ALLOWED`. Прямой `sys.stdin` остается конечным, фоновые запуски не открывают UI ввода, а скрипты не получают Context, raw Binder, объекты Host runtime или callback sink.
@@ -103,8 +104,8 @@ protocol: 1.0-1.5
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.4.0-alpha.9
-release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-alpha.1
+release state: 0.5.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; Host and Plugin offline JVM plus portable source gates passed, but no M5 Android device smoke has run and no new device claim is made; concurrency, prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -126,7 +127,7 @@ Runtime Chaquopy предназначен только для доверенны
 ******
 
 - Источник ограничен 4 MiB, весь вывод 16 MiB, chunk 16 KiB, число chunks 16384.
-- Максимальный timeout 30 min, один активный сеанс и без очереди provider.
+- Timeout ограниченного запроса не превышает 30 min. Явные long-running проекты не имеют deadline, но требуют foreground lifetime Host, стартовую аренду 2 min и heartbeat-аренду 45 s; по-прежнему активен один сеанс без очереди provider.
 - Workspace проекта ограничен 64 MiB в сжатом виде, 8192 файлами и 128 MiB после извлечения; до dispatch выбор Provider должен удовлетворять всем трем фактическим измерениям snapshot.
 - Полные PFD на стороне получателя Binder принимаются во владение и закрываются при завершении или close.
 - Вывод передаётся по chunks и credits во время выполнения; при исчерпании credits скрипт приостанавливается, принятый вывод предшествует единственному terminal, а вывод после terminal запрещён.
@@ -167,6 +168,14 @@ M4 Path A завершен; оценки M4 Paths B и C обе завершил
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `Примечание` Первый M5 current-tree alpha-кандидат; foreground long-running протокола 1.6 и offline JVM-тесты Host/Plugin с portable gate проходят, но M5 Android smoke не запускался и публикация, concurrency и prewarm процесса не заявляются
+* `Добавлено` Добавлен проектный `executionMode=long-running` без deadline, которым владеют Host `specialUse` foreground service, постоянное уведомление и действие Stop; плановые, background/Intent и developer-запуски отклоняются без downgrade
+* `Улучшено` Provider отправляет упорядоченные heartbeat каждые 15 s, Host проверяет start lease 2 min, heartbeat lease 45 s и независимую аренду foreground service; потеря liveness и Stop fail closed через перезапуск процесса, а bounded protocol 1.0-1.5 остается совместимым
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24
@@ -181,15 +190,6 @@ M4 Path A завершен; оценки M4 Paths B и C обе завершил
 
 * `Примечание` Восьмой alpha-кандидат текущего дерева; оценка встроенных пакетов M4 Path B закрыта решением `NOT_ADMITTED`, встроенный runtime остается `stdlib-only`, `requests` и другие кандидаты не добавлены, новые заявления о приемке на устройствах не делаются
 * `Улучшено` ADR 0003 фиксирует stdlib-only debug APK базы: 23,709,688 bytes для arm64-v8a, 23,726,048 bytes для x86_64 и 34,622,039 bytes для universal; без проверенного offline wheelhouse ложная разница размеров не публикуется, а будущий допуск требует Gradle `--offline`, `--no-index`, `--require-hashes`, license/hash locks, разницы трех APK и приемки публичного пути dual ABI
-
-# v0.4.0-alpha.7
-
-###### 2026/08/24
-
-* `Примечание` Седьмой alpha-кандидат current-tree автоматизации M3; полный сценарий реального Settings прошёл на эмуляторе API 37, а публикация, пути M4 B/C и полная матрица устройств остаются вне этого заявления
-* `Добавлено` Добавлен `m3_complete_automation`: ограниченный сценарий реального Settings с `app.launch`, `selector.find`, `selector.click` и `images.capture_screen`, строгой проверкой PNG и попадания целевого элемента в снимок
-* `Исправлено` Перед сериализацией Python границы доступности с `right < left` или `bottom < top` нормализуются в привязанные оси zero-area, а точные запросы selector изолируют посторонние узлы дерева
-* `Улучшено` Экспортированный публичный путь проекта `RunIntentActivity` прошёл на эмуляторе API 37 с PNG 1080x2424 и артефактом, проверенным SHA-256; затем доступность восстановлена до 0/null и всё точное тестовое staging удалено
 
 ##### Другие версии
 

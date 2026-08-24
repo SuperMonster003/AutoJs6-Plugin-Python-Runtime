@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `注記` 最初の M5 current-tree alpha 候補です. protocol 1.6 foreground long-running source と offline Host/Plugin JVM・portable gate は成功しましたが, M5 Android smoke は未実行で publication、concurrency、process prewarm は主張しません
+* `追加` project 単位の `executionMode=long-running` を追加し実行 deadline をなくします. Host `specialUse` foreground service、常駐 notification、Stop action が lifetime を所有し, schedule、background/Intent、developer launch は downgrade せず拒否します
+* `改善` Provider は 15 s ごとに順序付き heartbeat を送信し, Host は start 2 min、heartbeat 45 s、独立 foreground-service lease を強制します. liveness loss と Stop は process-restart cancellation で fail closed し, bounded protocol 1.0-1.5 は互換のままです
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24

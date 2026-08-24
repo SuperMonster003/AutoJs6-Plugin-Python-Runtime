@@ -16,6 +16,7 @@
     "إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.",
     "تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه {{ max_structured_json_bytes }} ونقل ما يصل إلى {{ max_output_artifacts }} من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.",
     "استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات و`files.read_text/write_text/exists/is_file/is_dir/list` المحدود و`dialogs.alert/confirm/prompt/select` المقصور على foreground و`engines.current/run/stop_self` و`automator.click/long_click/press/swipe/back/home` المحدود و`selector.snapshot/find/click/set_text` المحدود و`images.capture_screen` و`images.find_color` و`images.find_image` و`ocr.recognize` مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.",
+    "يضيف البروتوكول 1.6 مشاريع صريحة `executionMode=long-running` دون deadline للتنفيذ، مع إشعار Host في foreground وإجراء Stop وheartbeats مرتبة من Provider كل {{ long_running_heartbeat_interval }}؛ تفشل أسطح background بشكل مغلق دون downgrade.",
     "إرجاع `SystemExit` وأخطاء الصياغة والتنفيذ مع traceback منظم ومحدود.",
     "السماح بجلسة نشطة واحدة لكل عملية دون طابور لدى provider.",
     "لا حاجة لإعادة تشغيل المضيف: يعيد التنفيذ الجديد التالي بعد التثبيت أو إعادة التفعيل اكتشاف provider وتثبيت هويته، بينما ينهي Binder death أثناء التشغيل ذلك التنفيذ دون إعادة تلقائية."
@@ -33,7 +34,7 @@
   "h3_security_limits": "حدود التشغيل",
   "security_limits": [
     "حد المصدر {{ max_source_bytes }} والخرج الكلي {{ max_output_bytes }} وكل chunk ‏{{ max_output_chunk_bytes }} وعددها {{ max_output_chunks }}.",
-    "أقصى timeout هو {{ max_timeout }} مع جلسة واحدة ودون طابور provider.",
+    "يقتصر timeout للطلبات المحدودة على {{ max_timeout }}. لا تملك مشاريع long-running الصريحة deadline، لكنها تتطلب عمر Host في foreground وlease بدء {{ long_running_start_lease }} وlease heartbeat ‏{{ long_running_heartbeat_lease }}؛ وتبقى جلسة نشطة واحدة دون طابور provider.",
     "يحد workspace المشروع عند {{ max_workspace_archive_bytes }} مضغوطا و{{ max_workspace_entries }} ملفا و{{ max_workspace_uncompressed_bytes }} بعد الاستخراج؛ وقبل dispatch يجب أن يلبي اختيار Provider الأبعاد الفعلية الثلاثة للـ snapshot.",
     "تتملك العملية نسخ PFD الكاملة المستلمة عبر Binder وتغلقها عند النهاية أو close.",
     "يرسل الخرج chunk بعد chunk بالـ credits أثناء التنفيذ؛ يوقف نفاد credits السكربت مؤقتا، ويسبق الخرج المقبول الحالة terminal الوحيدة، ويمنع الخرج بعدها.",

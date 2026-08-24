@@ -52,6 +52,7 @@ Python Runtime is an independent provider for version 1 of the Python protocol. 
 - Deliver bounded stdout/stderr chunks in their original order during script execution; exhausted credits backpressure execution.
 - Set an explicit strict JSON result of at most 64 KiB and transfer up to 16 optional output artifacts under protocol 1.4 path, size, and SHA-256 limits; never infer a result from stdout.
 - Call live `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, permission-aware `notice`, bounded `files.read_text/write_text/exists/is_file/is_dir/list`, foreground-only `dialogs.alert/confirm/prompt/select`, `engines.current/run/stop_self`, bounded `automator.click/long_click/press/swipe/back/home`, bounded `selector.snapshot/find/click/set_text`, `images.capture_screen`, `images.find_color`, `images.find_image`, and `ocr.recognize` operations through the execution-scoped pure-data protocol 1.5 broker, which is revoked at terminal.
+- Protocol 1.6 adds explicit `long-running` projects through `executionMode=long-running`, with no elapsed deadline, a Host foreground notification and Stop action, and ordered Provider heartbeats every 15 s; background launch surfaces fail closed and never downgrade the request.
 - Report `SystemExit`, syntax errors, and runtime exceptions with a bounded structured traceback.
 - Allow one active session in the runtime process with no provider-side queue.
 - Require no host restart: the next new execution after install or re-enable rediscovers and pins the provider, while in-flight Binder death terminates that execution and is never automatically replayed.
@@ -89,10 +90,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.5
+protocol: 1.0-1.6
 ```
 
-The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most 1 MiB, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF; standard-library `getpass.getpass()` uses hidden echo. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Protocol 1.5 adds a pure-data Host capability broker bound to one execution, the plugin UID, call order, and a finite quota. Foreground Host dialogs require the same live Activity-backed authorization; background launches receive `INTERACTIVE_NOT_ALLOWED` without opening UI. Direct `sys.stdin` remains finite, background launches never open input UI, and user scripts receive no Context, raw Binder, host runtime object, or callback sink.
+The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most 1 MiB, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF; standard-library `getpass.getpass()` uses hidden echo. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Protocol 1.5 adds a pure-data Host capability broker bound to one execution, the plugin UID, call order, and a finite quota. Protocol 1.6 adds explicit `long-running` execution with ordered liveness heartbeats, a Host-owned foreground service, and manual Stop; background surfaces are rejected without downgrade. Foreground Host dialogs require the same live Activity-backed authorization; background launches receive `INTERACTIVE_NOT_ALLOWED` without opening UI. Direct `sys.stdin` remains finite, background launches never open input UI, and user scripts receive no Context, raw Binder, host runtime object, or callback sink.
 
 ******
 
@@ -103,8 +104,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 > Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
-release target: 0.4.0-alpha.9
-release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-alpha.1
+release state: 0.5.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; Host and Plugin offline JVM plus portable source gates passed, but no M5 Android device smoke has run and no new device claim is made; concurrency, prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -126,7 +127,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 ******
 
 - Source is capped at 4 MiB, total output at 16 MiB, each output chunk at 16 KiB, and output count at 16384 chunks.
-- Request timeout is capped at 30 min, with one active session per process and no provider-side queue.
+- Bounded request timeout is capped at 30 min. Explicit long-running projects have no elapsed deadline but require the Host foreground lifetime, a 2 min start lease, and a 45 s heartbeat lease; there is still one active session per process and no provider-side queue.
 - A project workspace is capped at 64 MiB compressed, 8192 file entries, and 128 MiB extracted; Provider selection must satisfy the actual snapshot in all three dimensions before dispatch.
 - SOURCE descriptors adopt complete Binder receiver-side PFD ownership, preserve reliable-pipe error channels, and close at terminal or session close.
 - Output is delivered chunk by chunk under credits during execution; exhausted credits pause the script, accepted output precedes the single terminal, and output after terminal is forbidden.
@@ -167,6 +168,14 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `Hint` First M5 current-tree alpha candidate; protocol 1.6 foreground long-running source plus offline Host/Plugin JVM and portable gates pass, but no M5 Android smoke has run and publication, concurrency, and process prewarm are not claimed
+* `Feature` Add project-level `executionMode=long-running` with no elapsed deadline, owned by a Host `specialUse` foreground service, persistent notification, and Stop action; scheduled, background/Intent, and developer launch surfaces reject without downgrade
+* `Improvement` Emit ordered Provider heartbeats every 15 s and enforce Host leases of 2 min for start, 45 s for heartbeats, and an independent foreground-service lease; liveness loss and manual Stop fail closed through process-restart cancellation while bounded protocol 1.0-1.5 remains compatible
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24
@@ -181,15 +190,6 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 
 * `Hint` Eighth current-tree alpha candidate; close the M4 Path B build-time package evaluation as `NOT_ADMITTED`, keep the embedded runtime `stdlib-only`, add neither `requests` nor any candidate dependency, and make no new device-acceptance claim
 * `Improvement` ADR 0003 records stdlib-only debug APK baselines of 23,709,688 bytes for arm64-v8a, 23,726,048 bytes for x86_64, and 34,622,039 bytes for universal; avoid a fabricated size delta without an audited offline wheelhouse, and require Gradle `--offline`, `--no-index`, `--require-hashes`, license/hash locks, three-APK size deltas, and dual ABI public-engine acceptance for future admission
-
-# v0.4.0-alpha.7
-
-###### 2026/08/24
-
-* `Hint` Seventh M3 automation current-tree alpha candidate; the complete real-Settings workflow passed on the API 37 emulator, while publication, M4 Paths B/C, and a complete device matrix remain outside this claim
-* `Feature` Add `m3_complete_automation`, a bounded real-Settings workflow using `app.launch`, `selector.find`, `selector.click`, and `images.capture_screen`, with strict PNG and destination-control containment assertions
-* `Fix` Normalize platform accessibility bounds with `right < left` or `bottom < top` to anchored zero-area axes before Python serialization, while exact selector queries avoid unrelated tree nodes
-* `Improvement` Pass the exported `RunIntentActivity` public project path on an API 37 emulator with a 1080x2424 PNG and SHA-256-verified artifact, then restore accessibility to 0/null and remove all exact test staging
 
 ##### For more releases
 

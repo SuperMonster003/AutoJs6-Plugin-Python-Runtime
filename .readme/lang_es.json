@@ -16,6 +16,7 @@
     "Entregar durante la ejecución chunks acotados de stdout/stderr en su orden original; al agotarse los créditos se aplica contrapresión a la ejecución.",
     "Establecer un resultado JSON estricto explícito de hasta {{ max_structured_json_bytes }} y transferir hasta {{ max_output_artifacts }} artefactos opcionales con límites de ruta, tamaño y SHA-256 del protocolo 1.4; nunca inferir un resultado desde stdout.",
     "Invocar en vivo `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible a permisos, `files.read_text/write_text/exists/is_file/is_dir/list` acotado, `dialogs.alert/confirm/prompt/select` solo en primer plano, `engines.current/run/stop_self`, `automator.click/long_click/press/swipe/back/home` acotado, `selector.snapshot/find/click/set_text` acotado, `images.capture_screen`, `images.find_color`, `images.find_image` y `ocr.recognize` mediante el broker de datos puros del protocolo 1.5 ligado a la ejecución y revocado al terminar.",
+    "El protocolo 1.6 añade proyectos explícitos `executionMode=long-running` sin fecha límite de ejecución, con notificación Host en primer plano, acción Stop y heartbeats Provider ordenados cada {{ long_running_heartbeat_interval }}; los inicios en segundo plano fallan de forma cerrada sin degradarse.",
     "Informar `SystemExit`, errores de sintaxis y excepciones con traceback estructurado y acotado.",
     "Permitir una sesión activa por proceso sin cola del proveedor.",
     "No requerir reinicio del host: la siguiente ejecución nueva tras instalar o reactivar redescubre y fija el provider; una muerte Binder en curso termina esa ejecución y nunca la repite automáticamente."
@@ -33,7 +34,7 @@
   "h3_security_limits": "Límites operativos",
   "security_limits": [
     "El código se limita a {{ max_source_bytes }}, la salida total a {{ max_output_bytes }}, cada chunk a {{ max_output_chunk_bytes }} y el total a {{ max_output_chunks }} chunks.",
-    "El timeout máximo es {{ max_timeout }}, con una sesión activa y sin cola del proveedor.",
+    "El timeout de solicitudes acotadas se limita a {{ max_timeout }}. Los proyectos long-running explícitos no tienen fecha límite, pero requieren la vida Host en primer plano, un lease de inicio de {{ long_running_start_lease }} y un lease de heartbeat de {{ long_running_heartbeat_lease }}; sigue habiendo una sesión activa sin cola del proveedor.",
     "Un workspace de proyecto se limita a {{ max_workspace_archive_bytes }} comprimidos, {{ max_workspace_entries }} archivos y {{ max_workspace_uncompressed_bytes }} extraídos; antes del envío, la selección del Provider debe satisfacer las tres dimensiones reales del snapshot.",
     "Se adopta la propiedad de los PFD completos recibidos por Binder y se cierran al terminar o cerrar la sesión.",
     "La salida se entrega chunk a chunk con créditos durante la ejecución; al agotarse se pausa el script, la salida aceptada precede al único terminal y se prohíbe toda salida posterior.",

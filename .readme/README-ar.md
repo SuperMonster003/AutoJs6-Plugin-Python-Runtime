@@ -52,6 +52,7 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 - إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.
 - تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه 64 KiB ونقل ما يصل إلى 16 من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.
 - استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات و`files.read_text/write_text/exists/is_file/is_dir/list` المحدود و`dialogs.alert/confirm/prompt/select` المقصور على foreground و`engines.current/run/stop_self` و`automator.click/long_click/press/swipe/back/home` المحدود و`selector.snapshot/find/click/set_text` المحدود و`images.capture_screen` و`images.find_color` و`images.find_image` و`ocr.recognize` مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
+- يضيف البروتوكول 1.6 مشاريع صريحة `executionMode=long-running` دون deadline للتنفيذ، مع إشعار Host في foreground وإجراء Stop وheartbeats مرتبة من Provider كل 15 s؛ تفشل أسطح background بشكل مغلق دون downgrade.
 - إرجاع `SystemExit` وأخطاء الصياغة والتنفيذ مع traceback منظم ومحدود.
 - السماح بجلسة نشطة واحدة لكل عملية دون طابور لدى provider.
 - لا حاجة لإعادة تشغيل المضيف: يعيد التنفيذ الجديد التالي بعد التثبيت أو إعادة التفعيل اكتشاف provider وتثبيت هويته، بينما ينهي Binder death أثناء التشغيل ذلك التنفيذ دون إعادة تلقائية.
@@ -89,7 +90,7 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.5
+protocol: 1.0-1.6
 ```
 
 تقبل الإضافة SOURCE مستقلا وworkspace archive اختياريا محدودا وstdin snapshot محدودا ومقدما مسبقا بحجم أقصاه 1 MiB وsnapshot للقدرات المضيفة للقراءة فقط في البروتوكول 1.1. يضيف البروتوكول 1.2 تفاوضا صريحا على مدخل file/module للمشاريع المقبولة. يضيف البروتوكول 1.3 بعد EOF للـ snapshot تفاعل prompt/reply تملكه Host ومقصورا على `input()` المضمنة في foreground، بينما تستخدم `getpass.getpass()` إدخالا مخفيا. يضيف البروتوكول 1.4 JSON صارما وصريحا وoutput artifacts اختيارية موصوفة بـ SHA-256؛ يبقى stdout للتشخيص ولا يحلل كنتيجة. يضيف البروتوكول 1.5 broker Host ببيانات خالصة مرتبطا بتنفيذ واحد وUID الإضافة وترتيب الاستدعاءات وحصة محدودة. تتطلب حوارات Host أيضا تفويضا foreground مدعوما بـ Activity نشطة؛ يعيد تشغيل background الرمز `INTERACTIVE_NOT_ALLOWED` من دون فتح UI. يظل `sys.stdin` المباشر محدودا ولا تفتح عمليات background واجهة إدخال ولا تتلقى النصوص Context أو Binder خاما أو كائنات Host runtime أو callback sink.
@@ -103,8 +104,8 @@ protocol: 1.0-1.5
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.4.0-alpha.9
-release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-alpha.1
+release state: 0.5.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; Host and Plugin offline JVM plus portable source gates passed, but no M5 Android device smoke has run and no new device claim is made; concurrency, prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -126,7 +127,7 @@ runtime/security/release owner: SuperMonster003
 ******
 
 - حد المصدر 4 MiB والخرج الكلي 16 MiB وكل chunk ‏16 KiB وعددها 16384.
-- أقصى timeout هو 30 min مع جلسة واحدة ودون طابور provider.
+- يقتصر timeout للطلبات المحدودة على 30 min. لا تملك مشاريع long-running الصريحة deadline، لكنها تتطلب عمر Host في foreground وlease بدء 2 min وlease heartbeat ‏45 s؛ وتبقى جلسة نشطة واحدة دون طابور provider.
 - يحد workspace المشروع عند 64 MiB مضغوطا و8192 ملفا و128 MiB بعد الاستخراج؛ وقبل dispatch يجب أن يلبي اختيار Provider الأبعاد الفعلية الثلاثة للـ snapshot.
 - تتملك العملية نسخ PFD الكاملة المستلمة عبر Binder وتغلقها عند النهاية أو close.
 - يرسل الخرج chunk بعد chunk بالـ credits أثناء التنفيذ؛ يوقف نفاد credits السكربت مؤقتا، ويسبق الخرج المقبول الحالة terminal الوحيدة، ويمنع الخرج بعدها.
@@ -167,6 +168,14 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `ملاحظة` أول مرشح alpha لـ M5 في الشجرة الحالية؛ ينجح مصدر foreground long-running للبروتوكول 1.6 واختبارات JVM غير المتصلة لـ Host/Plugin والبوابات المحمولة، لكن لم ينفذ smoke Android لـ M5 ولا يدعى النشر أو concurrency أو prewarm للعملية
+* `إضافة` إضافة `executionMode=long-running` على مستوى المشروع دون deadline، تملكه خدمة Host `specialUse` في foreground وإشعار دائم وإجراء Stop؛ ترفض أسطح schedule وbackground/Intent وdeveloper دون downgrade
+* `تحسين` يرسل Provider heartbeats مرتبة كل 15 s ويفرض Host lease بدء 2 min وlease heartbeat ‏45 s وlease مستقل لخدمة foreground؛ يفشل فقدان liveness وStop بشكل مغلق عبر إعادة تشغيل العملية بينما يبقى البروتوكول المحدود 1.0-1.5 متوافقا
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24
@@ -181,15 +190,6 @@ runtime/security/release owner: SuperMonster003
 
 * `ملاحظة` مرشح alpha الثامن للشجرة الحالية؛ يُغلق تقييم حزم build-time في M4 Path B بقرار `NOT_ADMITTED`، ويبقى runtime المضمّن `stdlib-only`، ولا تُضاف `requests` أو أي تبعية مرشحة ولا يُقدّم ادعاء قبول جديد على الأجهزة
 * `تحسين` يسجل ADR 0003 خطوط stdlib-only debug APK الأساسية: 23,709,688 bytes لـ arm64-v8a و23,726,048 bytes لـ x86_64 و34,622,039 bytes لـ universal؛ لا يُختلق فرق حجم دون wheelhouse offline مدقق، ويتطلب القبول المستقبلي Gradle `--offline` و`--no-index` و`--require-hashes` وأقفال license/hash وفروق أحجام ثلاثة APK وقبول المسار العام dual ABI
-
-# v0.4.0-alpha.7
-
-###### 2026/08/24
-
-* `ملاحظة` مرشح alpha السابع من current-tree لأتمتة M3؛ نجح مسار Settings الحقيقي الكامل على محاكي API 37، بينما يبقى النشر ومسارا M4 B/C ومصفوفة الأجهزة الكاملة خارج نطاق هذا الإقرار
-* `إضافة` إضافة `m3_complete_automation`، وهو مسار محدود على Settings الحقيقي يستخدم `app.launch` و`selector.find` و`selector.click` و`images.capture_screen` مع تحقق صارم من PNG واحتواء عنصر الوجهة
-* `إصلاح` تطبيع حدود إمكانية الوصول ذات `right < left` أو `bottom < top` قبل تسلسل Python إلى محاور zero-area مرتبطة بنقطة الأصل، مع عزل عقد الشجرة غير المرتبطة عبر استعلامات selector الدقيقة
-* `تحسين` نجح مسار المشروع العام المصدّر `RunIntentActivity` على محاكي API 37 مع PNG بدقة 1080x2424 وأثر متحقق منه عبر SHA-256، ثم أُعيدت إمكانية الوصول إلى 0/null وأزيل كل staging اختباري محدد
 
 ##### المزيد من الإصدارات
 

@@ -2,8 +2,8 @@
   "repo_url": "https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime",
   "repo_slug": "SuperMonster003/AutoJs6-Plugin-Python-Runtime",
   "default_branch": "master",
-  "release_target": "0.4.0-alpha.9",
-  "release_state": "0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim",
+  "release_target": "0.5.0-alpha.1",
+  "release_state": "0.5.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; Host and Plugin offline JVM plus portable source gates passed, but no M5 Android device smoke has run and no new device claim is made; concurrency, prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim",
   "host_pairing": "AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275",
   "long_term_signer": "SM003",
   "release_owner": "SuperMonster003",
@@ -16,7 +16,7 @@
   "plugin_variant": "cpython-3.13",
   "provider_id": "org.autojs.python.runtime.cpython",
   "engine_id": "python",
-  "protocol_version": "1.0-1.5",
+  "protocol_version": "1.0-1.6",
   "runtime_dependency": "Chaquopy 17.0.0",
   "python_line": "3.13",
   "python_version_expected": "3.13.9",
@@ -79,5 +79,8 @@
   "max_host_ocr_total_bytes": "48 KiB",
   "host_ocr_call_timeout": "60 s",
   "max_timeout": "30 min",
+  "long_running_heartbeat_interval": "15 s",
+  "long_running_heartbeat_lease": "45 s",
+  "long_running_start_lease": "2 min",
   "local_aars": "common-plugin-api.aar\nprotocol-wire-api.aar\npython-runtime-api.aar"
 }

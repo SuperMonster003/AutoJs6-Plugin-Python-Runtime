@@ -5,6 +5,18 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "اعتماد",
   "$data": {
+    "v0.5.0-alpha.1": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "أول مرشح alpha لـ M5 في الشجرة الحالية؛ ينجح مصدر foreground long-running للبروتوكول 1.6 واختبارات JVM غير المتصلة لـ Host/Plugin والبوابات المحمولة، لكن لم ينفذ smoke Android لـ M5 ولا يدعى النشر أو concurrency أو prewarm للعملية"
+      ],
+      "feature": [
+        "إضافة `executionMode=long-running` على مستوى المشروع دون deadline، تملكه خدمة Host `specialUse` في foreground وإشعار دائم وإجراء Stop؛ ترفض أسطح schedule وbackground/Intent وdeveloper دون downgrade"
+      ],
+      "improvement": [
+        "يرسل Provider heartbeats مرتبة كل 15 s ويفرض Host lease بدء 2 min وlease heartbeat ‏45 s وlease مستقل لخدمة foreground؛ يفشل فقدان liveness وStop بشكل مغلق عبر إعادة تشغيل العملية بينما يبقى البروتوكول المحدود 1.0-1.5 متوافقا"
+      ]
+    },
     "v0.4.0-alpha.9": {
       "released_date": "2026/08/24",
       "hint": [

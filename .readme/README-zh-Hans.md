@@ -52,6 +52,7 @@ Python Runtime 是独立的 Python 协议 V1 provider. 宿主把单个 Python �
 - 在脚本执行期间按 stdout/stderr 原始顺序通过有界 chunk 与 credit 传送; credit 耗尽会对执行施加背压.
 - 通过协议 1.4 显式设置最大 64 KiB 的严格 JSON 结果, 并传送最多 16 个具有路径、大小与 SHA-256 限制的可选输出 artifact; 绝不从 stdout 推断结果.
 - 通过协议 1.5 的执行级纯数据 broker 实时调用 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、权限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、仅限前台的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界 `automator.click/long_click/press/swipe/back/home`、有界 `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color`、`images.find_image` 与 `ocr.recognize`, 终态后自动撤销.
+- 协议 1.6 通过 `executionMode=long-running` 为显式前台项目增加无执行 deadline 的长任务档位, 由 Host 前台通知与 Stop action 持有生命周期, Provider 每 15 s 发布有序心跳; 后台入口稳定拒绝且绝不降级.
 - 返回 `SystemExit`, 语法错误和运行时异常, 包括有界结构化 traceback.
 - 同一运行时进程只允许一个活动会话, provider 侧不排队.
 - Host 无需重启; 安装或重新启用插件后下一次新执行会重新发现并 pin provider 身份, 在途 Binder death 会终止该执行且绝不自动重放.
@@ -89,10 +90,10 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.5
+protocol: 1.0-1.6
 ```
 
-插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. 协议 1.2 为已准入项目增加显式 file/module 入口协商. 协议 1.3 在快照 EOF 后为内置 `input()` 增加由 Host 持有且仅限前台的 prompt/reply; 标准库 `getpass.getpass()` 使用隐藏回显. 协议 1.4 增加显式严格 JSON 结果与可选的 SHA-256 manifest 输出 artifact, stdout 仅用于诊断且绝不被解析为结果. 协议 1.5 增加绑定单次执行、插件 UID、调用序号与配额的纯数据 Host capability broker. Host 对话框还要求由存活 Activity 支撑的前台授权; 后台启动不会打开 UI, 而是稳定返回 `INTERACTIVE_NOT_ALLOWED`. 直接 `sys.stdin` 始终有限, 后台启动绝不打开输入 UI, 用户脚本也不会得到 Context、原始 Binder、宿主运行时对象或 callback sink.
+插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. 协议 1.2 为已准入项目增加显式 file/module 入口协商. 协议 1.3 在快照 EOF 后为内置 `input()` 增加由 Host 持有且仅限前台的 prompt/reply; 标准库 `getpass.getpass()` 使用隐藏回显. 协议 1.4 增加显式严格 JSON 结果与可选的 SHA-256 manifest 输出 artifact, stdout 仅用于诊断且绝不被解析为结果. 协议 1.5 增加绑定单次执行、插件 UID、调用序号与配额的纯数据 Host capability broker. 协议 1.6 增加显式 `long-running` 执行、有序存活心跳、Host 持有的前台服务与手动 Stop; 后台入口会被拒绝且不降级. Host 对话框还要求由存活 Activity 支撑的前台授权; 后台启动不会打开 UI, 而是稳定返回 `INTERACTIVE_NOT_ALLOWED`. 直接 `sys.stdin` 始终有限, 后台启动绝不打开输入 UI, 用户脚本也不会得到 Context、原始 Binder、宿主运行时对象或 callback sink.
 
 ******
 
@@ -103,8 +104,8 @@ protocol: 1.0-1.5
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.4.0-alpha.9
-release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-alpha.1
+release state: 0.5.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; Host and Plugin offline JVM plus portable source gates passed, but no M5 Android device smoke has run and no new device claim is made; concurrency, prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -126,7 +127,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 ******
 
 - 源码最大 4 MiB, 总输出最大 16 MiB, 单个输出 chunk 最大 16 KiB, 最多 16384 个 chunk.
-- 请求超时最大 30 min, 同一进程最多一个活动会话, provider 侧不排队.
+- 有界请求超时最大 30 min. 显式长任务不设执行 deadline, 但必须维持 Host 前台生命周期、2 min 启动租约与 45 s 心跳租约; 同一进程仍最多一个活动会话, provider 侧不排队.
 - 项目 workspace 上限为压缩后 64 MiB、8192 个文件条目及解压后 128 MiB; 分发前 Provider 选择必须同时满足快照的实际三维需求.
 - SOURCE 描述符采用 Binder 接收端完整 PFD 所有权, 保留 reliable-pipe 错误通道, 并在终态或关闭时释放.
 - 输出在执行期间按 credit 逐 chunk 发送; credit 耗尽会暂停脚本, 已接受的输出先于唯一终态, 终态后禁止输出.
@@ -167,6 +168,14 @@ M4 路径 A 已完成; M4 路径 B 与 Path C 评估均以 `NOT_ADMITTED` 关闭
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `提示` 首个 M5 current-tree alpha 候选版; 协议 1.6 前台长任务源码与 Host/Plugin 离线 JVM、便携门禁已通过, 但尚未执行 M5 真机冒烟, 不声明发布、并发或进程预热完成
+* `新增` 新增项目级 `executionMode=long-running`: 移除执行 deadline, 由 Host `specialUse` 前台服务、常驻通知与 Stop action 持有生命周期; 定时任务、后台/Intent/开发者入口稳定拒绝且不降级
+* `优化` Provider 每 15 s 发布有序心跳, Host 强制 2 min 启动租约、45 s 心跳租约与独立前台服务租约; 丢失存活性和手动停止均 fail closed 并沿用进程重启取消, 有界协议 1.0-1.5 保持兼容
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24
@@ -181,15 +190,6 @@ M4 路径 A 已完成; M4 路径 B 与 Path C 评估均以 `NOT_ADMITTED` 关闭
 
 * `提示` 第八个 current-tree alpha 候选版; M4 Path B 构建期包评估以 `NOT_ADMITTED` 关闭, 内置运行时保持 `stdlib-only`, 未内置 `requests` 或任何候选依赖, 也不新增设备验收声明
 * `优化` ADR 0003 固定 stdlib-only debug APK 的 arm64-v8a 23,709,688 bytes、x86_64 23,726,048 bytes 与 universal 34,622,039 bytes 基线; 没有经审计的离线 wheelhouse 时不报告伪造体积差值, 未来准入必须同时具备 Gradle `--offline`、`--no-index`、`--require-hashes`、许可证/哈希锁、三 APK 体积差值与 dual ABI 公共引擎验收
-
-# v0.4.0-alpha.7
-
-###### 2026/08/24
-
-* `提示` 第七个 M3 自动化 current-tree alpha 候选版; 真实 Settings 完整工作流已在 API 37 模拟器通过, 发布、M4 路径 B/C 与完整设备矩阵不在本声明范围内
-* `新增` 新增 `m3_complete_automation`: 使用 `app.launch`、`selector.find`、`selector.click` 与 `images.capture_screen` 的有界真实 Settings 工作流, 严格断言 PNG 结构及目标控件包含关系
-* `修复` Python 序列化前将平台上报的 `right < left` 或 `bottom < top` 无障碍边界收敛为保持锚点的 zero-area 轴, 同时以精确 selector 查询隔离无关树节点
-* `优化` 导出的 `RunIntentActivity` 公开项目路径已在 API 37 模拟器通过, 产出 1080x2424 PNG 与经 SHA-256 验证的产物, 随后将无障碍恢复为 0/null 并移除全部精确测试暂存
 
 ##### 更多版本
 

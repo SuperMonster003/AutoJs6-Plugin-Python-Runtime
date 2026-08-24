@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `提示` 首個 M5 current-tree alpha 候選版; 協定 1.6 前景長任務原始碼與 Host/Plugin 離線 JVM、便攜門禁已通過, 但尚未執行 M5 真機冒煙, 不宣告發布、並行或程序預熱完成
+* `新增` 新增專案級 `executionMode=long-running`: 移除執行 deadline, 由 Host `specialUse` 前景服務、常駐通知與 Stop action 維持生命週期; 排程、背景/Intent/開發者入口穩定拒絕且不降級
+* `改善` Provider 每 15 s 發布有序心跳, Host 強制 2 min 啟動租約、45 s 心跳租約與獨立前景服務租約; 存活性遺失及手動停止均 fail closed 並沿用程序重啟取消, 有界協定 1.0-1.5 保持相容
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24

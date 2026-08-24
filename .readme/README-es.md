@@ -52,6 +52,7 @@ Python Runtime es un proveedor independiente del protocolo Python V1. El host en
 - Entregar durante la ejecución chunks acotados de stdout/stderr en su orden original; al agotarse los créditos se aplica contrapresión a la ejecución.
 - Establecer un resultado JSON estricto explícito de hasta 64 KiB y transferir hasta 16 artefactos opcionales con límites de ruta, tamaño y SHA-256 del protocolo 1.4; nunca inferir un resultado desde stdout.
 - Invocar en vivo `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible a permisos, `files.read_text/write_text/exists/is_file/is_dir/list` acotado, `dialogs.alert/confirm/prompt/select` solo en primer plano, `engines.current/run/stop_self`, `automator.click/long_click/press/swipe/back/home` acotado, `selector.snapshot/find/click/set_text` acotado, `images.capture_screen`, `images.find_color`, `images.find_image` y `ocr.recognize` mediante el broker de datos puros del protocolo 1.5 ligado a la ejecución y revocado al terminar.
+- El protocolo 1.6 añade proyectos explícitos `executionMode=long-running` sin fecha límite de ejecución, con notificación Host en primer plano, acción Stop y heartbeats Provider ordenados cada 15 s; los inicios en segundo plano fallan de forma cerrada sin degradarse.
 - Informar `SystemExit`, errores de sintaxis y excepciones con traceback estructurado y acotado.
 - Permitir una sesión activa por proceso sin cola del proveedor.
 - No requerir reinicio del host: la siguiente ejecución nueva tras instalar o reactivar redescubre y fija el provider; una muerte Binder en curso termina esa ejecución y nunca la repite automáticamente.
@@ -89,7 +90,7 @@ official index engine: python
 official index variant: cpython-3.13
 protocol provider id: org.autojs.python.runtime.cpython
 engine: python
-protocol: 1.0-1.5
+protocol: 1.0-1.6
 ```
 
 El complemento acepta una SOURCE independiente, un workspace archive acotado opcional, un snapshot stdin finito y preproporcionado de hasta 1 MiB y el snapshot de capacidades host de solo lectura del protocolo 1.1. El protocolo 1.2 añade negociación explícita de entrada file/module para proyectos admitidos. El protocolo 1.3 añade, tras el EOF del snapshot, prompt/respuesta propiedad del Host y solo en primer plano para el `input()` integrado; `getpass.getpass()` usa entrada oculta. El protocolo 1.4 añade JSON estricto explícito y artefactos opcionales manifestados con SHA-256; stdout sigue siendo diagnóstico y nunca se analiza como resultado. El protocolo 1.5 añade un broker Host de datos puros ligado a una ejecución, al UID del complemento, al orden de llamadas y a una cuota finita. Los diálogos Host también requieren autorización de primer plano respaldada por una Activity activa; los inicios en segundo plano reciben `INTERACTIVE_NOT_ALLOWED` sin abrir UI. `sys.stdin` directo sigue siendo finito, los inicios en segundo plano nunca abren UI de entrada y los scripts no reciben Context, Binder bruto, objetos del runtime host ni callback sinks.
@@ -103,8 +104,8 @@ El complemento acepta una SOURCE independiente, un workspace archive acotado opc
 > La versión 0.1.0 se empareja solo con AutoJs6 6.8.0, con el versionCode mínimo del Host 5275 congelado y aplicado; la revisión final y limpia del código fuente del Host y el manifiesto de distribución de los tres AAR están registrados en el lock. Cada ejecución nueva redescubre el provider; si falta o está desactivado pide instalar o activar sin fallback, y la instalación o reactivación no exige reiniciar el Host. La identidad del APK estable está vinculada a ese código fuente exacto del Plugin y al lock Host.
 
 ```text
-release target: 0.4.0-alpha.9
-release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-alpha.1
+release state: 0.5.0-alpha.1 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; Host and Plugin offline JVM plus portable source gates passed, but no M5 Android device smoke has run and no new device claim is made; concurrency, prewarm, later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -126,7 +127,7 @@ El runtime Chaquopy es solo para scripts locales de confianza, no un sandbox de 
 ******
 
 - El código se limita a 4 MiB, la salida total a 16 MiB, cada chunk a 16 KiB y el total a 16384 chunks.
-- El timeout máximo es 30 min, con una sesión activa y sin cola del proveedor.
+- El timeout de solicitudes acotadas se limita a 30 min. Los proyectos long-running explícitos no tienen fecha límite, pero requieren la vida Host en primer plano, un lease de inicio de 2 min y un lease de heartbeat de 45 s; sigue habiendo una sesión activa sin cola del proveedor.
 - Un workspace de proyecto se limita a 64 MiB comprimidos, 8192 archivos y 128 MiB extraídos; antes del envío, la selección del Provider debe satisfacer las tres dimensiones reales del snapshot.
 - Se adopta la propiedad de los PFD completos recibidos por Binder y se cierran al terminar o cerrar la sesión.
 - La salida se entrega chunk a chunk con créditos durante la ejecución; al agotarse se pausa el script, la salida aceptada precede al único terminal y se prohíbe toda salida posterior.
@@ -167,6 +168,14 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `Nota` Primer candidato alpha M5 del árbol actual; el modo long-running foreground del protocolo 1.6 y las pruebas JVM Host/Plugin offline y portables pasan, pero no se ejecutó smoke Android M5 ni se afirman publicación, concurrencia o precalentamiento
+* `Función` Añadir `executionMode=long-running` por proyecto sin fecha límite, propiedad de un servicio Host `specialUse` en primer plano, notificación persistente y acción Stop; los inicios programados, background/Intent y de desarrollador se rechazan sin degradación
+* `Mejora` Emitir heartbeats Provider ordenados cada 15 s y aplicar leases Host de 2 min para inicio, 45 s para heartbeat y uno independiente del servicio foreground; la pérdida de vida y Stop fallan cerrados mediante reinicio de proceso mientras el protocolo acotado 1.0-1.5 conserva compatibilidad
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24
@@ -181,15 +190,6 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 
 * `Nota` Octavo candidato alpha del árbol actual; cerrar la evaluación de paquetes integrados M4 Path B como `NOT_ADMITTED`, mantener el runtime `stdlib-only`, no añadir `requests` ni ninguna dependencia candidata y no formular una nueva afirmación de aceptación en dispositivos
 * `Mejora` ADR 0003 registra bases stdlib-only debug APK de 23,709,688 bytes para arm64-v8a, 23,726,048 bytes para x86_64 y 34,622,039 bytes para universal; no inventar una diferencia de tamaño sin un wheelhouse offline auditado, y exigir Gradle `--offline`, `--no-index`, `--require-hashes`, bloqueos de licencia/hash, diferencias de tres APK y aceptación pública dual ABI para una admisión futura
-
-# v0.4.0-alpha.7
-
-###### 2026/08/24
-
-* `Nota` Séptimo candidato alfa current-tree de automatización M3; el flujo completo de Settings real pasó en el emulador API 37, mientras que la publicación, las rutas M4 B/C y la matriz completa de dispositivos quedan fuera de esta declaración
-* `Función` Añade `m3_complete_automation`, un flujo acotado sobre Settings real que usa `app.launch`, `selector.find`, `selector.click` e `images.capture_screen`, con aserciones estrictas de PNG y contención del control de destino
-* `Corrección` Normaliza antes de serializar a Python los límites de accesibilidad con `right < left` o `bottom < top` como ejes zero-area anclados, mientras las consultas selector exactas aíslan nodos no relacionados
-* `Mejora` La ruta pública de proyecto exportada `RunIntentActivity` pasa en un emulador API 37 con PNG 1080x2424 y artefacto verificado por SHA-256; después restaura accesibilidad a 0/null y elimina todo staging exacto de prueba
 
 ##### Más versiones
 

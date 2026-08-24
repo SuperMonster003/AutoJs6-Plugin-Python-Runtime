@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.1
+
+###### 2026/08/24
+
+* `Note` Premier candidat alpha M5 current-tree; le mode long-running foreground du protocole 1.6 et les gates JVM Host/Plugin hors ligne et portables passent, mais aucun smoke Android M5 n'a été exécuté et la publication, la concurrence et le préchauffage ne sont pas revendiqués
+* `Fonction` Ajouter `executionMode=long-running` au niveau projet sans échéance, détenu par un service Host `specialUse` au premier plan, une notification persistante et l'action Stop; les lancements planifiés, background/Intent et développeur sont rejetés sans rétrogradation
+* `Amélioration` Émettre des heartbeats Provider ordonnés toutes les 15 s et imposer des baux Host de 2 min au démarrage, 45 s entre heartbeats et un bail indépendant du service foreground; toute perte de vie et Stop échouent fermés par redémarrage du processus, tandis que le protocole borné 1.0-1.5 reste compatible
+
 # v0.4.0-alpha.9
 
 ###### 2026/08/24

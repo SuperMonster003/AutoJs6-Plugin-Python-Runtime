@@ -22,10 +22,14 @@ LANGUAGE_CODES = (
 
 
 class U1ReadmeFactsTest(unittest.TestCase):
-    def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
+    def test_all_language_sources_describe_current_protocol_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.4.0-alpha.9", common["release_target"])
+        self.assertEqual("0.5.0-alpha.1", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
+        self.assertIn("protocol 1.6", common["release_state"])
+        self.assertIn("foreground-only long-running", common["release_state"])
+        self.assertIn("15-second Provider heartbeats", common["release_state"])
+        self.assertIn("no M5 Android device smoke", common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
         self.assertIn("selector/UI-tree", common["release_state"])
         self.assertIn("screen capture", common["release_state"])
@@ -50,12 +54,15 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("64 MiB", common["max_workspace_archive_bytes"])
         self.assertEqual("8192", common["max_workspace_entries"])
         self.assertEqual("128 MiB", common["max_workspace_uncompressed_bytes"])
-        self.assertEqual("1.0-1.5", common["protocol_version"])
+        self.assertEqual("1.0-1.6", common["protocol_version"])
         self.assertEqual("64 KiB", common["max_structured_json_bytes"])
         self.assertEqual("16", common["max_output_artifacts"])
         self.assertEqual("16 MiB", common["max_output_bytes"])
         self.assertEqual("16384", common["max_output_chunks"])
         self.assertEqual("30 min", common["max_timeout"])
+        self.assertEqual("15 s", common["long_running_heartbeat_interval"])
+        self.assertEqual("45 s", common["long_running_heartbeat_lease"])
+        self.assertEqual("2 min", common["long_running_start_lease"])
         self.assertEqual("1024", common["max_host_capability_calls"])
         self.assertEqual("64 KiB", common["max_host_capability_message_bytes"])
         self.assertEqual("32 KiB", common["max_host_capability_text_bytes"])
@@ -141,6 +148,15 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("`images.find_color`", broker_features[0])
                 self.assertIn("`images.find_image`", broker_features[0])
                 self.assertIn("`ocr.recognize`", broker_features[0])
+                long_running_features = [
+                    item for item in source["features"] if "1.6" in item
+                ]
+                self.assertEqual(1, len(long_running_features))
+                self.assertIn("`executionMode=long-running`", long_running_features[0])
+                self.assertIn(
+                    "{{ long_running_heartbeat_interval }}", long_running_features[0]
+                )
+                self.assertIn("Stop", long_running_features[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
                 self.assertIn("1.3", source["p_plugin_scope"])
                 self.assertIn("1.4", source["p_plugin_scope"])
@@ -185,6 +201,18 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "{{ max_host_engine_launches }}",
                 ):
                     self.assertIn(placeholder, broker_limits[0])
+                long_running_limits = [
+                    item
+                    for item in source["security_limits"]
+                    if "{{ long_running_heartbeat_lease }}" in item
+                ]
+                self.assertEqual(1, len(long_running_limits))
+                for placeholder in (
+                    "{{ max_timeout }}",
+                    "{{ long_running_start_lease }}",
+                    "{{ long_running_heartbeat_lease }}",
+                ):
+                    self.assertIn(placeholder, long_running_limits[0])
                 automator_limits = [
                     item
                     for item in source["security_limits"]
@@ -312,6 +340,22 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                long_running = source["$data"]["v0.5.0-alpha.1"]
+                self.assertEqual("2026/08/24", long_running["released_date"])
+                self.assertEqual(1, len(long_running["hint"]))
+                self.assertEqual(1, len(long_running["feature"]))
+                self.assertEqual(1, len(long_running["improvement"]))
+                for marker in ("M5", "1.6", "Host/Plugin"):
+                    self.assertIn(marker, long_running["hint"][0])
+                for marker in (
+                    "`executionMode=long-running`",
+                    "`specialUse`",
+                    "Stop",
+                ):
+                    self.assertIn(marker, long_running["feature"][0])
+                for marker in ("15 s", "2 min", "45 s", "1.0-1.5"):
+                    self.assertIn(marker, long_running["improvement"][0])
+
                 native_policy = source["$data"]["v0.4.0-alpha.9"]
                 self.assertEqual("2026/08/24", native_policy["released_date"])
                 self.assertNotIn("feature", native_policy)
@@ -575,7 +619,11 @@ class U1ReadmeFactsTest(unittest.TestCase):
             with self.subTest(code=code):
                 body = (README_DIR / f"README-{code}.md").read_text(encoding="utf-8")
                 self.assertIn("1 MiB", body)
-                self.assertIn("1.0-1.5", body)
+                self.assertIn("1.0-1.6", body)
+                self.assertIn("`executionMode=long-running`", body)
+                self.assertIn("15 s", body)
+                self.assertIn("45 s", body)
+                self.assertIn("2 min", body)
                 self.assertIn("64 KiB", body)
                 self.assertIn("16 MiB", body)
                 self.assertIn("16384", body)
@@ -628,6 +676,8 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("直接 `sys.stdin` 始终有限", simplified)
         self.assertIn("协议 1.4 增加显式严格 JSON 结果", simplified)
         self.assertIn("协议 1.5 增加绑定单次执行", simplified)
+        self.assertIn("协议 1.6 增加显式 `long-running`", simplified)
+        self.assertIn("`executionMode=long-running`", simplified)
         self.assertIn("`toast`", simplified)
         self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", simplified)
         self.assertIn("`dialogs.alert/confirm/prompt/select`", simplified)
@@ -659,6 +709,8 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("Direct `sys.stdin` remains finite", english)
         self.assertIn("Protocol 1.4 adds explicit strict JSON", english)
         self.assertIn("Protocol 1.5 adds a pure-data Host capability broker", english)
+        self.assertIn("Protocol 1.6 adds explicit `long-running`", english)
+        self.assertIn("`executionMode=long-running`", english)
         self.assertIn("`toast`", english)
         self.assertIn("`files.read_text/write_text/exists/is_file/is_dir/list`", english)
         self.assertIn("`dialogs.alert/confirm/prompt/select`", english)
