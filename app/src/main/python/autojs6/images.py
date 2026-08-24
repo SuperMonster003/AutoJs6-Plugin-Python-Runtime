@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import base64
 import binascii
+from collections.abc import Iterator
+from contextlib import contextmanager
 import hashlib
 import os
 import re
@@ -126,6 +128,26 @@ def find_image(
         0,
         MAX_COLOR_THRESHOLD,
     )
+    with _uploaded_template(template) as (template_id, width, height):
+        value = _expect_object(
+            _call(
+                "images.find_image",
+                {
+                    "templateId": template_id,
+                    "threshold": image_threshold,
+                    "region": search_region,
+                },
+            ),
+            "images.find_image",
+        )
+        return _image_match(value, search_region, width, height)
+
+
+@contextmanager
+def _uploaded_template(
+    template: bytes | bytearray | memoryview,
+) -> Iterator[tuple[str, int, int]]:
+    """Retain one bounded image in the Host for the duration of a capability call."""
     payload, image_format = _template_payload(template)
     release_id: str | None = None
     try:
@@ -185,18 +207,7 @@ def find_image(
             if offset != len(payload) or dimensions is None:
                 _invalid("images.write_template_chunk returned an incomplete template")
             width, height = dimensions
-            value = _expect_object(
-                _call(
-                    "images.find_image",
-                    {
-                        "templateId": template_id,
-                        "threshold": image_threshold,
-                        "region": search_region,
-                    },
-                ),
-                "images.find_image",
-            )
-            return _image_match(value, search_region, width, height)
+            yield template_id, width, height
         finally:
             if release_id is not None:
                 if sys.exc_info()[0] is None:

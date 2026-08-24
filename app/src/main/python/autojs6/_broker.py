@@ -27,6 +27,7 @@ _UNAVAILABLE_CODES = frozenset(
         "BROKER_CLOSED",
         "ACCESSIBILITY_UNAVAILABLE",
         "SCREEN_CAPTURE_UNAVAILABLE",
+        "OCR_UNAVAILABLE",
     )
 )
 
