@@ -16,4 +16,6 @@ automatic handoff are the authoritative observations.
 
 Stopping `second.py` while it waits is an additional smoke: it must never print
 `second admitted`, must not stop `first.py`, and must not block a later launch.
-No Android device smoke is claimed by merely compiling these example files.
+The focused checklist passed on `QV710AF65F` after installing the exact Host
+`afca7b14c` arm64 APK; this does not claim a broader device matrix or parallel
+CPython execution.

@@ -3,8 +3,9 @@
 This document describes the M5 concurrent-admission behavior introduced by
 AutoJs6 Host commits `afe6f3c73` and `b8cd0d01c`, then integrated into current
 Host `master` at `afca7b14c`. It records a current-tree source and offline JVM
-contract. The first device attempt described below used an older Host build
-without that integration and therefore does not constitute Android acceptance.
+contract plus the focused Android acceptance described below. The first device
+attempt used an older Host build without that integration and remains recorded
+as a useful negative diagnosis; the subsequent `afca7b14c` retest passed.
 Publication, true parallel CPython execution, and release qualification are not
 claimed.
 
@@ -89,10 +90,27 @@ waiter. After this diagnosis, the two queue commits were merged with the current
 Host identity-refactor tree and fast-forwarded to Host `master` at `afca7b14c`;
 the seven focused Python JVM suites and `assembleAppDebug` pass there.
 
-The Android FIFO retest remains pending. It must use a Host APK built from
-`afca7b14c` or a descendant containing `PythonRuntimeExecutionQueue`; Plugin
-versionCode 81 is sufficient because protocol 1.6, the AARs, and the Provider
-binary did not change for Host-side queuing.
+## 2026-08-24 `afca7b14c` device acceptance
+
+The user installed the exact arm64 Host APK built from `afca7b14c` on
+`QV710AF65F` and reported that the complete manual checklist matched the
+expected behavior with no issue:
+
+- `second.py` waited behind `first.py` instead of reaching Provider
+  `BUSY/SESSION_OPEN`;
+- it started automatically only after the first runtime generation completed
+  and retired, with the expected fresh Plugin PID;
+- stopping `second.py` while it was queued did not disturb `first.py`, and the
+  stopped waiter never entered its Python body;
+- a later launch still ran normally, proving that queue removal and ownership
+  handoff remained healthy.
+
+Only the Host APK was reported as replaced, so this record carries forward the
+previously identified Python Runtime versionCode 81. That is sufficient because
+protocol 1.6, the AARs, and the Provider binary did not change for Host-side
+queuing. This closes the focused M5 concurrent-admission Android smoke; it does
+not expand the claim to 32-waiter saturation, a device matrix, publication, or
+true parallel CPython.
 
 ## Manual smoke
 
@@ -112,5 +130,5 @@ Use `examples/python/m5_concurrency` from the AutoJs6 file explorer:
    must wait without opening a second foreground notification, then start after
    the notification Stop action retires the long-running generation.
 
-Record exact Host and Plugin commits if this is used to close the Roadmap
-device-smoke item. The portable and JVM tests alone do not close that item.
+Future device-matrix or release checks should record exact Host and Plugin
+commits, APK hashes, API/ABI, and page size independently.

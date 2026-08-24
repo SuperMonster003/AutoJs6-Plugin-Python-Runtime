@@ -43,7 +43,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
             "focused long-running Android smoke passes",
             "BUSY/SESSION_OPEN",
             "afca7b14c",
-            "concurrency Android retest remains pending",
+            "fresh-PID generation handoff",
+            "queued Stop isolation",
+            "focused concurrency Android smoke passes",
         ):
             self.assertIn(marker, common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
