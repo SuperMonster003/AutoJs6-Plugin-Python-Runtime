@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.3
+
+###### 2026/08/24
+
+* `Hint` Third M5 current-tree alpha candidate; focused long-running and Host FIFO Android smokes pass on QV710AF65F, and measured startup keeps process retention out of scope without claiming publication or release
+* `Improvement` Measure five fresh-process launches at 441/447/429/427/428 ms with five distinct Plugin PIDs; the all-sample median is 429 ms, the median excluding the first run is 428.5 ms, and the maximum is 447 ms
+* `Improvement` Close process-prewarm evaluation below the 1000 ms threshold: retain per-execution process retirement and its state-isolation/cancellation semantics instead of adding a keep-process option
+
 # v0.5.0-alpha.2
 
 ###### 2026/08/24

@@ -5,6 +5,16 @@
   "changelog_label_improvement": "Amélioration",
   "changelog_label_dependency": "Dépendance",
   "$data": {
+    "v0.5.0-alpha.3": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "Troisième candidat alpha M5 current-tree ; les smokes Android ciblés long-running et FIFO Host passent sur QV710AF65F, et la mesure du démarrage écarte la rétention de processus sans revendiquer publication ni release"
+      ],
+      "improvement": [
+        "Mesurer cinq lancements fresh-process à 441/447/429/427/428 ms avec cinq PID Plugin distincts ; la médiane de tous les échantillons est 429 ms, celle sans le premier lancement 428.5 ms, et le maximum 447 ms",
+        "Clore l'évaluation du préchauffage sous le seuil de 1000 ms : conserver la retraite per-execution et ses sémantiques d'isolation/annulation au lieu d'ajouter une option keep-process"
+      ]
+    },
     "v0.5.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [

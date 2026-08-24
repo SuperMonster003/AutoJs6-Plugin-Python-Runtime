@@ -5,6 +5,16 @@
   "changelog_label_improvement": "Улучшено",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v0.5.0-alpha.3": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "Третий M5 current-tree alpha-кандидат; целевые Android-smoke long-running и FIFO Host проходят на QV710AF65F, а измеренный запуск исключает retention процесса без заявления публикации или release"
+      ],
+      "improvement": [
+        "Пять запусков fresh-process заняли 441/447/429/427/428 ms с пятью разными PID Plugin; медиана всех образцов равна 429 ms, без первого запуска 428.5 ms, максимум 447 ms",
+        "Оценка prewarm закрыта ниже порога 1000 ms: сохраняются retirement per-execution и семантика изоляции/отмены вместо добавления опции keep-process"
+      ]
+    },
     "v0.5.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [

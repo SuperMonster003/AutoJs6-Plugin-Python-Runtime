@@ -1,8 +1,9 @@
 # M5 process-prewarm evaluation
 
-Status: the measurement path is implemented without changing protocol or
-runtime lifetime. Physical-device samples are still required before deciding
-whether to add an execution-afterlife option.
+Status: accepted on `QV710AF65F` on 2026-08-24. The measured median is
+`429 ms`, below the `1000 ms` decision threshold, so process retention is not
+justified. The runtime keeps its existing per-execution process retirement and
+no execution-afterlife option is added.
 
 ## Product metric
 
@@ -59,5 +60,32 @@ Decision rule:
   contamination risk;
 - invalid, negative, queued, or interrupted samples are discarded and rerun.
 
-This probe does not itself claim a device result, a warm-process implementation,
-or a release qualification.
+## 2026-08-24 QV710AF65F result
+
+The probe was run five times on an idle `QV710AF65F`, waiting for each run to
+finish before starting the next. The accepted Host context remained
+`afca7b14c`, versionCode `5276`; no Plugin package change was reported after the
+preceding accepted versionCode `81` smoke.
+
+| Run | `startup_probe_ms` | Plugin PID | Engine ID | Full Host duration |
+| ---: | ---: | ---: | ---: | ---: |
+| 1 | 441 ms | 26868 | 5 | 471 ms |
+| 2 | 447 ms | 27018 | 6 | 475 ms |
+| 3 | 429 ms | 27055 | 7 | 456 ms |
+| 4 | 427 ms | 27091 | 8 | 452 ms |
+| 5 | 428 ms | 27121 | 9 | 455 ms |
+
+The sorted startup values are `427, 428, 429, 441, 447 ms`. Their arithmetic
+mean is `434.4 ms`, the all-sample median is `429 ms`, and the median excluding
+the first run is `428.5 ms`. The minimum is `427 ms`, the maximum is `447 ms`,
+and the range is `20 ms`. The median full Host duration is `456 ms`.
+
+All five Plugin PIDs are distinct, consistent with a fresh process generation
+for every dispatched execution. Every startup value is below `1000 ms`, and
+even the maximum has more than 50% headroom to the threshold. The evaluation is
+therefore closed with decision **NO PROCESS RETENTION**: preserve deterministic
+per-execution retirement, state isolation, and process-restart cancellation;
+do not add a keep-process option, protocol field, or runtime-lifetime branch.
+
+This is a focused device decision for the prewarm Roadmap item. It does not by
+itself claim a complete device matrix, publication, or release qualification.

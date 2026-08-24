@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.3
+
+###### 2026/08/24
+
+* `안내` 세 번째 M5 current-tree alpha 후보입니다. QV710AF65F에서 long-running 및 Host FIFO focused Android smoke가 통과했고 startup 측정으로 process retention을 범위에서 제외하지만 publication 또는 release 완료를 주장하지 않습니다
+* `개선` 5회의 fresh-process launch가 441/447/429/427/428 ms이고 서로 다른 Plugin PID 5개를 확인했습니다. 전체 sample median은 429 ms, 첫 실행 제외 median은 428.5 ms, 최댓값은 447 ms입니다
+* `개선` 1000 ms threshold 아래에서 process-prewarm 평가를 종료합니다. keep-process option을 추가하지 않고 per-execution process retirement 및 state-isolation/cancellation semantics를 유지합니다
+
 # v0.5.0-alpha.2
 
 ###### 2026/08/24

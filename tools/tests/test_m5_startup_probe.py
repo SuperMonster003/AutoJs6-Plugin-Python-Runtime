@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import statistics
 import unittest
 
 
@@ -44,7 +45,18 @@ class M5StartupProbeTest(unittest.TestCase):
         self.assertLess(capture, broker_call)
         self.assertIn("first_python_wall_millis < engine_started_at_millis", source)
 
-    def test_guide_and_roadmap_require_measurement_before_retention(self) -> None:
+    def test_accepted_samples_close_retention_evaluation(self) -> None:
+        samples = [441, 447, 429, 427, 428]
+        plugin_pids = [26868, 27018, 27055, 27091, 27121]
+        self.assertEqual(429, statistics.median(samples))
+        self.assertEqual(428.5, statistics.median(samples[1:]))
+        self.assertEqual(427, min(samples))
+        self.assertEqual(447, max(samples))
+        self.assertEqual(20, max(samples) - min(samples))
+        self.assertEqual(5, len(set(plugin_pids)))
+        self.assertTrue(all(sample <= 1000 for sample in samples))
+
+    def test_guide_and_roadmap_close_measurement_without_retention(self) -> None:
         guide = " ".join(GUIDE.read_text(encoding="utf-8").split())
         roadmap = " ".join(ROADMAP.read_text(encoding="utf-8").split())
         for marker in (
@@ -52,12 +64,22 @@ class M5StartupProbeTest(unittest.TestCase):
             "Run the project five times",
             "median above 1000 ms",
             "retain per-execution retirement",
-            "does not itself claim a device result",
+            "441 ms",
+            "428.5 ms",
+            "five Plugin PIDs are distinct",
+            "NO PROCESS RETENTION",
+            "does not by itself claim a complete device matrix",
         ):
             self.assertIn(marker, guide)
-        self.assertIn("进程预热评估", roadmap)
-        self.assertIn("5 次", roadmap)
-        self.assertIn("1000 ms", roadmap)
+        for marker in (
+            "[x] [P] **进程预热评估**",
+            "441/447/429/427/428 ms",
+            "429 ms",
+            "428.5 ms",
+            "NO PROCESS RETENTION",
+            "M5 核心交付收口",
+        ):
+            self.assertIn(marker, roadmap)
 
 
 if __name__ == "__main__":

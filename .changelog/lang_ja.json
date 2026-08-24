@@ -5,6 +5,16 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v0.5.0-alpha.3": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "3 番目の M5 current-tree alpha candidate。QV710AF65F で long-running と Host FIFO の focused Android smoke が通過し、startup 実測により process retention を対象外としましたが、publication や release は主張しません"
+      ],
+      "improvement": [
+        "5 回の fresh-process launch は 441/447/429/427/428 ms で、5 個の異なる Plugin PID を確認しました。全 sample の median は 429 ms、初回を除く median は 428.5 ms、最大値は 447 ms です",
+        "1000 ms threshold 未満のため process-prewarm 評価を終了し、keep-process option を追加せず、per-execution process retirement と state-isolation/cancellation semantics を維持します"
+      ]
+    },
     "v0.5.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [

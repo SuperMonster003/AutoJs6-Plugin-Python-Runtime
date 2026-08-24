@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.3
+
+###### 2026/08/24
+
+* `提示` 第三個 M5 current-tree alpha 候選版; QV710AF65F 上的長任務及 Host FIFO Android 聚焦冒煙均通過, 冷啟動實測決定不引入程序保留, 不聲明發佈或 release 完成
+* `改善` 5 次 fresh-process 啟動為 441/447/429/427/428 ms, 對應 5 個不同 Plugin PID; 全樣本中位數為 429 ms, 排除首次後的中位數為 428.5 ms, 最大值為 447 ms
+* `改善` 低於 1000 ms 門檻後關閉程序預熱評估: 保留 per-execution 程序退休及其狀態隔離/取消語義, 不新增 keep-process 選項
+
 # v0.5.0-alpha.2
 
 ###### 2026/08/24

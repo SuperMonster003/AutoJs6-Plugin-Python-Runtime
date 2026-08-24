@@ -5,6 +5,16 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v0.5.0-alpha.3": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "第三个 M5 current-tree alpha 候选版; QV710AF65F 上的长任务与 Host FIFO Android 聚焦冒烟均通过, 冷启动实测决定不引入进程保留, 不声明发布或 release 完成"
+      ],
+      "improvement": [
+        "5 次 fresh-process 启动为 441/447/429/427/428 ms, 对应 5 个不同 Plugin PID; 全样本中位数为 429 ms, 排除首次后的中位数为 428.5 ms, 最大值为 447 ms",
+        "低于 1000 ms 门槛后关闭进程预热评估: 保留 per-execution 进程退休及其状态隔离/取消语义, 不新增 keep-process 选项"
+      ]
+    },
     "v0.5.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [

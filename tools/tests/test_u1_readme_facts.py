@@ -24,7 +24,7 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_current_protocol_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0-alpha.2", common["release_target"])
+        self.assertEqual("0.5.0-alpha.3", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("protocol 1.6", common["release_state"])
         self.assertIn("foreground-only long-running", common["release_state"])
@@ -47,8 +47,14 @@ class U1ReadmeFactsTest(unittest.TestCase):
             "queued Stop isolation",
             "focused concurrency Android smoke passes",
             "no-runtime-change startup probe",
-            "five idle QV710AF65F samples",
-            "1000 ms prewarm decision still pending",
+            "441/447/429/427/428 ms",
+            "five distinct Plugin PIDs",
+            "all-sample median is 429 ms",
+            "median excluding the first run is 428.5 ms",
+            "maximum is 447 ms",
+            "below the 1000 ms threshold",
+            "process retention is not justified",
+            "per-execution retirement remains",
         ):
             self.assertIn(marker, common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
@@ -400,6 +406,26 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     self.assertIn(marker, concurrency["feature"][0])
                 for marker in ("3", "1.6", "AAR", "Plugin"):
                     self.assertIn(marker, concurrency["improvement"][0])
+
+                prewarm = source["$data"]["v0.5.0-alpha.3"]
+                self.assertEqual("2026/08/24", prewarm["released_date"])
+                self.assertEqual(1, len(prewarm["hint"]))
+                self.assertNotIn("feature", prewarm)
+                self.assertNotIn("fix", prewarm)
+                self.assertNotIn("dependency", prewarm)
+                self.assertEqual(2, len(prewarm["improvement"]))
+                for marker in ("M5", "QV710AF65F"):
+                    self.assertIn(marker, prewarm["hint"][0])
+                for marker in (
+                    "441/447/429/427/428 ms",
+                    "429 ms",
+                    "428.5 ms",
+                    "447 ms",
+                    "Plugin",
+                ):
+                    self.assertIn(marker, prewarm["improvement"][0])
+                for marker in ("1000 ms", "per-execution", "keep-process"):
+                    self.assertIn(marker, prewarm["improvement"][1])
 
                 native_policy = source["$data"]["v0.4.0-alpha.9"]
                 self.assertEqual("2026/08/24", native_policy["released_date"])

@@ -5,6 +5,16 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "اعتماد",
   "$data": {
+    "v0.5.0-alpha.3": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "مرشح alpha ثالث لـ M5 current-tree؛ تنجح اختبارات Android المركزة لوضع long-running وFIFO في Host على QV710AF65F، ويستبعد قياس بدء التشغيل الاحتفاظ بالعملية من النطاق دون ادعاء النشر أو release"
+      ],
+      "improvement": [
+        "قياس خمس عمليات fresh-process عند 441/447/429/427/428 ms مع خمسة معرّفات PID مختلفة لـ Plugin؛ وسيط جميع العينات 429 ms، والوسيط دون التشغيل الأول 428.5 ms، والحد الأقصى 447 ms",
+        "إغلاق تقييم prewarm دون عتبة 1000 ms: الاحتفاظ بتقاعد العملية per-execution ودلالات العزل/الإلغاء بدلاً من إضافة خيار keep-process"
+      ]
+    },
     "v0.5.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [

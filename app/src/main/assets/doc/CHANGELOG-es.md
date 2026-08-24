@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.3
+
+###### 2026/08/24
+
+* `Nota` Tercer candidato alpha M5 current-tree; pasan los smokes Android focalizados de long-running y FIFO Host en QV710AF65F, y la medición de arranque deja fuera la retención de proceso sin afirmar publicación ni release
+* `Mejora` Medir cinco arranques fresh-process en 441/447/429/427/428 ms con cinco PID Plugin distintos; la mediana de todas las muestras es 429 ms, sin la primera ejecución 428.5 ms, y el máximo 447 ms
+* `Mejora` Cerrar la evaluación de precalentamiento por debajo del umbral de 1000 ms: conservar el retiro per-execution y su aislamiento/cancelación en lugar de añadir una opción keep-process
+
 # v0.5.0-alpha.2
 
 ###### 2026/08/24
