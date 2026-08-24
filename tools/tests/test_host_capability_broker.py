@@ -25,6 +25,7 @@ from autojs6 import (  # noqa: E402
     files,
     images,
     notice,
+    ocr,
     selector,
     toast,
 )
@@ -127,6 +128,7 @@ class RecordingBroker:
         self.template_releases: list[str] = []
         self.template_dimensions = (4, 3)
         self.image_match: tuple[int, int] | None = (17, 29)
+        self.ocr_lines = ["AutoJs6", "中文 OCR"]
 
     def dispatch(self, request_json: str) -> str:
         self.raw_requests.append(request_json)
@@ -324,6 +326,11 @@ class RecordingBroker:
                         "x": self.image_match[0],
                         "y": self.image_match[1],
                     }
+            elif capability == "ocr.recognize":
+                retained = self.retained_template
+                if retained is None or arguments["templateId"] != retained[0]:
+                    raise AssertionError("unexpected stale OCR image")
+                value = list(self.ocr_lines)
             elif capability == "images.release_template":
                 template_id = arguments["templateId"]
                 pending_id = None if self.pending_template is None else self.pending_template["id"]
@@ -1294,6 +1301,102 @@ class HostCapabilityBrokerTest(unittest.TestCase):
                     HostCapabilityError
                 ) as captured:
                     images.find_image(PNG_BYTES, region=(10, 20, 100, 200))
+                self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
+            self.assertEqual("images.release_template", broker.calls[-1][0])
+
+    def test_ocr_recognize_uploads_bounded_image_and_always_releases(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            self.assertEqual(("AutoJs6", "中文 OCR"), ocr.recognize(memoryview(PNG_BYTES)))
+        finally:
+            _reset_execution_broker(token)
+
+        self.assertEqual(
+            [
+                "images.begin_template",
+                "images.write_template_chunk",
+                "images.write_template_chunk",
+                "ocr.recognize",
+                "images.release_template",
+            ],
+            [capability for capability, _ in broker.calls],
+        )
+        self.assertEqual(
+            {"templateId": "template-1"},
+            broker.calls[-2][1],
+        )
+        self.assertEqual([("template-1", PNG_BYTES, "png")], broker.uploaded_templates)
+        self.assertEqual(["template-1"], broker.template_releases)
+        self.assertIsNone(broker.retained_template)
+
+    def test_ocr_recognize_rejects_invalid_images_before_dispatch(self) -> None:
+        broker = RecordingBroker()
+        token = _install_execution_broker(broker, EXECUTION_ID)
+        try:
+            for invalid in ("png", [], b"", b"not-an-image"):
+                with self.subTest(invalid=invalid), self.assertRaises((TypeError, ValueError)):
+                    ocr.recognize(invalid)
+            self.assertEqual([], broker.calls)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_ocr_recognize_maps_stable_failures_and_preserves_primary_error(self) -> None:
+        for code, error_type in (
+            ("OCR_UNAVAILABLE", CapabilityUnavailableError),
+            ("OCR_FAILED", HostCapabilityError),
+            ("RESULT_LIMIT_EXCEEDED", HostCapabilityError),
+            ("STALE_TEMPLATE", HostCapabilityError),
+        ):
+            broker = RecordingBroker()
+            broker.capability_failures["ocr.recognize"] = (code, "OCR failure")
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.subTest(code=code), self.assertRaises(error_type) as captured:
+                    ocr.recognize(JPEG_BYTES)
+                if isinstance(captured.exception, HostCapabilityError):
+                    self.assertEqual(code, captured.exception.code)
+            finally:
+                _reset_execution_broker(token)
+            self.assertEqual("images.release_template", broker.calls[-1][0])
+
+        primary = RecordingBroker()
+        primary.capability_failures["ocr.recognize"] = ("OCR_FAILED", "recognition failed")
+        primary.capability_failures["images.release_template"] = (
+            "HOST_FAILURE",
+            "release also failed",
+        )
+        token = _install_execution_broker(primary, EXECUTION_ID)
+        try:
+            with self.assertRaises(HostCapabilityError) as captured:
+                ocr.recognize(JPEG_BYTES)
+            self.assertEqual("OCR_FAILED", captured.exception.code)
+        finally:
+            _reset_execution_broker(token)
+
+    def test_ocr_recognize_rejects_malformed_or_oversized_results(self) -> None:
+        malformed_values = (
+            "not-a-list",
+            [1],
+            ["x"] * (ocr.MAX_LINES + 1),
+            ["x" * (ocr.MAX_LINE_BYTES + 1)],
+            ["x" * ocr.MAX_LINE_BYTES]
+            * (ocr.MAX_TOTAL_TEXT_BYTES // ocr.MAX_LINE_BYTES + 1),
+            ["\ud800"],
+        )
+        for malformed in malformed_values:
+            broker = RecordingBroker()
+            broker.capability_mutators["ocr.recognize"] = (
+                lambda response, value=malformed: response.__setitem__("value", value)
+            )
+            token = _install_execution_broker(broker, EXECUTION_ID)
+            try:
+                with self.subTest(malformed=type(malformed).__name__), self.assertRaises(
+                    HostCapabilityError
+                ) as captured:
+                    ocr.recognize(PNG_BYTES)
                 self.assertEqual("BROKER_PROTOCOL_ERROR", captured.exception.code)
             finally:
                 _reset_execution_broker(token)
