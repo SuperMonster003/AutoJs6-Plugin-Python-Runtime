@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.6
+
+###### 2026/08/24
+
+* `提示` 第六個 M3 automation current-tree alpha 候選版; 已設定 Host OCR 的正向辨識在具備合格服務的 API 37 模擬器通過, API 31 實機在不變更其無障礙服務的前提下完成故障關閉; 更豐富的 OCR、發佈及完整裝置矩陣不在本聲明範圍內
+* `新增` 新增 `autojs6.ocr.recognize(image)`, 接受有界 PNG/JPEG 位元組, 並從已設定 Host OCR 引擎回傳有序不可變文字行 tuple
+* `改善` 重用 1 MiB PNG/JPEG 上傳、24 KiB 原始分塊與 SHA-256 驗證, 僅選擇已啟用、已授權且相容的 Host OCR 服務, 結果限制為 256 行、每行 4 KiB 嚴格 UTF-8、合計 48 KiB, 一律 release 並清零緩衝區, 以穩定 `OCR_UNAVAILABLE` 或 `OCR_FAILED` 回報失敗
+
 # v0.4.0-alpha.5
 
 ###### 2026/08/24

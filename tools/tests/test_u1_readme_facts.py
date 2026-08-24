@@ -24,13 +24,14 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.4.0-alpha.5", common["release_target"])
+        self.assertEqual("0.4.0-alpha.6", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
         self.assertIn("selector/UI-tree", common["release_state"])
         self.assertIn("screen capture", common["release_state"])
         self.assertIn("find_color", common["release_state"])
         self.assertIn("find_image", common["release_state"])
+        self.assertIn("Host OCR", common["release_state"])
         self.assertIn("M4 Path A", common["release_state"])
         self.assertIn("project-local pure-Python", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
@@ -82,6 +83,10 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertEqual("1048576", common["max_host_image_template_pixels"])
         self.assertEqual("4194304", common["max_host_image_match_region_pixels"])
         self.assertEqual("16777216", common["max_host_image_match_comparisons"])
+        self.assertEqual("256", common["max_host_ocr_lines"])
+        self.assertEqual("4 KiB", common["max_host_ocr_line_bytes"])
+        self.assertEqual("48 KiB", common["max_host_ocr_total_bytes"])
+        self.assertEqual("60 s", common["host_ocr_call_timeout"])
         for code in LANGUAGE_CODES:
             with self.subTest(code=code):
                 source = json.loads(
@@ -123,6 +128,7 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("`images.capture_screen`", broker_features[0])
                 self.assertIn("`images.find_color`", broker_features[0])
                 self.assertIn("`images.find_image`", broker_features[0])
+                self.assertIn("`ocr.recognize`", broker_features[0])
                 self.assertIn("{{ max_stdin_bytes }}", source["p_plugin_scope"])
                 self.assertIn("1.3", source["p_plugin_scope"])
                 self.assertIn("1.4", source["p_plugin_scope"])
@@ -223,6 +229,25 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "`STALE_IMAGE`",
                 ):
                     self.assertIn(error_code, image_limits[0])
+                ocr_limits = [
+                    item
+                    for item in source["security_limits"]
+                    if "{{ max_host_ocr_lines }}" in item
+                ]
+                self.assertEqual(1, len(ocr_limits))
+                for placeholder in (
+                    "{{ max_host_image_template_bytes }}",
+                    "{{ max_host_image_template_chunk_bytes }}",
+                    "{{ max_host_image_template_dimension }}",
+                    "{{ max_host_image_template_pixels }}",
+                    "{{ max_host_ocr_lines }}",
+                    "{{ max_host_ocr_line_bytes }}",
+                    "{{ max_host_ocr_total_bytes }}",
+                    "{{ host_ocr_call_timeout }}",
+                ):
+                    self.assertIn(placeholder, ocr_limits[0])
+                self.assertIn("`OCR_UNAVAILABLE`", ocr_limits[0])
+                self.assertIn("`OCR_FAILED`", ocr_limits[0])
                 network_limits = [item for item in source["security_limits"] if "INTERNET" in item]
                 self.assertEqual(1, len(network_limits))
                 self.assertIn("pip", network_limits[0])
@@ -264,6 +289,24 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                host_ocr = source["$data"]["v0.4.0-alpha.6"]
+                self.assertEqual("2026/08/24", host_ocr["released_date"])
+                self.assertEqual(1, len(host_ocr["feature"]))
+                self.assertIn("ocr.recognize", host_ocr["feature"][0])
+                self.assertIn("PNG/JPEG", host_ocr["feature"][0])
+                for boundary in (
+                    "1 MiB",
+                    "24 KiB",
+                    "SHA-256",
+                    "256",
+                    "4 KiB",
+                    "48 KiB",
+                    "OCR_UNAVAILABLE",
+                    "OCR_FAILED",
+                    "release",
+                ):
+                    self.assertIn(boundary, host_ocr["improvement"][0])
+
                 template_image = source["$data"]["v0.4.0-alpha.5"]
                 self.assertEqual("2026/08/24", template_image["released_date"])
                 self.assertEqual(1, len(template_image["feature"]))

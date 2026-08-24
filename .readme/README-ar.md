@@ -51,7 +51,7 @@ Python Runtime هو provider مستقل للإصدار V1 من بروتوكول 
 - استيراد حزم pure-Python المحلية للمشروع وبيانات `.dist-info` من جذر المشروع المقبول دون pip عبر الإنترنت أو تثبيت وقت التشغيل.
 - إرسال chunks محدودة من stdout/stderr بترتيبها الأصلي أثناء التنفيذ؛ يفرض نفاد credits ضغطا عكسيا على التنفيذ.
 - تعيين نتيجة JSON صارمة وصريحة بحجم أقصاه 64 KiB ونقل ما يصل إلى 16 من output artifacts الاختيارية ضمن حدود المسار والحجم وSHA-256 في البروتوكول 1.4؛ ولا تستنتج النتيجة من stdout.
-- استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات و`files.read_text/write_text/exists/is_file/is_dir/list` المحدود و`dialogs.alert/confirm/prompt/select` المقصور على foreground و`engines.current/run/stop_self` و`automator.click/long_click/press/swipe/back/home` المحدود و`selector.snapshot/find/click/set_text` المحدود و`images.capture_screen` و`images.find_color` و`images.find_image` مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
+- استدعاء `toast` و`clip.get/set` و`app.launch/launch_app/open_url` و`device.info` و`console.log/warn/error` و`notice` المراعي للأذونات و`files.read_text/write_text/exists/is_file/is_dir/list` المحدود و`dialogs.alert/confirm/prompt/select` المقصور على foreground و`engines.current/run/stop_self` و`automator.click/long_click/press/swipe/back/home` المحدود و`selector.snapshot/find/click/set_text` المحدود و`images.capture_screen` و`images.find_color` و`images.find_image` و`ocr.recognize` مباشرة عبر broker بيانات خالصة مرتبط بالتنفيذ في البروتوكول 1.5 ويُلغى عند النهاية.
 - إرجاع `SystemExit` وأخطاء الصياغة والتنفيذ مع traceback منظم ومحدود.
 - السماح بجلسة نشطة واحدة لكل عملية دون طابور لدى provider.
 - لا حاجة لإعادة تشغيل المضيف: يعيد التنفيذ الجديد التالي بعد التثبيت أو إعادة التفعيل اكتشاف provider وتثبيت هويته، بينما ينهي Binder death أثناء التشغيل ذلك التنفيذ دون إعادة تلقائية.
@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.4.0-alpha.5
-release state: 0.4.0-alpha.5 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, and bounded PNG/JPEG find_image template matching passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.6
+release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -135,6 +135,7 @@ runtime/security/release owner: SuperMonster003
 - لا تقبل إحداثيات automator إلا أعدادا صحيحة من 0 إلى 1000000، وتتراوح مدة press وswipe من 1 ms إلى 4 s؛ يؤدي عدم توفر Host accessibility إلى `CapabilityUnavailableError` دون فتح الإعدادات.
 - يقبل snapshot الخاص بـ selector حتى 128 عقدة وعمقا 32 و48 KiB من JSON؛ ويفحص find حتى 1024 عقدة، ويحد نص العقدة عند 256 Unicode code points ونص الاستعلام عند 1024 UTF-8 bytes وset_text عند 4 KiB، ويحتفظ كل تنفيذ بما يصل إلى 128 مرجعا للعقد. يعيد الفحص غير المكتمل `SELECTOR_SCAN_LIMIT_EXCEEDED` والمرجع القديم `STALE_NODE`.
 - تحتفظ screen capture بما يصل إلى 1 صورة لكل تنفيذ، وتحد البيانات المشفرة عند 4 MiB والكتلة الخام عند 32 KiB وكل بُعد عند 8192 بكسل والمساحة الكلية عند 16777216 بكسل. يتحقق Python من الطول والترتيب وEOF وSHA-256 وتوقيع التنسيق قبل الإرجاع؛ يؤدي عدم توفر accessibility/API إلى `CapabilityUnavailableError`، وتشمل الأخطاء الثابتة `SCREEN_CAPTURE_FAILED` و`RESULT_LIMIT_EXCEEDED` و`STALE_IMAGE`. يبحث color search في لقطة جديدة بترتيب الصفوف مع منطقة محدودة اختيارية وحد لكل قناة حتى 255، ولا يعيد إلا إحداثيا أو عدم تطابق من دون نقل بايتات الصورة. يحتفظ template search بما يصل إلى 1 قالب PNG/JPEG، ويحده عند 1 MiB وينقل raw chunks بحجم 24 KiB، مع حد البعد 2048 والمساحة 1048576 ومنطقة البحث 4194304 والمقارنات 16777216؛ تشارك pixels المعتمة بالكامل فقط والبقية wildcards، ويكون المسح deterministic row-major، وتُحرر buffers وتُصفّر عند النهاية.
+- يعيد `ocr.recognize` استخدام غلاف PNG/JPEG بحجم 1 MiB وraw chunks بحجم 24 KiB وحد 2048 pixels لكل ضلع و1048576 pixels بعد decode. يعيد Host OCR engine المضبوط بحد أقصى 256 سطرا و4 KiB من strict UTF-8 لكل سطر و48 KiB إجمالا ضمن admission/call budget الحالي 60 s؛ يبلغ عدم التوفر والفشل بـ `OCR_UNAVAILABLE` و`OCR_FAILED`، ويُحرر upload ويُصفّر دائما.
 - يعيد الإلغاء تشغيل العملية؛ تتطلب native extensions والاستدعاءات الحاجبة تحقق Android لاحقا.
 - يسمح إذن `INTERNET` للنصوص باستخدام عملاء الشبكة في المكتبة القياسية مباشرة؛ ولا يزال pip عبر الإنترنت والتنزيل التلقائي للكود وتثبيت حزم الجهات الخارجية وقت التشغيل غير مدعوم.
 
@@ -146,7 +147,7 @@ runtime/security/release owner: SuperMonster003
 
 - لا يتوفر live stdin عام ولا callback streaming مباشر لـ `sys.stdin`. يقتصر تفاعل foreground على `input()` المضمنة و`getpass.getpass()` بعد EOF للـ snapshot المحدود حتى 1 MiB. تظل الكتابة إلى workspace وpip عبر الإنترنت وتنزيل wheels غير مدعومة.
 - لا توجد نصوص UI أو debugger أو REPL أو صلاحية عشوائية لكائنات Java في المضيف.
-- يغطي broker المباشر أول مجموعة كاملة منخفضة المخاطر وHost files المحدودة وحوارات foreground وengines المحدودة وإجراءات automator الصريحة بالإحداثيات/global وsnapshot/actions المحدودة لـ selector/UI tree وscreen capture و`find_color` و`find_image` المحدودة؛ ولا تزال OCR ومعالجة الصور القابلة للتغيير والمطابقة multi-scale غير معلنة.
+- يغطي broker المباشر أول مجموعة كاملة منخفضة المخاطر وHost files المحدودة وحوارات foreground وengines المحدودة وإجراءات automator الصريحة بالإحداثيات/global وsnapshot/actions المحدودة لـ selector/UI tree وscreen capture و`find_color` و`find_image` وOCR سطرية؛ ولا تزال OCR boxes/confidence/options ومعالجة الصور القابلة للتغيير والمطابقة multi-scale غير معلنة.
 - لا يضمن Android ‏32-bit أو أي native wheel خارجي.
 - تتوفر للشجرة الحالية أدلة smoke على جهاز API 31 ‏arm64-v8a وعلى محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يقدم أي منهما كمصفوفة أجهزة كاملة أو كتأهيل release.
 
@@ -156,7 +157,7 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
-اكتمل المسار A من M4، وتشمل automation في M3 الآن إجراءات إحداثيات/global محدودة وطبقة بيانات selector/UI tree وscreen capture وبحث RGB لمرة واحدة ومطابقة قالب PNG/JPEG محدودة عبر Host accessibility. يستمر OCR ومسارات الحزم build-time/native في M4 حسب قيمة المستخدم؛ تبقى أدوات الأدلة التاريخية متاحة لكنها ليست بوابات إصدار تلقائية.
+اكتمل المسار A من M4، وتشمل automation في M3 الآن إجراءات إحداثيات/global محدودة وطبقة بيانات selector/UI tree وscreen capture وبحث RGB لمرة واحدة ومطابقة قالب PNG/JPEG محدودة والتعرف السطري عبر Host OCR engine المضبوط. تستمر عمليات image/OCR الأوسع ومسارات الحزم build-time/native في M4 حسب قيمة المستخدم؛ تبقى أدوات الأدلة التاريخية متاحة لكنها ليست بوابات إصدار تلقائية.
 
 - [عرض ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -165,6 +166,14 @@ runtime/security/release owner: SuperMonster003
 ### سجل الإصدارات
 
 ******
+
+# v0.4.0-alpha.6
+
+###### 2026/08/24
+
+* `ملاحظة` مرشح alpha السادس لشجرة M3 automation الحالية؛ نجح Host OCR recognition المضبوط على API 37 emulator بخدمة مؤهلة وفشل مغلقا على جهاز API 31 فعلي من دون تغيير accessibility services؛ تبقى OCR الأوسع والنشر ومصفوفة الأجهزة الكاملة خارج هذا الادعاء
+* `إضافة` إضافة `autojs6.ocr.recognize(image)` لبايتات PNG/JPEG محدودة وtuple ثابت ومرتب من أسطر النص يعيده Host OCR engine المضبوط
+* `تحسين` إعادة استخدام PNG/JPEG upload بحجم 1 MiB وraw chunks بحجم 24 KiB والتحقق SHA-256، واختيار Host OCR service مفعلة ومصرحا بها ومتوافقة فقط، وتحديد النتيجة عند 256 سطرا و4 KiB من strict UTF-8 لكل سطر و48 KiB إجمالا، ودائما release وتصفير buffers، والإبلاغ الثابت بـ `OCR_UNAVAILABLE` أو `OCR_FAILED`
 
 # v0.4.0-alpha.5
 
@@ -181,14 +190,6 @@ runtime/security/release owner: SuperMonster003
 * `ملاحظة` مرشح alpha رابع لأتمتة M3 في الشجرة الحالية؛ نجح بحث اللون المحدود على محاكي API 37 مع accessibility وفشل بشكل مغلق على جهاز API 31 من دون تغيير خدماته؛ يظل بحث القالب وOCR والنشر ومصفوفة الأجهزة الكاملة خارج هذا الادعاء
 * `إضافة` إضافة `autojs6.images.find_color(color, *, region=None, threshold=0)` لعدد RGB صحيح صارم أو نص `#RRGGBB` ومنطقة محدودة اختيارية ونتيجة إحداثي أو `None`
 * `تحسين` التقاط شاشة accessibility جديدة واحدة على Android 11+ لكل استدعاء ومسحها بترتيب row-major حتمي وحد لكل قناة من 0 إلى 255 والتحقق من `autojs6-python-color-match-v1` الدقيق وعدم نقل بايتات الصورة أو مقابضها إلى Python
-
-# v0.4.0-alpha.3
-
-###### 2026/08/24
-
-* `ملاحظة` مرشح alpha ثالث لأتمتة M3 في الشجرة الحالية؛ اجتاز مسار screen capture المحدود الكامل لنظام Android 11+ قبولاً مركزاً على محاكي API 37 مع تفعيل accessibility service، واجتاز fail-closed على جهاز فعلي API 31 من دون تغيير accessibility services فيه؛ يبقى البحث عن image/color وOCR والنشر ومصفوفة الأجهزة الكاملة خارج هذا الادعاء
-* `إضافة` إضافة `autojs6.images.capture_screen` لإرجاع encoded bytes موثقة بصيغة PNG/JPEG أو كتابة ونشر output artifact للتنفيذ بصورة ذرية
-* `تحسين` الاحتفاظ بما يصل إلى 1 capture لكل تنفيذ ونقل raw chunks بحجم 32 KiB وحد encoded data عند 4 MiB؛ يتحقق Python من الترتيب وEOF وSHA-256 وتواقيع التنسيق ويجري release دائماً، ويمسح Host البيانات عند الاستبدال/release/terminal ويعيد أخطاء ثابتة من دون تفعيل service أو فتح الإعدادات
 
 ##### المزيد من الإصدارات
 

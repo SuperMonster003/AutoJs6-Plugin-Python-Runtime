@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.6
+
+###### 2026/08/24
+
+* `Hint` Sixth M3 automation current-tree alpha candidate; configured Host OCR recognition passed on an eligible-service API 37 emulator and failed closed on an API 31 physical device without changing its accessibility services; richer OCR, publication, and a complete device matrix remain outside this claim
+* `Feature` Add `autojs6.ocr.recognize(image)` for bounded PNG/JPEG bytes and an immutable ordered tuple of text lines from the configured Host OCR engine
+* `Improvement` Reuse the 1 MiB PNG/JPEG upload in 24 KiB raw chunks with SHA-256 verification, select only an enabled, authorized, compatible Host OCR service, cap results at 256 lines, 4 KiB strict UTF-8 per line, and 48 KiB total, always release and zero buffers, and report stable `OCR_UNAVAILABLE` or `OCR_FAILED` failures
+
 # v0.4.0-alpha.5
 
 ###### 2026/08/24

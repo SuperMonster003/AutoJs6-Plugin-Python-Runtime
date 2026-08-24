@@ -51,7 +51,7 @@ Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte t
 - Importer depuis la racine admise des paquets Python purs locaux au projet et leurs métadonnées `.dist-info`, sans pip en ligne ni installation à l'exécution.
 - Livrer pendant l'exécution des chunks stdout/stderr bornés dans leur ordre d'origine; l'épuisement des crédits applique une contre-pression à l'exécution.
 - Définir un résultat JSON strict explicite de 64 KiB au maximum et transférer jusqu'à 16 artefacts facultatifs sous les limites de chemin, taille et SHA-256 du protocole 1.4; ne jamais déduire un résultat de stdout.
-- Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible aux autorisations, `files.read_text/write_text/exists/is_file/is_dir/list` borné, `dialogs.alert/confirm/prompt/select` réservé au premier plan, `engines.current/run/stop_self`, `automator.click/long_click/press/swipe/back/home` borné, `selector.snapshot/find/click/set_text` borné, `images.capture_screen`, `images.find_color` et `images.find_image` via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
+- Appeler en direct `toast`, `clip.get/set`, `app.launch/launch_app/open_url`, `device.info`, `console.log/warn/error`, `notice` sensible aux autorisations, `files.read_text/write_text/exists/is_file/is_dir/list` borné, `dialogs.alert/confirm/prompt/select` réservé au premier plan, `engines.current/run/stop_self`, `automator.click/long_click/press/swipe/back/home` borné, `selector.snapshot/find/click/set_text` borné, `images.capture_screen`, `images.find_color`, `images.find_image` et `ocr.recognize` via le broker de données pures du protocole 1.5 lié à l'exécution, révoqué à l'état terminal.
 - Signaler `SystemExit`, les erreurs de syntaxe et les exceptions avec une traceback structurée bornée.
 - Autoriser une session active par processus sans file d'attente côté fournisseur.
 - Ne pas redémarrer l'hôte: la prochaine nouvelle exécution après installation ou réactivation redécouvre et épingle le provider; une mort Binder en cours termine cette exécution sans jamais la rejouer.
@@ -103,8 +103,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.4.0-alpha.5
-release state: 0.4.0-alpha.5 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, and bounded PNG/JPEG find_image template matching passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.6
+release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -135,6 +135,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 - Les coordonnées automator sont des entiers stricts de 0 à 1000000, tandis que les durées de press et swipe vont de 1 ms à 4 s; une accessibilité Host indisponible lève `CapabilityUnavailableError` sans ouvrir les paramètres.
 - Les snapshots selector acceptent au plus 128 nœuds, une profondeur de 32 et 48 KiB de JSON; find parcourt au plus 1024 nœuds, le texte d'un nœud est limité à 256 Unicode code points, le texte de requête à 1024 UTF-8 bytes, set_text à 4 KiB et chaque exécution conserve au plus 128 références de nœud. Un parcours incomplet renvoie `SELECTOR_SCAN_LIMIT_EXCEEDED` et une référence périmée renvoie `STALE_NODE`.
 - La capture d'écran conserve au plus 1 image par exécution, limite les données encodées à 4 MiB, les blocs bruts à 32 KiB, chaque dimension à 8192 pixels et la surface totale à 16777216 pixels. Python vérifie longueur, ordre, EOF, SHA-256 et signature de format avant le retour; une accessibilité/API indisponible lève `CapabilityUnavailableError`, et les erreurs stables incluent `SCREEN_CAPTURE_FAILED`, `RESULT_LIMIT_EXCEEDED` et `STALE_IMAGE`. La recherche de couleur parcourt une nouvelle capture par lignes, avec région bornée facultative et seuil par canal jusqu'à 255, puis renvoie seulement une coordonnée ou une absence sans transférer les octets de l'image. La recherche par modèle conserve au plus 1 modèle PNG/JPEG, le limite à 1 MiB, transfère des blocs bruts de 24 KiB et limite chaque dimension à 2048, la surface à 1048576, la région à 4194304 et les comparaisons à 16777216; seuls les pixels totalement opaques participent, les autres sont des jokers, le parcours row-major est déterministe et les tampons sont libérés et effacés à l'état terminal.
+- `ocr.recognize` réutilise l'enveloppe PNG/JPEG de 1 MiB, des blocs bruts de 24 KiB, 2048 pixels par côté et 1048576 pixels décodés. Le moteur OCR Host configuré renvoie au plus 256 lignes, 4 KiB d'UTF-8 strict par ligne et 48 KiB au total dans le budget d'admission/appel de 60 s; un moteur indisponible ou défaillant signale `OCR_UNAVAILABLE` ou `OCR_FAILED`, et les données chargées sont toujours libérées et effacées.
 - L'annulation redémarre le processus; les extensions natives et appels bloquants restent à valider sur Android.
 - L'autorisation `INTERNET` permet aux scripts d'utiliser directement les clients réseau de la bibliothèque standard; pip en ligne, le téléchargement automatique de code et l'installation de paquets tiers à l'exécution restent non pris en charge.
 
@@ -146,7 +147,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 - Le stdin général en direct et le streaming callback de `sys.stdin` direct sont indisponibles. L'interaction au premier plan s'applique uniquement au `input()` intégré et à `getpass.getpass()` après l'EOF du snapshot fini de 1 MiB au maximum. L'écriture dans le workspace, pip en ligne et les téléchargements de wheel restent indisponibles.
 - Aucun script UI, débogueur, REPL ou accès arbitraire aux objets Java de l'hôte.
-- Le broker temps réel couvre le premier lot complet à faible risque, Host files borné, les dialogues de premier plan, engines borné, les actions automator explicites par coordonnées/globales, les snapshots/actions selector/arbre UI, la capture d'écran, `find_color` et `find_image`; OCR, le traitement d'image mutable et la recherche multi-échelle restent non déclarés.
+- Le broker temps réel couvre le premier lot complet à faible risque, Host files borné, les dialogues de premier plan, engines borné, les actions automator explicites par coordonnées/globales, les snapshots/actions selector/arbre UI, la capture d'écran, `find_color`, `find_image` et l'OCR par lignes. Les boîtes/confiance/options OCR, le traitement d'image mutable et la recherche multi-échelle restent non déclarés.
 - Le support Android 32 bits et les wheels natives tierces ne sont pas garantis.
 - L'arbre courant dispose d'un smoke sur appareil API 31 arm64-v8a et d'un smoke sur émulateur API 37 x86_64 à pages de 16 KB; aucun ne constitue une matrice complète d'appareils ni une qualification de release.
 
@@ -156,7 +157,7 @@ Le runtime Chaquopy est réservé aux scripts locaux de confiance, pas à un san
 
 ******
 
-Le chemin A de M4 est terminé, et l'automatisation M3 comprend maintenant les actions bornées par coordonnées/globales, le plan de données selector/arbre UI, la capture d'écran, la recherche RGB ponctuelle et la recherche bornée par modèle PNG/JPEG via l'accessibilité Host. OCR et les chemins M4 de paquets intégrés/native suivront la valeur utilisateur; les outils de preuve historiques restent disponibles sans être des portes de publication automatiques.
+Le chemin A de M4 est terminé, et l'automatisation M3 comprend maintenant les actions bornées par coordonnées/globales, le plan de données selector/arbre UI, la capture d'écran, la recherche RGB ponctuelle, la recherche bornée par modèle PNG/JPEG et la reconnaissance par lignes via le moteur OCR Host configuré. Des opérations image/OCR plus riches et les chemins M4 de paquets intégrés/native suivront la valeur utilisateur; les outils de preuve historiques restent disponibles sans être des portes de publication automatiques.
 
 - [Voir ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -165,6 +166,14 @@ Le chemin A de M4 est terminé, et l'automatisation M3 comprend maintenant les a
 ### Historique des versions
 
 ******
+
+# v0.4.0-alpha.6
+
+###### 2026/08/24
+
+* `Note` Sixième candidat alpha current-tree de l'automatisation M3; la reconnaissance OCR Host configurée a réussi sur un émulateur API 37 doté d'un service éligible et a échoué de façon fermée sur un appareil physique API 31 sans modifier ses services d'accessibilité; l'OCR enrichi, la publication et une matrice complète restent hors de cette déclaration
+* `Fonction` Ajouter `autojs6.ocr.recognize(image)` pour des octets PNG/JPEG bornés et un tuple immuable et ordonné de lignes issu du moteur OCR Host configuré
+* `Amélioration` Réutiliser l'upload PNG/JPEG de 1 MiB en blocs bruts de 24 KiB avec vérification SHA-256, ne sélectionner qu'un service OCR Host activé, autorisé et compatible, limiter le résultat à 256 lignes, 4 KiB d'UTF-8 strict par ligne et 48 KiB au total, toujours release et effacer les tampons, et signaler de façon stable `OCR_UNAVAILABLE` ou `OCR_FAILED`
 
 # v0.4.0-alpha.5
 
@@ -181,14 +190,6 @@ Le chemin A de M4 est terminé, et l'automatisation M3 comprend maintenant les a
 * `Note` Quatrième candidat alpha d'automatisation M3 de l'arbre actuel; la recherche de couleur bornée a réussi sur un émulateur API 37 avec accessibilité et échoué de façon fermée sur un appareil API 31 sans modifier ses services; recherche par modèle, OCR, publication et matrice complète restent hors de cette déclaration
 * `Fonction` Ajouter `autojs6.images.find_color(color, *, region=None, threshold=0)` pour un entier RGB strict ou un texte `#RRGGBB`, une région bornée facultative et un résultat coordonnée ou `None`
 * `Amélioration` Capturer un nouvel écran d'accessibilité Android 11+ par appel, le parcourir dans un ordre row-major déterministe avec un seuil par canal de 0 à 255, valider exactement `autojs6-python-color-match-v1` et ne transférer aucun octet ni handle d'image vers Python
-
-# v0.4.0-alpha.3
-
-###### 2026/08/24
-
-* `Note` Troisième candidat alpha M3 d'automatisation de l'arbre courant; le parcours complet de capture d'écran bornée Android 11+ a réussi l'acceptation ciblée sur un émulateur API 37 avec accessibilité activée, et le fail-closed a réussi sur un appareil physique API 31 sans modifier ses services d'accessibilité; recherche d'image/couleur, OCR, publication et matrice complète restent hors de cette déclaration
-* `Fonction` Ajout de `autojs6.images.capture_screen`, qui renvoie des octets PNG/JPEG vérifiés ou écrit et publie atomiquement un artefact de sortie d'exécution
-* `Amélioration` Conserver au plus 1 capture par exécution, transférer des blocs bruts de 32 KiB et limiter les données encodées à 4 MiB; Python vérifie ordre, EOF, SHA-256 et signatures de format puis effectue toujours release, tandis que Host efface au remplacement/release/terminal et signale des erreurs stables sans activer de service ni ouvrir les paramètres
 
 ##### Autres versions
 

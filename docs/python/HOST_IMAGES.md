@@ -217,14 +217,16 @@ unbounded polling loop.
 
 The module currently returns encoded bytes or an output artifact, not a mutable
 image object. It does not expose cropping, rotation, arbitrary pixel access,
-template creation from a retained capture, multi-scale/rotated matching, OCR,
-MediaProjection capture, or background service enablement. Those are separate
-Roadmap slices and are not implied by the current exact-size RGB matcher.
+template creation from a retained capture, multi-scale/rotated matching,
+MediaProjection capture, or background service enablement. Line-oriented OCR is
+a separate `autojs6.ocr` module which can consume bounded encoded bytes through
+the same upload envelope; it does not add a retained capture-to-OCR handle.
 
 See [`m3_capture_screen.py`](../../examples/python/m3_capture_screen.py),
 [`m3_find_color.py`](../../examples/python/m3_find_color.py), and
 [`m3_find_image.py`](../../examples/python/m3_find_image.py) for minimal
 examples, [`HOST_AUTOMATOR.md`](HOST_AUTOMATOR.md) and
 [`HOST_SELECTOR.md`](HOST_SELECTOR.md) for actions/UI data, and
+[`HOST_OCR.md`](HOST_OCR.md) for configured Host OCR recognition. See
 [`PYTHON_SEMANTICS_CONTRACT.md`](PYTHON_SEMANTICS_CONTRACT.md) for normative
 execution and broker semantics.

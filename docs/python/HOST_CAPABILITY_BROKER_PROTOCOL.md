@@ -1,15 +1,12 @@
 # Python Host Capability Broker Protocol 1.5
 
-Status: implemented in the current Host and Plugin development trees. The first
-capability slice covers toast, clipboard, application launch/navigation, live
-device state, level-aware Host console output and permission-aware notices. The
-second slice now includes bounded execution-relative Host files,
-foreground-only alert, confirmation, text-prompt and selection dialogs, and
-bounded current-engine/self-stop/non-Python child-launch operations. All three
-second-slice portions passed one API 31 arm64 physical-device smoke and one API
-37 x86_64 16 KiB-page emulator smoke on 2026-08-23. This document describes the
-reusable broker contract; it does not claim that later Roadmap capabilities, a
-complete device matrix or a published release exist.
+Status: implemented in the current Host and Plugin development trees. In
+addition to the original low-risk, files, dialogs, and engines slices, the
+allow-list now carries bounded automator, selector, screen-image/search, and
+configured Host OCR operations. Capability-specific object and lifetime
+contracts live in their focused documents. This document describes the reusable
+broker envelope; it does not claim that a complete device matrix or a published
+release exists.
 
 ## Negotiation and Binder compatibility
 
@@ -122,6 +119,8 @@ exact object defined by the selected capability.
 | One engine name / source name | 256 / 1024 UTF-8 bytes |
 | One ordinary Host main-thread action wait | 5 s |
 | One foreground dialog response wait | 5 min |
+| One OCR image upload | 1 MiB encoded, 24 KiB raw chunks, 2048 px/side, 1,048,576 pixels |
+| One OCR result | 256 lines, 4 KiB/line, 48 KiB aggregate strict UTF-8 |
 
 The overall Python execution deadline still applies independently. A dialog
 call holds one broker call until the user responds, the dialog is dismissed,
@@ -149,8 +148,10 @@ The Host dispatcher can return:
 | `INTERACTIVE_NOT_ALLOWED` | A Host dialog was requested without a live foreground Activity-backed grant |
 | `NESTED_PYTHON_NOT_ALLOWED` | `engines.run` selected Python while the provider's one active session is occupied |
 | `ENGINE_LAUNCH_LIMIT_EXCEEDED` | The execution already launched 16 child Host scripts successfully |
+| `OCR_UNAVAILABLE` | No enabled, authorized, compatible Host OCR engine can be selected |
+| `OCR_FAILED` | A selected Host OCR engine failed without exposing internal details |
 
-`CAPABILITY_UNAVAILABLE` and `BROKER_CLOSED` become
+`CAPABILITY_UNAVAILABLE`, `BROKER_CLOSED`, and `OCR_UNAVAILABLE` become
 `autojs6.CapabilityUnavailableError`. Other Host failures become
 `autojs6.HostCapabilityError`; its public `code` attribute contains the stable
 code. A dead Binder, closed private bridge or missing negotiated broker becomes
@@ -185,6 +186,7 @@ code. A dead Binder, closed private bridge or missing negotiated broker becomes
 | `autojs6.engines.current() -> dict[str, object]` | `engines.current` | `{}` | strict current-engine identity without an absolute path |
 | `autojs6.engines.run(path) -> dict[str, object]` | `engines.run` | `{"path": path}` | strict asynchronous child-execution handle |
 | `autojs6.engines.stop_self() -> NoReturn` | `engines.stop_self` | `{}` | queues authoritative Host cancellation; never returns to following Python code |
+| `autojs6.ocr.recognize(image) -> tuple[str, ...]` | `ocr.recognize` | `{"templateId": id}` after bounded `images.begin_template` / `images.write_template_chunk` upload | ordered bounded OCR text lines; `images.release_template` follows in `finally` |
 
 Package names must use ordinary dotted Android identifier segments. URLs must
 start with `http://` or `https://`. Empty toast/clipboard/console text is
@@ -281,10 +283,10 @@ The launch-time `app.snapshot()` and `device.snapshot()` APIs remain detached
 immutable snapshots. The execution-private workspace visible to ordinary Python
 `open()` is still a frozen Plugin-side copy and is not mutated by
 `autojs6.files`. Conversely, `autojs6.files` observes the live bounded Host root;
-it does not grant arbitrary filesystem access, expose a general Java bridge, or
-add accessibility, screenshot or OCR APIs. The bounded engines facade likewise
-does not expose Host runtime objects. Those remaining capabilities stay separate
-Roadmap items.
+it does not grant arbitrary filesystem access or expose a general Java bridge.
+Bounded accessibility, image, and OCR families remain separate explicit
+allow-list entries with contracts in `HOST_AUTOMATOR.md`, `HOST_SELECTOR.md`,
+`HOST_IMAGES.md`, and `HOST_OCR.md`; none exposes Host runtime objects.
 
 ## Trust boundary
 

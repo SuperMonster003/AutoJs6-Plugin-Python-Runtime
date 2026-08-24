@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.6
+
+###### 2026/08/24
+
+* `Note` Sixième candidat alpha current-tree de l'automatisation M3; la reconnaissance OCR Host configurée a réussi sur un émulateur API 37 doté d'un service éligible et a échoué de façon fermée sur un appareil physique API 31 sans modifier ses services d'accessibilité; l'OCR enrichi, la publication et une matrice complète restent hors de cette déclaration
+* `Fonction` Ajouter `autojs6.ocr.recognize(image)` pour des octets PNG/JPEG bornés et un tuple immuable et ordonné de lignes issu du moteur OCR Host configuré
+* `Amélioration` Réutiliser l'upload PNG/JPEG de 1 MiB en blocs bruts de 24 KiB avec vérification SHA-256, ne sélectionner qu'un service OCR Host activé, autorisé et compatible, limiter le résultat à 256 lignes, 4 KiB d'UTF-8 strict par ligne et 48 KiB au total, toujours release et effacer les tampons, et signaler de façon stable `OCR_UNAVAILABLE` ou `OCR_FAILED`
+
 # v0.4.0-alpha.5
 
 ###### 2026/08/24

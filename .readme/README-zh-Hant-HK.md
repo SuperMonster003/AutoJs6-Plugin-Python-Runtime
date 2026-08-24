@@ -51,7 +51,7 @@ Python Runtime 是獨立的 Python 協議 V1 provider. 宿主將單一 Python �
 - 從已准入項目根目錄 import 項目本地純 Python 套件及 `.dist-info` 元數據, 毋須線上 pip 或執行時安裝.
 - 在腳本執行期間按 stdout/stderr 原始次序透過有界 chunk 與 credit 傳送; credit 用盡會對執行施加背壓.
 - 透過協議 1.4 明確設定最大 64 KiB 的嚴格 JSON 結果, 並傳送最多 16 個具有路徑、大小及 SHA-256 限制的可選輸出 artifact; 絕不從 stdout 推斷結果.
-- 透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、僅限前台的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界 `automator.click/long_click/press/swipe/back/home`、有界 `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color` 及 `images.find_image`, 終態後自動撤銷.
+- 透過協議 1.5 的執行級純數據 broker 即時呼叫 `toast`、`clip.get/set`、`app.launch/launch_app/open_url`、`device.info`、`console.log/warn/error`、權限感知 `notice`、有界 `files.read_text/write_text/exists/is_file/is_dir/list`、僅限前台的 `dialogs.alert/confirm/prompt/select`、`engines.current/run/stop_self`、有界 `automator.click/long_click/press/swipe/back/home`、有界 `selector.snapshot/find/click/set_text`、`images.capture_screen`、`images.find_color`、`images.find_image` 及 `ocr.recognize`, 終態後自動撤銷.
 - 傳回 `SystemExit`, 語法錯誤和執行階段例外, 包括有界結構化 traceback.
 - 同一執行環境程序只允許一個使用中工作階段, provider 端不排隊.
 - 宿主毋須重新啟動; 安裝或重新啟用後下一次新執行會重新發現並 pin provider 身分, 執行中的 Binder death 會終止該次執行且絕不自動重播.
@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.4.0-alpha.5
-release state: 0.4.0-alpha.5 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, and bounded PNG/JPEG find_image template matching passed their enabled-service paths on the emulator and fail-closed on the physical device without changing its accessibility services; OCR, later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.6
+release state: 0.4.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, and configured Host OCR recognition passed their eligible-service paths on the emulator and failed closed on the physical device without changing its accessibility services; later M3/M4 batches, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -135,6 +135,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 - Automator 座標只接受 0 至 1000000 的嚴格整數, press 及 swipe 持續時間為 1 ms 至 4 s; Host 無障礙不可用時拋出 `CapabilityUnavailableError`, 不開啟設定.
 - Selector snapshot 最多接受 128 個節點、深度 32 及 48 KiB JSON; find 最多掃描 1024 個節點, 節點文字上限為 256 Unicode code points, 查詢文字上限為 1024 UTF-8 bytes, set_text 上限為 4 KiB, 每次執行最多保留 128 個節點引用. 掃描不完整時返回 `SELECTOR_SCAN_LIMIT_EXCEEDED`, 引用過期時返回 `STALE_NODE`.
 - 螢幕截圖每次執行最多保留 1 張, 單張編碼後最大 4 MiB, 以 32 KiB 原始區塊傳輸, 單邊最大 8192 像素且總計最多 16777216 像素. Python 在返回前核對長度、順序、EOF、SHA-256 及格式簽名; 無障礙/API 不可用拋出 `CapabilityUnavailableError`, 其他穩定錯誤包括 `SCREEN_CAPTURE_FAILED`、`RESULT_LIMIT_EXCEEDED` 及 `STALE_IMAGE`. 找色在一張最新截圖內按行優先掃描, 支援有界可選區域及最大 255 的逐通道閾值, 只返回座標或未命中且不傳輸圖像字節. 模板找圖每次執行最多保留 1 個 PNG/JPEG 模板, 最大 1 MiB, 以 24 KiB 原始區塊上傳; 單邊最大 2048, 面積最大 1048576, 搜尋區域最大 4194304, 比較次數最大 16777216; 僅全不透明像素參與匹配, 其餘為通配, 按 row-major 確定性掃描, 終態釋放並清零緩衝區.
+- `ocr.recognize` 重用最大 1 MiB、24 KiB 原始區塊、單邊 2048 像素及解碼後 1048576 像素的 PNG/JPEG 模板信封. 已配置的 Host OCR 引擎在現有 60 s 准入/呼叫預算內最多返回 256 行, 每行 4 KiB 嚴格 UTF-8, 合計 48 KiB; 引擎不可用及執行失敗分別報告 `OCR_UNAVAILABLE` 及 `OCR_FAILED`, 上傳始終釋放並清零.
 - 取消模式是程序重啟, 而非 CPython 級協作取消; 原生擴充套件或阻塞呼叫仍需後續 Android 驗證.
 - 插件已授予 `INTERNET` 以支援腳本透過標準庫直接連線; 仍不支援線上 pip、自動下載程式碼或執行時安裝第三方套件.
 
@@ -146,7 +147,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 - 不提供通用即時 stdin 或直接 `sys.stdin` callback streaming. 前台互動只適用於最大 1 MiB 的有限 snapshot 到達 EOF 後的內置 `input()` 與標準庫 `getpass.getpass()`. 仍不支援 workspace 寫回, 線上 pip 或執行階段下載 wheel.
 - 不提供 UI 指令碼, 除錯器, REPL 或任意宿主 Java 物件存取.
-- 即時 broker 已涵蓋完整首批低風險能力、有界 Host files、前台對話框、有界 engines、顯式座標/全域 automator 動作、有界 selector/UI 樹快照與動作、有界螢幕截圖、`find_color` 及 `find_image`; OCR、可變圖像處理及多尺度匹配仍未聲明.
+- 即時 broker 已涵蓋完整首批低風險能力、有界 Host files、前台對話框、有界 engines、顯式座標/全域 automator 動作、有界 selector/UI 樹快照與動作、有界螢幕截圖、`find_color`、`find_image` 及行級 OCR. OCR 檢測框/置信度/選項、可變圖像處理及多尺度匹配仍未聲明.
 - 不聲明 32 位元 Android 支援, 亦不保證任何第三方 native wheel 可用.
 - 目前樹已有 API 31 arm64-v8a 真機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格.
 
@@ -156,7 +157,7 @@ Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sand
 
 ******
 
-M4 路徑 A 已完成, M3 自動化現已透過 Host 無障礙接通有界座標/全域動作、有界 selector/UI 樹數據面、有界螢幕截圖、單次 RGB 找色及有界 PNG/JPEG 模板找圖. OCR 與 M4 構建期/native 套件路徑繼續按用戶價值推進; 歷史證據工具保留但不作自動發佈門禁.
+M4 路徑 A 已完成, M3 自動化現已接通有界座標/全域動作、有界 selector/UI 樹數據面、有界螢幕截圖、單次 RGB 找色、有界 PNG/JPEG 模板找圖, 以及透過已配置 Host OCR 引擎執行的行級識別. 更豐富的圖像/OCR 操作與 M4 構建期/native 套件路徑繼續按用戶價值推進; 歷史證據工具保留但不作自動發佈門禁.
 
 - [檢視 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -165,6 +166,14 @@ M4 路徑 A 已完成, M3 自動化現已透過 Host 無障礙接通有界座標
 ### 版本記錄
 
 ******
+
+# v0.4.0-alpha.6
+
+###### 2026/08/24
+
+* `提示` 第六個 M3 automation current-tree alpha 候選版; 已配置 Host OCR 的正向識別在具備合資格服務的 API 37 模擬器通過, API 31 實機在不改動其無障礙服務的前提下完成故障關閉; 更豐富的 OCR、發佈及完整裝置矩陣不在本聲明範圍內
+* `新增` 新增 `autojs6.ocr.recognize(image)`, 接受有界 PNG/JPEG 字節, 並從已配置 Host OCR 引擎返回有序不可變文字行 tuple
+* `改善` 重用 1 MiB PNG/JPEG 上傳、24 KiB 原始分塊及 SHA-256 校驗, 僅選擇已啟用、已授權且兼容的 Host OCR 服務, 結果限制為 256 行、每行 4 KiB 嚴格 UTF-8、合計 48 KiB, 始終 release 並清零緩衝區, 以穩定 `OCR_UNAVAILABLE` 或 `OCR_FAILED` 報告失敗
 
 # v0.4.0-alpha.5
 
@@ -181,14 +190,6 @@ M4 路徑 A 已完成, M3 自動化現已透過 Host 無障礙接通有界座標
 * `提示` 當前樹第四個 M3 自動化 alpha 候選; 有界螢幕找色已在啟用無障礙的 API 37 模擬器通過, API 31 物理機在不改變既有無障礙服務的前提下通過 fail-closed; 模板找圖、OCR、發佈及完整設備矩陣仍不在本次聲明範圍
 * `新增` 新增 `autojs6.images.find_color(color, *, region=None, threshold=0)`, 接受嚴格 RGB 整數或 `#RRGGBB` 文本、可選有界區域, 返回座標或 `None`
 * `改善` 每次呼叫只捕獲一張最新 Android 11+ 無障礙截圖, 以確定性 row-major 順序和 0..255 逐通道閾值掃描, 校驗精確 `autojs6-python-color-match-v1`, 不向 Python 傳輸圖像字節或句柄
-
-# v0.4.0-alpha.3
-
-###### 2026/08/24
-
-* `提示` 目前樹第三個 M3 自動化 alpha 候選; Android 11+ 有界螢幕截圖完整路徑已在啟用無障礙的 API 37 模擬器通過聚焦驗收, API 31 實體裝置在不變更既有無障礙服務的前提下通過 fail-closed; 找圖找色、OCR、發布及完整裝置矩陣仍不在本次聲明範圍
-* `新增` 新增 `autojs6.images.capture_screen`, 以 PNG/JPEG 返回經驗證的編碼位元組, 或原子寫入並發布執行輸出產物
-* `改善` 每次執行最多保留 1 張截圖, 以 32 KiB 原始區塊傳輸且編碼後最多 4 MiB; Python 核對順序、EOF、SHA-256 及格式簽名並始終 release, Host 在替換/釋放/終態清零, 失敗使用穩定錯誤且不啟用服務、不開啟設定
 
 ##### 更多版本
 

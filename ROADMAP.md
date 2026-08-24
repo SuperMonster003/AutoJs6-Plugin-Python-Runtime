@@ -17,7 +17,7 @@
 
 ******
 
-## 基线: 当前已具备的能力 (截至 0.4.0-alpha.5 current tree, 均有代码与本地构建门禁支撑)
+## 基线: 当前已具备的能力 (截至 0.4.0-alpha.6 current tree, 均有代码与本地构建门禁支撑)
 
 ### 运行时与执行
 
@@ -387,7 +387,15 @@
   `e51ce0f`、`38187ee`。
 - [x] [P] 找图示例 (`examples/python/m3_find_image.py`) 与上传/解码/alpha/预算/错误说明
   (`docs/python/HOST_IMAGES.md`)。
-- [ ] [H+P] `autojs6.ocr.recognize(image)` —— 复用宿主 OCR 引擎
+- [x] [H+P] `autojs6.ocr.recognize(image)` 有界行级识别: 接受最大 1 MiB 的 PNG/JPEG
+  bytes-like 图像, 复用 24 KiB 分块、SHA-256、单边 2048 / 总计 1,048,576 像素的
+  模板上传信封; 只选择宿主已启用、已授权且兼容的 OCR 服务, 返回最多 256 行、每行
+  4 KiB 严格 UTF-8、合计 48 KiB 的有序不可变 tuple。无合格引擎稳定返回
+  `OCR_UNAVAILABLE`, 已选择引擎执行失败返回 `OCR_FAILED`; 不安装/启用/授权服务,
+  不向 Python 暴露 Bitmap、Binder 或 OCR 插件对象。宿主实现/测试提交:
+  `337841107`、`4961ac13a`; 插件 façade 与 36 项聚焦 broker 测试提交:
+  `1923992`、`7538d4d`; 示例与完整契约分别为 `examples/python/m3_ocr.py` 和
+  `docs/python/HOST_OCR.md`。
 - [ ] 完整自动化示例: 一个真实的 "打开应用 → 找控件 → 点击 → 截图断言" Python 脚本
 - [ ] 发布 0.4.0
 
@@ -492,6 +500,33 @@
   `adb install --no-streaming -r -t` 覆盖安装, 未卸载、未清数据。用户已确认
   QV710AF65F 定时任务成功, 本轮找图验收未修改其定时任务或无障碍配置。
 
+### 2026-08-24 M3 Host OCR 验收记录
+
+- 宿主 OCR 选择/临时 Bitmap 生命周期、dispatcher 与结果边界测试由隔离分支提交
+  `337841107`、`4961ac13a` 固定, 并由 `f3167c703` 非快进合并到宿主主分支;
+  插件有界上传 façade、不可变结果、错误映射与恶意
+  返回防御由 `1923992`、`7538d4d` 固定。插件 188 项便携测试全部通过; 插件
+  `:app:testDebugUnitTest :app:assembleDebug` 离线构建 38 秒通过, 宿主
+  `:app:assembleAppDebug :app:assembleAppDebugAndroidTest` 离线构建 1 分 50 秒通过。
+- API 37 / x86_64 / 16 KiB page 模拟器安装同一 SM003 signer 的 ML Kit OCR
+  `1.0.0`/4 测试依赖。公共 Python 项目上传 instrumentation 现场生成的 1200 x 320
+  PNG `AUTOJS6 OCR 2026`, 经宿主既有 `OcrPluginHost` 选择并调用合格服务; 返回值类型
+  精确为 `tuple`, 合并文本同时包含 `AUTOJS6`、`OCR` 与 `2026`, 不发布产物。测试体
+  用时 2.873 秒, `OK (1 test)`。运行前后 `accessibility_enabled=0`、服务列表为 `null`,
+  证明该路径未借用或修改无障碍; 宿主、测试包及 Python Runtime 无进程残留。为遵守
+  不卸载约束, 已核验 OCR 测试依赖继续保留在该模拟器上。
+- Sony XQ-AT72 (`QV710AF65F`, API 31 / arm64-v8a / 4 KiB page) 不安装 OCR 服务;
+  公共 Python 项目调用 `ocr.recognize(...)` 时稳定得到
+  `CapabilityUnavailableError` 与精确消息
+  `No enabled, authorized, and compatible Host OCR engine is available`, 不发布产物。
+  测试体用时 0.918 秒, `OK (1 test)`。运行前后 `accessibility_enabled=1`, 既有六个
+  无障碍服务列表逐字一致且 AutoJs6 始终缺席; 测试包及 Python Runtime 无进程残留。
+- Host 5276、插件 `0.4.0-alpha.6`/66、测试 APK 与 ML Kit OCR 测试依赖均经 APK
+  Signature v2 校验为 SM003 证书 SHA-256
+  `31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213`。仅采用
+  `adb install --no-streaming -r -t` 覆盖安装, 未卸载、未清数据、未访问非授权设备。
+  用户已确认 QV710AF65F 定时任务成功, 本轮 OCR 验收未修改其定时任务或无障碍配置。
+
 ### 后续批次 (需求驱动, 出现用例再排期)
 
 - [ ] [H+P] `shell` (root/shizuku)、`sensors`、`media`、`sqlite`、`storages`、
@@ -554,7 +589,7 @@
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
-| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (automator/selector/截图/找色/找图已完成) |
+| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (automator/selector/截图/找色/找图/OCR 已完成) |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 

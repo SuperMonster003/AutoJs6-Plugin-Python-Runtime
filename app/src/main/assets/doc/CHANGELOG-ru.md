@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.6
+
+###### 2026/08/24
+
+* `Примечание` Шестой current-tree alpha-кандидат автоматизации M3; распознавание настроенного Host OCR прошло на API 37 emulator с подходящим сервисом и завершилось fail-closed на физическом устройстве API 31 без изменения его accessibility services; расширенный OCR, публикация и полная матрица устройств не входят в это заявление
+* `Добавлено` Добавить `autojs6.ocr.recognize(image)` для ограниченных PNG/JPEG bytes и неизменяемого упорядоченного tuple текстовых строк настроенного Host OCR engine
+* `Улучшено` Повторно использовать PNG/JPEG upload до 1 MiB, raw chunks по 24 KiB и проверку SHA-256, выбирать только enabled/authorized/compatible Host OCR service, ограничить результат 256 строками, 4 KiB strict UTF-8 на строку и 48 KiB суммарно, всегда release и обнулять buffers, стабильно сообщать `OCR_UNAVAILABLE` или `OCR_FAILED`
+
 # v0.4.0-alpha.5
 
 ###### 2026/08/24

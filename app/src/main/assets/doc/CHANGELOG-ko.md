@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.6
+
+###### 2026/08/24
+
+* `안내` 여섯 번째 M3 automation current-tree alpha candidate입니다. 설정된 Host OCR recognition은 eligible service가 있는 API 37 emulator에서 통과했고 API 31 physical device에서는 accessibility service를 변경하지 않고 fail-closed했습니다. 더 풍부한 OCR, publication 및 전체 device matrix는 이 claim에 포함하지 않습니다
+* `추가` 제한된 PNG/JPEG bytes를 받아 설정된 Host OCR engine의 ordered immutable text-line tuple을 반환하는 `autojs6.ocr.recognize(image)` 추가
+* `개선` 1 MiB PNG/JPEG upload, 24 KiB raw chunk 및 SHA-256 verification을 재사용하고 enabled/authorized/compatible Host OCR service만 선택합니다. 결과를 256줄, 줄당 4 KiB strict UTF-8, 합계 48 KiB로 제한하고 buffer를 항상 release/zeroize하며 `OCR_UNAVAILABLE` 또는 `OCR_FAILED`를 안정적으로 보고합니다
+
 # v0.4.0-alpha.5
 
 ###### 2026/08/24

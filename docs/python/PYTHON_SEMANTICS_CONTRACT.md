@@ -384,7 +384,15 @@ The current public Python surface is:
   editable=None, enabled=None, scrollable=None, max_nodes=512, max_depth=32)
   -> dict[str, object] | None` for an AND-composed first match;
 - `autojs6.selector.click(node: str | dict[str, object]) -> bool` and
-  `autojs6.selector.set_text(node: str | dict[str, object], text: str) -> bool`.
+  `autojs6.selector.set_text(node: str | dict[str, object], text: str) -> bool`;
+- `autojs6.images.capture_screen(*, format="png", quality=100, path=None)
+  -> bytes | str`;
+- `autojs6.images.find_color(color, *, region=None, threshold=0)
+  -> tuple[int, int] | None`;
+- `autojs6.images.find_image(template, *, region=None, threshold=0)
+  -> tuple[int, int] | None`;
+- `autojs6.ocr.recognize(image) -> tuple[str, ...]` through the configured Host
+  OCR engine.
 
 These are live Host operations, distinct from the detached launch-time
 `app.snapshot()` and `device.snapshot()` data. Every request is bound to the
@@ -558,9 +566,37 @@ digest/decode/dimensions, or an all-wildcard template return
 `INVALID_IMAGE_TEMPLATE`. Malformed transfer, acknowledgement, color-match, or
 template-match data returns `BROKER_PROTOCOL_ERROR`.
 Android image objects and callbacks never cross the process boundary. Mutable
-images, cropping, arbitrary pixel access, capture-to-template handles,
-multi-scale/rotated matching, and OCR remain undeclared. The full transfer,
-search, error and artifact contract is documented in `HOST_IMAGES.md`.
+images, cropping, arbitrary pixel access, capture-to-template handles, and
+multi-scale/rotated matching remain undeclared. The full transfer, search,
+error and artifact contract is documented in `HOST_IMAGES.md`.
+
+`ocr.recognize(image)` accepts the same PNG/JPEG bytes-like values and bounded
+upload envelope as `images.find_image`: 1 MiB encoded, 24 KiB ordered chunks,
+2048 pixels per side, 1,048,576 decoded pixels, and at least one alpha-255
+pixel. It returns an immutable tuple in the exact line order supplied by the
+Host-selected OCR plugin. Empty recognition is `()`; Python does not trim,
+merge, sort, deduplicate, or infer text.
+
+The Host selects only an enabled, authorized and Host-compatible service from
+its existing OCR plugin host, respecting configured variant priority. It copies
+the retained pixels into a temporary `ARGB_8888` bitmap, clears the copied
+array, invokes the existing line-oriented OCR AIDL path, then erases/recycles
+the bitmap. Python always releases the upload and clears its mutable copy. No
+OCR implementation/model, Android bitmap, Binder, plugin object, or callback
+crosses into Python, and the API never installs/enables/authorizes a service or
+opens settings.
+
+Recognition is limited to 256 lines, 4 KiB strict UTF-8 per line, and 48 KiB of
+aggregate line text, in addition to the 64 KiB encoded broker-response limit.
+The Host validates external output and Python repeats the checks. No eligible
+engine returns stable `OCR_UNAVAILABLE`, mapped to
+`CapabilityUnavailableError`; selected-engine failure returns `OCR_FAILED`;
+image/result overflow uses `RESULT_LIMIT_EXCEEDED`, stale upload lifetime uses
+`STALE_TEMPLATE`, invalid upload/decode uses `INVALID_IMAGE_TEMPLATE`, and a
+malformed result uses `BROKER_PROTOCOL_ERROR`. Detection boxes, confidence,
+orientation, engine/language/profile options, preprocessing, and a direct
+capture-to-OCR handle remain undeclared. The full contract is documented in
+`HOST_OCR.md`.
 
 Android rejects accessibility screenshot requests made within 333 ms of the
 previous accepted request. Only exact
@@ -613,6 +649,25 @@ byte-for-byte unchanged with AutoJs6 absent. Neither run uninstalled packages
 or cleared application data. The emulator was restored to the one enabled and
 bound AutoJs6 service with empty binding/crashed sets; this remains focused
 current-tree acceptance rather than a release claim.
+
+Focused Host-OCR acceptance exercised the public Python project engine against
+Host 5276 and Plugin `0.4.0-alpha.6`/66. On the API 37 x86_64 16 KiB-page
+emulator, an SM003-signed ML Kit OCR `1.0.0`/4 service recognized an
+instrumentation-generated 1200 x 320 PNG containing `AUTOJS6 OCR 2026` through
+the configured `OcrPluginHost` path. Python returned an immutable tuple whose
+combined text contained all three controlled tokens, published no artifact,
+and completed in 2.873 seconds with `OK (1 test)`. Accessibility remained
+disabled with a null service list before and after; Host, test and Python
+Runtime processes did not remain after instrumentation. The verified OCR test
+dependency remains installed on that emulator rather than being uninstalled.
+On Sony XQ-AT72 (`QV710AF65F`, API 31, arm64-v8a, 4 KiB pages), no OCR service
+was installed and the same public API failed closed with the exact
+`CapabilityUnavailableError` message in 0.918 seconds. Its
+`accessibility_enabled=1` state and pre-existing six-service list remained
+byte-for-byte unchanged with AutoJs6 absent. Installs used only
+`adb install --no-streaming -r -t`; no package was uninstalled, no app data was
+cleared, and this remains focused current-tree acceptance rather than a release
+claim.
 
 Focused selector acceptance exercised the public Python project engine against
 the paired Host 5276 and Plugin `0.4.0-alpha.2`/54 builds. On the API 37 x86_64
