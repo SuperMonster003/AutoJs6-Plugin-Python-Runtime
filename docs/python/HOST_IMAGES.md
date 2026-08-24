@@ -228,7 +228,7 @@ See [`m3_capture_screen.py`](../../examples/python/m3_capture_screen.py),
 examples. The
 [`m3_complete_automation`](../../examples/python/m3_complete_automation)
 project combines a real Settings launch, selector click, destination check, and
-PNG structure/dimension assertion in one bounded workflow.
+PNG structure/destination-control containment assertion in one bounded workflow.
 See [`HOST_AUTOMATOR.md`](HOST_AUTOMATOR.md) and
 [`HOST_SELECTOR.md`](HOST_SELECTOR.md) for actions/UI data, and
 [`HOST_OCR.md`](HOST_OCR.md) for configured Host OCR recognition. See

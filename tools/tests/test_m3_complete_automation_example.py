@@ -51,10 +51,6 @@ def _node(
     }
 
 
-def _tree(*nodes: dict[str, object]) -> dict[str, object]:
-    return {"nodes": list(nodes)}
-
-
 def _png_header(width: int, height: int) -> bytes:
     ihdr = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
     checksum = zlib.crc32(b"IHDR" + ihdr) & 0xFFFFFFFF
@@ -88,25 +84,24 @@ class _FakeSelector:
             clickable=True,
             bounds=(126, 142, 1080, 331),
         )
-        self.snapshots = [
-            _tree(
-                _node("node-1-1", package_name=SETTINGS_PACKAGE),
-                self.home_control,
-            ),
-            _tree(
-                _node("node-2-1", package_name=SEARCH_PACKAGE),
-                self.destination_editor,
-            ),
-        ]
+        self.destination_visible = False
+        self.find_calls: list[dict[str, object]] = []
         self.clicked: list[dict[str, object]] = []
 
-    def snapshot(self, *, max_nodes: int, max_depth: int) -> dict[str, object]:
-        if (max_nodes, max_depth) != (128, 32):
+    def find(self, **arguments: object) -> dict[str, object] | None:
+        self.find_calls.append(arguments)
+        if arguments.get("max_nodes") != 512 or arguments.get("max_depth") != 32:
             raise AssertionError("Example changed its bounded selector profile")
-        return self.snapshots.pop(0)
+        resource_id = arguments.get("resource_id")
+        if resource_id == HOME_SEARCH_RESOURCE_ID and not self.destination_visible:
+            return self.home_control
+        if resource_id == OPEN_SEARCH_RESOURCE_ID and self.destination_visible:
+            return self.destination_editor
+        return None
 
     def click(self, node: dict[str, object]) -> bool:
         self.clicked.append(node)
+        self.destination_visible = node is self.home_control
         return node is self.home_control
 
 
@@ -127,14 +122,16 @@ class M3CompleteAutomationExampleTest(unittest.TestCase):
             f'SETTINGS_PACKAGE = "{SETTINGS_PACKAGE}"',
             f'HOME_SEARCH_RESOURCE_ID = "{HOME_SEARCH_RESOURCE_ID}"',
             "MAX_BACK_STEPS = 4",
+            "selector.find(",
             "selector.click(search_control)",
             'images.capture_screen(',
             'path=ARTIFACT_PATH',
             'header[12:16] != b"IHDR"',
-            '"matchesUiBounds": True',
+            '"containsDestinationControl": True',
             "result.set(run())",
         ):
             self.assertIn(marker, source)
+        self.assertNotIn("selector.snapshot", source)
 
         readme = (EXAMPLE / "README.md").read_text(encoding="utf-8")
         for marker in (
@@ -175,6 +172,10 @@ class M3CompleteAutomationExampleTest(unittest.TestCase):
 
         self.assertEqual([fake_selector.home_control], fake_selector.clicked)
         self.assertEqual(
+            [HOME_SEARCH_RESOURCE_ID, OPEN_SEARCH_RESOURCE_ID],
+            [call["resource_id"] for call in fake_selector.find_calls],
+        )
+        self.assertEqual(
             [{"format": "png", "quality": 100, "path": "screens/settings-search.png"}],
             capture_calls,
         )
@@ -185,18 +186,22 @@ class M3CompleteAutomationExampleTest(unittest.TestCase):
         self.assertTrue(outcome["clicked"])
         self.assertEqual(0, outcome["backSteps"])
         self.assertEqual(
+            {"left": 126, "top": 142, "right": 1080, "bottom": 331},
+            outcome["destinationBounds"],
+        )
+        self.assertEqual(
             {
                 "artifact": "screens/settings-search.png",
                 "format": "png",
                 "width": 1080,
                 "height": 2424,
                 "bytes": 45,
-                "matchesUiBounds": True,
+                "containsDestinationControl": True,
             },
             outcome["screenshot"],
         )
 
-    def test_mismatched_screenshot_and_ui_dimensions_fail_closed(self) -> None:
+    def test_destination_outside_screenshot_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             image = pathlib.Path(directory) / "wrong-size.png"
             image.write_bytes(_png_header(720, 1280))
@@ -215,7 +220,7 @@ class M3CompleteAutomationExampleTest(unittest.TestCase):
             with mock.patch.dict(sys.modules, {"autojs6": fake_autojs6}):
                 with self.assertRaisesRegex(
                     AssertionError,
-                    r"PNG=720x1280, UI=1080x2424",
+                    r"PNG=720x1280, bounds=\(126, 142, 1080, 331\)",
                 ):
                     runpy.run_path(str(MAIN), run_name="__main__")
 
