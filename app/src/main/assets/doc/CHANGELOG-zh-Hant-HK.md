@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.4
+
+###### 2026/08/25
+
+* `提示` 第四個 current-tree alpha 候選版; M6 將未發佈的 0.2/0.3/0.4 實現節點統一累計到 0.5.0, 不聲明 beta、穩定版、signing 或 publication 完成
+* `新增` 新增 `tools/verify-m6-candidate.py`, 以明確 `--source-only`/`--full` 檔位檢查 clean Git、版本、Changelog、生成文件及 AAR lock, 並可追加便攜測試、R2 靜態門禁和 offline debug build
+* `改善` 固定 10 項 Android 冒煙清單及 alpha → beta → 0.5.0 晉級次序; 本地門禁不執行 ADB、signing、tag、push 或 publication
+
 # v0.5.0-alpha.3
 
 ###### 2026/08/24

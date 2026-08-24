@@ -143,8 +143,10 @@ class M4NativePackageAdmissionTest(unittest.TestCase):
             self.assertIn("ADR 0004", source)
             self.assertIn("stdlib-only", source)
         self.assertIn("[x] [P] **路径 C (native 包评估)**", roadmap)
-        self.assertIn("路径 B/C 均已评估且不接纳", roadmap)
         self.assertIn("`NOT_ADMITTED`", roadmap)
+        self.assertIn("**0.4.0 单独发布项关闭**", roadmap)
+        self.assertIn("自动化核心及 M4 B/C 决策已累计进入 `0.5.0`", roadmap)
+        self.assertIn("未单独发布; 累计进入 0.5.0", roadmap)
         self.assertIn("No native package was admitted", policy)
         self.assertIn("complete dual-ABI 16 KiB alignment gate", semantics)
 

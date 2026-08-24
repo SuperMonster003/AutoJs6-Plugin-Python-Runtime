@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.4
+
+###### 2026/08/25
+
+* `注記` 4 番目の current-tree alpha candidate。M6 は未公開の 0.2/0.3/0.4 waypoint を 1 つの累積 0.5.0 train に統合し、beta、stable release、signing、publication は主張しません
+* `追加` `tools/verify-m6-candidate.py` に明示的な `--source-only`/`--full` profile を追加し、clean Git、version、Changelog、generated document、AAR lock に加えて portable test、R2 static gate、offline debug build を検査します
+* `改善` 10 項目の Android smoke checklist と alpha → beta → 0.5.0 promotion を固定します。local gate は ADB、signing、tag、push、publication を実行しません
+
 # v0.5.0-alpha.3
 
 ###### 2026/08/24

@@ -55,6 +55,7 @@ __pycache__/
 !/tools/verify-r6-release-source.ps1
 !/tools/verify-r6-stable-release.ps1
 !/tools/write-r6-rc-provenance.ps1
+!/tools/verify-m6-candidate.py
 
 /gradle/wrappers/backup/
 

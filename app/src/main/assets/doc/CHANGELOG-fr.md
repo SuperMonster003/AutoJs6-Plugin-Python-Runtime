@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.4
+
+###### 2026/08/25
+
+* `Note` Quatrième candidat alpha current-tree ; M6 regroupe les étapes 0.2/0.3/0.4 non publiées dans un train cumulatif 0.5.0 sans revendiquer beta, version stable, signing ni publication
+* `Fonction` Ajouter `tools/verify-m6-candidate.py` avec les profils explicites `--source-only` et `--full` pour contrôler clean Git, version, Changelog, documents générés et AAR lock, puis les tests portables, la porte R2 statique et un offline debug build
+* `Amélioration` Définir une liste de smoke Android en 10 points et la promotion alpha → beta → 0.5.0 ; la porte locale n'exécute aucune opération ADB, signing, tag, push ou publication
+
 # v0.5.0-alpha.3
 
 ###### 2026/08/24

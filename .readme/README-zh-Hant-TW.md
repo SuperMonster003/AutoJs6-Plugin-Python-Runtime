@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂與三件 AAR distribution manifest 已寫入 lock. 每次新執行都重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後無須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.5.0-alpha.3
-release state: 0.5.0-alpha.3 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; on QV710AF65F with Host versionCode 5276 and Plugin versionCode 81, notification Stop ended the script, the project rebound cleanly, and a subsequent run remained healthy through tick=70 (about 350 seconds), so the focused long-running Android smoke passes; the paired Host now admits concurrent Python launches through one fair FIFO owner plus 32 bounded waiters before Provider binding, supports interruptible queued Stop, and waits up to 3 seconds for dispatched process-generation retirement before handoff while the Plugin remains single-session with no provider queue; the first concurrency attempt on that device reached Provider BUSY/SESSION_OPEN because the installed Host did not yet contain FIFO integration; after installing the exact afca7b14c arm64 Host APK, the user confirmed the full documented FIFO order, fresh-PID generation handoff, queued Stop isolation, and later rerun checklist matched expectations with no issue, so the focused concurrency Android smoke passes; the no-runtime-change startup probe on QV710AF65F measured 441/447/429/427/428 ms with five distinct Plugin PIDs; the all-sample median is 429 ms, the median excluding the first run is 428.5 ms, and the maximum is 447 ms; every sample is below the 1000 ms threshold, so process retention is not justified and per-execution retirement remains; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-alpha.4
+release state: 0.5.0-alpha.4 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; on QV710AF65F with Host versionCode 5276 and Plugin versionCode 81, notification Stop ended the script, the project rebound cleanly, and a subsequent run remained healthy through tick=70 (about 350 seconds), so the focused long-running Android smoke passes; the paired Host now admits concurrent Python launches through one fair FIFO owner plus 32 bounded waiters before Provider binding, supports interruptible queued Stop, and waits up to 3 seconds for dispatched process-generation retirement before handoff while the Plugin remains single-session with no provider queue; the first concurrency attempt on that device reached Provider BUSY/SESSION_OPEN because the installed Host did not yet contain FIFO integration; after installing the exact afca7b14c arm64 Host APK, the user confirmed the full documented FIFO order, fresh-PID generation handoff, queued Stop isolation, and later rerun checklist matched expectations with no issue, so the focused concurrency Android smoke passes; the no-runtime-change startup probe on QV710AF65F measured 441/447/429/427/428 ms with five distinct Plugin PIDs; the all-sample median is 429 ms, the median excluding the first run is 428.5 ms, and the maximum is 447 ms; every sample is below the 1000 ms threshold, so process retention is not justified and per-execution retirement remains; M6 consolidates the unpublished 0.2/0.3/0.4 implementation waypoints into one cumulative 0.5.0 release train and adds a read-only source profile plus a full local candidate gate with a ten-item manual Android smoke checklist; neither profile uses ADB, signing, network, tagging, pushing, or publication; M4 Path D, the exact signed-candidate smoke, beta/stable promotion, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,14 @@ M4 路徑 A 已完成; M4 路徑 B 與 Path C 評估均以 `NOT_ADMITTED` 關閉
 
 ******
 
+# v0.5.0-alpha.4
+
+###### 2026/08/25
+
+* `提示` 第四個 current-tree alpha 候選版; M6 將未發布的 0.2/0.3/0.4 實作節點統一累計到 0.5.0, 不宣稱 beta、穩定版、signing 或 publication 完成
+* `新增` 新增 `tools/verify-m6-candidate.py`, 以明確 `--source-only`/`--full` 模式檢查 clean Git、版本、Changelog、生成文件與 AAR lock, 並可追加可攜測試、R2 靜態門禁和 offline debug build
+* `改善` 固定 10 項 Android 冒煙清單及 alpha → beta → 0.5.0 晉級順序; 本機門禁不執行 ADB、signing、tag、push 或 publication
+
 # v0.5.0-alpha.3
 
 ###### 2026/08/24
@@ -184,14 +192,6 @@ M4 路徑 A 已完成; M4 路徑 B 與 Path C 評估均以 `NOT_ADMITTED` 關閉
 * `提示` 第二個 M5 current-tree alpha 候選版; Host FIFO 並行准入原始碼與離線 JVM/可攜門禁已通過, 但尚未執行 Android 並行冒煙, 不宣稱 true parallel CPython、預熱、發布或 release 完成
 * `新增` 在 Provider 探索前以公平 Host FIFO 接納並行 Python 啟動: 1 個 active owner 加最多 32 個 waiter; queued Stop 可中斷, 不繫結 Plugin、不消耗 request timeout, 也不提前建立長任務前景通知
 * `改善` 已 dispatch 工作階段 close 後最多保留 Provider binding 3 秒, 確認程序世代退休再做 FIFO 交接; 協定 1.6、三件 AAR 與 Plugin 單一工作階段/無 provider 佇列邊界均維持不變
-
-# v0.5.0-alpha.1
-
-###### 2026/08/24
-
-* `提示` 首個 M5 current-tree alpha 候選版; 協定 1.6 前景長任務原始碼與 Host/Plugin 離線 JVM、便攜門禁已通過, 但尚未執行 M5 真機冒煙, 不宣告發布、並行或程序預熱完成
-* `新增` 新增專案級 `executionMode=long-running`: 移除執行 deadline, 由 Host `specialUse` 前景服務、常駐通知與 Stop action 維持生命週期; 排程、背景/Intent/開發者入口穩定拒絕且不降級
-* `改善` Provider 每 15 s 發布有序心跳, Host 強制 2 min 啟動租約、45 s 心跳租約與獨立前景服務租約; 存活性遺失及手動停止均 fail closed 並沿用程序重啟取消, 有界協定 1.0-1.5 保持相容
 
 ##### 更多版本
 

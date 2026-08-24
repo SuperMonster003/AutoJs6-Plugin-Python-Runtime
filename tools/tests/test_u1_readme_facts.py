@@ -24,7 +24,7 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_current_protocol_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0-alpha.3", common["release_target"])
+        self.assertEqual("0.5.0-alpha.4", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("protocol 1.6", common["release_state"])
         self.assertIn("foreground-only long-running", common["release_state"])
@@ -55,6 +55,14 @@ class U1ReadmeFactsTest(unittest.TestCase):
             "below the 1000 ms threshold",
             "process retention is not justified",
             "per-execution retirement remains",
+            "M6 consolidates the unpublished 0.2/0.3/0.4",
+            "cumulative 0.5.0 release train",
+            "read-only source profile",
+            "full local candidate gate",
+            "ten-item manual Android smoke checklist",
+            "neither profile uses ADB, signing, network, tagging, pushing, or publication",
+            "exact signed-candidate smoke",
+            "beta/stable promotion",
         ):
             self.assertIn(marker, common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
@@ -406,6 +414,34 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     self.assertIn(marker, concurrency["feature"][0])
                 for marker in ("3", "1.6", "AAR", "Plugin"):
                     self.assertIn(marker, concurrency["improvement"][0])
+
+                cadence = source["$data"]["v0.5.0-alpha.4"]
+                self.assertEqual("2026/08/25", cadence["released_date"])
+                self.assertEqual(1, len(cadence["hint"]))
+                self.assertEqual(1, len(cadence["feature"]))
+                self.assertEqual(1, len(cadence["improvement"]))
+                self.assertNotIn("fix", cadence)
+                self.assertNotIn("dependency", cadence)
+                for marker in ("M6", "0.2/0.3/0.4", "0.5.0"):
+                    self.assertIn(marker, cadence["hint"][0])
+                for marker in (
+                    "`tools/verify-m6-candidate.py`",
+                    "`--source-only`",
+                    "`--full`",
+                    "R2",
+                    "offline",
+                ):
+                    self.assertIn(marker, cadence["feature"][0])
+                for marker in (
+                    "10",
+                    "alpha",
+                    "beta",
+                    "0.5.0",
+                    "ADB",
+                    "signing",
+                    "publication",
+                ):
+                    self.assertIn(marker, cadence["improvement"][0])
 
                 prewarm = source["$data"]["v0.5.0-alpha.3"]
                 self.assertEqual("2026/08/24", prewarm["released_date"])

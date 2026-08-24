@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.4
+
+###### 2026/08/25
+
+* `Hint` Fourth current-tree alpha candidate; M6 consolidates the unpublished 0.2/0.3/0.4 waypoints into one cumulative 0.5.0 train without claiming beta, stable release, signing, or publication
+* `Feature` Add `tools/verify-m6-candidate.py` with explicit `--source-only` and `--full` profiles for clean Git/version/changelog/generated-document/AAR-lock checks plus portable tests, the R2 static gate, and an offline debug build
+* `Improvement` Define one 10-item Android smoke checklist and the alpha → beta → 0.5.0 promotion sequence; the local gate performs no ADB, signing, tag, push, or publication operation
+
 # v0.5.0-alpha.3
 
 ###### 2026/08/24

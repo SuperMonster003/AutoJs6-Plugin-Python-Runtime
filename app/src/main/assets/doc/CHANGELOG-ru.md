@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.4
+
+###### 2026/08/25
+
+* `Примечание` Четвёртый current-tree alpha-кандидат; M6 объединяет неопубликованные этапы 0.2/0.3/0.4 в один накопительный цикл 0.5.0 без заявления beta, стабильного релиза, signing или publication
+* `Добавлено` Добавить `tools/verify-m6-candidate.py` с явными профилями `--source-only` и `--full` для проверки clean Git, версии, Changelog, созданных документов и AAR lock, а также portable-тестов, статического gate R2 и offline debug build
+* `Улучшено` Зафиксировать Android smoke checklist из 10 пунктов и продвижение alpha → beta → 0.5.0; локальный gate не выполняет ADB, signing, tag, push или publication
+
 # v0.5.0-alpha.3
 
 ###### 2026/08/24

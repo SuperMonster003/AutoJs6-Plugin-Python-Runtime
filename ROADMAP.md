@@ -110,7 +110,8 @@
   均已确认只声明一次该权限。
 - [x] [P] **标准库联网真机验收**: `urllib.request.urlopen('https://...')` 经 CPython SSL
   栈读取 HTTPS 200 响应成功。
-- [ ] [H+P] 以上完成后发布 **0.2.0** (双 ABI + universal APK, 真机冒烟清单通过即发)。
+- [x] [H+P] **0.2.0 单独发布项关闭**: 功能与真机验收均已累计进入 `0.5.0`
+  release train, 不补造未曾发布的 0.2.0 tag; 统一按 M6 清单晋级。
 
 ### 2026-08-23 M1 真机与模拟器冒烟记录
 
@@ -241,7 +242,7 @@
 - [x] [P] 首批低风险能力示例脚本
   (`examples/python/m3_low_risk_capabilities.py`)。
 - [x] [H+P] 协议 1.5 公共引擎双设备冒烟 (物理设备 arm64 + 16 KiB page x86_64 模拟器)。
-- [ ] 发布 0.3.0-alpha。
+- [x] **0.3.0-alpha 单独发布项关闭**: 首批能力已累计进入 `0.5.0`, 不补发历史 tag。
 
 ### 2026-08-23 M3 首批 broker 验收记录
 
@@ -286,7 +287,7 @@
   `3707d9318`、`0c4df640e`; 插件提交: `454fcd3`、`cd204f2`。
 - [x] [P] Host engines 示例脚本 (`examples/python/m3_engines.py` 与
   `examples/python/m3_engines_child.js`)。
-- [ ] 发布 0.3.x alpha
+- [x] **0.3.x alpha 单独发布项关闭**: 第二批能力已累计进入 `0.5.0`, 不补发历史 tag。
 
 ### 2026-08-23 M3 Host files 验收记录
 
@@ -397,7 +398,8 @@
   `1923992`、`7538d4d`; 示例与完整契约分别为 `examples/python/m3_ocr.py` 和
   `docs/python/HOST_OCR.md`。
 - [x] 完整自动化示例: 一个真实的 "打开应用 → 找控件 → 点击 → 截图断言" Python 脚本
-- [ ] 发布 0.4.0
+- [x] **0.4.0 单独发布项关闭**: 自动化核心及 M4 B/C 决策已累计进入 `0.5.0`,
+  不补发历史 tag。
 
 ### 2026-08-23 M3 automator 基础动作验收记录
 
@@ -689,22 +691,45 @@
 | 版本 | 内容 | 状态 |
 | --- | --- | --- |
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
-| 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
-| 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
-| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (自动化核心已完成; 路径 B/C 均已评估且不接纳) |
-| 0.5.x | M5 长任务/并发/预热 | 核心完成 (长任务/并发真机通过; 冷启动中位数 429 ms, 不实施进程保留) |
+| 0.2.x | M1 体验补全 + M2 入口收尾 | 实现完成, 未单独发布; 累计进入 0.5.0 |
+| 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 实现完成, 未单独发布; 累计进入 0.5.0 |
+| 0.4.x | M3 自动化核心 + M4 第三方包路径 B/C | 实现/决策完成, 未单独发布; 累计进入 0.5.0 |
+| 0.5.0-alpha.N | M1-M5 累计 current-tree 候选 | 当前阶段 |
+| 0.5.0-beta.1 | 功能冻结 + 完整本地门禁 + 精确候选 10 项真机冒烟 | 下一阶段 |
+| 0.5.0 | 0.1.0 后首个累计稳定版 | 待 beta 验收与明确发布授权 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
+
+### M6 推进状态
+
+- [x] **单一 release train**: 未发布的 0.2/0.3/0.4 实现节点统一累计到 `0.5.0`,
+  不创建追溯性 tag, 晋级顺序固定为 alpha → beta → stable。
+- [x] **轻量本地候选门禁**: 新增 `tools/verify-m6-candidate.py`:
+  - `--source-only` 检查 clean Git/提交数版本、十语 Changelog 顺序、生成文档一致性、
+    三件 Host API AAR 哈希与无陈旧 release 输出;
+  - `--full` 追加全部便携测试、R2 filesystem-static 门禁及 Python 3.13 驱动的
+    Gradle offline debug 单测/构建;
+  - 两档均不运行 ADB、不读签名口令、不生成 release APK、不写证据 receipt、不改 Git、
+    不 tag/push/publish。
+- [x] **十项真机冒烟清单**: 固定单文件/项目与流式输出、导入、输入、结构化结果/产物、
+  低风险能力、files/dialogs/engines、自动化/图像/OCR、长任务、FIFO 并发、定时任务与
+  热插拔十项; 失败即 issue + 聚焦回归, 不再生成哈希绑定证据包。
+- [ ] **晋级 beta**: 在精确 signed candidate 上跑完十项清单并记录简短 PASS/FAIL;
+  失败项修复后重跑, 全通过才改为 `0.5.0-beta.1`。
+- [ ] **发布 0.5.0**: beta 验收通过后, 仅在明确授权下构建 signed release、创建 tag、
+  push 与发布; 本地候选门禁 PASS 不等于发布授权。
+
+完整规则与十项操作清单见
+[M6 lightweight release process](docs/maintenance/M6_RELEASE_PROCESS.md)。
 
 ### 轻量验证约定 (代替证据等级流程)
 
 - 本地快速回归 (离线, 避免外网 Cloudflare 超时):
   ```powershell
-  $env:PYTHONDONTWRITEBYTECODE = '1'
-  python -B -m unittest tools.tests.test_bootstrap -v
-  .\gradlew.bat --offline --console=plain :app:testDebugUnitTest :app:assembleDebug
+  python -B tools/verify-m6-candidate.py --source-only
+  python -B tools/verify-m6-candidate.py --full
   ```
-- 发版前: 真机冒烟清单 (约 10 项手动操作, 覆盖当版新能力 + 停止/重启/热插拔),
-  通过即发布。
+- beta/stable 晋级前: 在精确 signed candidate 上执行十项真机冒烟清单; 全通过仅表示
+  允许晋级, 实际签名构建、tag、push 与发布仍分别需要明确授权。
 - 历史 U1 证据工具 (`tools/verify-u1-*`, `tools/device/*`) 与报告继续保留可用,
   供需要时复核, 但**不再作为任何版本的发布前置**。
 - 新能力的验证方式: 一个示例脚本在真机跑通即视为完成; 后续异常按 M5 异常修复通道处理。

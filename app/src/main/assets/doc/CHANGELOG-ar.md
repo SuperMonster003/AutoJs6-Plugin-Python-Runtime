@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.4
+
+###### 2026/08/25
+
+* `ملاحظة` مرشح alpha رابع من current-tree؛ يجمع M6 محطات 0.2/0.3/0.4 غير المنشورة في مسار تراكمي واحد 0.5.0 دون ادعاء beta أو إصدار مستقر أو signing أو publication
+* `إضافة` إضافة `tools/verify-m6-candidate.py` بملفي تعريف صريحين `--source-only` و`--full` لفحص clean Git والإصدار وChangelog والمستندات المولدة وAAR lock، ثم الاختبارات المحمولة وبوابة R2 الثابتة وoffline debug build
+* `تحسين` تثبيت Android smoke checklist من 10 عناصر وتسلسل الترقية alpha → beta → 0.5.0؛ لا تنفذ البوابة المحلية أي ADB أو signing أو tag أو push أو publication
+
 # v0.5.0-alpha.3
 
 ###### 2026/08/24

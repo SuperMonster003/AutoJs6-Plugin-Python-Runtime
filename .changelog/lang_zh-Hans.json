@@ -5,6 +5,18 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v0.5.0-alpha.4": {
+      "released_date": "2026/08/25",
+      "hint": [
+        "第四个 current-tree alpha 候选版; M6 将未发布的 0.2/0.3/0.4 实现节点统一累计到 0.5.0, 不声明 beta、稳定版、signing 或 publication 完成"
+      ],
+      "feature": [
+        "新增 `tools/verify-m6-candidate.py`, 以显式 `--source-only`/`--full` 档位检查 clean Git、版本、Changelog、生成文档与 AAR lock, 并可追加便携测试、R2 静态门禁和 offline debug build"
+      ],
+      "improvement": [
+        "固定 10 项 Android 冒烟清单及 alpha → beta → 0.5.0 晋级顺序; 本地门禁不执行 ADB、signing、tag、push 或 publication"
+      ]
+    },
     "v0.5.0-alpha.3": {
       "released_date": "2026/08/24",
       "hint": [
