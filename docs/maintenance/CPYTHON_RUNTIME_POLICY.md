@@ -149,3 +149,12 @@ the methods and pure-data shapes frozen in
 Binder to user globals. Do not add arbitrary Host objects, Android `Context`,
 shell, accessibility or new live UI capabilities without recording the
 corresponding threat-model decision.
+
+M4 Path B was evaluated in ADR 0003 with a pinned five-distribution `requests`
+candidate and was not admitted. The repository has no reviewed offline
+wheelhouse for that candidate, and Gradle `--offline` does not by itself prevent
+Chaquopy's separate build-Python pip subprocess from contacting an index. The
+embedded package policy therefore remains `stdlib-only` with count zero and
+online pip forbidden. Any future build-time package must enter through the ADR
+0003 wheel, hash, license, native-payload, clean-offline-build, APK-size and
+dual-ABI admission gate; a bare `pip { install(...) }` is not sufficient.

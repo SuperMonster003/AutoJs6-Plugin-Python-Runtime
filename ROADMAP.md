@@ -580,9 +580,21 @@
     `adb install -r -t` 并保留应用数据。使用说明与可复现示例见
     [PROJECT_LOCAL_PACKAGES.md](docs/python/PROJECT_LOCAL_PACKAGES.md) 与
     [m4_project_local_requests](examples/python/m4_project_local_requests)。
-- [ ] [P] **路径 B (构建期精选包)**: 评估在 `build.gradle.kts` `pip { install(...) }`
-  内置少量高频纯 Python 包 (候选: requests, charset_normalizer 等; 更新
-  `python-runtime.lock` 的 packages 政策键值与 NOTICE)。按 APK 体积与收益决策。
+- [x] [P] **路径 B (构建期精选包评估)**: 结论为 `NOT_ADMITTED`, 当前 APK 继续
+  `stdlib-only`。候选固定为路径 A 已验收的 `requests 2.34.2` 五包闭包; 它的主要收益
+  只是免去选择该库的项目准备步骤, 而标准库联网与项目本地依赖均已可用。内置后却会让
+  每个 APK 无条件承担体积、五包更新/安全维护及许可证成本, `charset_normalizer` 单独
+  内置也没有足够通用价值。
+  - `0.4.0-alpha.7` stdlib-only release 输出基线为 arm64-v8a 23,709,688 bytes、
+    x86_64 23,726,048 bytes、universal 34,622,039 bytes。仓库没有经审计的离线 wheelhouse
+    与哈希锁, 而 Gradle `--offline` 不会自动约束 Chaquopy 的独立 pip 子进程; 本次拒绝
+    联网临时下载, 因此不伪造不可复现的候选体积差值。缺少 hermetic 输入本身即为准入阻断。
+  - 当前不添加 `pip` block, `python-runtime.lock` 保持 packages policy=`stdlib-only`、
+    count=0、online pip=false, NOTICE 明确候选未随 APK 分发。未来只有在出现路径 A
+    明显不足的真实高频用例, 并同时提交本地 wheel、精确版本/哈希、许可证、无 native
+    payload 扫描、断网 clean build、三种 APK 体积差值与双 ABI 公共引擎验收后才重开。
+  - 完整决策与准入清单见
+    [ADR 0003](docs/adr/0003-build-time-python-package-admission.md)。
 - [ ] [P] **路径 C (native 包)**: 评估 Chaquopy 官方 wheel 源的 numpy/pillow/opencv
   构建期打包可行性 (Chaquopy 提供预编译 Android wheel); 逐包实测, 能用即收录,
   16 KB page 等兼容性问题出现时针对性修复。
@@ -613,7 +625,7 @@
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
-| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (automator/selector/截图/找色/找图/OCR/完整自动化示例已完成) |
+| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (自动化核心已完成; 路径 B 已评估且不接纳, 路径 C 待评估) |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 

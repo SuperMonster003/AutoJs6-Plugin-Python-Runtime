@@ -38,6 +38,9 @@ The full MIT text is packaged as
 The packaged CPython binaries and standard library are supplied through the
 Chaquopy target artifacts pinned in `locks/python-runtime.lock`. No third-party
 Python packages or online `pip` installation are part of this release scope.
+The `requests` / `charset_normalizer` build-time candidates discussed in ADR
+0003 were evaluated but are not distributed; their names and versions in that
+decision record are not an attribution claim or a packaged dependency inventory.
 The complete upstream `v3.13.9` license and incorporated-software notices are
 packaged as `third_party_licenses/CPython-3.13.9-LICENSE.txt`.
 

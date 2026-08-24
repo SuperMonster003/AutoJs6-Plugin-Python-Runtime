@@ -303,12 +303,20 @@ imports without widening the admitted workspace.
 
 ### Third-party dependencies
 
-The embedded `0.1.0` runtime is stdlib-only. M4 Path A adds project-local
+The embedded runtime remains stdlib-only. M4 Path A adds project-local
 pure-Python distributions: an admitted project may place import packages and
 their `.dist-info` metadata directly in its root, which is already first on
 `sys.path` during project execution. Ordinary transitive imports and
 `importlib.metadata` discovery then work from the immutable workspace snapshot;
 the packages do not become part of the Plugin runtime or its dependency lock.
+
+M4 Path B evaluated embedding the pinned five-distribution `requests` closure
+at build time and recorded `NOT_ADMITTED` in ADR 0003. No Chaquopy pip block,
+build-time package payload or candidate license is part of the current APK.
+The decision preserves `python.packages.policy=stdlib-only`, package count zero
+and `online.pip.allowed=false`; it is not a claim that the candidate cannot run
+under Chaquopy. A future build-time package must first satisfy ADR 0003's
+immutable wheel, exact hash, offline build, license, APK-size and dual-ABI gate.
 
 The Host admits at most a 64 MiB compressed workspace, 8192 archive file
 entries and 128 MiB of extracted file content. Provider selection compares the
