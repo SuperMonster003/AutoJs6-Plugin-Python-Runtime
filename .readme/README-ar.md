@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.4.0-alpha.8
-release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.9
+release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
-اكتمل M4 Path A؛ وانتهى تقييم حزم build-time في M4 Path B بقرار `NOT_ADMITTED`، لذلك يبقى runtime المضمّن `stdlib-only`؛ ويستمر تقييم حزم native في M4 Path C حسب قيمة المستخدم. تشمل automation في M3 الإجراءات المحدودة وselector/UI tree وscreen capture والبحث اللوني وقوالب PNG/JPEG وHost OCR. لا تُعد أدوات الأدلة التاريخية بوابات إصدار تلقائية.
+اكتمل M4 Path A؛ وانتهى تقييما M4 Paths B وC بقرار `NOT_ADMITTED`، لذلك يبقى runtime المضمّن `stdlib-only`. نجح Path C في بناء Pillow وNumPy دون اتصال، لكن إغلاقاتهما native الكاملة فشلت في بوابة ELF ثنائية ABI بحجم 16 KiB، ولا يملك OpenCV wheel Android من نوع `cp313`؛ ويبقى Path D حسب الطلب. تشمل automation في M3 الإجراءات المحدودة وselector/UI tree وscreen capture والبحث اللوني وقوالب PNG/JPEG وHost OCR. لا تُعد أدوات الأدلة التاريخية بوابات إصدار تلقائية.
 
 - [عرض ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,14 @@ runtime/security/release owner: SuperMonster003
 ### سجل الإصدارات
 
 ******
+
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `ملاحظة` مرشح alpha التاسع للشجرة الحالية؛ يُغلق تقييم حزم native في M4 Path C بقرار `NOT_ADMITTED`، ويبقى runtime المضمّن `stdlib-only`، ولا تُضاف حمولات Pillow أو NumPy أو OpenCV أو تبعيات native الانتقالية ولا يُقدّم ادعاء قبول جديد على الأجهزة
+* `تحسين` يسجل ADR 0004 debug builds ثنائية ABI وoffline باستخدام `--no-index --find-links`: يضيف Pillow 11.0.0 مقدار 2,054,483 bytes لكل APK، ويضيف NumPy 1.26.2 مقدار 21,931,164 bytes، وتجتاز المخرجات الستة `zipalign -c -P 16 4`
+* `تحسين` يرفض تدقيق ELF الكامل عبر NDK 29 مكتبة FreeType بمحاذاة `0x1000` على كلا ABI وOpenBLAS/libgfortran بمحاذاة `0x1000` على x86_64؛ ولا يملك OpenCV wheel Android رسميًا من نوع `cp313`، وتتطلب إعادة الفتح wheels قابلة للتكرار عبر NDK r28+ وقبولًا عامًا بحجم 16 KiB
 
 # v0.4.0-alpha.8
 
@@ -182,14 +190,6 @@ runtime/security/release owner: SuperMonster003
 * `إضافة` إضافة `m3_complete_automation`، وهو مسار محدود على Settings الحقيقي يستخدم `app.launch` و`selector.find` و`selector.click` و`images.capture_screen` مع تحقق صارم من PNG واحتواء عنصر الوجهة
 * `إصلاح` تطبيع حدود إمكانية الوصول ذات `right < left` أو `bottom < top` قبل تسلسل Python إلى محاور zero-area مرتبطة بنقطة الأصل، مع عزل عقد الشجرة غير المرتبطة عبر استعلامات selector الدقيقة
 * `تحسين` نجح مسار المشروع العام المصدّر `RunIntentActivity` على محاكي API 37 مع PNG بدقة 1080x2424 وأثر متحقق منه عبر SHA-256، ثم أُعيدت إمكانية الوصول إلى 0/null وأزيل كل staging اختباري محدد
-
-# v0.4.0-alpha.6
-
-###### 2026/08/24
-
-* `ملاحظة` مرشح alpha السادس لشجرة M3 automation الحالية؛ نجح Host OCR recognition المضبوط على API 37 emulator بخدمة مؤهلة وفشل مغلقا على جهاز API 31 فعلي من دون تغيير accessibility services؛ تبقى OCR الأوسع والنشر ومصفوفة الأجهزة الكاملة خارج هذا الادعاء
-* `إضافة` إضافة `autojs6.ocr.recognize(image)` لبايتات PNG/JPEG محدودة وtuple ثابت ومرتب من أسطر النص يعيده Host OCR engine المضبوط
-* `تحسين` إعادة استخدام PNG/JPEG upload بحجم 1 MiB وraw chunks بحجم 24 KiB والتحقق SHA-256، واختيار Host OCR service مفعلة ومصرحا بها ومتوافقة فقط، وتحديد النتيجة عند 256 سطرا و4 KiB من strict UTF-8 لكل سطر و48 KiB إجمالا، ودائما release وتصفير buffers، والإبلاغ الثابت بـ `OCR_UNAVAILABLE` أو `OCR_FAILED`
 
 ##### المزيد من الإصدارات
 

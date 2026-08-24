@@ -55,7 +55,7 @@
     "تتوفر للشجرة الحالية أدلة smoke على جهاز API 31 ‏arm64-v8a وعلى محاكي API 37 ‏x86_64 بصفحات 16 KB؛ ولا يقدم أي منهما كمصفوفة أجهزة كاملة أو كتأهيل release."
   ],
   "h3_roadmap": "خارطة الطريق",
-  "p_roadmap": "اكتمل M4 Path A؛ وانتهى تقييم حزم build-time في M4 Path B بقرار `NOT_ADMITTED`، لذلك يبقى runtime المضمّن `stdlib-only`؛ ويستمر تقييم حزم native في M4 Path C حسب قيمة المستخدم. تشمل automation في M3 الإجراءات المحدودة وselector/UI tree وscreen capture والبحث اللوني وقوالب PNG/JPEG وHost OCR. لا تُعد أدوات الأدلة التاريخية بوابات إصدار تلقائية.",
+  "p_roadmap": "اكتمل M4 Path A؛ وانتهى تقييما M4 Paths B وC بقرار `NOT_ADMITTED`، لذلك يبقى runtime المضمّن `stdlib-only`. نجح Path C في بناء Pillow وNumPy دون اتصال، لكن إغلاقاتهما native الكاملة فشلت في بوابة ELF ثنائية ABI بحجم 16 KiB، ولا يملك OpenCV wheel Android من نوع `cp313`؛ ويبقى Path D حسب الطلب. تشمل automation في M3 الإجراءات المحدودة وselector/UI tree وscreen capture والبحث اللوني وقوالب PNG/JPEG وHost OCR. لا تُعد أدوات الأدلة التاريخية بوابات إصدار تلقائية.",
   "text_link_roadmap": "عرض ROADMAP.md",
   "h3_release_history": "سجل الإصدارات",
   "h5_for_more_release_history": "المزيد من الإصدارات",

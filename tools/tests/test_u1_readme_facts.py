@@ -24,7 +24,7 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_protocol_15_broker_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.4.0-alpha.8", common["release_target"])
+        self.assertEqual("0.4.0-alpha.9", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
         self.assertIn("selector/UI-tree", common["release_state"])
@@ -36,9 +36,14 @@ class U1ReadmeFactsTest(unittest.TestCase):
         self.assertIn("M4 Path A", common["release_state"])
         self.assertIn("project-local pure-Python", common["release_state"])
         self.assertIn("M4 Path B", common["release_state"])
+        self.assertIn("M4 Path C", common["release_state"])
         self.assertIn("NOT_ADMITTED", common["release_state"])
         self.assertIn("stdlib-only", common["release_state"])
         self.assertIn("zero packages", common["release_state"])
+        self.assertIn("Pillow 11.0.0", common["release_state"])
+        self.assertIn("NumPy 1.26.2", common["release_state"])
+        self.assertIn("OpenCV", common["release_state"])
+        self.assertIn("16 KiB gate", common["release_state"])
         self.assertIn("no candidate dependency payload", common["release_state"])
         self.assertIn("no new device claim", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
@@ -289,10 +294,14 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 self.assertIn("gate", source["p_build_architecture"].lower())
                 self.assertIn("M4", source["p_roadmap"])
                 for decision_marker in (
-                    "M4 Path B",
+                    "M4",
                     "`NOT_ADMITTED`",
                     "`stdlib-only`",
-                    "M4 Path C",
+                    "Path C",
+                    "Pillow",
+                    "NumPy",
+                    "OpenCV",
+                    "16 KiB",
                 ):
                     self.assertIn(decision_marker, source["p_roadmap"])
 
@@ -303,6 +312,44 @@ class U1ReadmeFactsTest(unittest.TestCase):
                 source = json.loads(
                     (changelog_dir / f"lang_{code}.json").read_text(encoding="utf-8")
                 )
+                native_policy = source["$data"]["v0.4.0-alpha.9"]
+                self.assertEqual("2026/08/24", native_policy["released_date"])
+                self.assertNotIn("feature", native_policy)
+                self.assertNotIn("fix", native_policy)
+                self.assertNotIn("dependency", native_policy)
+                self.assertEqual(1, len(native_policy["hint"]))
+                for marker in (
+                    "M4 Path C",
+                    "`NOT_ADMITTED`",
+                    "`stdlib-only`",
+                    "Pillow",
+                    "NumPy",
+                    "OpenCV",
+                ):
+                    self.assertIn(marker, native_policy["hint"][0])
+                self.assertEqual(2, len(native_policy["improvement"]))
+                for marker in (
+                    "ADR 0004",
+                    "`--no-index --find-links`",
+                    "Pillow 11.0.0",
+                    "2,054,483",
+                    "NumPy 1.26.2",
+                    "21,931,164",
+                    "`zipalign -c -P 16 4`",
+                ):
+                    self.assertIn(marker, native_policy["improvement"][0])
+                for marker in (
+                    "NDK 29",
+                    "FreeType",
+                    "`0x1000`",
+                    "OpenBLAS/libgfortran",
+                    "OpenCV",
+                    "`cp313`",
+                    "NDK r28+",
+                    "16 KiB",
+                ):
+                    self.assertIn(marker, native_policy["improvement"][1])
+
                 package_policy = source["$data"]["v0.4.0-alpha.8"]
                 self.assertEqual("2026/08/24", package_policy["released_date"])
                 self.assertNotIn("feature", package_policy)

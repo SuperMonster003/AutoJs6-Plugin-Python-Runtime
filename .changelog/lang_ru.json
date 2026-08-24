@@ -5,6 +5,16 @@
   "changelog_label_improvement": "Улучшено",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v0.4.0-alpha.9": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "Девятый alpha-кандидат текущего дерева; оценка native-пакетов M4 Path C закрыта решением `NOT_ADMITTED`, встроенный runtime остается `stdlib-only`, payload Pillow, NumPy, OpenCV и транзитивных native-зависимостей не добавлен, новые заявления о приемке на устройствах не делаются"
+      ],
+      "improvement": [
+        "ADR 0004 фиксирует dual ABI offline debug builds с `--no-index --find-links`: Pillow 11.0.0 добавляет 2,054,483 bytes к каждому APK, NumPy 1.26.2 добавляет 21,931,164 bytes, все шесть выходов проходят `zipalign -c -P 16 4`",
+        "Полный ELF-аудит NDK 29 отклоняет FreeType с `0x1000` на обеих ABI и OpenBLAS/libgfortran с `0x1000` на x86_64; для OpenCV нет официального Android wheel `cp313`, а повторное открытие требует воспроизводимых wheels NDK r28+ и публичной приемки 16 KiB"
+      ]
+    },
     "v0.4.0-alpha.8": {
       "released_date": "2026/08/24",
       "hint": [

@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.4.0-alpha.8
-release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.9
+release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Expo
 
 ******
 
-M4 路径 A 已完成; M4 Path B 构建期包评估结论为 `NOT_ADMITTED`, 内置运行时继续保持 `stdlib-only`; M4 Path C native 包评估仍按用户价值推进. M3 自动化已接通有界坐标/全局动作、selector/UI 树、截图、找色、PNG/JPEG 模板找图与宿主 OCR. 历史证据工具保留但不作为自动发布门禁.
+M4 路径 A 已完成; M4 路径 B 与 Path C 评估均以 `NOT_ADMITTED` 关闭, 内置运行时保持 `stdlib-only`. Path C 的 Pillow/NumPy 可离线构建, 但完整 native 闭包未通过双 ABI 16 KiB ELF 门禁, OpenCV 无 `cp313` Android wheel; 路径 D 仅在明确需求时启动. M3 自动化已接通有界动作、selector/UI 树、截图、找色、PNG/JPEG 模板找图与宿主 OCR. 历史证据工具不作为自动发布门禁.
 
 - [查看 ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,14 @@ M4 路径 A 已完成; M4 Path B 构建期包评估结论为 `NOT_ADMITTED`, 内
 ### 版本历史
 
 ******
+
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `提示` 第九个 current-tree alpha 候选版; M4 Path C native 包评估以 `NOT_ADMITTED` 关闭, 内置运行时保持 `stdlib-only`, 未内置 Pillow、NumPy、OpenCV 或任何传递 native payload, 也不新增设备验收声明
+* `优化` ADR 0004 记录本地 `--no-index --find-links` 双 ABI offline debug build: Pillow 11.0.0 使每个 APK 增加 2,054,483 bytes, NumPy 1.26.2 增加 21,931,164 bytes, 六个候选输出均通过 `zipalign -c -P 16 4`
+* `优化` NDK 29 全闭包 ELF 审计拒绝双 ABI 均为 `0x1000` 的 FreeType, 以及 x86_64 为 `0x1000` 的 OpenBLAS/libgfortran; OpenCV 无官方 `cp313` Android wheel, 重开须有可复现 NDK r28+ wheel 与 16 KiB 公共引擎验收
 
 # v0.4.0-alpha.8
 
@@ -182,14 +190,6 @@ M4 路径 A 已完成; M4 Path B 构建期包评估结论为 `NOT_ADMITTED`, 内
 * `新增` 新增 `m3_complete_automation`: 使用 `app.launch`、`selector.find`、`selector.click` 与 `images.capture_screen` 的有界真实 Settings 工作流, 严格断言 PNG 结构及目标控件包含关系
 * `修复` Python 序列化前将平台上报的 `right < left` 或 `bottom < top` 无障碍边界收敛为保持锚点的 zero-area 轴, 同时以精确 selector 查询隔离无关树节点
 * `优化` 导出的 `RunIntentActivity` 公开项目路径已在 API 37 模拟器通过, 产出 1080x2424 PNG 与经 SHA-256 验证的产物, 随后将无障碍恢复为 0/null 并移除全部精确测试暂存
-
-# v0.4.0-alpha.6
-
-###### 2026/08/24
-
-* `提示` 第六个 M3 自动化 current-tree alpha 候选版; 已配置宿主 OCR 的正向识别在具备合格服务的 API 37 模拟器通过, API 31 真机在不改动其无障碍服务的前提下完成故障关闭; 更丰富的 OCR、发布及完整设备矩阵不在本声明范围内
-* `新增` 新增 `autojs6.ocr.recognize(image)`, 接受有界 PNG/JPEG 字节, 并从已配置宿主 OCR 引擎返回有序不可变文本行元组
-* `优化` 复用 1 MiB PNG/JPEG 上传、24 KiB 原始分块与 SHA-256 校验, 仅选择已启用、已授权且兼容的宿主 OCR 服务, 结果限制为 256 行、每行 4 KiB 严格 UTF-8、合计 48 KiB, 始终 release 并清零缓冲区, 以稳定 `OCR_UNAVAILABLE` 或 `OCR_FAILED` 报告失败
 
 ##### 更多版本
 

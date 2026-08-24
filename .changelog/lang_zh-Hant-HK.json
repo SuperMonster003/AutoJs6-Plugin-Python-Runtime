@@ -5,6 +5,16 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "相依項目",
   "$data": {
+    "v0.4.0-alpha.9": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "第九個 current-tree alpha 候選版; M4 Path C native 套件評估以 `NOT_ADMITTED` 關閉, 內置 runtime 保持 `stdlib-only`, 未內置 Pillow、NumPy、OpenCV 或任何傳遞 native payload, 亦不新增裝置驗收聲明"
+      ],
+      "improvement": [
+        "ADR 0004 記錄本地 `--no-index --find-links` 雙 ABI offline debug build: Pillow 11.0.0 令每個 APK 增加 2,054,483 bytes, NumPy 1.26.2 增加 21,931,164 bytes, 六個候選輸出均通過 `zipalign -c -P 16 4`",
+        "NDK 29 全閉包 ELF 審計拒絕雙 ABI 均為 `0x1000` 的 FreeType, 以及 x86_64 為 `0x1000` 的 OpenBLAS/libgfortran; OpenCV 沒有官方 `cp313` Android wheel, 重開須有可重現 NDK r28+ wheel 與 16 KiB 公共引擎驗收"
+      ]
+    },
     "v0.4.0-alpha.8": {
       "released_date": "2026/08/24",
       "hint": [

@@ -55,7 +55,7 @@
     "当前树已有 API 31 arm64-v8a 真机冒烟证据与 API 37 x86_64 16 KB page 模拟器冒烟证据; 两者都不冒充完整设备矩阵或发布资质."
   ],
   "h3_roadmap": "路线图",
-  "p_roadmap": "M4 路径 A 已完成; M4 Path B 构建期包评估结论为 `NOT_ADMITTED`, 内置运行时继续保持 `stdlib-only`; M4 Path C native 包评估仍按用户价值推进. M3 自动化已接通有界坐标/全局动作、selector/UI 树、截图、找色、PNG/JPEG 模板找图与宿主 OCR. 历史证据工具保留但不作为自动发布门禁.",
+  "p_roadmap": "M4 路径 A 已完成; M4 路径 B 与 Path C 评估均以 `NOT_ADMITTED` 关闭, 内置运行时保持 `stdlib-only`. Path C 的 Pillow/NumPy 可离线构建, 但完整 native 闭包未通过双 ABI 16 KiB ELF 门禁, OpenCV 无 `cp313` Android wheel; 路径 D 仅在明确需求时启动. M3 自动化已接通有界动作、selector/UI 树、截图、找色、PNG/JPEG 模板找图与宿主 OCR. 历史证据工具不作为自动发布门禁.",
   "text_link_roadmap": "查看 ROADMAP.md",
   "h3_release_history": "版本历史",
   "h5_for_more_release_history": "更多版本",

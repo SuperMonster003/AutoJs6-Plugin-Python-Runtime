@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `ملاحظة` مرشح alpha التاسع للشجرة الحالية؛ يُغلق تقييم حزم native في M4 Path C بقرار `NOT_ADMITTED`، ويبقى runtime المضمّن `stdlib-only`، ولا تُضاف حمولات Pillow أو NumPy أو OpenCV أو تبعيات native الانتقالية ولا يُقدّم ادعاء قبول جديد على الأجهزة
+* `تحسين` يسجل ADR 0004 debug builds ثنائية ABI وoffline باستخدام `--no-index --find-links`: يضيف Pillow 11.0.0 مقدار 2,054,483 bytes لكل APK، ويضيف NumPy 1.26.2 مقدار 21,931,164 bytes، وتجتاز المخرجات الستة `zipalign -c -P 16 4`
+* `تحسين` يرفض تدقيق ELF الكامل عبر NDK 29 مكتبة FreeType بمحاذاة `0x1000` على كلا ABI وOpenBLAS/libgfortran بمحاذاة `0x1000` على x86_64؛ ولا يملك OpenCV wheel Android رسميًا من نوع `cp313`، وتتطلب إعادة الفتح wheels قابلة للتكرار عبر NDK r28+ وقبولًا عامًا بحجم 16 KiB
+
 # v0.4.0-alpha.8
 
 ###### 2026/08/24

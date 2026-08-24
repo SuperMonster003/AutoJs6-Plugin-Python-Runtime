@@ -55,7 +55,7 @@
     "El árbol actual tiene evidencia smoke en un dispositivo API 31 arm64-v8a y en un emulador API 37 x86_64 con páginas de 16 KB; ninguna se presenta como matriz completa de dispositivos ni como calificación de release."
   ],
   "h3_roadmap": "Hoja de ruta",
-  "p_roadmap": "La ruta A de M4 está terminada; la evaluación de paquetes integrados de M4 Path B concluyó `NOT_ADMITTED`, por lo que el runtime integrado sigue `stdlib-only`; la evaluación native de M4 Path C continúa según el valor para el usuario. La automatización M3 incluye acciones acotadas, selector/árbol UI, captura, búsqueda de color, plantillas PNG/JPEG y OCR del Host. Las herramientas históricas de evidencia siguen disponibles sin ser gates automáticos de publicación.",
+  "p_roadmap": "La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NOT_ADMITTED`, por lo que el runtime integrado sigue `stdlib-only`. Path C compiló Pillow y NumPy sin conexión, pero sus cierres native fallaron el gate ELF dual ABI de 16 KiB y OpenCV no tenía wheel Android `cp313`; Path D queda sujeto a demanda. La automatización M3 incluye acciones acotadas, selector/árbol UI, captura, búsqueda de color, plantillas PNG/JPEG y OCR del Host. Las herramientas históricas de evidencia no son gates automáticos de publicación.",
   "text_link_roadmap": "Ver ROADMAP.md",
   "h3_release_history": "Historial de versiones",
   "h5_for_more_release_history": "Más versiones",

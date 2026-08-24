@@ -5,6 +5,16 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v0.4.0-alpha.9": {
+      "released_date": "2026/08/24",
+      "hint": [
+        "9 番目の current-tree alpha 候補. M4 Path C native package 評価を `NOT_ADMITTED` で完了し、組み込み runtime は `stdlib-only` を維持します. Pillow、NumPy、OpenCV または推移的 native payload は追加せず、新しい device acceptance も主張しません"
+      ],
+      "improvement": [
+        "ADR 0004 は `--no-index --find-links` による dual ABI offline debug build を記録します. Pillow 11.0.0 は各 APK に 2,054,483 bytes、NumPy 1.26.2 は 21,931,164 bytes を追加し、6 出力すべてが `zipalign -c -P 16 4` を通過しました",
+        "NDK 29 の完全 closure ELF 監査は両 ABI の FreeType `0x1000` と x86_64 の OpenBLAS/libgfortran `0x1000` を拒否します. OpenCV に公式 `cp313` Android wheel はなく、再開には再現可能な NDK r28+ wheel と 16 KiB public-engine acceptance が必要です"
+      ]
+    },
     "v0.4.0-alpha.8": {
       "released_date": "2026/08/24",
       "hint": [

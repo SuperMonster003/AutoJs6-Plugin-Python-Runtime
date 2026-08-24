@@ -103,8 +103,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 > Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
-release target: 0.4.0-alpha.8
-release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.9
+release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ The Chaquopy runtime is for trusted local scripts, not a hostile-code sandbox. T
 
 ******
 
-M4 Path A is complete; the M4 Path B build-time package evaluation concluded `NOT_ADMITTED`, so the embedded runtime remains `stdlib-only`; M4 Path C native-package evaluation continues by user value. M3 automation now includes bounded coordinate/global actions, selector/UI-tree operations, screen capture, color search, PNG/JPEG template matching, and Host OCR. Historical evidence tools remain available but are not automatic release gates.
+M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the embedded runtime remains `stdlib-only`. Path C built Pillow and NumPy offline, but their complete native closures failed the dual-ABI 16 KiB ELF gate, and OpenCV had no `cp313` Android wheel; Path D remains demand-driven. M3 automation includes bounded actions, selector/UI-tree operations, screen capture, color search, PNG/JPEG template matching, and Host OCR. Historical evidence tools are not automatic release gates.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,14 @@ M4 Path A is complete; the M4 Path B build-time package evaluation concluded `NO
 ### Release history
 
 ******
+
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `Hint` Ninth current-tree alpha candidate; close the M4 Path C native-package evaluation as `NOT_ADMITTED`, keep the embedded runtime `stdlib-only`, add no Pillow, NumPy, OpenCV, or transitive native payload, and make no new device-acceptance claim
+* `Improvement` ADR 0004 records local `--no-index --find-links` dual-ABI offline debug builds: Pillow 11.0.0 adds 2,054,483 bytes to each APK, NumPy 1.26.2 adds 21,931,164 bytes, and all six candidate outputs pass `zipalign -c -P 16 4`
+* `Improvement` Full-closure NDK 29 ELF audit rejects FreeType at `0x1000` on both ABIs and OpenBLAS/libgfortran at `0x1000` on x86_64; OpenCV has no official `cp313` Android wheel, and reopening requires reproducible NDK r28+ wheels plus 16 KiB public-engine acceptance
 
 # v0.4.0-alpha.8
 
@@ -182,14 +190,6 @@ M4 Path A is complete; the M4 Path B build-time package evaluation concluded `NO
 * `Feature` Add `m3_complete_automation`, a bounded real-Settings workflow using `app.launch`, `selector.find`, `selector.click`, and `images.capture_screen`, with strict PNG and destination-control containment assertions
 * `Fix` Normalize platform accessibility bounds with `right < left` or `bottom < top` to anchored zero-area axes before Python serialization, while exact selector queries avoid unrelated tree nodes
 * `Improvement` Pass the exported `RunIntentActivity` public project path on an API 37 emulator with a 1080x2424 PNG and SHA-256-verified artifact, then restore accessibility to 0/null and remove all exact test staging
-
-# v0.4.0-alpha.6
-
-###### 2026/08/24
-
-* `Hint` Sixth M3 automation current-tree alpha candidate; configured Host OCR recognition passed on an eligible-service API 37 emulator and failed closed on an API 31 physical device without changing its accessibility services; richer OCR, publication, and a complete device matrix remain outside this claim
-* `Feature` Add `autojs6.ocr.recognize(image)` for bounded PNG/JPEG bytes and an immutable ordered tuple of text lines from the configured Host OCR engine
-* `Improvement` Reuse the 1 MiB PNG/JPEG upload in 24 KiB raw chunks with SHA-256 verification, select only an enabled, authorized, compatible Host OCR service, cap results at 256 lines, 4 KiB strict UTF-8 per line, and 48 KiB total, always release and zero buffers, and report stable `OCR_UNAVAILABLE` or `OCR_FAILED` failures
 
 ##### For more releases
 

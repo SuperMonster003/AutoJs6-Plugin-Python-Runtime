@@ -55,7 +55,7 @@
     "Для текущего дерева есть smoke evidence на устройстве API 31 arm64-v8a и эмуляторе API 37 x86_64 со страницами 16 KB; это не выдается за полную матрицу устройств или release qualification."
   ],
   "h3_roadmap": "План",
-  "p_roadmap": "M4 Path A завершен; оценка встроенных пакетов M4 Path B завершилась решением `NOT_ADMITTED`, поэтому встроенный runtime остается `stdlib-only`; оценка native-пакетов M4 Path C продолжится по пользовательской ценности. Автоматизация M3 включает ограниченные actions, selector/UI tree, screen capture, color search, PNG/JPEG template matching и Host OCR. Исторические инструменты доказательств не являются автоматическими воротами выпуска.",
+  "p_roadmap": "M4 Path A завершен; оценки M4 Paths B и C обе завершились решением `NOT_ADMITTED`, поэтому встроенный runtime остается `stdlib-only`. В Path C Pillow и NumPy собраны offline, но полные native-замыкания не прошли dual ABI ELF gate 16 KiB, а для OpenCV нет Android wheel `cp313`; Path D остается по запросу. Автоматизация M3 включает ограниченные actions, selector/UI tree, screen capture, color search, PNG/JPEG template matching и Host OCR. Исторические инструменты доказательств не являются автоматическими воротами выпуска.",
   "text_link_roadmap": "Открыть ROADMAP.md",
   "h3_release_history": "История версий",
   "h5_for_more_release_history": "Другие версии",

@@ -55,7 +55,7 @@
     "현재 tree에는 API 31 arm64-v8a 실제 기기 smoke evidence와 API 37 x86_64 16 KB page emulator smoke evidence가 있으며, 어느 쪽도 완전한 기기 matrix나 release qualification으로 제시하지 않습니다."
   ],
   "h3_roadmap": "로드맵",
-  "p_roadmap": "M4 Path A가 완료되었습니다. M4 Path B build-time package 평가는 `NOT_ADMITTED`로 결론되어 내장 runtime은 `stdlib-only`를 유지합니다. M4 Path C native package 평가는 user value에 따라 계속합니다. M3 automation은 제한된 action, selector/UI tree, screen capture, color search, PNG/JPEG template matching 및 Host OCR을 포함합니다. 과거 evidence tool은 자동 release gate로 사용하지 않습니다.",
+  "p_roadmap": "M4 Path A가 완료되었습니다. M4 Paths B/C 평가는 모두 `NOT_ADMITTED`로 결론되어 내장 runtime은 `stdlib-only`를 유지합니다. Path C에서 Pillow/NumPy offline build는 성공했지만 전체 native closure가 dual ABI 16 KiB ELF gate를 통과하지 못했고 OpenCV에는 `cp313` Android wheel이 없습니다. Path D는 명확한 수요가 있을 때 진행합니다. M3 automation은 제한된 action, selector/UI tree, screen capture, color search, PNG/JPEG template matching 및 Host OCR을 포함합니다. 과거 evidence tool은 자동 release gate로 사용하지 않습니다.",
   "text_link_roadmap": "ROADMAP.md 보기",
   "h3_release_history": "변경 이력",
   "h5_for_more_release_history": "다른 버전",

@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.4.0-alpha.8
-release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.9
+release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ Runtime Chaquopy предназначен только для доверенны
 
 ******
 
-M4 Path A завершен; оценка встроенных пакетов M4 Path B завершилась решением `NOT_ADMITTED`, поэтому встроенный runtime остается `stdlib-only`; оценка native-пакетов M4 Path C продолжится по пользовательской ценности. Автоматизация M3 включает ограниченные actions, selector/UI tree, screen capture, color search, PNG/JPEG template matching и Host OCR. Исторические инструменты доказательств не являются автоматическими воротами выпуска.
+M4 Path A завершен; оценки M4 Paths B и C обе завершились решением `NOT_ADMITTED`, поэтому встроенный runtime остается `stdlib-only`. В Path C Pillow и NumPy собраны offline, но полные native-замыкания не прошли dual ABI ELF gate 16 KiB, а для OpenCV нет Android wheel `cp313`; Path D остается по запросу. Автоматизация M3 включает ограниченные actions, selector/UI tree, screen capture, color search, PNG/JPEG template matching и Host OCR. Исторические инструменты доказательств не являются автоматическими воротами выпуска.
 
 - [Открыть ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,14 @@ M4 Path A завершен; оценка встроенных пакетов M4 
 ### История версий
 
 ******
+
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `Примечание` Девятый alpha-кандидат текущего дерева; оценка native-пакетов M4 Path C закрыта решением `NOT_ADMITTED`, встроенный runtime остается `stdlib-only`, payload Pillow, NumPy, OpenCV и транзитивных native-зависимостей не добавлен, новые заявления о приемке на устройствах не делаются
+* `Улучшено` ADR 0004 фиксирует dual ABI offline debug builds с `--no-index --find-links`: Pillow 11.0.0 добавляет 2,054,483 bytes к каждому APK, NumPy 1.26.2 добавляет 21,931,164 bytes, все шесть выходов проходят `zipalign -c -P 16 4`
+* `Улучшено` Полный ELF-аудит NDK 29 отклоняет FreeType с `0x1000` на обеих ABI и OpenBLAS/libgfortran с `0x1000` на x86_64; для OpenCV нет официального Android wheel `cp313`, а повторное открытие требует воспроизводимых wheels NDK r28+ и публичной приемки 16 KiB
 
 # v0.4.0-alpha.8
 
@@ -182,14 +190,6 @@ M4 Path A завершен; оценка встроенных пакетов M4 
 * `Добавлено` Добавлен `m3_complete_automation`: ограниченный сценарий реального Settings с `app.launch`, `selector.find`, `selector.click` и `images.capture_screen`, строгой проверкой PNG и попадания целевого элемента в снимок
 * `Исправлено` Перед сериализацией Python границы доступности с `right < left` или `bottom < top` нормализуются в привязанные оси zero-area, а точные запросы selector изолируют посторонние узлы дерева
 * `Улучшено` Экспортированный публичный путь проекта `RunIntentActivity` прошёл на эмуляторе API 37 с PNG 1080x2424 и артефактом, проверенным SHA-256; затем доступность восстановлена до 0/null и всё точное тестовое staging удалено
-
-# v0.4.0-alpha.6
-
-###### 2026/08/24
-
-* `Примечание` Шестой current-tree alpha-кандидат автоматизации M3; распознавание настроенного Host OCR прошло на API 37 emulator с подходящим сервисом и завершилось fail-closed на физическом устройстве API 31 без изменения его accessibility services; расширенный OCR, публикация и полная матрица устройств не входят в это заявление
-* `Добавлено` Добавить `autojs6.ocr.recognize(image)` для ограниченных PNG/JPEG bytes и неизменяемого упорядоченного tuple текстовых строк настроенного Host OCR engine
-* `Улучшено` Повторно использовать PNG/JPEG upload до 1 MiB, raw chunks по 24 KiB и проверку SHA-256, выбирать только enabled/authorized/compatible Host OCR service, ограничить результат 256 строками, 4 KiB strict UTF-8 на строку и 48 KiB суммарно, всегда release и обнулять buffers, стабильно сообщать `OCR_UNAVAILABLE` или `OCR_FAILED`
 
 ##### Другие версии
 

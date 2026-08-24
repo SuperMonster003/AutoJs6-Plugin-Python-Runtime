@@ -55,7 +55,7 @@
     "目前樹已有 API 31 arm64-v8a 真機冒煙證據與 API 37 x86_64 16 KB page 模擬器冒煙證據; 兩者都不冒充完整裝置矩陣或發行資格."
   ],
   "h3_roadmap": "路線圖",
-  "p_roadmap": "M4 路徑 A 已完成; M4 Path B 構建期套件評估結論為 `NOT_ADMITTED`, 內置 runtime 繼續保持 `stdlib-only`; M4 Path C native 套件評估仍按用戶價值推進. M3 自動化已接通有界座標/全域動作、selector/UI 樹、截圖、找色、PNG/JPEG 模板找圖與 Host OCR. 歷史證據工具保留但不作自動發佈門禁.",
+  "p_roadmap": "M4 路徑 A 已完成; M4 路徑 B 與 Path C 評估均以 `NOT_ADMITTED` 關閉, 內置 runtime 保持 `stdlib-only`. Path C 的 Pillow/NumPy 可離線構建, 但完整 native 閉包未通過雙 ABI 16 KiB ELF 門禁, OpenCV 沒有 `cp313` Android wheel; 路徑 D 只在有明確需求時啟動. M3 自動化已接通有界動作、selector/UI 樹、截圖、找色、PNG/JPEG 模板找圖與 Host OCR. 歷史證據工具不作自動發佈門禁.",
   "text_link_roadmap": "檢視 ROADMAP.md",
   "h3_release_history": "版本記錄",
   "h5_for_more_release_history": "更多版本",

@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `안내` 아홉 번째 current-tree alpha 후보입니다. M4 Path C native package 평가를 `NOT_ADMITTED`로 완료하고 내장 runtime을 `stdlib-only`로 유지하며 Pillow, NumPy, OpenCV 또는 전이 native payload를 추가하지 않고 새로운 device acceptance도 주장하지 않습니다
+* `개선` ADR 0004는 `--no-index --find-links` dual ABI offline debug build를 기록합니다. Pillow 11.0.0은 각 APK에 2,054,483 bytes, NumPy 1.26.2는 21,931,164 bytes를 추가하며 여섯 출력 모두 `zipalign -c -P 16 4`를 통과합니다
+* `개선` NDK 29 전체 closure ELF 감사는 양 ABI의 FreeType `0x1000`과 x86_64의 OpenBLAS/libgfortran `0x1000`을 거부합니다. OpenCV에는 공식 `cp313` Android wheel이 없으며 재개에는 재현 가능한 NDK r28+ wheel과 16 KiB public-engine acceptance가 필요합니다
+
 # v0.4.0-alpha.8
 
 ###### 2026/08/24

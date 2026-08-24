@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.4.0-alpha.8
-release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.9
+release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ Chaquopy runtime은 신뢰하는 로컬 스크립트 전용이며 hostile-code s
 
 ******
 
-M4 Path A가 완료되었습니다. M4 Path B build-time package 평가는 `NOT_ADMITTED`로 결론되어 내장 runtime은 `stdlib-only`를 유지합니다. M4 Path C native package 평가는 user value에 따라 계속합니다. M3 automation은 제한된 action, selector/UI tree, screen capture, color search, PNG/JPEG template matching 및 Host OCR을 포함합니다. 과거 evidence tool은 자동 release gate로 사용하지 않습니다.
+M4 Path A가 완료되었습니다. M4 Paths B/C 평가는 모두 `NOT_ADMITTED`로 결론되어 내장 runtime은 `stdlib-only`를 유지합니다. Path C에서 Pillow/NumPy offline build는 성공했지만 전체 native closure가 dual ABI 16 KiB ELF gate를 통과하지 못했고 OpenCV에는 `cp313` Android wheel이 없습니다. Path D는 명확한 수요가 있을 때 진행합니다. M3 automation은 제한된 action, selector/UI tree, screen capture, color search, PNG/JPEG template matching 및 Host OCR을 포함합니다. 과거 evidence tool은 자동 release gate로 사용하지 않습니다.
 
 - [ROADMAP.md 보기](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,14 @@ M4 Path A가 완료되었습니다. M4 Path B build-time package 평가는 `NOT_
 ### 변경 이력
 
 ******
+
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `안내` 아홉 번째 current-tree alpha 후보입니다. M4 Path C native package 평가를 `NOT_ADMITTED`로 완료하고 내장 runtime을 `stdlib-only`로 유지하며 Pillow, NumPy, OpenCV 또는 전이 native payload를 추가하지 않고 새로운 device acceptance도 주장하지 않습니다
+* `개선` ADR 0004는 `--no-index --find-links` dual ABI offline debug build를 기록합니다. Pillow 11.0.0은 각 APK에 2,054,483 bytes, NumPy 1.26.2는 21,931,164 bytes를 추가하며 여섯 출력 모두 `zipalign -c -P 16 4`를 통과합니다
+* `개선` NDK 29 전체 closure ELF 감사는 양 ABI의 FreeType `0x1000`과 x86_64의 OpenBLAS/libgfortran `0x1000`을 거부합니다. OpenCV에는 공식 `cp313` Android wheel이 없으며 재개에는 재현 가능한 NDK r28+ wheel과 16 KiB public-engine acceptance가 필요합니다
 
 # v0.4.0-alpha.8
 
@@ -182,14 +190,6 @@ M4 Path A가 완료되었습니다. M4 Path B build-time package 평가는 `NOT_
 * `추가` `app.launch`, `selector.find`, `selector.click`, `images.capture_screen`을 사용하고 PNG 구조와 대상 컨트롤 포함 관계를 엄격히 검증하는 실제 Settings 유한 워크플로 `m3_complete_automation` 추가
 * `수정` Python 직렬화 전에 `right < left` 또는 `bottom < top` 접근성 경계를 앵커를 유지하는 zero-area 축으로 정규화하고 정확한 selector 쿼리로 무관한 트리 노드를 격리
 * `개선` 내보낸 `RunIntentActivity` 공개 프로젝트 경로를 API 37 에뮬레이터에서 통과시키고 1080x2424 PNG와 SHA-256 검증 아티팩트를 확인한 뒤 접근성을 0/null로 복원하고 정확한 테스트 staging을 모두 제거
-
-# v0.4.0-alpha.6
-
-###### 2026/08/24
-
-* `안내` 여섯 번째 M3 automation current-tree alpha candidate입니다. 설정된 Host OCR recognition은 eligible service가 있는 API 37 emulator에서 통과했고 API 31 physical device에서는 accessibility service를 변경하지 않고 fail-closed했습니다. 더 풍부한 OCR, publication 및 전체 device matrix는 이 claim에 포함하지 않습니다
-* `추가` 제한된 PNG/JPEG bytes를 받아 설정된 Host OCR engine의 ordered immutable text-line tuple을 반환하는 `autojs6.ocr.recognize(image)` 추가
-* `개선` 1 MiB PNG/JPEG upload, 24 KiB raw chunk 및 SHA-256 verification을 재사용하고 enabled/authorized/compatible Host OCR service만 선택합니다. 결과를 256줄, 줄당 4 KiB strict UTF-8, 합계 48 KiB로 제한하고 buffer를 항상 release/zeroize하며 `OCR_UNAVAILABLE` 또는 `OCR_FAILED`를 안정적으로 보고합니다
 
 ##### 다른 버전
 

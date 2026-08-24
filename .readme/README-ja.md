@@ -103,8 +103,8 @@ protocol: 1.0-1.5
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.4.0-alpha.8
-release state: 0.4.0-alpha.8 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time package evaluation is complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path C, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.4.0-alpha.9
+release state: 0.4.0-alpha.9 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added and no new device claim is made; later demand-driven M3 batches, M4 Path D, a complete device matrix, publication, and release evidence remain outside this claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -157,7 +157,7 @@ Chaquopy runtime は信頼するローカルスクリプト向けで, hostile-co
 
 ******
 
-M4 Path A は完了しました. M4 Path B の build-time package 評価は `NOT_ADMITTED` と結論し、組み込み runtime は `stdlib-only` を維持します. M4 Path C の native package 評価は user value に応じて継続します. M3 automation は有界 action、selector/UI tree、screen capture、color search、PNG/JPEG template matching、Host OCR を提供します. 歴史的 evidence tool は自動 release gate にはしません.
+M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMITTED` で、組み込み runtime は `stdlib-only` を維持します. Path C では Pillow/NumPy を offline build できましたが、完全な native closure は dual ABI 16 KiB ELF gate に失敗し、OpenCV には `cp313` Android wheel がありません. Path D は明確な需要時に進めます. M3 automation は有界 action、selector/UI tree、screen capture、color search、PNG/JPEG template matching、Host OCR を提供します. 歴史的 evidence tool は自動 release gate にはしません.
 
 - [ROADMAP.md を表示](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/ROADMAP.md)
 
@@ -166,6 +166,14 @@ M4 Path A は完了しました. M4 Path B の build-time package 評価は `NOT
 ### 更新履歴
 
 ******
+
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `注記` 9 番目の current-tree alpha 候補. M4 Path C native package 評価を `NOT_ADMITTED` で完了し、組み込み runtime は `stdlib-only` を維持します. Pillow、NumPy、OpenCV または推移的 native payload は追加せず、新しい device acceptance も主張しません
+* `改善` ADR 0004 は `--no-index --find-links` による dual ABI offline debug build を記録します. Pillow 11.0.0 は各 APK に 2,054,483 bytes、NumPy 1.26.2 は 21,931,164 bytes を追加し、6 出力すべてが `zipalign -c -P 16 4` を通過しました
+* `改善` NDK 29 の完全 closure ELF 監査は両 ABI の FreeType `0x1000` と x86_64 の OpenBLAS/libgfortran `0x1000` を拒否します. OpenCV に公式 `cp313` Android wheel はなく、再開には再現可能な NDK r28+ wheel と 16 KiB public-engine acceptance が必要です
 
 # v0.4.0-alpha.8
 
@@ -182,14 +190,6 @@ M4 Path A は完了しました. M4 Path B の build-time package 評価は `NOT
 * `追加` `app.launch`、`selector.find`、`selector.click`、`images.capture_screen` を使い、PNG 構造と対象コントロールの包含を厳密に検証する有界な実 Settings ワークフロー `m3_complete_automation` を追加
 * `修正` Python シリアライズ前に `right < left` または `bottom < top` のアクセシビリティ境界をアンカー保持の zero-area 軸へ正規化し、正確な selector クエリで無関係なツリーノードを隔離
 * `改善` エクスポートされた `RunIntentActivity` 公開プロジェクト経路を API 37 エミュレーターで検証し、1080x2424 PNG と SHA-256 検証済み成果物を確認後、アクセシビリティを 0/null に戻して正確なテスト staging をすべて削除
-
-# v0.4.0-alpha.6
-
-###### 2026/08/24
-
-* `注記` 6 番目の M3 automation current-tree alpha candidate. 設定済み Host OCR recognition は eligible service のある API 37 emulator で成功し、API 31 physical device では accessibility service を変更せず fail-closed しました. より高度な OCR、publication、完全な device matrix はこの claim の対象外です
-* `追加` 有界な PNG/JPEG bytes を受け取り、設定済み Host OCR engine の ordered immutable text-line tuple を返す `autojs6.ocr.recognize(image)` を追加
-* `改善` 1 MiB の PNG/JPEG upload、24 KiB raw chunk、SHA-256 verification を再利用し、enabled/authorized/compatible な Host OCR service だけを選択します. 結果を 256 行、1 行 4 KiB strict UTF-8、合計 48 KiB に制限し、buffer を常に release/zeroize し、`OCR_UNAVAILABLE` または `OCR_FAILED` を安定して報告します
 
 ##### その他のバージョン
 

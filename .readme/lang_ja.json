@@ -55,7 +55,7 @@
     "現在の tree には API 31 arm64-v8a 実機 smoke evidence と API 37 x86_64 16 KB page emulator smoke evidence がありますが, 完全な device matrix や release qualification とは扱いません."
   ],
   "h3_roadmap": "ロードマップ",
-  "p_roadmap": "M4 Path A は完了しました. M4 Path B の build-time package 評価は `NOT_ADMITTED` と結論し、組み込み runtime は `stdlib-only` を維持します. M4 Path C の native package 評価は user value に応じて継続します. M3 automation は有界 action、selector/UI tree、screen capture、color search、PNG/JPEG template matching、Host OCR を提供します. 歴史的 evidence tool は自動 release gate にはしません.",
+  "p_roadmap": "M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMITTED` で、組み込み runtime は `stdlib-only` を維持します. Path C では Pillow/NumPy を offline build できましたが、完全な native closure は dual ABI 16 KiB ELF gate に失敗し、OpenCV には `cp313` Android wheel がありません. Path D は明確な需要時に進めます. M3 automation は有界 action、selector/UI tree、screen capture、color search、PNG/JPEG template matching、Host OCR を提供します. 歴史的 evidence tool は自動 release gate にはしません.",
   "text_link_roadmap": "ROADMAP.md を表示",
   "h3_release_history": "更新履歴",
   "h5_for_more_release_history": "その他のバージョン",

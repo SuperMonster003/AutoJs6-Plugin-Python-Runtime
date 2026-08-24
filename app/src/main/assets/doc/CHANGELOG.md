@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `提示` 第九个 current-tree alpha 候选版; M4 Path C native 包评估以 `NOT_ADMITTED` 关闭, 内置运行时保持 `stdlib-only`, 未内置 Pillow、NumPy、OpenCV 或任何传递 native payload, 也不新增设备验收声明
+* `优化` ADR 0004 记录本地 `--no-index --find-links` 双 ABI offline debug build: Pillow 11.0.0 使每个 APK 增加 2,054,483 bytes, NumPy 1.26.2 增加 21,931,164 bytes, 六个候选输出均通过 `zipalign -c -P 16 4`
+* `优化` NDK 29 全闭包 ELF 审计拒绝双 ABI 均为 `0x1000` 的 FreeType, 以及 x86_64 为 `0x1000` 的 OpenBLAS/libgfortran; OpenCV 无官方 `cp313` Android wheel, 重开须有可复现 NDK r28+ wheel 与 16 KiB 公共引擎验收
+
 # v0.4.0-alpha.8
 
 ###### 2026/08/24

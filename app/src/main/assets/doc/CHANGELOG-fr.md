@@ -4,6 +4,14 @@
 
 ******
 
+# v0.4.0-alpha.9
+
+###### 2026/08/24
+
+* `Note` Neuvième candidat alpha de l'arbre courant; clore M4 Path C native avec `NOT_ADMITTED`, conserver le runtime `stdlib-only`, n'ajouter aucun payload Pillow, NumPy, OpenCV ou native transitif et ne faire aucune nouvelle déclaration d'acceptation sur appareil
+* `Amélioration` ADR 0004 consigne les debug builds offline dual ABI avec `--no-index --find-links`: Pillow 11.0.0 ajoute 2,054,483 bytes à chaque APK, NumPy 1.26.2 ajoute 21,931,164 bytes, et les six sorties passent `zipalign -c -P 16 4`
+* `Amélioration` L'audit ELF NDK 29 de la clôture complète refuse FreeType à `0x1000` sur les deux ABI et OpenBLAS/libgfortran à `0x1000` sur x86_64; OpenCV n'a pas de wheel Android `cp313` officiel, et la réouverture exige des wheels NDK r28+ reproductibles et une acceptation publique 16 KiB
+
 # v0.4.0-alpha.8
 
 ###### 2026/08/24
