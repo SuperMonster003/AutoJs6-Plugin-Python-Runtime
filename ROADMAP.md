@@ -637,6 +637,13 @@
     且停止后的插件进程可干净重绑。验收身份: Host versionCode 5276 / Plugin versionCode 81。
 - [ ] [P] **进程预热评估**: 实测 CPython 冷启动耗时; 若显著 (>1 s), 提供
   "执行后保留进程" 选项 (放弃 per-execution 退休, 状态污染问题出现再修)。
+  - [x] 新增 `examples/python/m5_startup_probe`: 复用现有 `engines.current().startedAtMillis`,
+    在 broker 调用前捕获首个 Python wall-clock 时间, 输出 launch-to-first-Python 毫秒数、
+    Plugin PID 与结构化结果; 不改协议、AAR 或进程生命周期。
+  - [x] 固定评估规则: 空闲 Host 连续独立运行 5 次, 同时报全样本中位数与排除首次后的
+    中位数; 以 1000 ms 为是否值得牺牲 per-execution 隔离的门槛。
+  - [ ] 在 `QV710AF65F` 运行 5 次并记录 `startup_probe_ms`/`plugin_pid`; 若中位数
+    ≤1000 ms 则关闭预热且保留现状, 若 >1000 ms 再设计显式 opt-in 进程保留模式。
 - [x] [H] **多脚本并发准入**: 采用宿主全局 FIFO 排队而不是在单个 Chaquopy/CPython
   解释器中并行执行; 源码、离线门禁与真机双脚本 FIFO 冒烟均已完成。
   - [x] 一个 active owner + 最多 32 个 pending execution; 公平 FIFO、防插队、队满以
@@ -678,7 +685,7 @@
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
 | 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (自动化核心已完成; 路径 B/C 均已评估且不接纳) |
-| 0.5.x | M5 长任务/并发/预热 | 进行中 (长任务与并发真机通过; 预热待评估) |
+| 0.5.x | M5 长任务/并发/预热 | 进行中 (长任务与并发真机通过; 预热探针就绪、待 5 次实测) |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 
 ### 轻量验证约定 (代替证据等级流程)

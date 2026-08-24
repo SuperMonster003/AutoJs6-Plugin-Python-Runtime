@@ -46,6 +46,9 @@ class U1ReadmeFactsTest(unittest.TestCase):
             "fresh-PID generation handoff",
             "queued Stop isolation",
             "focused concurrency Android smoke passes",
+            "no-runtime-change startup probe",
+            "five idle QV710AF65F samples",
+            "1000 ms prewarm decision still pending",
         ):
             self.assertIn(marker, common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
