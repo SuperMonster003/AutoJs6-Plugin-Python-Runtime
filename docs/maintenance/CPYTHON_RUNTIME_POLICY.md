@@ -158,3 +158,13 @@ embedded package policy therefore remains `stdlib-only` with count zero and
 online pip forbidden. Any future build-time package must enter through the ADR
 0003 wheel, hash, license, native-payload, clean-offline-build, APK-size and
 dual-ABI admission gate; a bare `pip { install(...) }` is not sufficient.
+
+M4 Path C was evaluated in ADR 0004 with the complete official-index Pillow
+11.0.0 and NumPy 1.26.2 closures for both supported ABIs. Both candidates built
+from a bounded local wheel directory, but transitive FreeType, OpenBLAS and
+libgfortran ELF files failed the 16 KiB LOAD-alignment gate; the official
+OpenCV index had no CPython 3.13 Android wheel. No native package was admitted.
+A future native proposal must satisfy ADR 0004's reproducible wheel-build,
+same-minor build-Python, full-closure `.so`/`.so.*`, dual-ABI 16 KiB ELF and APK
+alignment, license, size-budget and public-engine device gate. A successful
+Gradle build or APK `zipalign` check alone is not native compatibility evidence.

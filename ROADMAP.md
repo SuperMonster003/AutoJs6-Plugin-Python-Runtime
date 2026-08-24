@@ -595,9 +595,25 @@
     payload 扫描、断网 clean build、三种 APK 体积差值与双 ABI 公共引擎验收后才重开。
   - 完整决策与准入清单见
     [ADR 0003](docs/adr/0003-build-time-python-package-admission.md)。
-- [ ] [P] **路径 C (native 包)**: 评估 Chaquopy 官方 wheel 源的 numpy/pillow/opencv
-  构建期打包可行性 (Chaquopy 提供预编译 Android wheel); 逐包实测, 能用即收录,
-  16 KB page 等兼容性问题出现时针对性修复。
+- [x] [P] **路径 C (native 包评估)**: 结论为 `NOT_ADMITTED`, 当前 APK 继续
+  `stdlib-only`。在 `0.4.0-alpha.8` detached worktree 中使用官方 CPython 3.13.9
+  build Python、Chaquopy 官方 wheel 与本地 `--no-index --find-links` 闭包逐包实测:
+  - Pillow 11.0.0 (`BUILDABLE_NOT_ADMITTED_16K`) 可完成双 ABI offline debug build,
+    三种 APK 均增加 2,054,483 bytes 且 `zipalign -c -P 16 4` 通过; 但其
+    `chaquopy-freetype 2.9.1-2` 在 arm64-v8a 与 x86_64 的 ELF LOAD 最小对齐均仅
+    `0x1000`, `chaquopy-libjpeg` 的 x86_64 也仅 `0x1000`, 因而完整闭包不支持
+    16 KiB page。
+  - NumPy 1.26.2 (`BUILDABLE_NOT_ADMITTED_16K_AND_SIZE`) 同样可构建, 三种 APK 均增加
+    21,931,164 bytes; 顶层 wheel 与 arm64-v8a 闭包通过静态对齐, 但 x86_64 的
+    `chaquopy-openblas 0.2.20-5` 与 `chaquopy-libgfortran 4.9-0` 仍为 `0x1000`。
+  - OpenCV (`NOT_BUILDABLE_NO_CP313_WHEEL`) 的官方 Android 索引只提供到 CPython 3.10,
+    对 Python 3.13 / `cp313` 无匹配 distribution。
+  - 4 KiB ELF 的后续 LOAD 段布局不能只改 `p_align`, 必须重新链接。Chaquopy 当前建议
+    Python 3.13+ wheel 在 Linux/macOS 以 cibuildwheel 构建; 本轮不安装新的 Docker/WSL
+    基础设施, 也不把本机临时重打包伪装成可复现依赖。重开须提交 NDK r28+ 双 ABI
+    可复现 wheel、哈希/许可证锁、全闭包 ELF+ZIP 16 KiB 审计、三 APK release 体积预算与
+    16 KiB 环境公共引擎验收。完整输入、体积、许可证与准入门见
+    [ADR 0004](docs/adr/0004-native-python-package-admission.md)。
 - [ ] [P] **路径 D (运行时安装, 可选进阶)**: 插件内 pip 安装到私有目录并纳入 `sys.path`
   (需 INTERNET; 作为显式用户操作, 不做隐式解析)。有明确用户需求再启动。
 
@@ -625,7 +641,7 @@
 | 0.1.0 | 协议 1.0-1.1 基线, 独立进程执行 | 已发布 |
 | 0.2.0 | M1 体验补全 + M2 入口收尾 | 进行中 |
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 进行中 (路径 A 已完成) |
-| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (自动化核心已完成; 路径 B 已评估且不接纳, 路径 C 待评估) |
+| 0.4.0 | M3 自动化核心 + M4 第三方包路径 B/C | 进行中 (自动化核心已完成; 路径 B/C 均已评估且不接纳) |
 | 0.5.x | M5 长任务/并发/预热 | 计划 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 

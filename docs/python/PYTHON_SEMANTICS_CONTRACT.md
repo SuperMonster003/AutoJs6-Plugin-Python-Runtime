@@ -318,6 +318,14 @@ and `online.pip.allowed=false`; it is not a claim that the candidate cannot run
 under Chaquopy. A future build-time package must first satisfy ADR 0003's
 immutable wheel, exact hash, offline build, license, APK-size and dual-ABI gate.
 
+M4 Path C separately built the official-index Pillow 11.0.0 and NumPy 1.26.2
+native closures and recorded `NOT_ADMITTED` in ADR 0004. Both top-level CPython
+3.13 wheels built, but transitive ELF files failed the complete dual-ABI 16 KiB
+alignment gate; the official OpenCV Android index had no `cp313` wheel. These
+candidates and licenses are likewise absent from the current APK. Native
+admission requires all direct and transitive `.so`/`.so.*` files, not only the
+top-level extension, to satisfy ADR 0004's reproducible dual-ABI gate.
+
 The Host admits at most a 64 MiB compressed workspace, 8192 archive file
 entries and 128 MiB of extracted file content. Provider selection compares the
 actual snapshot against all three advertised capacities before dispatch. These
