@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.0-alpha.5
+
+###### 2026/08/25
+
+* `Hint` Fifth current-tree alpha candidate; rebuild all three Host API release AAR files from exact clean `afca7b14c` with byte-identical payloads and refresh the provenance lock to that source without claiming a signed APK, the ten-item Android smoke, beta, or publication
+* `Improvement` Run Host `verifyPythonReleaseApiDistributionGate` in an isolated worktree and pin AutoJs6 6.8.0/versionCode 5276, protocol 1.6, the source fingerprint, and the distribution-manifest SHA-256 with `dirty=false`
+
 # v0.5.0-alpha.4
 
 ###### 2026/08/25

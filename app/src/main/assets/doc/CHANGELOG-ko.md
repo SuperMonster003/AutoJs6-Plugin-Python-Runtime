@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.0-alpha.5
+
+###### 2026/08/25
+
+* `안내` 다섯 번째 current-tree alpha 후보; 정확한 clean `afca7b14c`에서 Host API release AAR 3개를 다시 빌드해 payload 바이트가 동일함을 확인하고 provenance lock을 해당 소스로 갱신; signed APK, Android 10개 smoke, beta 또는 publication 완료를 선언하지 않음
+* `개선` 격리된 worktree에서 Host `verifyPythonReleaseApiDistributionGate`를 실행하고 `dirty=false`로 AutoJs6 6.8.0/versionCode 5276, protocol 1.6, source fingerprint 및 distribution manifest SHA-256을 고정
+
 # v0.5.0-alpha.4
 
 ###### 2026/08/25

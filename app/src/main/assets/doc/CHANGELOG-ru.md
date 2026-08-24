@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.0-alpha.5
+
+###### 2026/08/25
+
+* `Примечание` Пятый current-tree alpha-кандидат; повторно собрать три release AAR Host API из точного clean-коммита `afca7b14c`, подтвердить побайтовое совпадение и обновить provenance lock на этот источник, не заявляя signed APK, Android smoke из десяти пунктов, beta или publication
+* `Улучшено` Запустить Host `verifyPythonReleaseApiDistributionGate` в изолированном worktree и закрепить AutoJs6 6.8.0/versionCode 5276, protocol 1.6, source fingerprint и SHA-256 distribution manifest со значением `dirty=false`
+
 # v0.5.0-alpha.4
 
 ###### 2026/08/25

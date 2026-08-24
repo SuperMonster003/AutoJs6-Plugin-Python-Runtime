@@ -24,7 +24,7 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_current_protocol_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0-alpha.4", common["release_target"])
+        self.assertEqual("0.5.0-alpha.5", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("protocol 1.6", common["release_state"])
         self.assertIn("foreground-only long-running", common["release_state"])
@@ -442,6 +442,18 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "publication",
                 ):
                     self.assertIn(marker, cadence["improvement"][0])
+
+                provenance = source["$data"]["v0.5.0-alpha.5"]
+                self.assertEqual("2026/08/25", provenance["released_date"])
+                self.assertEqual(1, len(provenance["hint"]))
+                self.assertEqual(1, len(provenance["improvement"]))
+                self.assertNotIn("feature", provenance)
+                self.assertNotIn("fix", provenance)
+                self.assertNotIn("dependency", provenance)
+                for marker in ("Host", "AAR", "afca7b14c", "lock"):
+                    self.assertIn(marker, provenance["hint"][0])
+                for marker in ("dirty=false", "6.8.0", "5276", "1.6"):
+                    self.assertIn(marker, provenance["improvement"][0])
 
                 prewarm = source["$data"]["v0.5.0-alpha.3"]
                 self.assertEqual("2026/08/24", prewarm["released_date"])

@@ -36,6 +36,16 @@ The forward sequence is deliberately short:
   values. Refreshing that lock remains a separate dual-repository operation.
 - `release/` and `releases/` contain no stale APK before a candidate check.
 
+For `0.5.0-alpha.5`, the accepted Host provenance is clean AutoJs6 commit
+`afca7b14c4ba3971b60a9ce3587e2f10bfd0ab1e`, version `6.8.0`/versionCode
+`5276`. Its isolated `verifyPythonReleaseApiDistributionGate` run recorded
+source fingerprint
+`c7e7fe0b9b7fcf60fb61aeebc1586305d4ffa2395ff92170471ddfa945e84f00`
+and distribution-manifest SHA-256
+`5c3f2cd9118cd6ec0c8838febe12f0df4b9b1d58a40d5252b462667194f09da6`.
+All three rebuilt AAR payloads were byte-identical to the previously staged
+files, so only their source-provenance lock changed.
+
 ## Local candidate gate
 
 The quick source profile is read-only and requires a clean committed tree:

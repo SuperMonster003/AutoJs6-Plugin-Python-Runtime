@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.0-alpha.5
+
+###### 2026/08/25
+
+* `ملاحظة` مرشح alpha خامس من current-tree; إعادة بناء ملفات AAR release الثلاثة لواجهة Host API من المصدر clean الدقيق `afca7b14c` مع تطابق البايتات وتحديث provenance lock إلى هذا المصدر, دون إعلان signed APK أو smoke Android ذي البنود العشرة أو beta أو publication
+* `تحسين` تشغيل Host `verifyPythonReleaseApiDistributionGate` في worktree معزول وتثبيت AutoJs6 6.8.0/versionCode 5276 و protocol 1.6 و source fingerprint و SHA-256 الخاص بـ distribution manifest مع `dirty=false`
+
 # v0.5.0-alpha.4
 
 ###### 2026/08/25

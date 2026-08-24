@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.0-alpha.5
+
+###### 2026/08/25
+
+* `Nota` Quinto candidato alpha current-tree; reconstruir los tres AAR release de la Host API desde el commit clean exacto `afca7b14c` con bytes idénticos y actualizar el provenance lock a ese origen, sin declarar un signed APK, el smoke Android de diez puntos, beta ni publication
+* `Mejora` Ejecutar Host `verifyPythonReleaseApiDistributionGate` en un worktree aislado y fijar AutoJs6 6.8.0/versionCode 5276, el protocolo 1.6, el source fingerprint y el SHA-256 del distribution manifest con `dirty=false`
+
 # v0.5.0-alpha.4
 
 ###### 2026/08/25

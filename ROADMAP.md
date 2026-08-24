@@ -713,6 +713,10 @@
 - [x] **十项真机冒烟清单**: 固定单文件/项目与流式输出、导入、输入、结构化结果/产物、
   低风险能力、files/dialogs/engines、自动化/图像/OCR、长任务、FIFO 并发、定时任务与
   热插拔十项; 失败即 issue + 聚焦回归, 不再生成哈希绑定证据包。
+- [x] **精确 Host provenance**: 在隔离 clean worktree 中从已验收的 AutoJs6
+  `afca7b14c`/6.8.0/versionCode 5276 运行 release API distribution gate; 三件协议
+  AAR 与既有 payload 字节完全一致, lock 已刷新到该提交、source fingerprint 和
+  distribution manifest SHA-256。
 - [ ] **晋级 beta**: 在精确 signed candidate 上跑完十项清单并记录简短 PASS/FAIL;
   失败项修复后重跑, 全通过才改为 `0.5.0-beta.1`。
 - [ ] **发布 0.5.0**: beta 验收通过后, 仅在明确授权下构建 signed release、创建 tag、

@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.0-alpha.5
+
+###### 2026/08/25
+
+* `提示` 第五個 current-tree alpha 候選版; 三件 Host API release AAR 從精確 clean `afca7b14c` 重新構建後位元組未變, provenance lock 已刷新至該來源; 不聲明 signed APK、Android 十項冒煙、beta 或 publication 完成
+* `改善` 在隔離 worktree 中運行 Host `verifyPythonReleaseApiDistributionGate`, 以 `dirty=false` 固定 AutoJs6 6.8.0/versionCode 5276、協議 1.6、source fingerprint 與 distribution manifest SHA-256
+
 # v0.5.0-alpha.4
 
 ###### 2026/08/25
