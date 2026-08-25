@@ -72,10 +72,13 @@ class M6ManualSmokeTest(unittest.TestCase):
         ):
             self.assertIn(marker, verifier)
         for marker in (
-            "QV710AF65F exact SM003 candidate run",
+            "QV710AF65F exact SM003 alpha.6 candidate run",
+            "QV710AF65F exact SM003 beta.1 candidate run",
             "every item PASS",
             "CA6252ACE475FFA554FE414DEB09386F0F5BED79F2CC135847FEF9A3424FD8ED",
+            "80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F",
             "alpha-to-beta",
+            "beta-to-stable-source",
         ):
             self.assertIn(marker, results)
 

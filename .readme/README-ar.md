@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. يضيف 0.5.0-alpha.6 مسار استعادة Plugin Center ACTIVATE/WakeActivity لحالة stopped/notLaunched التي تتركها بعض أجهزة OEM بعد التثبيت الأول. يجب أن تستخدم حزم Host وPlugin APK نفس signer؛ ويُرفض خلط debug Host مع production Plugin بشكل حتمي باسم PYTHON_RUNTIME_PROVIDER_UNTRUSTED. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.5.0-beta.1
-release state: 0.5.0-beta.1 feature-freeze source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-alpha.6 arm64 APK from commit 9ac32da5fd33eafdfe684e12e51f1dc79101b8e1 was pulled back byte-identical and passed all ten manual Android smoke items on QV710AF65F (10/10 PASS); a matching Android-Debug build also passed 10/10 on OnePlus OPD2413 including OEM ACTIVATE recovery; deterministic item 2/3/4 materials now live in examples/python/m6_manual_smoke; a signed beta artifact, exact beta smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.0
+release state: 0.5.0 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,14 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
+# v0.5.0
+
+###### 2026/08/25
+
+* `ملاحظة` 0.5.0 مرشح المصدر المستقر التراكمي؛ اجتاز مرشح beta المطابق والموقّع بـ SM003 اختبارات Android العشرة 10، من دون إعلان اكتمال APK المستقر أو tag أو publication
+* `إضافة` يجمع M6 قدرات M1-M5 ومواد الاختبار القابلة لإعادة الاستخدام للبنود 2/3/4، ويثبت حدود مرشحي alpha → beta → stable والنشر الخفيفة
+* `تحسين` تطابق APK arm64 للإصدار 0.5.0-beta.1 المسحوب من QV710AF65F بايتاً ببايت مع المرشح الرسمي، واكتملت الجولة الكاملة الثانية بنتيجة 10/10 PASS
+
 # v0.5.0-beta.1
 
 ###### 2026/08/25
@@ -184,13 +192,6 @@ runtime/security/release owner: SuperMonster003
 * `ملاحظة` مرشح current-tree alpha السادس؛ استكمال عقد AutoJs6 WakeActivity لأول تفعيل للـ Plugin على OnePlus OPD2413 وأجهزة OEM المشابهة دون ادعاء production signed candidate أو beta أو publication
 * `إصلاح` إعلان `org.autojs.plugin.WAKE_ACTIVITY` و`org.autojs.plugin.action.WAKE` عبر Activity من نوع NoDisplay محمية بـ signature permission وتنتهي فورا؛ يتيح ذلك لـ `ACTIVATE` في Plugin Center مسح `stopped/notLaunched` وإعادة محاولة التفعيل تلقائيا
 * `تحسين` إعادة إنتاج الفشل الأصلي ومعالجته باستخدام debug Host عند `afca7b14c` وPlugin تشخيصي له نفس signer، مع إرجاع نتيجة startup probe خلال `277 ms`؛ والتأكد بشكل مستقل من أن اختلاف signer يفشل مغلقا باسم `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
-
-# v0.5.0-alpha.5
-
-###### 2026/08/25
-
-* `ملاحظة` مرشح alpha خامس من current-tree; إعادة بناء ملفات AAR release الثلاثة لواجهة Host API من المصدر clean الدقيق `afca7b14c` مع تطابق البايتات وتحديث provenance lock إلى هذا المصدر, دون إعلان signed APK أو smoke Android ذي البنود العشرة أو beta أو publication
-* `تحسين` تشغيل Host `verifyPythonReleaseApiDistributionGate` في worktree معزول وتثبيت AutoJs6 6.8.0/versionCode 5276 و protocol 1.6 و source fingerprint و SHA-256 الخاص بـ distribution manifest مع `dirty=false`
 
 ##### المزيد من الإصدارات
 

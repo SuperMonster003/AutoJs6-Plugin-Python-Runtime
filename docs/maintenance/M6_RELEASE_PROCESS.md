@@ -1,7 +1,7 @@
 # M6 lightweight release process
 
-Status: `0.5.0-beta.1` feature freeze admitted after the exact SM003-signed
-alpha.6 candidate passed all ten Android smoke items. This process replaces the
+Status: `0.5.0` stable source candidate admitted after the exact SM003-signed
+beta.1 candidate passed all ten Android smoke items. This process replaces the
 new Roadmap's remaining release ambiguity; it does not replace the frozen
 historical verification of the already-published `v0.1.0` tag.
 
@@ -16,11 +16,13 @@ The forward sequence is deliberately short:
 
 1. `0.5.0-alpha.N`: current-tree development candidates; incomplete release
    work is allowed and no publication is implied.
-2. `0.5.0-beta.1`: current feature-freeze line, admitted after the full local
-   gate and the exact alpha candidate's manual Android smoke checklist pass.
-3. `0.5.0`: first cumulative stable release after `0.1.0`; requires an explicit
-   publication instruction, the pinned production signer and Host provenance,
-   and the same smoke checklist on the signed candidate.
+2. `0.5.0-beta.1`: completed feature-freeze line, admitted after the full local
+   gate and the exact alpha candidate's manual Android smoke checklist pass;
+   its exact signed candidate subsequently passed the same ten-item checklist.
+3. `0.5.0`: current stable-candidate line and first cumulative release after
+   `0.1.0`; publication requires the pinned production signer and Host
+   provenance, the same smoke checklist on the exact signed stable candidate,
+   and an explicit publication instruction.
 
 `1.0.0` remains the later API-stability milestone. It is not a synonym for
 "everything in the Roadmap is implemented" and is not pulled forward by M6.
@@ -166,6 +168,26 @@ concise identity and claim boundary are recorded in
 [`M6_ANDROID_SMOKE_RESULTS.md`](M6_ANDROID_SMOKE_RESULTS.md). This admits beta
 source preparation; it does not create a tag, push, publication or stable
 claim.
+
+## Accepted beta-to-stable-source run
+
+On 2026-08-25, the formal SM003-signed beta.1 arm64 APK from source commit
+`4bbae75dbfb496995e5278684024f63ae9f71a43` was installed in place on the same
+Sony XQ-AT72 (`QV710AF65F`, Android 12 / API 31). The operator reran all ten
+items and reported every item PASS. A subsequent read-only device audit showed
+Plugin `0.5.0-beta.1`/versionCode 91 active for user 0. Pulling installed
+`base.apk` produced SHA-256
+`80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F`,
+byte-identical to
+`autojs6-plugin-python-runtime-v0.5.0-beta.1-arm64-v8a-adc0d68b.apk`.
+
+The paired AutoJs6 remained `6.8.0`/versionCode 5276 with installed APK
+SHA-256 `20FFE49EA9D9F1D637F96BAB1A8E251F343643F26963131F5CDC6114E96D43C8`.
+Host and Plugin each had the same SM003 certificate SHA-256
+`31A681FCFFFB3E428420CAE280DED89292B12A3B0F59E19B7A73E32A8AE4C213`.
+This run admits `0.5.0` source and signed-candidate preparation. It does not
+qualify an as-yet-unbuilt stable APK, create a tag, push, or publish anything;
+the exact signed stable APK must still pass the same checklist.
 
 ## Signed candidate and publication boundary
 

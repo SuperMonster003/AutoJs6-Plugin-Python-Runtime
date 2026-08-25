@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 0.5.0-alpha.6 為部分 OEM 首次安裝後的 stopped/notLaunched 狀態提供 Plugin Center ACTIVATE/WakeActivity 復原路徑. Host 與 Plugin APK 必須使用同一 signer; debug Host 與 production Plugin 混合安裝會穩定拒絕為 PYTHON_RUNTIME_PROVIDER_UNTRUSTED. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.5.0-beta.1
-release state: 0.5.0-beta.1 feature-freeze source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-alpha.6 arm64 APK from commit 9ac32da5fd33eafdfe684e12e51f1dc79101b8e1 was pulled back byte-identical and passed all ten manual Android smoke items on QV710AF65F (10/10 PASS); a matching Android-Debug build also passed 10/10 on OnePlus OPD2413 including OEM ACTIVATE recovery; deterministic item 2/3/4 materials now live in examples/python/m6_manual_smoke; a signed beta artifact, exact beta smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.0
+release state: 0.5.0 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,14 @@ M4 路徑 A 已完成; M4 路徑 B 與 Path C 評估均以 `NOT_ADMITTED` 關閉
 
 ******
 
+# v0.5.0
+
+###### 2026/08/25
+
+* `提示` 0.5.0 累計穩定版原始碼候選; 精確 SM003 簽署的 beta 候選已通過 10 項 Android 冒煙測試, 尚不聲明穩定 APK、tag 或 publication 完成
+* `新增` M6 彙總 M1-M5 能力與可重用的 2/3/4 測試材料, 固定 alpha → beta → stable 的輕量候選及發佈邊界
+* `改善` 從 QV710AF65F 回拉的 0.5.0-beta.1 arm64 APK 與正式候選逐位元組一致, 第二輪完整十項清單結果為 10/10 PASS
+
 # v0.5.0-beta.1
 
 ###### 2026/08/25
@@ -184,13 +192,6 @@ M4 路徑 A 已完成; M4 路徑 B 與 Path C 評估均以 `NOT_ADMITTED` 關閉
 * `提示` 第六個 current-tree alpha 候選版; 為 OnePlus OPD2413 等 OEM 的首次插件啟用補齊 AutoJs6 WakeActivity 契約, 不聲稱 production signed candidate、beta 或 publication 已完成
 * `修正` 聲明 `org.autojs.plugin.WAKE_ACTIVITY` 與 `org.autojs.plugin.action.WAKE`, 提供簽名權限保護並即時結束的 NoDisplay Activity; 插件中心可透過 `ACTIVATE` 清除 `stopped/notLaunched` 狀態並自動重試啟用
 * `改善` 在 `afca7b14c` debug Host 與相同 signer 的診斷 Plugin 上重現並修復原始失敗, startup probe 於 `277 ms` 傳回結構化結果; 另確認 signer 不相符會獨立 fail closed 為 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
-
-# v0.5.0-alpha.5
-
-###### 2026/08/25
-
-* `提示` 第五個 current-tree alpha 候選版; 三件 Host API release AAR 從精確 clean `afca7b14c` 重新構建後位元組未變, provenance lock 已刷新至該來源; 不聲明 signed APK、Android 十項冒煙、beta 或 publication 完成
-* `改善` 在隔離 worktree 中運行 Host `verifyPythonReleaseApiDistributionGate`, 以 `dirty=false` 固定 AutoJs6 6.8.0/versionCode 5276、協議 1.6、source fingerprint 與 distribution manifest SHA-256
 
 ##### 更多版本
 

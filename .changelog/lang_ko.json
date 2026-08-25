@@ -5,6 +5,18 @@
   "changelog_label_improvement": "개선",
   "changelog_label_dependency": "의존성",
   "$data": {
+    "v0.5.0": {
+      "released_date": "2026/08/25",
+      "hint": [
+        "0.5.0 누적 안정 소스 후보입니다. 정확한 SM003 서명 beta 후보가 Android 10개 항목을 통과했으며 안정 APK, tag 또는 publication 완료를 아직 선언하지 않습니다"
+      ],
+      "feature": [
+        "M6는 M1-M5 기능과 재사용 가능한 2/3/4 테스트 자료를 통합하고 경량 alpha → beta → stable 후보 및 배포 경계를 고정합니다"
+      ],
+      "improvement": [
+        "QV710AF65F에서 추출한 0.5.0-beta.1 arm64 APK가 공식 후보와 바이트 단위로 일치했고 두 번째 전체 10개 실행이 10/10 PASS였습니다"
+      ]
+    },
     "v0.5.0-beta.1": {
       "released_date": "2026/08/25",
       "hint": [

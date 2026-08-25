@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Improvement",
   "changelog_label_dependency": "Dependency",
   "$data": {
+    "v0.5.0": {
+      "released_date": "2026/08/25",
+      "hint": [
+        "0.5.0 cumulative stable source candidate; the exact SM003-signed beta candidate passed all 10 Android smoke items, without claiming a stable APK, tag, or completed publication"
+      ],
+      "feature": [
+        "M6 consolidates M1-M5 capabilities and reusable item 2/3/4 materials while fixing the lightweight alpha → beta → stable candidate and publication boundaries"
+      ],
+      "improvement": [
+        "The 0.5.0-beta.1 arm64 APK pulled from QV710AF65F was byte-identical to the formal candidate, and the second complete ten-item run finished 10/10 PASS"
+      ]
+    },
     "v0.5.0-beta.1": {
       "released_date": "2026/08/25",
       "hint": [

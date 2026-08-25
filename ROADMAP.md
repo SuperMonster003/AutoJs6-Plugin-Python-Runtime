@@ -695,8 +695,8 @@
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 实现完成, 未单独发布; 累计进入 0.5.0 |
 | 0.4.x | M3 自动化核心 + M4 第三方包路径 B/C | 实现/决策完成, 未单独发布; 累计进入 0.5.0 |
 | 0.5.0-alpha.N | M1-M5 累计 current-tree 候选 | 已完成; 精确 SM003 alpha.6 十项 PASS |
-| 0.5.0-beta.1 | 功能冻结 + 完整本地门禁 + 精确候选 10 项真机冒烟 | 当前阶段 |
-| 0.5.0 | 0.1.0 后首个累计稳定版 | 待 beta 验收与明确发布授权 |
+| 0.5.0-beta.1 | 功能冻结 + 完整本地门禁 + 精确候选 10 项真机冒烟 | 已完成; 精确 SM003 beta.1 十项 PASS |
+| 0.5.0 | 0.1.0 后首个累计稳定版 | 当前稳定候选; 待精确 signed stable 冒烟与明确发布授权 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 
 ### M6 推进状态
@@ -735,8 +735,17 @@
   用户完成十项清单并全部 PASS。另有 OnePlus OPD2413 同签名诊断组合的 10/10 功能
   PASS 与 OEM `ACTIVATE` 恢复结果。简短记录见
   `docs/maintenance/M6_ANDROID_SMOKE_RESULTS.md`; release train 已进入 `0.5.0-beta.1`。
-- [ ] **发布 0.5.0**: beta 验收通过后, 仅在明确授权下构建 signed release、创建 tag、
-  push 与发布; 本地候选门禁 PASS 不等于发布授权。
+- [x] **beta 验收**: 正式 SM003-signed beta.1 arm64 APK 在 QV710AF65F 原地更新后,
+  用户再次完成全部十项并报告 10/10 PASS。只读回拉的 installed `base.apk` SHA-256
+  为 `80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F`, 与
+  commit `4bbae75dbfb496995e5278684024f63ae9f71a43` 的正式候选逐字节一致; Host 仍为
+  6.8.0/5276, 两者均为 SM003 signer。
+- [x] **稳定候选源码**: release train 晋级 `0.5.0`; 版本/十语 Changelog/生成文档与
+  beta-to-stable 设备记录绑定同一提交, 不把源码候选或本地 signed APK 冒充已发布版本。
+- [ ] **稳定候选真机验收**: 对最终 SM003-signed `0.5.0` APK 重跑同一十项清单并绑定
+  installed APK SHA-256; 失败即修复并重跑, 通过后才具备发布资格。
+- [ ] **发布 0.5.0**: 精确 stable 候选验收后, 仅在明确授权下创建 tag、push 与发布;
+  本地候选门禁、signed APK 或真机 PASS 均不等于发布授权。
 
 完整规则与十项操作清单见
 [M6 lightweight release process](docs/maintenance/M6_RELEASE_PROCESS.md)。

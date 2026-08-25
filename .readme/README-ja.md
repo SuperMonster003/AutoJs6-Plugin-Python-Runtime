@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. 0.5.0-alpha.6 は一部 OEM が初回インストール後に残す stopped/notLaunched 状態へ Plugin Center ACTIVATE/WakeActivity 復旧経路を追加します. Host と Plugin APK は同じ signer が必須で, debug Host と production Plugin の混在は PYTHON_RUNTIME_PROVIDER_UNTRUSTED として決定的に拒否されます. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.5.0-beta.1
-release state: 0.5.0-beta.1 feature-freeze source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-alpha.6 arm64 APK from commit 9ac32da5fd33eafdfe684e12e51f1dc79101b8e1 was pulled back byte-identical and passed all ten manual Android smoke items on QV710AF65F (10/10 PASS); a matching Android-Debug build also passed 10/10 on OnePlus OPD2413 including OEM ACTIVATE recovery; deterministic item 2/3/4 materials now live in examples/python/m6_manual_smoke; a signed beta artifact, exact beta smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.0
+release state: 0.5.0 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,14 @@ M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMI
 
 ******
 
+# v0.5.0
+
+###### 2026/08/25
+
+* `注記` 0.5.0 は累積安定版のソース候補です。正確な SM003 署名 beta 候補は Android の 10 項目を通過しましたが、安定 APK、tag、publication の完了はまだ宣言しません
+* `追加` M6 は M1-M5 の機能と再利用可能な 2/3/4 テスト材料を統合し、軽量な alpha → beta → stable 候補および公開境界を固定します
+* `改善` QV710AF65F から回収した 0.5.0-beta.1 arm64 APK は正式候補とバイト単位で一致し、2 回目の完全な十項目実行は 10/10 PASS でした
+
 # v0.5.0-beta.1
 
 ###### 2026/08/25
@@ -184,13 +192,6 @@ M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMI
 * `注記` 6 番目の current-tree alpha candidate; OnePlus OPD2413 などの OEM で初回 Plugin 有効化に必要な AutoJs6 WakeActivity 契約を追加し, production signed candidate、beta、publication の完了は主張しない
 * `修正` `org.autojs.plugin.WAKE_ACTIVITY` と `org.autojs.plugin.action.WAKE` を宣言し, signature permission で保護され直ちに終了する NoDisplay Activity を提供; Plugin Center の `ACTIVATE` が `stopped/notLaunched` を解除して有効化を自動再試行できるようにする
 * `改善` `afca7b14c` debug Host と同じ signer の診断 Plugin で元の失敗を再現・復旧し, startup probe は `277 ms` で構造化結果を返した; signer 不一致は独立して `PYTHON_RUNTIME_PROVIDER_UNTRUSTED` として fail closed することも確認
-
-# v0.5.0-alpha.5
-
-###### 2026/08/25
-
-* `注記` 5 番目の current-tree alpha 候補; 正確な clean `afca7b14c` から 3 件の Host API release AAR を再ビルドして payload のバイト一致を確認し, provenance lock をそのソースへ更新; signed APK、Android 10 項目 smoke、beta、publication の完了は宣言しない
-* `改善` 分離 worktree で Host `verifyPythonReleaseApiDistributionGate` を実行し, `dirty=false` で AutoJs6 6.8.0/versionCode 5276、protocol 1.6、source fingerprint、distribution manifest SHA-256 を固定
 
 ##### その他のバージョン
 

@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0
+
+###### 2026/08/25
+
+* `Hint` 0.5.0 cumulative stable source candidate; the exact SM003-signed beta candidate passed all 10 Android smoke items, without claiming a stable APK, tag, or completed publication
+* `Feature` M6 consolidates M1-M5 capabilities and reusable item 2/3/4 materials while fixing the lightweight alpha → beta → stable candidate and publication boundaries
+* `Improvement` The 0.5.0-beta.1 arm64 APK pulled from QV710AF65F was byte-identical to the formal candidate, and the second complete ten-item run finished 10/10 PASS
+
 # v0.5.0-beta.1
 
 ###### 2026/08/25

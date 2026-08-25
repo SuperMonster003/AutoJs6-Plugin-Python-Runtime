@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0
+
+###### 2026/08/25
+
+* `Note` 0.5.0 est le candidat source stable cumulatif ; le candidat beta exact signé SM003 a réussi les 10 tests Android, sans déclarer un APK stable, un tag ou une publication terminée
+* `Fonction` M6 regroupe les capacités M1-M5 et les supports réutilisables des points 2/3/4, tout en fixant les limites légères alpha → beta → stable et de publication
+* `Amélioration` L’APK arm64 0.5.0-beta.1 extrait de QV710AF65F est identique octet par octet au candidat officiel ; la seconde exécution complète donne 10/10 PASS
+
 # v0.5.0-beta.1
 
 ###### 2026/08/25

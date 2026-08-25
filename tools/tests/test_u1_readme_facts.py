@@ -24,20 +24,22 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_current_protocol_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0-beta.1", common["release_target"])
+        self.assertEqual("0.5.0", common["release_target"])
         for marker in (
-            "0.5.0-beta.1 feature-freeze source candidate",
+            "0.5.0 stable source candidate",
             "protocol 1.0-1.6",
             "cumulative M1-M5",
             "stdlib-only",
-            "SM003-signed 0.5.0-alpha.6",
+            "SM003-signed 0.5.0-beta.1",
             "QV710AF65F",
+            "80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F",
             "passed all ten manual Android smoke items",
-            "10/10",
+            "10/10 PASS",
             "OnePlus OPD2413",
             "ACTIVATE",
             "examples/python/m6_manual_smoke",
-            "signed beta artifact",
+            "stable signed artifact",
+            "exact stable smoke",
             "stable tag",
             "publication",
         ):
@@ -399,6 +401,20 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "publication",
                 ):
                     self.assertIn(marker, cadence["improvement"][0])
+
+                stable = source["$data"]["v0.5.0"]
+                self.assertEqual("2026/08/25", stable["released_date"])
+                self.assertEqual(1, len(stable["hint"]))
+                self.assertEqual(1, len(stable["feature"]))
+                self.assertEqual(1, len(stable["improvement"]))
+                self.assertNotIn("fix", stable)
+                self.assertNotIn("dependency", stable)
+                for marker in ("0.5.0", "SM003", "10"):
+                    self.assertIn(marker, stable["hint"][0])
+                for marker in ("M6", "2/3/4"):
+                    self.assertIn(marker, stable["feature"][0])
+                for marker in ("QV710AF65F", "0.5.0-beta.1", "PASS"):
+                    self.assertIn(marker, stable["improvement"][0])
 
                 beta = source["$data"]["v0.5.0-beta.1"]
                 self.assertEqual("2026/08/25", beta["released_date"])

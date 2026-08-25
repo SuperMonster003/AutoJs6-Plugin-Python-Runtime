@@ -105,8 +105,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. La version 0.5.0-alpha.6 ajoute la récupération Plugin Center ACTIVATE/WakeActivity pour l'état stopped/notLaunched laissé par certains OEM après la première installation. Les APK Host et Plugin doivent utiliser le même signer; mélanger un Host debug avec le Plugin de production est rejeté de façon déterministe par PYTHON_RUNTIME_PROVIDER_UNTRUSTED. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.5.0-beta.1
-release state: 0.5.0-beta.1 feature-freeze source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-alpha.6 arm64 APK from commit 9ac32da5fd33eafdfe684e12e51f1dc79101b8e1 was pulled back byte-identical and passed all ten manual Android smoke items on QV710AF65F (10/10 PASS); a matching Android-Debug build also passed 10/10 on OnePlus OPD2413 including OEM ACTIVATE recovery; deterministic item 2/3/4 materials now live in examples/python/m6_manual_smoke; a signed beta artifact, exact beta smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.0
+release state: 0.5.0 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,14 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 
 ******
 
+# v0.5.0
+
+###### 2026/08/25
+
+* `Note` 0.5.0 est le candidat source stable cumulatif ; le candidat beta exact signé SM003 a réussi les 10 tests Android, sans déclarer un APK stable, un tag ou une publication terminée
+* `Fonction` M6 regroupe les capacités M1-M5 et les supports réutilisables des points 2/3/4, tout en fixant les limites légères alpha → beta → stable et de publication
+* `Amélioration` L’APK arm64 0.5.0-beta.1 extrait de QV710AF65F est identique octet par octet au candidat officiel ; la seconde exécution complète donne 10/10 PASS
+
 # v0.5.0-beta.1
 
 ###### 2026/08/25
@@ -184,13 +192,6 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 * `Note` Sixième candidat alpha current-tree; compléter le contrat AutoJs6 WakeActivity pour la première activation du Plugin sur OnePlus OPD2413 et des OEM similaires, sans revendiquer de production signed candidate, de beta ni de publication
 * `Correction` Déclarer `org.autojs.plugin.WAKE_ACTIVITY` et `org.autojs.plugin.action.WAKE` avec une Activity NoDisplay protégée par permission de signature et immédiatement terminée; `ACTIVATE` dans Plugin Center peut ainsi effacer `stopped/notLaunched` et retenter automatiquement l'activation
 * `Amélioration` Reproduire puis corriger l'échec initial avec le Host debug `afca7b14c` et un Plugin de diagnostic au même signer, avec un résultat startup probe à `277 ms`; confirmer séparément qu'un signer différent échoue de façon fermée avec `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
-
-# v0.5.0-alpha.5
-
-###### 2026/08/25
-
-* `Note` Cinquième candidat alpha current-tree; reconstruire les trois AAR release de la Host API depuis le commit clean exact `afca7b14c` avec des octets identiques et actualiser le provenance lock vers cette source, sans déclarer de signed APK, de smoke Android en dix points, de beta ni de publication
-* `Amélioration` Exécuter Host `verifyPythonReleaseApiDistributionGate` dans un worktree isolé et figer AutoJs6 6.8.0/versionCode 5276, le protocole 1.6, le source fingerprint et le SHA-256 du distribution manifest avec `dirty=false`
 
 ##### Autres versions
 
