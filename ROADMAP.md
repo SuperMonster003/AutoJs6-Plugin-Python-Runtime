@@ -694,8 +694,8 @@
 | 0.2.x | M1 体验补全 + M2 入口收尾 | 实现完成, 未单独发布; 累计进入 0.5.0 |
 | 0.3.x | M3 broker 骨架 + 第一二批能力 + M4 路径 A | 实现完成, 未单独发布; 累计进入 0.5.0 |
 | 0.4.x | M3 自动化核心 + M4 第三方包路径 B/C | 实现/决策完成, 未单独发布; 累计进入 0.5.0 |
-| 0.5.0-alpha.N | M1-M5 累计 current-tree 候选 | 当前阶段 |
-| 0.5.0-beta.1 | 功能冻结 + 完整本地门禁 + 精确候选 10 项真机冒烟 | 下一阶段 |
+| 0.5.0-alpha.N | M1-M5 累计 current-tree 候选 | 已完成; 精确 SM003 alpha.6 十项 PASS |
+| 0.5.0-beta.1 | 功能冻结 + 完整本地门禁 + 精确候选 10 项真机冒烟 | 当前阶段 |
 | 0.5.0 | 0.1.0 后首个累计稳定版 | 待 beta 验收与明确发布授权 |
 | 1.0.0 | 能力面稳定, API 冻结 | 计划 |
 
@@ -727,8 +727,14 @@
   `FLAG_INCLUDE_STOPPED_PACKAGES` 假设经真机反证后已撤销, 此修复不需要 Host 源码改动。
   另确认 Host 与 Plugin signer 不同会独立触发 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`;
   调试 Host 只能搭配同签名调试插件, production candidate 继续使用 SM003 signer。
-- [ ] **晋级 beta**: 在精确 signed candidate 上跑完十项清单并记录简短 PASS/FAIL;
-  失败项修复后重跑, 全通过才改为 `0.5.0-beta.1`。
+- [x] **可复用操作测试包**: 将人工最难判定的导入、stdin/交互输入、结构化结果与
+  二进制 artifact 拆成自断言项目, 收入 `examples/python/m6_manual_smoke/`; 便携测试实际
+  执行同一 bootstrap 路径, PowerShell 校验器独立核对设备发布文件的长度与 SHA-256。
+- [x] **晋级 beta**: 正式 SM003-signed alpha.6 arm64 APK 从 QV710AF65F 回拉后与
+  `releases/` 候选 SHA-256 完全一致; 配对 Host 6.8.0/5276 使用同一 SM003 signer,
+  用户完成十项清单并全部 PASS。另有 OnePlus OPD2413 同签名诊断组合的 10/10 功能
+  PASS 与 OEM `ACTIVATE` 恢复结果。简短记录见
+  `docs/maintenance/M6_ANDROID_SMOKE_RESULTS.md`; release train 已进入 `0.5.0-beta.1`。
 - [ ] **发布 0.5.0**: beta 验收通过后, 仅在明确授权下构建 signed release、创建 tag、
   push 与发布; 本地候选门禁 PASS 不等于发布授权。
 

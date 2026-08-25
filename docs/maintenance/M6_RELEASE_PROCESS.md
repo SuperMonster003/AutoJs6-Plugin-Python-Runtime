@@ -1,7 +1,8 @@
 # M6 lightweight release process
 
-Status: accepted for the cumulative `0.5.0` release train. This process replaces
-the new Roadmap's remaining release ambiguity; it does not replace the frozen
+Status: `0.5.0-beta.1` feature freeze admitted after the exact SM003-signed
+alpha.6 candidate passed all ten Android smoke items. This process replaces the
+new Roadmap's remaining release ambiguity; it does not replace the frozen
 historical verification of the already-published `v0.1.0` tag.
 
 ## One cumulative release train
@@ -15,8 +16,8 @@ The forward sequence is deliberately short:
 
 1. `0.5.0-alpha.N`: current-tree development candidates; incomplete release
    work is allowed and no publication is implied.
-2. `0.5.0-beta.1`: feature freeze after the full local gate and the exact
-   candidate's manual Android smoke checklist pass.
+2. `0.5.0-beta.1`: current feature-freeze line, admitted after the full local
+   gate and the exact alpha candidate's manual Android smoke checklist pass.
 3. `0.5.0`: first cumulative stable release after `0.1.0`; requires an explicit
    publication instruction, the pinned production signer and Host provenance,
    and the same smoke checklist on the signed candidate.
@@ -147,6 +148,24 @@ Any failed applicable item blocks promotion, becomes an issue, and gains one
 focused regression before the checklist is rerun. Capability-unavailable paths
 count as PASS only when the documented stable error is returned without device
 configuration mutation.
+
+## Accepted alpha-to-beta run
+
+On 2026-08-25, the formal SM003-signed alpha.6 arm64 APK from source commit
+`9ac32da5fd33eafdfe684e12e51f1dc79101b8e1` was installed in place on Sony
+XQ-AT72 (`QV710AF65F`, Android 12 / API 31). Pulling its installed `base.apk`
+back from the device produced the exact formal artifact SHA-256
+`CA6252ACE475FFA554FE414DEB09386F0F5BED79F2CC135847FEF9A3424FD8ED`.
+The paired AutoJs6 6.8.0/versionCode 5276 Host used the same SM003 certificate.
+The operator ran all ten items and reported every item PASS.
+
+Items 2, 3 and 4 used the reusable projects in
+[`examples/python/m6_manual_smoke`](../../examples/python/m6_manual_smoke),
+including the independent 34-byte artifact PowerShell check. The complete
+concise identity and claim boundary are recorded in
+[`M6_ANDROID_SMOKE_RESULTS.md`](M6_ANDROID_SMOKE_RESULTS.md). This admits beta
+source preparation; it does not create a tag, push, publication or stable
+claim.
 
 ## Signed candidate and publication boundary
 

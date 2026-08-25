@@ -24,74 +24,24 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_current_protocol_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0-alpha.6", common["release_target"])
-        self.assertIn("protocol 1.5", common["release_state"])
-        self.assertIn("protocol 1.6", common["release_state"])
-        self.assertIn("foreground-only long-running", common["release_state"])
-        self.assertIn("15-second Provider heartbeats", common["release_state"])
-        self.assertIn("concurrent Python launches", common["release_state"])
-        self.assertIn("fair FIFO", common["release_state"])
-        self.assertIn("32 bounded waiters", common["release_state"])
-        self.assertIn("3 seconds", common["release_state"])
-        self.assertIn("single-session", common["release_state"])
-        self.assertIn("no provider queue", common["release_state"])
+        self.assertEqual("0.5.0-beta.1", common["release_target"])
         for marker in (
+            "0.5.0-beta.1 feature-freeze source candidate",
+            "protocol 1.0-1.6",
+            "cumulative M1-M5",
+            "stdlib-only",
+            "SM003-signed 0.5.0-alpha.6",
             "QV710AF65F",
-            "Host versionCode 5276",
-            "Plugin versionCode 81",
-            "tick=70",
-            "focused long-running Android smoke passes",
-            "BUSY/SESSION_OPEN",
-            "afca7b14c",
-            "fresh-PID generation handoff",
-            "queued Stop isolation",
-            "focused concurrency Android smoke passes",
-            "no-runtime-change startup probe",
-            "441/447/429/427/428 ms",
-            "five distinct Plugin PIDs",
-            "all-sample median is 429 ms",
-            "median excluding the first run is 428.5 ms",
-            "maximum is 447 ms",
-            "below the 1000 ms threshold",
-            "process retention is not justified",
-            "per-execution retirement remains",
-            "M6 consolidates the unpublished 0.2/0.3/0.4",
-            "cumulative 0.5.0 release train",
-            "read-only source profile",
-            "full local candidate gate",
-            "ten-item manual Android smoke checklist",
-            "neither profile uses ADB, signing, network, tagging, pushing, or publication",
-            "exact production-signed alpha.6 smoke",
-            "beta/stable promotion",
+            "passed all ten manual Android smoke items",
+            "10/10",
             "OnePlus OPD2413",
-            "stopped/notLaunched",
-            "signature-protected WakeActivity",
             "ACTIVATE",
-            "277 ms",
-            "Host and Plugin signer must match",
-            "PYTHON_RUNTIME_PROVIDER_UNTRUSTED",
+            "examples/python/m6_manual_smoke",
+            "signed beta artifact",
+            "stable tag",
+            "publication",
         ):
             self.assertIn(marker, common["release_state"])
-        self.assertIn("bounded automator", common["release_state"])
-        self.assertIn("selector/UI-tree", common["release_state"])
-        self.assertIn("screen capture", common["release_state"])
-        self.assertIn("find_color", common["release_state"])
-        self.assertIn("find_image", common["release_state"])
-        self.assertIn("Host OCR", common["release_state"])
-        self.assertIn("complete Settings", common["release_state"])
-        self.assertIn("M4 Path A", common["release_state"])
-        self.assertIn("project-local pure-Python", common["release_state"])
-        self.assertIn("M4 Path B", common["release_state"])
-        self.assertIn("M4 Path C", common["release_state"])
-        self.assertIn("NOT_ADMITTED", common["release_state"])
-        self.assertIn("stdlib-only", common["release_state"])
-        self.assertIn("zero packages", common["release_state"])
-        self.assertIn("Pillow 11.0.0", common["release_state"])
-        self.assertIn("NumPy 1.26.2", common["release_state"])
-        self.assertIn("OpenCV", common["release_state"])
-        self.assertIn("16 KiB gate", common["release_state"])
-        self.assertIn("no candidate dependency payload", common["release_state"])
-        self.assertIn("publication, and release evidence remain outside", common["release_state"])
         self.assertEqual("1 MiB", common["max_stdin_bytes"])
         self.assertEqual("64 MiB", common["max_workspace_archive_bytes"])
         self.assertEqual("8192", common["max_workspace_entries"])
@@ -449,6 +399,20 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     "publication",
                 ):
                     self.assertIn(marker, cadence["improvement"][0])
+
+                beta = source["$data"]["v0.5.0-beta.1"]
+                self.assertEqual("2026/08/25", beta["released_date"])
+                self.assertEqual(1, len(beta["hint"]))
+                self.assertEqual(1, len(beta["feature"]))
+                self.assertEqual(1, len(beta["improvement"]))
+                self.assertNotIn("fix", beta)
+                self.assertNotIn("dependency", beta)
+                for marker in ("0.5.0-beta.1", "SM003", "10"):
+                    self.assertIn(marker, beta["hint"][0])
+                for marker in ("M6", "2/3/4"):
+                    self.assertIn(marker, beta["feature"][0])
+                for marker in ("QV710AF65F", "0.5.0-alpha.6", "PASS"):
+                    self.assertIn(marker, beta["improvement"][0])
 
                 provenance = source["$data"]["v0.5.0-alpha.5"]
                 self.assertEqual("2026/08/25", provenance["released_date"])

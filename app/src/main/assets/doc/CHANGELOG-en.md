@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-beta.1
+
+###### 2026/08/25
+
+* `Hint` 0.5.0-beta.1 feature-freeze source candidate; the exact SM003-signed alpha candidate passed all 10 Android smoke items, without claiming a beta APK, stable release, or completed publication
+* `Feature` M6 adds reusable item 2/3/4 projects and an independent artifact verifier so imports, stdin/interactive input, and structured results can be accepted repeatably
+* `Improvement` The 0.5.0-alpha.6 arm64 APK pulled from QV710AF65F was byte-identical to the formal candidate, and the complete ten-item checklist finished 10/10 PASS
+
 # v0.5.0-alpha.6
 
 ###### 2026/08/25

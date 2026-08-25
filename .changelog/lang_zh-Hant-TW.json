@@ -5,6 +5,18 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "相依性",
   "$data": {
+    "v0.5.0-beta.1": {
+      "released_date": "2026/08/25",
+      "hint": [
+        "0.5.0-beta.1 功能凍結原始碼候選; 精確 SM003 簽署的 alpha 候選已通過 10 項 Android 冒煙測試, 尚不聲明 beta APK、穩定版或 publication 完成"
+      ],
+      "feature": [
+        "M6 新增可重複使用的 2/3/4 測試專案與獨立 artifact 驗證材料, 讓匯入、stdin/互動輸入和結構化結果可重複驗收"
+      ],
+      "improvement": [
+        "從 QV710AF65F 拉回的 0.5.0-alpha.6 arm64 APK 與正式候選逐位元組一致, 完整十項清單結果為 10/10 PASS"
+      ]
+    },
     "v0.5.0-alpha.6": {
       "released_date": "2026/08/25",
       "hint": [

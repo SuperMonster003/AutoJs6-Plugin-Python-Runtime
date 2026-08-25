@@ -5,6 +5,18 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v0.5.0-beta.1": {
+      "released_date": "2026/08/25",
+      "hint": [
+        "0.5.0-beta.1 は機能凍結済みのソース候補です。正確な SM003 署名 alpha 候補は Android の 10 項目を通過しましたが、beta APK、安定版、publication の完了はまだ宣言しません"
+      ],
+      "feature": [
+        "M6 に再利用可能な 2/3/4 テストプロジェクトと独立 artifact 検証を追加し、import、stdin/対話入力、構造化結果を反復可能に検収できるようにしました"
+      ],
+      "improvement": [
+        "QV710AF65F から回収した 0.5.0-alpha.6 arm64 APK は正式候補とバイト単位で一致し、完全な十項目チェックは 10/10 PASS でした"
+      ]
+    },
     "v0.5.0-alpha.6": {
       "released_date": "2026/08/25",
       "hint": [

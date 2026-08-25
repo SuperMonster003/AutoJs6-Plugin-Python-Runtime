@@ -46,7 +46,7 @@ class M6CandidateGateTest(unittest.TestCase):
     def test_current_locale_generation_and_aar_lock_are_consistent(self) -> None:
         version = MODULE.read_unique_properties(ROOT / "version.properties")["VERSION_NAME"]
         common = json.loads((ROOT / ".readme" / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0-alpha.6", version)
+        self.assertEqual("0.5.0-beta.1", version)
         self.assertEqual(version, common["release_target"])
         self.assertEqual(10, MODULE.validate_changelog_sources(ROOT, version))
         self.assertEqual(25, MODULE.validate_generated_documents(ROOT))
@@ -114,6 +114,7 @@ class M6CandidateGateTest(unittest.TestCase):
             "afca7b14c",
             "0.5.0-beta.1",
             "docs/maintenance/M6_RELEASE_PROCESS.md",
+            "docs/maintenance/M6_ANDROID_SMOKE_RESULTS.md",
         ):
             self.assertIn(marker, roadmap)
         for stale in ("[ ] 发布 0.3.0-alpha", "[ ] 发布 0.3.x alpha", "[ ] 发布 0.4.0"):

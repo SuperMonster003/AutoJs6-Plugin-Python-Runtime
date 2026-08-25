@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > 0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂與三件 AAR distribution manifest 已寫入 lock. 每次新執行都重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後無須重新啟動宿主. 0.5.0-alpha.6 為部分 OEM 首次安裝後的 stopped/notLaunched 狀態提供外掛中心 ACTIVATE/WakeActivity 復原路徑. Host 與 Plugin APK 必須使用同一 signer; debug Host 與 production Plugin 混合安裝會穩定拒絕為 PYTHON_RUNTIME_PROVIDER_UNTRUSTED. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.
 
 ```text
-release target: 0.5.0-alpha.6
-release state: 0.5.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; on QV710AF65F with Host versionCode 5276 and Plugin versionCode 81, notification Stop ended the script, the project rebound cleanly, and a subsequent run remained healthy through tick=70 (about 350 seconds), so the focused long-running Android smoke passes; the paired Host now admits concurrent Python launches through one fair FIFO owner plus 32 bounded waiters before Provider binding, supports interruptible queued Stop, and waits up to 3 seconds for dispatched process-generation retirement before handoff while the Plugin remains single-session with no provider queue; the first concurrency attempt on that device reached Provider BUSY/SESSION_OPEN because the installed Host did not yet contain FIFO integration; after installing the exact afca7b14c arm64 Host APK, the user confirmed the full documented FIFO order, fresh-PID generation handoff, queued Stop isolation, and later rerun checklist matched expectations with no issue, so the focused concurrency Android smoke passes; the no-runtime-change startup probe on QV710AF65F measured 441/447/429/427/428 ms with five distinct Plugin PIDs; the all-sample median is 429 ms, the median excluding the first run is 428.5 ms, and the maximum is 447 ms; every sample is below the 1000 ms threshold, so process retention is not justified and per-execution retirement remains; M6 consolidates the unpublished 0.2/0.3/0.4 implementation waypoints into one cumulative 0.5.0 release train and adds a read-only source profile plus a full local candidate gate with a ten-item manual Android smoke checklist; neither profile uses ADB, signing, network, tagging, pushing, or publication; the accepted clean Host provenance is AutoJs6 afca7b14c/6.8.0/versionCode 5276, and its isolated dirty=false distribution gate rebuilt all three protocol 1.6 AAR payloads byte-identically before refreshing the source lock; on OnePlus OPD2413, a fresh install reproduced the OEM stopped/notLaunched InfoService bind failure, while the signature-protected WakeActivity let Plugin Center ACTIVATE the package and auto-enable it; with a matching Android-Debug signer, the startup probe completed in 277 ms and returned structured JSON; Host and Plugin signer must match, and mixing the debug-signed local afca7b14c Host with the production-signed Plugin correctly fails closed as PYTHON_RUNTIME_PROVIDER_UNTRUSTED; M4 Path D, the exact production-signed alpha.6 smoke, beta/stable promotion, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-beta.1
+release state: 0.5.0-beta.1 feature-freeze source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-alpha.6 arm64 APK from commit 9ac32da5fd33eafdfe684e12e51f1dc79101b8e1 was pulled back byte-identical and passed all ten manual Android smoke items on QV710AF65F (10/10 PASS); a matching Android-Debug build also passed 10/10 on OnePlus OPD2413 including OEM ACTIVATE recovery; deterministic item 2/3/4 materials now live in examples/python/m6_manual_smoke; a signed beta artifact, exact beta smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,14 @@ M4 路徑 A 已完成; M4 路徑 B 與 Path C 評估均以 `NOT_ADMITTED` 關閉
 
 ******
 
+# v0.5.0-beta.1
+
+###### 2026/08/25
+
+* `提示` 0.5.0-beta.1 功能凍結原始碼候選; 精確 SM003 簽署的 alpha 候選已通過 10 項 Android 冒煙測試, 尚不聲明 beta APK、穩定版或 publication 完成
+* `新增` M6 新增可重複使用的 2/3/4 測試專案與獨立 artifact 驗證材料, 讓匯入、stdin/互動輸入和結構化結果可重複驗收
+* `改善` 從 QV710AF65F 拉回的 0.5.0-alpha.6 arm64 APK 與正式候選逐位元組一致, 完整十項清單結果為 10/10 PASS
+
 # v0.5.0-alpha.6
 
 ###### 2026/08/25
@@ -183,14 +191,6 @@ M4 路徑 A 已完成; M4 路徑 B 與 Path C 評估均以 `NOT_ADMITTED` 關閉
 
 * `提示` 第五個 current-tree alpha 候選版; 三件 Host API release AAR 從精確 clean `afca7b14c` 重新建置後位元組未變, provenance lock 已更新至該來源; 不宣告 signed APK、Android 十項冒煙、beta 或 publication 完成
 * `改善` 在隔離 worktree 中執行 Host `verifyPythonReleaseApiDistributionGate`, 以 `dirty=false` 固定 AutoJs6 6.8.0/versionCode 5276、協定 1.6、source fingerprint 與 distribution manifest SHA-256
-
-# v0.5.0-alpha.4
-
-###### 2026/08/25
-
-* `提示` 第四個 current-tree alpha 候選版; M6 將未發布的 0.2/0.3/0.4 實作節點統一累計到 0.5.0, 不宣稱 beta、穩定版、signing 或 publication 完成
-* `新增` 新增 `tools/verify-m6-candidate.py`, 以明確 `--source-only`/`--full` 模式檢查 clean Git、版本、Changelog、生成文件與 AAR lock, 並可追加可攜測試、R2 靜態門禁和 offline debug build
-* `改善` 固定 10 項 Android 冒煙清單及 alpha → beta → 0.5.0 晉級順序; 本機門禁不執行 ADB、signing、tag、push 或 publication
 
 ##### 更多版本
 

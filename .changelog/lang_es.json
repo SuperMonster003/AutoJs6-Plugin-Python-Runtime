@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Mejora",
   "changelog_label_dependency": "Dependencia",
   "$data": {
+    "v0.5.0-beta.1": {
+      "released_date": "2026/08/25",
+      "hint": [
+        "0.5.0-beta.1 es un candidato de código con funciones congeladas; el candidato alpha exacto firmado con SM003 superó las 10 pruebas Android, sin declarar un APK beta, versión estable ni publicación completada"
+      ],
+      "feature": [
+        "M6 añade proyectos reutilizables para los puntos 2/3/4 y un verificador artifact independiente para validar de forma repetible imports, stdin/entrada interactiva y resultados estructurados"
+      ],
+      "improvement": [
+        "El APK arm64 0.5.0-alpha.6 extraído de QV710AF65F fue idéntico byte a byte al candidato formal; la lista completa terminó con 10/10 PASS"
+      ]
+    },
     "v0.5.0-alpha.6": {
       "released_date": "2026/08/25",
       "hint": [

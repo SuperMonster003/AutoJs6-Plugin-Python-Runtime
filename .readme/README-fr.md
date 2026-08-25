@@ -105,8 +105,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. La version 0.5.0-alpha.6 ajoute la récupération Plugin Center ACTIVATE/WakeActivity pour l'état stopped/notLaunched laissé par certains OEM après la première installation. Les APK Host et Plugin doivent utiliser le même signer; mélanger un Host debug avec le Plugin de production est rejeté de façon déterministe par PYTHON_RUNTIME_PROVIDER_UNTRUSTED. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.5.0-alpha.6
-release state: 0.5.0-alpha.6 current-tree candidate; the pre-existing M1/M2 and protocol 1.5 slices plus M4 Path A project-local pure-Python packages passed the public engine path on an API 31 arm64 device and an API 37 x86_64 16 KiB-page emulator; bounded automator actions, execution-local selector/UI-tree snapshot/find/click/set_text, bounded Android 11+ screen capture, one-shot RGB find_color, bounded PNG/JPEG find_image template matching, configured Host OCR recognition, and a complete Settings launch/find/click/screenshot workflow passed their eligible-service paths on the emulator, while the applicable capability-unavailable paths failed closed on the physical device without changing its accessibility services; the M4 Path B build-time pure-Python and M4 Path C native-package evaluations are complete with decision NOT_ADMITTED, so the embedded package policy remains stdlib-only with zero packages and online pip disabled; Path C built the official Pillow 11.0.0 and NumPy 1.26.2 dual-ABI closures offline, but transitive 4 KiB ELF LOAD segments failed the 16 KiB gate, and the official OpenCV index had no cp313 Android wheel; no candidate dependency payload was added; protocol 1.6 adds an explicit foreground-only long-running mode with a Host specialUse foreground notification, manual Stop, and 15-second Provider heartbeats under fail-closed leases; on QV710AF65F with Host versionCode 5276 and Plugin versionCode 81, notification Stop ended the script, the project rebound cleanly, and a subsequent run remained healthy through tick=70 (about 350 seconds), so the focused long-running Android smoke passes; the paired Host now admits concurrent Python launches through one fair FIFO owner plus 32 bounded waiters before Provider binding, supports interruptible queued Stop, and waits up to 3 seconds for dispatched process-generation retirement before handoff while the Plugin remains single-session with no provider queue; the first concurrency attempt on that device reached Provider BUSY/SESSION_OPEN because the installed Host did not yet contain FIFO integration; after installing the exact afca7b14c arm64 Host APK, the user confirmed the full documented FIFO order, fresh-PID generation handoff, queued Stop isolation, and later rerun checklist matched expectations with no issue, so the focused concurrency Android smoke passes; the no-runtime-change startup probe on QV710AF65F measured 441/447/429/427/428 ms with five distinct Plugin PIDs; the all-sample median is 429 ms, the median excluding the first run is 428.5 ms, and the maximum is 447 ms; every sample is below the 1000 ms threshold, so process retention is not justified and per-execution retirement remains; M6 consolidates the unpublished 0.2/0.3/0.4 implementation waypoints into one cumulative 0.5.0 release train and adds a read-only source profile plus a full local candidate gate with a ten-item manual Android smoke checklist; neither profile uses ADB, signing, network, tagging, pushing, or publication; the accepted clean Host provenance is AutoJs6 afca7b14c/6.8.0/versionCode 5276, and its isolated dirty=false distribution gate rebuilt all three protocol 1.6 AAR payloads byte-identically before refreshing the source lock; on OnePlus OPD2413, a fresh install reproduced the OEM stopped/notLaunched InfoService bind failure, while the signature-protected WakeActivity let Plugin Center ACTIVATE the package and auto-enable it; with a matching Android-Debug signer, the startup probe completed in 277 ms and returned structured JSON; Host and Plugin signer must match, and mixing the debug-signed local afca7b14c Host with the production-signed Plugin correctly fails closed as PYTHON_RUNTIME_PROVIDER_UNTRUSTED; M4 Path D, the exact production-signed alpha.6 smoke, beta/stable promotion, a complete device matrix, publication, and release evidence remain outside this claim
+release target: 0.5.0-beta.1
+release state: 0.5.0-beta.1 feature-freeze source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-alpha.6 arm64 APK from commit 9ac32da5fd33eafdfe684e12e51f1dc79101b8e1 was pulled back byte-identical and passed all ten manual Android smoke items on QV710AF65F (10/10 PASS); a matching Android-Debug build also passed 10/10 on OnePlus OPD2413 including OEM ACTIVATE recovery; deterministic item 2/3/4 materials now live in examples/python/m6_manual_smoke; a signed beta artifact, exact beta smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,14 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 
 ******
 
+# v0.5.0-beta.1
+
+###### 2026/08/25
+
+* `Note` 0.5.0-beta.1 est un candidat source avec fonctionnalités gelées ; le candidat alpha exact signé SM003 a réussi les 10 tests Android, sans déclarer un APK beta, une version stable ou une publication terminée
+* `Fonction` M6 ajoute des projets réutilisables pour les points 2/3/4 et un vérificateur artifact indépendant afin de valider de façon répétable les imports, stdin/saisie interactive et résultats structurés
+* `Amélioration` L’APK arm64 0.5.0-alpha.6 extrait de QV710AF65F est identique octet par octet au candidat officiel ; la liste complète donne 10/10 PASS
+
 # v0.5.0-alpha.6
 
 ###### 2026/08/25
@@ -183,14 +191,6 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 
 * `Note` Cinquième candidat alpha current-tree; reconstruire les trois AAR release de la Host API depuis le commit clean exact `afca7b14c` avec des octets identiques et actualiser le provenance lock vers cette source, sans déclarer de signed APK, de smoke Android en dix points, de beta ni de publication
 * `Amélioration` Exécuter Host `verifyPythonReleaseApiDistributionGate` dans un worktree isolé et figer AutoJs6 6.8.0/versionCode 5276, le protocole 1.6, le source fingerprint et le SHA-256 du distribution manifest avec `dirty=false`
-
-# v0.5.0-alpha.4
-
-###### 2026/08/25
-
-* `Note` Quatrième candidat alpha current-tree ; M6 regroupe les étapes 0.2/0.3/0.4 non publiées dans un train cumulatif 0.5.0 sans revendiquer beta, version stable, signing ni publication
-* `Fonction` Ajouter `tools/verify-m6-candidate.py` avec les profils explicites `--source-only` et `--full` pour contrôler clean Git, version, Changelog, documents générés et AAR lock, puis les tests portables, la porte R2 statique et un offline debug build
-* `Amélioration` Définir une liste de smoke Android en 10 points et la promotion alpha → beta → 0.5.0 ; la porte locale n'exécute aucune opération ADB, signing, tag, push ou publication
 
 ##### Autres versions
 

@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-beta.1
+
+###### 2026/08/25
+
+* `Note` 0.5.0-beta.1 est un candidat source avec fonctionnalités gelées ; le candidat alpha exact signé SM003 a réussi les 10 tests Android, sans déclarer un APK beta, une version stable ou une publication terminée
+* `Fonction` M6 ajoute des projets réutilisables pour les points 2/3/4 et un vérificateur artifact indépendant afin de valider de façon répétable les imports, stdin/saisie interactive et résultats structurés
+* `Amélioration` L’APK arm64 0.5.0-alpha.6 extrait de QV710AF65F est identique octet par octet au candidat officiel ; la liste complète donne 10/10 PASS
+
 # v0.5.0-alpha.6
 
 ###### 2026/08/25
