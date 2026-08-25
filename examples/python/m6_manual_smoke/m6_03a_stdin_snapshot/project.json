@@ -1,0 +1,8 @@
+{
+  "type": "python",
+  "main": "main.py",
+  "stdin": {
+    "file": "fixtures/input.txt"
+  },
+  "timeout": 30000
+}

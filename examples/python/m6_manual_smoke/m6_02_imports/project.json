@@ -1,0 +1,6 @@
+{
+  "type": "python",
+  "entryMode": "module",
+  "main": "smoke_imports.main",
+  "timeout": 60000
+}

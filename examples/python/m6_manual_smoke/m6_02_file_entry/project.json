@@ -1,0 +1,5 @@
+{
+  "type": "python",
+  "main": "src/main.py",
+  "timeout": 30000
+}
