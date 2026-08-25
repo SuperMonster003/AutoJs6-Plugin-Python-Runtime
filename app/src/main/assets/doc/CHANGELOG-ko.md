@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.6
+
+###### 2026/08/25
+
+* `안내` 여섯 번째 current-tree alpha 후보; OnePlus OPD2413 및 유사 OEM의 첫 Plugin 활성화를 위한 AutoJs6 WakeActivity 계약을 추가하며 production signed candidate, beta 또는 publication 완료를 주장하지 않음
+* `수정` `org.autojs.plugin.WAKE_ACTIVITY`와 `org.autojs.plugin.action.WAKE`를 선언하고 signature permission으로 보호되며 즉시 종료되는 NoDisplay Activity를 제공; Plugin Center의 `ACTIVATE`가 `stopped/notLaunched`를 해제하고 활성화를 자동 재시도하도록 함
+* `개선` `afca7b14c` debug Host와 동일 signer의 진단 Plugin으로 원래 실패를 재현·복구하고 startup probe가 `277 ms`에 구조화 결과를 반환함; signer 불일치는 별도로 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`로 fail closed됨을 확인
+
 # v0.5.0-alpha.5
 
 ###### 2026/08/25

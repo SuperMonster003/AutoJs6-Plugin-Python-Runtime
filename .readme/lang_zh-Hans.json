@@ -29,7 +29,7 @@
   "p_plugin_interface": "宿主通过以下标识发现并调用插件",
   "p_plugin_scope": "插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 {{ max_stdin_bytes }} 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. 协议 1.2 为已准入项目增加显式 file/module 入口协商. 协议 1.3 在快照 EOF 后为内置 `input()` 增加由 Host 持有且仅限前台的 prompt/reply; 标准库 `getpass.getpass()` 使用隐藏回显. 协议 1.4 增加显式严格 JSON 结果与可选的 SHA-256 manifest 输出 artifact, stdout 仅用于诊断且绝不被解析为结果. 协议 1.5 增加绑定单次执行、插件 UID、调用序号与配额的纯数据 Host capability broker. 协议 1.6 增加显式 `long-running` 执行、有序存活心跳、Host 持有的前台服务与手动 Stop; 后台入口会被拒绝且不降级. Host 对话框还要求由存活 Activity 支撑的前台授权; 后台启动不会打开 UI, 而是稳定返回 `INTERACTIVE_NOT_ALLOWED`. 直接 `sys.stdin` 始终有限, 后台启动绝不打开输入 UI, 用户脚本也不会得到 Context、原始 Binder、宿主运行时对象或 callback sink.",
   "h3_host_integration_status": "宿主集成状态",
-  "p_host_integration_status": "0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.",
+  "p_host_integration_status": "0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 0.5.0-alpha.6 为部分 OEM 首装后的 stopped/notLaunched 状态提供插件中心 ACTIVATE/WakeActivity 恢复路径. Host 与 Plugin APK 必须使用同一 signer; 调试 Host 与 production Plugin 混装会稳定拒绝为 PYTHON_RUNTIME_PROVIDER_UNTRUSTED. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.",
   "h3_security": "安全性和隐私",
   "p_security": "Chaquopy 运行时只面向可信本地脚本, 不是 hostile-code sandbox. Exported service 要求宿主签名权限并复核 UID, 包和 signer; 独立 Android UID, 专用进程和窄 Binder 边界降低宿主暴露, 但不让 Python 成为沙箱. SM003 是长期发行 signer, SuperMonster003 承担 runtime, security 与 release owner.",
   "h3_security_limits": "运行限制",

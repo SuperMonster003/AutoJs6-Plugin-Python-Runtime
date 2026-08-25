@@ -29,7 +29,7 @@
   "p_plugin_interface": "宿主透過以下識別資料探索及呼叫外掛程式",
   "p_plugin_scope": "外掛程式接收獨立 SOURCE, 可選的有界 workspace archive, 最大 {{ max_stdin_bytes }} 的有限預置 stdin snapshot, 以及協議 1.1 的唯讀宿主能力快照. 協議 1.2 為已准入項目加入明確 file/module 入口協商. 協議 1.3 在 snapshot EOF 後為內置 `input()` 加入由 Host 持有且僅限前台的 prompt/reply; 標準庫 `getpass.getpass()` 使用隱藏回顯. 協議 1.4 加入明確嚴格 JSON 結果及可選的 SHA-256 manifest 輸出 artifact, stdout 只供診斷且絕不解析為結果. 協議 1.5 加入綁定單次執行、外掛 UID、呼叫次序及配額的純數據 Host capability broker. Host 對話框亦要求由有效 Activity 支援的前台授權; 後台啟動不會開啟 UI, 而是穩定回傳 `INTERACTIVE_NOT_ALLOWED`. 直接 `sys.stdin` 始終有限, 後台啟動絕不開啟輸入 UI, 使用者指令碼亦不會取得 Context、原始 Binder、宿主執行環境物件或 callback sink.",
   "h3_host_integration_status": "宿主整合狀態",
-  "p_host_integration_status": "0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.",
+  "p_host_integration_status": "0.1.0 只與 AutoJs6 6.8.0 配對, 最低 Host versionCode 已凍結並強制為 5275; 最終 clean Host 原始碼修訂及三件 AAR distribution manifest 已寫入 lock. 每次新執行均重新發現 provider; 缺失或停用時提示安裝或啟用且絕不 fallback, 安裝或重新啟用後毋須重新啟動宿主. 0.5.0-alpha.6 為部分 OEM 首次安裝後的 stopped/notLaunched 狀態提供 Plugin Center ACTIVATE/WakeActivity 復原路徑. Host 與 Plugin APK 必須使用同一 signer; debug Host 與 production Plugin 混合安裝會穩定拒絕為 PYTHON_RUNTIME_PROVIDER_UNTRUSTED. 穩定 APK 身分與該精確 Plugin 原始碼及 Host lock 綁定.",
   "h3_security": "安全性與私隱",
   "p_security": "Chaquopy 執行環境只供可信本機指令碼使用, 並非 hostile-code sandbox. Exported service 要求宿主簽署權限並核對 UID, 套件及 signer; 獨立 Android UID, 專用程序與窄 Binder 邊界可降低宿主暴露, 但不會令 Python 成為沙箱. SM003 是長期發行 signer, SuperMonster003 負責 runtime, security 及 release.",
   "h3_security_limits": "執行限制",

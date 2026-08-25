@@ -717,6 +717,16 @@
   `afca7b14c`/6.8.0/versionCode 5276 运行 release API distribution gate; 三件协议
   AAR 与既有 payload 字节完全一致, lock 已刷新到该提交、source fingerprint 和
   distribution manifest SHA-256。
+- [x] **OnePlus/OEM 首装激活兼容**: OnePlus OPD2413 (Android 15/OxygenOS 15)
+  上新安装的 Plugin 处于 `stopped=true/notLaunched=true`, 首次 InfoService 绑定稳定复现
+  用户报告的 `bindService failed`。Plugin 新增签名权限保护、NoDisplay 且立即结束的
+  `WakeActivity`, 并以 `org.autojs.plugin.WAKE_ACTIVITY`/`org.autojs.plugin.action.WAKE`
+  声明 Host 既有唤醒契约; 插件中心的 `ACTIVATE` 可清除 OEM 首启限制并自动重试启用。
+  同签名诊断组合在唤醒后开关为 checked、独立 Runtime PID 正常启动, startup probe
+  以 `277 ms` 到达首条 Python 语句并返回结构化结果。Host 的
+  `FLAG_INCLUDE_STOPPED_PACKAGES` 假设经真机反证后已撤销, 此修复不需要 Host 源码改动。
+  另确认 Host 与 Plugin signer 不同会独立触发 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`;
+  调试 Host 只能搭配同签名调试插件, production candidate 继续使用 SM003 signer。
 - [ ] **晋级 beta**: 在精确 signed candidate 上跑完十项清单并记录简短 PASS/FAIL;
   失败项修复后重跑, 全通过才改为 `0.5.0-beta.1`。
 - [ ] **发布 0.5.0**: beta 验收通过后, 仅在明确授权下构建 signed release、创建 tag、

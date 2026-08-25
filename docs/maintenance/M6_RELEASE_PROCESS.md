@@ -36,7 +36,8 @@ The forward sequence is deliberately short:
   values. Refreshing that lock remains a separate dual-repository operation.
 - `release/` and `releases/` contain no stale APK before a candidate check.
 
-For `0.5.0-alpha.5`, the accepted Host provenance is clean AutoJs6 commit
+The accepted Host provenance introduced by `0.5.0-alpha.5` and retained by
+`0.5.0-alpha.6` is clean AutoJs6 commit
 `afca7b14c4ba3971b60a9ce3587e2f10bfd0ab1e`, version `6.8.0`/versionCode
 `5276`. Its isolated `verifyPythonReleaseApiDistributionGate` run recorded
 source fingerprint
@@ -45,6 +46,40 @@ and distribution-manifest SHA-256
 `5c3f2cd9118cd6ec0c8838febe12f0df4b9b1d58a40d5252b462667194f09da6`.
 All three rebuilt AAR payloads were byte-identical to the previously staged
 files, so only their source-provenance lock changed.
+
+## OEM first-install activation and signer pairing
+
+Some OEM package managers leave a newly installed plugin in Android's
+`stopped=true`/`notLaunched=true` state. An explicit service bind can return
+`false` in that state even when the component resolves, is exported and
+enabled, uses the correct signature permission, and the caller holds that
+permission. This is an activation failure, not a Python or Binder protocol
+failure.
+
+The Plugin therefore publishes AutoJs6's existing recovery contract:
+
+- application metadata `org.autojs.plugin.WAKE_ACTIVITY=.WakeActivity`;
+- action `org.autojs.plugin.action.WAKE` with the default category;
+- an exported `Theme.NoDisplay` Activity protected by
+  `org.autojs.permission.PLUGIN` which calls `finish()` during `onCreate` and
+  does not initialize Python or bind the Runtime service.
+
+When an OEM rejects the first InfoService bind, Plugin Center offers
+`ACTIVATE`, starts this Activity explicitly, then retries enablement. On a
+OnePlus OPD2413 running Android 15/OxygenOS 15, the original failure reproduced
+with the package stopped; `ACTIVATE` changed it to
+`stopped=false`/`notLaunched=false`, automatically enabled the switch, and a
+matching-signer diagnostic run reached the first Python statement in 277 ms and
+returned its structured result. Adding `FLAG_INCLUDE_STOPPED_PACKAGES` to Host
+bind intents did not change the failure and was reverted, so no Host source
+change is part of this fix.
+
+Activation does not relax signer trust. Host and Plugin APKs must carry the same
+certificate. The locally installed `afca7b14c` Host used for the OPD2413 check
+was Android-Debug-signed, while the production Plugin candidate uses the SM003
+signer; mixing those artifacts correctly fails before Runtime binding with
+`PYTHON_RUNTIME_PROVIDER_UNTRUSTED`. A matching Android-Debug Plugin was used
+only for the focused diagnostic and is not a production release artifact.
 
 ## Local candidate gate
 
@@ -104,7 +139,8 @@ short failure note. No hash-bound evidence bundle is required.
   an immediate rerun succeeds, and an unstopped run survives beyond five minutes.
 - [ ] Two rapid Python launches execute in Host FIFO order with fresh process
   generations; stopping a queued launch does not stop the active owner.
-- [ ] A bounded scheduled task runs, then Plugin disable/re-enable or in-place
+- [ ] A bounded scheduled task runs; a fresh install can be recovered through
+  `ACTIVATE` when an OEM leaves it stopped; Plugin disable/re-enable or in-place
   update is rediscovered without restarting Host; no fallback engine is used.
 
 Any failed applicable item blocks promotion, becomes an issue, and gains one

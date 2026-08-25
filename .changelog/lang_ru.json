@@ -5,6 +5,18 @@
   "changelog_label_improvement": "Улучшено",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v0.5.0-alpha.6": {
+      "released_date": "2026/08/25",
+      "hint": [
+        "Шестой current-tree alpha candidate; добавить контракт AutoJs6 WakeActivity для первой активации Plugin на OnePlus OPD2413 и похожих OEM, не заявляя production signed candidate, beta или publication"
+      ],
+      "fix": [
+        "Объявить `org.autojs.plugin.WAKE_ACTIVITY` и `org.autojs.plugin.action.WAKE` с защищенной signature permission и немедленно завершающейся NoDisplay Activity; `ACTIVATE` в Plugin Center может снять `stopped/notLaunched` и автоматически повторить включение"
+      ],
+      "improvement": [
+        "Воспроизвести и устранить исходный сбой с debug Host `afca7b14c` и диагностическим Plugin с тем же signer, получив результат startup probe за `277 ms`; отдельно подтвердить, что несовпадение signer закрыто завершается как `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`"
+      ]
+    },
     "v0.5.0-alpha.5": {
       "released_date": "2026/08/25",
       "hint": [

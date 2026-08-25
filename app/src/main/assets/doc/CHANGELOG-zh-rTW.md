@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.6
+
+###### 2026/08/25
+
+* `提示` 第六個 current-tree alpha 候選版; 為 OnePlus OPD2413 等 OEM 的首次外掛啟用補齊 AutoJs6 WakeActivity 契約, 不宣稱 production signed candidate、beta 或 publication 已完成
+* `修正` 宣告 `org.autojs.plugin.WAKE_ACTIVITY` 與 `org.autojs.plugin.action.WAKE`, 提供簽章權限保護且立即結束的 NoDisplay Activity; 外掛中心可透過 `ACTIVATE` 清除 `stopped/notLaunched` 狀態並自動重試啟用
+* `改善` 在 `afca7b14c` debug Host 與相同 signer 的診斷 Plugin 上重現並排除原始失敗, startup probe 於 `277 ms` 傳回結構化結果; 另確認 signer 不相符會獨立 fail closed 為 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
+
 # v0.5.0-alpha.5
 
 ###### 2026/08/25

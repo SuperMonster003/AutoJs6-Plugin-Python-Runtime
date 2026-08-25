@@ -36,7 +36,7 @@ class M6CandidateGateTest(unittest.TestCase):
             with self.assertRaisesRegex(MODULE.CandidateError, "malformed property"):
                 MODULE.read_unique_properties(malformed)
 
-        for version in ("0.5.0-alpha.5", "0.5.0-beta.1", "0.5.0", "1.0.0-rc.1"):
+        for version in ("0.5.0-alpha.6", "0.5.0-beta.1", "0.5.0", "1.0.0-rc.1"):
             MODULE.validate_version_name(version)
         for version in ("v0.5.0", "0.5", "01.0.0", "0.5.0-", "0.5.0-alpha..1"):
             with self.subTest(version=version):
@@ -46,7 +46,7 @@ class M6CandidateGateTest(unittest.TestCase):
     def test_current_locale_generation_and_aar_lock_are_consistent(self) -> None:
         version = MODULE.read_unique_properties(ROOT / "version.properties")["VERSION_NAME"]
         common = json.loads((ROOT / ".readme" / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0-alpha.5", version)
+        self.assertEqual("0.5.0-alpha.6", version)
         self.assertEqual(version, common["release_target"])
         self.assertEqual(10, MODULE.validate_changelog_sources(ROOT, version))
         self.assertEqual(25, MODULE.validate_generated_documents(ROOT))

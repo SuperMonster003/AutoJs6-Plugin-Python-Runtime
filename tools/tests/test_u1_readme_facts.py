@@ -24,7 +24,7 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_current_protocol_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.0-alpha.5", common["release_target"])
+        self.assertEqual("0.5.0-alpha.6", common["release_target"])
         self.assertIn("protocol 1.5", common["release_state"])
         self.assertIn("protocol 1.6", common["release_state"])
         self.assertIn("foreground-only long-running", common["release_state"])
@@ -61,8 +61,15 @@ class U1ReadmeFactsTest(unittest.TestCase):
             "full local candidate gate",
             "ten-item manual Android smoke checklist",
             "neither profile uses ADB, signing, network, tagging, pushing, or publication",
-            "exact signed-candidate smoke",
+            "exact production-signed alpha.6 smoke",
             "beta/stable promotion",
+            "OnePlus OPD2413",
+            "stopped/notLaunched",
+            "signature-protected WakeActivity",
+            "ACTIVATE",
+            "277 ms",
+            "Host and Plugin signer must match",
+            "PYTHON_RUNTIME_PROVIDER_UNTRUSTED",
         ):
             self.assertIn(marker, common["release_state"])
         self.assertIn("bounded automator", common["release_state"])
@@ -454,6 +461,25 @@ class U1ReadmeFactsTest(unittest.TestCase):
                     self.assertIn(marker, provenance["hint"][0])
                 for marker in ("dirty=false", "6.8.0", "5276", "1.6"):
                     self.assertIn(marker, provenance["improvement"][0])
+
+                activation = source["$data"]["v0.5.0-alpha.6"]
+                self.assertEqual("2026/08/25", activation["released_date"])
+                self.assertEqual(1, len(activation["hint"]))
+                self.assertEqual(1, len(activation["fix"]))
+                self.assertEqual(1, len(activation["improvement"]))
+                self.assertNotIn("feature", activation)
+                self.assertNotIn("dependency", activation)
+                for marker in ("OnePlus", "OPD2413", "WakeActivity"):
+                    self.assertIn(marker, activation["hint"][0])
+                for marker in ("WAKE_ACTIVITY", "ACTIVATE", "stopped/notLaunched"):
+                    self.assertIn(marker, activation["fix"][0])
+                for marker in (
+                    "afca7b14c",
+                    "277 ms",
+                    "signer",
+                    "PYTHON_RUNTIME_PROVIDER_UNTRUSTED",
+                ):
+                    self.assertIn(marker, activation["improvement"][0])
 
                 prewarm = source["$data"]["v0.5.0-alpha.3"]
                 self.assertEqual("2026/08/24", prewarm["released_date"])

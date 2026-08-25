@@ -4,6 +4,14 @@
 
 ******
 
+# v0.5.0-alpha.6
+
+###### 2026/08/25
+
+* `提示` 第六个 current-tree alpha 候选版; 为 OnePlus OPD2413 等 OEM 的首次插件激活补齐 AutoJs6 WakeActivity 契约, 不声明 production signed candidate、beta 或 publication 完成
+* `修复` 声明 `org.autojs.plugin.WAKE_ACTIVITY` 与 `org.autojs.plugin.action.WAKE`, 提供签名权限保护且立即结束的 NoDisplay Activity; 插件中心可通过 `ACTIVATE` 清除 `stopped/notLaunched` 状态并自动重试启用
+* `优化` 在 `afca7b14c` 调试 Host 与同 signer 诊断 Plugin 上复现并恢复原始失败, startup probe 于 `277 ms` 返回结构化结果; 另确认 signer 不匹配会独立 fail closed 为 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
+
 # v0.5.0-alpha.5
 
 ###### 2026/08/25
