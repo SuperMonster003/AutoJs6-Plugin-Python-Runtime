@@ -169,6 +169,12 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 
 ******
 
+# v0.5.1
+
+###### 2026/09/11
+
+* `Amélioration` Vérification à la compilation de l'alignement des pages de 16 KB des bibliothèques natives 64 bits, avec contrôle du contrat manifest et rapports JSON
+
 # v0.5.0
 
 ###### 2026/08/25
@@ -184,14 +190,6 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 * `Note` 0.5.0-beta.1 est un candidat source avec fonctionnalités gelées ; le candidat alpha exact signé SM003 a réussi les 10 tests Android, sans déclarer un APK beta, une version stable ou une publication terminée
 * `Fonction` M6 ajoute des projets réutilisables pour les points 2/3/4 et un vérificateur artifact indépendant afin de valider de façon répétable les imports, stdin/saisie interactive et résultats structurés
 * `Amélioration` L’APK arm64 0.5.0-alpha.6 extrait de QV710AF65F est identique octet par octet au candidat officiel ; la liste complète donne 10/10 PASS
-
-# v0.5.0-alpha.6
-
-###### 2026/08/25
-
-* `Note` Sixième candidat alpha current-tree; compléter le contrat AutoJs6 WakeActivity pour la première activation du Plugin sur OnePlus OPD2413 et des OEM similaires, sans revendiquer de production signed candidate, de beta ni de publication
-* `Correction` Déclarer `org.autojs.plugin.WAKE_ACTIVITY` et `org.autojs.plugin.action.WAKE` avec une Activity NoDisplay protégée par permission de signature et immédiatement terminée; `ACTIVATE` dans Plugin Center peut ainsi effacer `stopped/notLaunched` et retenter automatiquement l'activation
-* `Amélioration` Reproduire puis corriger l'échec initial avec le Host debug `afca7b14c` et un Plugin de diagnostic au même signer, avec un résultat startup probe à `277 ms`; confirmer séparément qu'un signer différent échoue de façon fermée avec `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
 
 ##### Autres versions
 
@@ -269,3 +267,6 @@ app/src/main/res/values-*/strings.xml
 - Documentation AutoJs6: https://docs.autojs6.com
 - Chaquopy: https://chaquo.com/chaquopy/
 - Python: https://www.python.org/
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)

@@ -169,6 +169,12 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 
 ******
 
+# v0.5.1
+
+###### 2026/09/11
+
+* `Improvement` Build verification of 16 KB page alignment for 64-bit native libraries, including manifest contract checks and JSON reports
+
 # v0.5.0
 
 ###### 2026/08/25
@@ -184,14 +190,6 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 * `Hint` 0.5.0-beta.1 feature-freeze source candidate; the exact SM003-signed alpha candidate passed all 10 Android smoke items, without claiming a beta APK, stable release, or completed publication
 * `Feature` M6 adds reusable item 2/3/4 projects and an independent artifact verifier so imports, stdin/interactive input, and structured results can be accepted repeatably
 * `Improvement` The 0.5.0-alpha.6 arm64 APK pulled from QV710AF65F was byte-identical to the formal candidate, and the complete ten-item checklist finished 10/10 PASS
-
-# v0.5.0-alpha.6
-
-###### 2026/08/25
-
-* `Hint` Sixth current-tree alpha candidate; complete the AutoJs6 WakeActivity contract for first-time Plugin activation on OnePlus OPD2413 and similar OEMs without claiming a production signed candidate, beta, or publication
-* `Fix` Declare `org.autojs.plugin.WAKE_ACTIVITY` and `org.autojs.plugin.action.WAKE` with a signature-protected immediately finishing NoDisplay Activity, allowing Plugin Center `ACTIVATE` to clear `stopped/notLaunched` and retry enablement automatically
-* `Improvement` Reproduce and recover the original failure with `afca7b14c` debug Host and a matching-signer diagnostic Plugin, returning the startup probe result at `277 ms`; separately confirm that a signer mismatch fails closed as `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
 
 ##### For more releases
 
@@ -269,3 +267,6 @@ app/src/main/res/values-*/strings.xml
 - AutoJs6 documentation: https://docs.autojs6.com
 - Chaquopy: https://chaquo.com/chaquopy/
 - Python: https://www.python.org/
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)

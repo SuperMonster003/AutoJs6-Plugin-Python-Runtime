@@ -209,3 +209,6 @@ app/src/main/res/values-*/strings.xml
 - {{ text_link_autojs6_docs }}: {{ docs_autojs6_url }}
 - {{ text_link_chaquopy }}: {{ chaquopy_url }}
 - {{ text_link_cpython }}: {{ cpython_url }}
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)

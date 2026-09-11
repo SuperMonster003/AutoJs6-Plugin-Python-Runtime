@@ -169,6 +169,12 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
+# v0.5.1
+
+###### 2026/09/11
+
+* `تحسين` التحقق أثناء البناء من محاذاة صفحات 16 KB للمكتبات الأصلية ذات 64 بت, مع فحص عقد manifest وتقارير JSON
+
 # v0.5.0
 
 ###### 2026/08/25
@@ -184,14 +190,6 @@ runtime/security/release owner: SuperMonster003
 * `ملاحظة` 0.5.0-beta.1 مرشح مصدر مع تجميد الميزات؛ اجتاز مرشح alpha المطابق والموقّع بـ SM003 اختبارات Android العشرة 10، من دون إعلان اكتمال beta APK أو الإصدار المستقر أو publication
 * `إضافة` يضيف M6 مشاريع قابلة لإعادة الاستخدام للبنود 2/3/4 ومدقق artifact مستقلاً كي يمكن قبول الاستيراد وstdin/الإدخال التفاعلي والنتائج المنظمة بصورة قابلة للتكرار
 * `تحسين` تطابق APK arm64 للإصدار 0.5.0-alpha.6 المسحوب من QV710AF65F بايتاً ببايت مع المرشح الرسمي، واكتملت القائمة ذات البنود العشرة بنتيجة 10/10 PASS
-
-# v0.5.0-alpha.6
-
-###### 2026/08/25
-
-* `ملاحظة` مرشح current-tree alpha السادس؛ استكمال عقد AutoJs6 WakeActivity لأول تفعيل للـ Plugin على OnePlus OPD2413 وأجهزة OEM المشابهة دون ادعاء production signed candidate أو beta أو publication
-* `إصلاح` إعلان `org.autojs.plugin.WAKE_ACTIVITY` و`org.autojs.plugin.action.WAKE` عبر Activity من نوع NoDisplay محمية بـ signature permission وتنتهي فورا؛ يتيح ذلك لـ `ACTIVATE` في Plugin Center مسح `stopped/notLaunched` وإعادة محاولة التفعيل تلقائيا
-* `تحسين` إعادة إنتاج الفشل الأصلي ومعالجته باستخدام debug Host عند `afca7b14c` وPlugin تشخيصي له نفس signer، مع إرجاع نتيجة startup probe خلال `277 ms`؛ والتأكد بشكل مستقل من أن اختلاف signer يفشل مغلقا باسم `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
 
 ##### المزيد من الإصدارات
 
@@ -269,3 +267,6 @@ app/src/main/res/values-*/strings.xml
 - توثيق AutoJs6: https://docs.autojs6.com
 - Chaquopy: https://chaquo.com/chaquopy/
 - Python: https://www.python.org/
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)

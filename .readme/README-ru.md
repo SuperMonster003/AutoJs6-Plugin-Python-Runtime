@@ -169,6 +169,12 @@ M4 Path A завершен; оценки M4 Paths B и C обе завершил
 
 ******
 
+# v0.5.1
+
+###### 2026/09/11
+
+* `Улучшено` Проверка выравнивания страниц 16 KB для 64-битных нативных библиотек при сборке, включая контракт manifest и отчеты JSON
+
 # v0.5.0
 
 ###### 2026/08/25
@@ -184,14 +190,6 @@ M4 Path A завершен; оценки M4 Paths B и C обе завершил
 * `Примечание` 0.5.0-beta.1 — кандидат исходного кода с замороженными функциями; точный alpha-кандидат с подписью SM003 прошёл все 10 Android-проверок, без заявления о готовности beta APK, стабильного выпуска или publication
 * `Добавлено` M6 добавляет повторно используемые проекты для пунктов 2/3/4 и независимую проверку artifact, чтобы воспроизводимо проверять импорт, stdin/интерактивный ввод и структурированные результаты
 * `Улучшено` APK arm64 версии 0.5.0-alpha.6, извлечённый с QV710AF65F, побайтово совпал с официальным кандидатом; полный список завершён с результатом 10/10 PASS
-
-# v0.5.0-alpha.6
-
-###### 2026/08/25
-
-* `Примечание` Шестой current-tree alpha candidate; добавить контракт AutoJs6 WakeActivity для первой активации Plugin на OnePlus OPD2413 и похожих OEM, не заявляя production signed candidate, beta или publication
-* `Исправлено` Объявить `org.autojs.plugin.WAKE_ACTIVITY` и `org.autojs.plugin.action.WAKE` с защищенной signature permission и немедленно завершающейся NoDisplay Activity; `ACTIVATE` в Plugin Center может снять `stopped/notLaunched` и автоматически повторить включение
-* `Улучшено` Воспроизвести и устранить исходный сбой с debug Host `afca7b14c` и диагностическим Plugin с тем же signer, получив результат startup probe за `277 ms`; отдельно подтвердить, что несовпадение signer закрыто завершается как `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
 
 ##### Другие версии
 
@@ -269,3 +267,6 @@ app/src/main/res/values-*/strings.xml
 - Документация AutoJs6: https://docs.autojs6.com
 - Chaquopy: https://chaquo.com/chaquopy/
 - Python: https://www.python.org/
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)

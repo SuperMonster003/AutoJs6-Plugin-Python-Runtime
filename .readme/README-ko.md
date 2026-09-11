@@ -169,6 +169,12 @@ M4 Path A가 완료되었습니다. M4 Paths B/C 평가는 모두 `NOT_ADMITTED`
 
 ******
 
+# v0.5.1
+
+###### 2026/09/11
+
+* `개선` 64비트 네이티브 라이브러리의 16 KB 페이지 정렬을 빌드 시 검증, manifest 계약 검사 및 JSON 보고서 지원
+
 # v0.5.0
 
 ###### 2026/08/25
@@ -184,14 +190,6 @@ M4 Path A가 완료되었습니다. M4 Paths B/C 평가는 모두 `NOT_ADMITTED`
 * `안내` 0.5.0-beta.1 기능 동결 소스 후보입니다. 정확한 SM003 서명 alpha 후보가 Android 10개 항목을 통과했으며 beta APK, 안정 버전 또는 publication 완료를 아직 선언하지 않습니다
 * `추가` M6에 재사용 가능한 2/3/4 테스트 프로젝트와 독립 artifact 검증기를 추가해 import, stdin/대화형 입력 및 구조화 결과를 반복 검수할 수 있게 했습니다
 * `개선` QV710AF65F에서 추출한 0.5.0-alpha.6 arm64 APK가 공식 후보와 바이트 단위로 일치했고 전체 10개 체크리스트가 10/10 PASS였습니다
-
-# v0.5.0-alpha.6
-
-###### 2026/08/25
-
-* `안내` 여섯 번째 current-tree alpha 후보; OnePlus OPD2413 및 유사 OEM의 첫 Plugin 활성화를 위한 AutoJs6 WakeActivity 계약을 추가하며 production signed candidate, beta 또는 publication 완료를 주장하지 않음
-* `수정` `org.autojs.plugin.WAKE_ACTIVITY`와 `org.autojs.plugin.action.WAKE`를 선언하고 signature permission으로 보호되며 즉시 종료되는 NoDisplay Activity를 제공; Plugin Center의 `ACTIVATE`가 `stopped/notLaunched`를 해제하고 활성화를 자동 재시도하도록 함
-* `개선` `afca7b14c` debug Host와 동일 signer의 진단 Plugin으로 원래 실패를 재현·복구하고 startup probe가 `277 ms`에 구조화 결과를 반환함; signer 불일치는 별도로 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`로 fail closed됨을 확인
 
 ##### 다른 버전
 
@@ -269,3 +267,6 @@ app/src/main/res/values-*/strings.xml
 - AutoJs6 문서: https://docs.autojs6.com
 - Chaquopy: https://chaquo.com/chaquopy/
 - Python: https://www.python.org/
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)

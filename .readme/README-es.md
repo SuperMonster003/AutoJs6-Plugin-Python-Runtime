@@ -169,6 +169,12 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 
 ******
 
+# v0.5.1
+
+###### 2026/09/11
+
+* `Mejora` Verificación de compilación de la alineación de páginas de 16 KB en bibliotecas nativas de 64 bits, con controles del contrato manifest e informes JSON
+
 # v0.5.0
 
 ###### 2026/08/25
@@ -184,14 +190,6 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 * `Nota` 0.5.0-beta.1 es un candidato de código con funciones congeladas; el candidato alpha exacto firmado con SM003 superó las 10 pruebas Android, sin declarar un APK beta, versión estable ni publicación completada
 * `Función` M6 añade proyectos reutilizables para los puntos 2/3/4 y un verificador artifact independiente para validar de forma repetible imports, stdin/entrada interactiva y resultados estructurados
 * `Mejora` El APK arm64 0.5.0-alpha.6 extraído de QV710AF65F fue idéntico byte a byte al candidato formal; la lista completa terminó con 10/10 PASS
-
-# v0.5.0-alpha.6
-
-###### 2026/08/25
-
-* `Nota` Sexto candidato alpha current-tree; completar el contrato AutoJs6 WakeActivity para la primera activación del Plugin en OnePlus OPD2413 y OEM similares, sin afirmar un production signed candidate, beta ni publicación
-* `Corrección` Declarar `org.autojs.plugin.WAKE_ACTIVITY` y `org.autojs.plugin.action.WAKE` con una Activity NoDisplay protegida por permiso de firma y de finalización inmediata; `ACTIVATE` en Plugin Center puede limpiar `stopped/notLaunched` y reintentar la activación automáticamente
-* `Mejora` Reproducir y recuperar el fallo original con el Host debug `afca7b14c` y un Plugin de diagnóstico con el mismo signer, devolviendo el resultado startup probe a `277 ms`; confirmar por separado que un signer distinto falla de forma cerrada como `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
 
 ##### Más versiones
 
@@ -269,3 +267,6 @@ app/src/main/res/values-*/strings.xml
 - Documentación de AutoJs6: https://docs.autojs6.com
 - Chaquopy: https://chaquo.com/chaquopy/
 - Python: https://www.python.org/
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)

@@ -4,6 +4,7 @@ import org.gradle.api.artifacts.dsl.LockMode
 import org.gradle.api.provider.Property
 
 plugins {
+    id("io.github.supermonster003.autojs6-native-alignment")
     id("org.autojs.build.utils")
     id("org.autojs.build.versions")
     id("org.autojs.build.signs")
@@ -645,3 +646,6 @@ gradle.taskGraph.whenReady {
 extra {
     versions.handleIfNeeded(project, "", listOf(buildTypeDebug, buildTypeRelease))
 }
+
+// Chaquopy delivers extension modules in nested ZIP/IMY assets.
+nativeAlignment { scanEmbeddedPayloads.set(true) }

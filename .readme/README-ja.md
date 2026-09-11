@@ -169,6 +169,12 @@ M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMI
 
 ******
 
+# v0.5.1
+
+###### 2026/09/11
+
+* `改善` 64 ビットのネイティブライブラリの 16 KB ページアラインメントをビルド時に検証, manifest 契約の検査と JSON レポートに対応
+
 # v0.5.0
 
 ###### 2026/08/25
@@ -184,14 +190,6 @@ M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMI
 * `注記` 0.5.0-beta.1 は機能凍結済みのソース候補です。正確な SM003 署名 alpha 候補は Android の 10 項目を通過しましたが、beta APK、安定版、publication の完了はまだ宣言しません
 * `追加` M6 に再利用可能な 2/3/4 テストプロジェクトと独立 artifact 検証を追加し、import、stdin/対話入力、構造化結果を反復可能に検収できるようにしました
 * `改善` QV710AF65F から回収した 0.5.0-alpha.6 arm64 APK は正式候補とバイト単位で一致し、完全な十項目チェックは 10/10 PASS でした
-
-# v0.5.0-alpha.6
-
-###### 2026/08/25
-
-* `注記` 6 番目の current-tree alpha candidate; OnePlus OPD2413 などの OEM で初回 Plugin 有効化に必要な AutoJs6 WakeActivity 契約を追加し, production signed candidate、beta、publication の完了は主張しない
-* `修正` `org.autojs.plugin.WAKE_ACTIVITY` と `org.autojs.plugin.action.WAKE` を宣言し, signature permission で保護され直ちに終了する NoDisplay Activity を提供; Plugin Center の `ACTIVATE` が `stopped/notLaunched` を解除して有効化を自動再試行できるようにする
-* `改善` `afca7b14c` debug Host と同じ signer の診断 Plugin で元の失敗を再現・復旧し, startup probe は `277 ms` で構造化結果を返した; signer 不一致は独立して `PYTHON_RUNTIME_PROVIDER_UNTRUSTED` として fail closed することも確認
 
 ##### その他のバージョン
 
@@ -269,3 +267,6 @@ app/src/main/res/values-*/strings.xml
 - AutoJs6 ドキュメント: https://docs.autojs6.com
 - Chaquopy: https://chaquo.com/chaquopy/
 - Python: https://www.python.org/
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)

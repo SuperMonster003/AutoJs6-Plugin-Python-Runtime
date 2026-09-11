@@ -169,6 +169,12 @@ M4 路径 A 已完成; M4 路径 B 与 Path C 评估均以 `NOT_ADMITTED` 关闭
 
 ******
 
+# v0.5.1
+
+###### 2026/09/11
+
+* `优化` 构建阶段校验 64 位原生库的 16 KB 页大小对齐, 检查 manifest 契约并输出 JSON 报告
+
 # v0.5.0
 
 ###### 2026/08/25
@@ -184,14 +190,6 @@ M4 路径 A 已完成; M4 路径 B 与 Path C 评估均以 `NOT_ADMITTED` 关闭
 * `提示` 0.5.0-beta.1 功能冻结源码候选; 精确 SM003 签名 alpha 候选已通过 10 项 Android 冒烟, 尚不声明 beta APK、稳定版或 publication 完成
 * `新增` M6 新增可复用的 2/3/4 测试项目与独立 artifact 校验材料, 让导入、stdin/交互输入和结构化结果可重复验收
 * `优化` QV710AF65F 上回拉的 0.5.0-alpha.6 arm64 APK 与正式候选逐字节一致, 完整十项清单结果为 10/10 PASS
-
-# v0.5.0-alpha.6
-
-###### 2026/08/25
-
-* `提示` 第六个 current-tree alpha 候选版; 为 OnePlus OPD2413 等 OEM 的首次插件激活补齐 AutoJs6 WakeActivity 契约, 不声明 production signed candidate、beta 或 publication 完成
-* `修复` 声明 `org.autojs.plugin.WAKE_ACTIVITY` 与 `org.autojs.plugin.action.WAKE`, 提供签名权限保护且立即结束的 NoDisplay Activity; 插件中心可通过 `ACTIVATE` 清除 `stopped/notLaunched` 状态并自动重试启用
-* `优化` 在 `afca7b14c` 调试 Host 与同 signer 诊断 Plugin 上复现并恢复原始失败, startup probe 于 `277 ms` 返回结构化结果; 另确认 signer 不匹配会独立 fail closed 为 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
 
 ##### 更多版本
 
@@ -269,3 +267,6 @@ app/src/main/res/values-*/strings.xml
 - AutoJs6 文档: https://docs.autojs6.com
 - Chaquopy: https://chaquo.com/chaquopy/
 - Python: https://www.python.org/
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)

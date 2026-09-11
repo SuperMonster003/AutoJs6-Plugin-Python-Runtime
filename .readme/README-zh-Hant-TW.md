@@ -169,6 +169,12 @@ M4 路徑 A 已完成; M4 路徑 B 與 Path C 評估均以 `NOT_ADMITTED` 關閉
 
 ******
 
+# v0.5.1
+
+###### 2026/09/11
+
+* `改善` 建置階段校驗 64 位原生函式庫的 16 KB 頁面大小對齊, 檢查 manifest 契約並輸出 JSON 報告
+
 # v0.5.0
 
 ###### 2026/08/25
@@ -184,14 +190,6 @@ M4 路徑 A 已完成; M4 路徑 B 與 Path C 評估均以 `NOT_ADMITTED` 關閉
 * `提示` 0.5.0-beta.1 功能凍結原始碼候選; 精確 SM003 簽署的 alpha 候選已通過 10 項 Android 冒煙測試, 尚不聲明 beta APK、穩定版或 publication 完成
 * `新增` M6 新增可重複使用的 2/3/4 測試專案與獨立 artifact 驗證材料, 讓匯入、stdin/互動輸入和結構化結果可重複驗收
 * `改善` 從 QV710AF65F 拉回的 0.5.0-alpha.6 arm64 APK 與正式候選逐位元組一致, 完整十項清單結果為 10/10 PASS
-
-# v0.5.0-alpha.6
-
-###### 2026/08/25
-
-* `提示` 第六個 current-tree alpha 候選版; 為 OnePlus OPD2413 等 OEM 的首次外掛啟用補齊 AutoJs6 WakeActivity 契約, 不宣稱 production signed candidate、beta 或 publication 已完成
-* `修正` 宣告 `org.autojs.plugin.WAKE_ACTIVITY` 與 `org.autojs.plugin.action.WAKE`, 提供簽章權限保護且立即結束的 NoDisplay Activity; 外掛中心可透過 `ACTIVATE` 清除 `stopped/notLaunched` 狀態並自動重試啟用
-* `改善` 在 `afca7b14c` debug Host 與相同 signer 的診斷 Plugin 上重現並排除原始失敗, startup probe 於 `277 ms` 傳回結構化結果; 另確認 signer 不相符會獨立 fail closed 為 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`
 
 ##### 更多版本
 
@@ -269,3 +267,6 @@ app/src/main/res/values-*/strings.xml
 - AutoJs6 文件: https://docs.autojs6.com
 - Chaquopy: https://chaquo.com/chaquopy/
 - Python: https://www.python.org/
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-Python-Runtime/blob/master/docs/16kb.md)
