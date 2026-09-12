@@ -83,6 +83,22 @@ source commit `4bbae75dbfb496995e5278684024f63ae9f71a43`. It remained v2-signed,
 `debuggable=false`, `testOnly=false`, and carried the production SM003
 certificate shared with Host.
 
+## Samsung ARM64 / 16 KiB supplement
+
+On 2026-09-10, Samsung SM-A566B (`localhost:31277`, Android 16 / API 36 /
+arm64-v8a / 16384-byte pages) ran the SM003-signed `0.5.0`/93 Plugin with a
+matching-signer `6.8.0`/5279 debug Host. Twenty current public-engine methods
+have passing final observations, and a native stdlib probe confirms actual
+16 KiB pages inside the Plugin process. The Host still has three 4 KiB-aligned
+ELF libraries and runs under Android's page-size compatibility mode. One old
+R1 console assertion also remains failed and is excluded from those passes.
+
+Exact installed identities, the first-launch clipboard failure and successful
+retry, the Host library names, and the untested portions are recorded in
+[`SAMSUNG_ARM64_16K_SMOKE_RESULTS.md`](SAMSUNG_ARM64_16K_SMOKE_RESULTS.md).
+This fills a focused physical ARM64 / 16 KiB evidence gap; it does not close
+the stable candidate's full ten-item checklist.
+
 ## Claim boundary
 
 The first QV710AF65F run closed the production-signed alpha-to-beta gate; the

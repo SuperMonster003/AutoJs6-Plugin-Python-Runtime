@@ -750,6 +750,28 @@
 完整规则与十项操作清单见
 [M6 lightweight release process](docs/maintenance/M6_RELEASE_PROCESS.md)。
 
+### 2026-09-10 三星 ARM64 / 16 KiB 补测
+
+- [x] [H+P] **补充 ARM64 / 16 KiB 真机证据**: Samsung SM-A566B
+  (`localhost:31277`, Android 16 / API 36, 实际页大小 16384) 使用 SM003-signed
+  Python Runtime `0.5.0`/93 + 同签名 debug Host `6.8.0`/5279, 20 个当前公共引擎
+  用例最终通过, 覆盖 module、stdin、前台交互、结果/产物、Host broker、4.25 MiB 输出、
+  停止后重跑和 90 s 实时输出; 无障碍/OCR 仅验证服务不可用分支。
+  [原生探针](examples/python/arm64_16k_probe.py) 另确认 Python 进程的 sysconf/libc/mmap
+  页大小均为 16384、内核映射为 16 KiB, 压缩、mmap、ctypes、SQLite、SSL 初始化和
+  socketpair 均通过。精确 APK 身份、初次失败与复测范围见
+  [三星补测记录](docs/maintenance/SAMSUNG_ARM64_16K_SMOKE_RESULTS.md)。
+- [ ] [H] **消除宿主的 16 KiB 兼容模式依赖**: 本轮 Host APK 的
+  `libc++_shared.so`、`libjackpal-androidterm5.so`、`libjackpal-termexec2.so` ELF LOAD
+  最小对齐仍为 `0x1000`; 系统弹出兼容模式提示, `pageSizeCompat=4`。需升级/重编译
+  这些库并对最终 Host APK 复验 ELF + ZIP 对齐, 再在无兼容模式下重跑公共路径。
+  Plugin 自身 `pageSizeCompat=0`、所打包 ELF 对齐检查通过; 本轮不能证明宿主已原生
+  支持 16 KiB, 也不关闭稳定候选完整十项验收。
+- [ ] [H] **更新旧 R1 流式控制台断言并补跑双 workspace**: 第一段 Python 脚本成功,
+  但旧验收 helper 在 chunk 间插入换行, 导致提示与结果相邻的历史断言失败。应按实际
+  输出顺序拼接而不注入分隔符, 保留字节数/终态断言后重跑; 本轮未到达第二 workspace,
+  因此旧 R1 测试仍记 FAIL, 不计入上述 20 个 PASS。
+
 ### 轻量验证约定 (代替证据等级流程)
 
 - 本地快速回归 (离线, 避免外网 Cloudflare 超时):
