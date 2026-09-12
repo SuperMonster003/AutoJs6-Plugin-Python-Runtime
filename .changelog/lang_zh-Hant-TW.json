@@ -6,7 +6,10 @@
   "changelog_label_dependency": "相依性",
   "$data": {
     "v0.5.1": {
-      "released_date": "2026/09/11",
+      "released_date": "2026/09/12",
+      "fix": [
+        "執行 clean 後 Chaquopy 混淆規則檔案遺失導致 Release 建置失敗的問題"
+      ],
       "improvement": [
         "建置階段校驗 64 位原生函式庫的 16 KB 頁面大小對齊, 檢查 manifest 契約並輸出 JSON 報告"
       ]

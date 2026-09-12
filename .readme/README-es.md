@@ -171,8 +171,9 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 
 # v0.5.1
 
-###### 2026/09/11
+###### 2026/09/12
 
+* `Corrección` Fallo de compilación Release después de clean cuando falta el archivo de reglas ProGuard generado por Chaquopy
 * `Mejora` Verificación de compilación de la alineación de páginas de 16 KB en bibliotecas nativas de 64 bits, con controles del contrato manifest e informes JSON
 
 # v0.5.0

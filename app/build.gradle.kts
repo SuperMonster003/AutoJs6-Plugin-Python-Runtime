@@ -523,6 +523,29 @@ chaquopy {
     }
 }
 
+// Chaquopy 17 extracts these rules during configuration, before clean removes them.
+// Restore the same embedded bytes as a task output before any Android compilation.
+val chaquopyProguardRules = requireNotNull(
+    plugins.getPlugin("com.chaquo.python").javaClass
+        .getResourceAsStream("/com/chaquo/python/proguard-rules.pro"),
+) {
+    "The applied Chaquopy plugin is missing its embedded ProGuard rules"
+}.use { it.readBytes() }
+val chaquopyProguardFile = layout.buildDirectory.file("python/proguard-rules.pro")
+val prepareChaquopyProguardRules = tasks.register("prepareChaquopyProguardRules") {
+    inputs.property("rules", chaquopyProguardRules)
+    outputs.file(chaquopyProguardFile)
+    mustRunAfter(tasks.named("clean"))
+    doLast {
+        val output = chaquopyProguardFile.get().asFile
+        output.parentFile.mkdirs()
+        output.writeBytes(chaquopyProguardRules)
+    }
+}
+tasks.named("preBuild") {
+    dependsOn(prepareChaquopyProguardRules)
+}
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
     implementation("org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21")

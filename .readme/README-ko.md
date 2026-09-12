@@ -171,8 +171,9 @@ M4 Path A가 완료되었습니다. M4 Paths B/C 평가는 모두 `NOT_ADMITTED`
 
 # v0.5.1
 
-###### 2026/09/11
+###### 2026/09/12
 
+* `수정` clean 후 Chaquopy가 생성한 ProGuard 규칙 파일이 없어 Release 빌드가 실패하는 문제
 * `개선` 64비트 네이티브 라이브러리의 16 KB 페이지 정렬을 빌드 시 검증, manifest 계약 검사 및 JSON 보고서 지원
 
 # v0.5.0

@@ -171,8 +171,9 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 
 # v0.5.1
 
-###### 2026/09/11
+###### 2026/09/12
 
+* `Fix` Release build failure after clean when the generated Chaquopy ProGuard rules file is missing
 * `Improvement` Build verification of 16 KB page alignment for 64-bit native libraries, including manifest contract checks and JSON reports
 
 # v0.5.0

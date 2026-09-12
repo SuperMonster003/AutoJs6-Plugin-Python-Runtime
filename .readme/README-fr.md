@@ -171,8 +171,9 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 
 # v0.5.1
 
-###### 2026/09/11
+###### 2026/09/12
 
+* `Correction` Échec de la compilation Release après clean lorsque le fichier de règles ProGuard généré par Chaquopy est absent
 * `Amélioration` Vérification à la compilation de l'alignement des pages de 16 KB des bibliothèques natives 64 bits, avec contrôle du contrat manifest et rapports JSON
 
 # v0.5.0

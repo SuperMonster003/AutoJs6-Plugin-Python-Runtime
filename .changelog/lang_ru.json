@@ -6,7 +6,10 @@
   "changelog_label_dependency": "Зависимость",
   "$data": {
     "v0.5.1": {
-      "released_date": "2026/09/11",
+      "released_date": "2026/09/12",
+      "fix": [
+        "Сбой сборки Release после clean из-за отсутствия созданного Chaquopy файла правил ProGuard"
+      ],
       "improvement": [
         "Проверка выравнивания страниц 16 KB для 64-битных нативных библиотек при сборке, включая контракт manifest и отчеты JSON"
       ]
