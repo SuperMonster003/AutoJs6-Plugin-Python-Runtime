@@ -36,13 +36,13 @@ class PluginActivationContractTest(unittest.TestCase):
             item.get(ANDROID + "name"): item.get(ANDROID + "value")
             for item in self.application.findall("meta-data")
         }
-        self.assertEqual(".WakeActivity", metadata.get("org.autojs.plugin.WAKE_ACTIVITY"))
+        self.assertEqual("io.github.supermonster003.autojs6.plugin.python.runtime.WakeActivity", metadata.get("org.autojs.plugin.WAKE_ACTIVITY"))
 
         activity = next(
             (
                 item
                 for item in self.application.findall("activity")
-                if item.get(ANDROID + "name") == ".WakeActivity"
+                if item.get(ANDROID + "name") == "io.github.supermonster003.autojs6.plugin.python.runtime.WakeActivity"
             ),
             None,
         )

@@ -8,6 +8,7 @@
 
 ###### 2026/09/13
 
+* `Note` Candidat source stable 0.5.2; la validation finale sur appareil et la publication restent distinctes des résultats beta historiques
 * `Correction` Corriger la lecture des fichiers de sortie sur Android 7 en conservant les protections des descripteurs et liens symboliques
 * `Correction` Indiquer uniquement les ABI natives présentes dans l’APK installé
 
