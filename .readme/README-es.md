@@ -173,6 +173,7 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 
 ###### 2026/09/13
 
+* `Nota` Candidato de código estable 0.5.2; la aceptación final en dispositivos y la publicación siguen separadas de los resultados beta históricos
 * `Corrección` Corregir la lectura de archivos de salida en Android 7 conservando la protección de descriptores y enlaces simbólicos
 * `Corrección` Informar solo de las ABI nativas presentes en el APK instalado
 

@@ -170,10 +170,10 @@ Assert-True ($appBuild -match 'version\s*=\s*"3\.13"') 'Python line must be 3.13
 Assert-True ($versionProperties -match 'OVERRIDDEN_ANDROID_GRADLE_PLUGIN_VERSION=NONE') 'AGP override must remain disabled so platform compatibility selection stays active'
 $platformVersionsPluginMatches = [regex]::Matches(
     $settings,
-    'id\("org\.autojs\.build\.platform-versions"\)'
+    'id\("io\.github\.supermonster003\.autojs6-platform-versions"\)'
 )
 Assert-True ($platformVersionsPluginMatches.Count -eq 2) 'The pinned platform-version selector must be declared and applied exactly once'
-Assert-True ($settings -match 'id\("org\.autojs\.build\.platform-versions"\)\s+version\s+"1\.4\.1"') 'The platform-version selector plugin must remain pinned to 1.4.1'
+Assert-True ($settings -match 'id\("io\.github\.supermonster003\.autojs6-platform-versions"\)\s+version\s+"1\.8\.1"') 'The platform-version selector plugin must remain pinned to 1.8.1'
 Assert-True ($rootBuild -match 'id\("com\.android\.application"\)\s+version\s+System\.getProperty\("gradle\.agp\.version"\)\s+apply false') 'AGP must consume the platform selector result without a second version source'
 Assert-True ($wrapperProperties -match 'distributionSha256Sum=553c78f50dafcd54d65b9a444649057857469edf836431389695608536d6b746') 'Gradle wrapper SHA-256 is missing or drifted'
 Assert-True ($wrapperProperties -match 'distributionUrl=https\\://services\.gradle\.org/distributions/gradle-9\.5\.0-bin\.zip') 'Gradle wrapper distribution must remain pinned to 9.5.0'
@@ -219,7 +219,8 @@ Assert-True ($manifest -match 'android:name="org\.autojs\.plugin\.python\.RUNTIM
 Assert-True ($manifest -match 'android:value="org\.autojs\.python\.runtime\.cpython"') 'Provider ID drifted'
 Assert-True ($manifest -match 'android:permission="org\.autojs\.permission\.PLUGIN"') 'Signature permission guard is missing'
 $manifestPermissions = [regex]::Matches($manifest, '<uses-permission\b')
-Assert-True ($manifestPermissions.Count -eq 1) 'The runtime APK must request exactly one Android permission'
+Assert-True ($manifestPermissions.Count -eq 2) 'The runtime APK must request only Internet and the host plugin permission'
+Assert-True ($manifest -match '<uses-permission\s+android:name="org\.autojs\.permission\.PLUGIN"\s*/>') 'The host plugin activation permission is missing'
 Assert-True ($manifest -match '<uses-permission\s+android:name="android\.permission\.INTERNET"\s*/>') 'The standard-library networking permission is missing'
 Assert-True ($manifest -notmatch 'android:sharedUserId') 'A shared Android UID is forbidden'
 Assert-True ($manifest -notmatch 'com\.chaquo\.python\.android\.PyApplication') 'CPython must not start in the application/main process'
