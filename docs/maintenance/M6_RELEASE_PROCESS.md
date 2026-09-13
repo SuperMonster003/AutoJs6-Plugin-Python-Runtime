@@ -1,7 +1,7 @@
 # M6 lightweight release process
 
-Status: `0.5.0` stable source candidate admitted after the exact SM003-signed
-beta.1 candidate passed all ten Android smoke items. This process replaces the
+Status: `0.5.1` is the current stable source candidate. The historical exact SM003-signed
+0.5.0-beta.1 candidate passed all ten Android smoke items; current final APK acceptance remains separate. This process replaces the
 new Roadmap's remaining release ambiguity; it does not replace the frozen
 historical verification of the already-published `v0.1.0` tag.
 
@@ -37,7 +37,7 @@ The forward sequence is deliberately short:
 - README and Android changelog outputs exactly match `.python/generate_markdown.py`.
 - The three Host API AAR files exactly match `locks/host-api-aars.lock` SHA-256
   values. Refreshing that lock remains a separate dual-repository operation.
-- `release/` and `releases/` contain no stale APK before a candidate check.
+- `release/` and `releases/` contain no stale APK before a candidate check. Current collection writes verified APKs to `app/releases/<version>/`, so ignored local release outputs do not invalidate the source candidate. The `collectReleaseFiles` alias and `appendDigestToReleasedFiles` both validate the exact three APKs, package version and real APK signatures before CRC32 naming.
 
 The accepted Host provenance introduced by `0.5.0-alpha.5` and retained by
 `0.5.0-alpha.6` is clean AutoJs6 commit

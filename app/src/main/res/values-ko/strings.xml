@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AutoJs6 Python 런타임</string>
-    <string name="plugin_name">Python 런타임</string>
     <string name="plugin_description">전용 플러그인 프로세스에서 AutoJs6용 Python 스크립트를 실행합니다</string>
+    <string name="plugin_name">Python 런타임</string>
 </resources>

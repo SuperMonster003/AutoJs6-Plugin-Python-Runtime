@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import argparse
+import sys
 import json
 import re
 from pathlib import Path
@@ -186,10 +188,23 @@ def build_readme_values(code, languages, changelogs):
     return content
 
 
+GENERATED = {}
+
+
 def write_text(path: Path, content: str):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8", newline="\n")
-    print(f"Generated {path.relative_to(ROOT)}")
+    GENERATED[path] = content
+
+
+def finish_outputs(artifacts, check):
+    drift = [p for p, text in artifacts.items() if not p.is_file() or p.read_text(encoding="utf-8") != text]
+    if check:
+        for path in drift:
+            print(f"Out of date: {path}", file=sys.stderr)
+        return 1 if drift else 0
+    for path, text in artifacts.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8", newline="\n")
+    return 0
 
 
 def generate_readmes(languages, changelogs):
@@ -219,13 +234,20 @@ def generate_changelogs(languages, changelogs):
             write_text(ANDROID_CHANGELOG_DIR / "CHANGELOG.md", output)
 
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="check generated content without writing")
+    args = parser.parse_args(argv)
+    GENERATED.clear()
     if LANGUAGE_CODE_DEFAULT not in LANGUAGE_CODES:
         raise ValueError(f"Default language code {LANGUAGE_CODE_DEFAULT!r} is not supported")
     languages, changelogs = load_languages()
     generate_changelogs(languages, changelogs)
     generate_readmes(languages, changelogs)
+    result = finish_outputs(GENERATED, args.check)
+    print(f"MARKDOWN_{'FAIL' if result else 'OK'} artifacts={len(GENERATED)} mode={'check' if args.check else 'write'}")
+    return result
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

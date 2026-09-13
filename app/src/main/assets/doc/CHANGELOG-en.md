@@ -6,10 +6,12 @@
 
 # v0.5.1
 
-###### 2026/09/12
+###### 2026/09/13
 
+* `Hint` 0.5.1 stable source candidate; final device acceptance and publication remain separate from the historical beta results
 * `Fix` Release build failure after clean when the generated Chaquopy ProGuard rules file is missing
 * `Improvement` Build verification of 16 KB page alignment for 64-bit native libraries, including manifest contract checks and JSON reports
+* `Improvement` Host activation, plugin metadata, localized documentation and signed release collection follow the common plugin conventions
 
 # v0.5.0
 

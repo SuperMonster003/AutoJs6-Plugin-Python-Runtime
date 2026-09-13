@@ -6,12 +6,16 @@
   "changelog_label_dependency": "Dependency",
   "$data": {
     "v0.5.1": {
-      "released_date": "2026/09/12",
+      "released_date": "2026/09/13",
       "fix": [
         "Release build failure after clean when the generated Chaquopy ProGuard rules file is missing"
       ],
       "improvement": [
-        "Build verification of 16 KB page alignment for 64-bit native libraries, including manifest contract checks and JSON reports"
+        "Build verification of 16 KB page alignment for 64-bit native libraries, including manifest contract checks and JSON reports",
+        "Host activation, plugin metadata, localized documentation and signed release collection follow the common plugin conventions"
+      ],
+      "hint": [
+        "0.5.1 stable source candidate; final device acceptance and publication remain separate from the historical beta results"
       ]
     },
     "v0.5.0": {

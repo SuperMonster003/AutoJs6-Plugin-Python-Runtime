@@ -6,10 +6,12 @@
 
 # v0.5.1
 
-###### 2026/09/12
+###### 2026/09/13
 
+* `Nota` Candidato de código estable 0.5.1; la aceptación final en dispositivos y la publicación siguen separadas de los resultados beta históricos
 * `Corrección` Fallo de compilación Release después de clean cuando falta el archivo de reglas ProGuard generado por Chaquopy
 * `Mejora` Verificación de compilación de la alineación de páginas de 16 KB en bibliotecas nativas de 64 bits, con controles del contrato manifest e informes JSON
+* `Mejora` Activación del host, metadatos, documentación traducida y recopilación de APK firmados conforme a las convenciones comunes
 
 # v0.5.0
 
