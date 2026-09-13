@@ -45,6 +45,11 @@ class ActivationContractInstrumentedTest {
             val info = IPluginInfoProvider.Stub.asInterface(remote).info
             val installed = manager.getPackageInfo(context.packageName, 0)
             assertEquals(installed.versionName, info.versionName)
+            val installedCode = if (android.os.Build.VERSION.SDK_INT >= 28) installed.longVersionCode else installed.versionCode.toLong()
+            assertEquals(installedCode, info.versionCode)
+            assertEquals(BuildConfig.PLUGIN_ID, info.id)
+            assertEquals(BuildConfig.PLUGIN_ENGINE, info.engine)
+            assertEquals(BuildConfig.PLUGIN_VARIANT, info.variant)
             assertEquals(context.getString(R.string.app_name), info.name)
             assertEquals(context.getString(R.string.plugin_description), info.description)
             assertTrue(info.supportedAbis.isNotEmpty())
@@ -56,6 +61,7 @@ class ActivationContractInstrumentedTest {
             }
             assertTrue(android.os.Build.SUPPORTED_ABIS.any { it in info.supportedAbis })
             assertNotNull(info.capabilities)
+            assertTrue(info.capabilities!!.keySet().isNotEmpty())
         } finally { context.unbindService(connection) }
     }
 }
