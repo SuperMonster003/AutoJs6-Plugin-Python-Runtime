@@ -52,14 +52,17 @@ class ActivationContractInstrumentedTest {
             assertEquals(BuildConfig.PLUGIN_VARIANT, info.variant)
             assertEquals(context.getString(R.string.app_name), info.name)
             assertEquals(context.getString(R.string.plugin_description), info.description)
-            assertTrue(info.supportedAbis.isNotEmpty())
+            val supportedAbis = requireNotNull(info.supportedAbis) {
+                "Python INFO must report its packaged native ABIs"
+            }
+            assertTrue(supportedAbis.isNotEmpty())
             val installedPaths = listOf(context.applicationInfo.sourceDir) + context.applicationInfo.splitSourceDirs.orEmpty()
-            info.supportedAbis.forEach { abi ->
+            supportedAbis.forEach { abi ->
                 assertTrue("Advertised ABI $abi is not packaged", installedPaths.any { path ->
                     java.util.zip.ZipFile(path).use { it.getEntry("lib/$abi/libpython3.13.so") != null }
                 })
             }
-            assertTrue(android.os.Build.SUPPORTED_ABIS.any { it in info.supportedAbis })
+            assertTrue(android.os.Build.SUPPORTED_ABIS.any { it in supportedAbis })
             assertNotNull(info.capabilities)
             assertTrue(info.capabilities!!.keySet().isNotEmpty())
         } finally { context.unbindService(connection) }
