@@ -36,7 +36,7 @@ class PythonRuntimePluginInfoService : Service() {
                 instruction = null,
                 author = getString(R.string.plugin_author),
                 collaborators = null,
-                versionName = installed.versionName,
+                versionName = requireNotNull(installed.versionName) { "Installed plugin version is missing" },
                 versionCode = if (android.os.Build.VERSION.SDK_INT >= 28) installed.longVersionCode else installed.versionCode.toLong(),
                 versionDate = getString(R.string.plugin_version_date),
                 id = BuildConfig.PLUGIN_ID,
