@@ -9,7 +9,8 @@
       "released_date": "2026/09/13",
       "fix": [
         "Read output artifacts safely on Android 7 without requiring an API 27 Java constant",
-        "Report only the native ABIs present in the installed APK"
+        "Report only the native ABIs present in the installed APK",
+        "Use English build dates in plugin metadata regardless of the build machine locale"
       ],
       "hint": [
         "0.5.2 stable source candidate; final device acceptance and publication remain separate from the historical beta results"

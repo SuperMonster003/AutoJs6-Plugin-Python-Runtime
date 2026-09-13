@@ -9,7 +9,8 @@
       "released_date": "2026/09/13",
       "fix": [
         "Corregir la lectura de archivos de salida en Android 7 conservando la protección de descriptores y enlaces simbólicos",
-        "Informar solo de las ABI nativas presentes en el APK instalado"
+        "Informar solo de las ABI nativas presentes en el APK instalado",
+        "Usar fechas de compilación en inglés independientemente del idioma de la máquina"
       ],
       "hint": [
         "Candidato de código estable 0.5.2; la aceptación final en dispositivos y la publicación siguen separadas de los resultados beta históricos"

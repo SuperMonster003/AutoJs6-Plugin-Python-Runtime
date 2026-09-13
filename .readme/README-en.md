@@ -176,6 +176,7 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 * `Hint` 0.5.2 stable source candidate; final device acceptance and publication remain separate from the historical beta results
 * `Fix` Read output artifacts safely on Android 7 without requiring an API 27 Java constant
 * `Fix` Report only the native ABIs present in the installed APK
+* `Fix` Use English build dates in plugin metadata regardless of the build machine locale
 
 # v0.5.1
 
