@@ -7,6 +7,7 @@ import android.os.IBinder
 import org.autojs.plugin.common.api.IPluginInfoProvider
 import org.autojs.plugin.common.api.PluginCapabilityKeys
 import org.autojs.plugin.common.api.PluginInfo
+import java.util.zip.ZipFile
 
 /** Plugin Center metadata endpoint. Runtime execution remains in the separate runtime service. */
 class PythonRuntimePluginInfoService : Service() {
@@ -42,13 +43,27 @@ class PythonRuntimePluginInfoService : Service() {
                 id = BuildConfig.PLUGIN_ID,
                 engine = BuildConfig.PLUGIN_ENGINE,
                 variant = BuildConfig.PLUGIN_VARIANT,
-                supportedAbis = PythonRuntimeMetadata.capabilities.supportedAbis.toTypedArray(),
+                supportedAbis = installedRuntimeAbis(),
                 capabilities = capabilities,
             )
         }
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
+
+    private fun installedRuntimeAbis(): Array<String> {
+        val packaged = mutableSetOf<String>()
+        val packages = listOf(applicationInfo.sourceDir) + applicationInfo.splitSourceDirs.orEmpty()
+        packages.forEach { path ->
+            ZipFile(path).use { apk ->
+                PythonRuntimeMetadata.capabilities.supportedAbis.forEach { abi ->
+                    if (apk.getEntry("lib/$abi/libpython3.13.so") != null) packaged += abi
+                }
+            }
+        }
+        check(packaged.isNotEmpty()) { "Installed Python runtime libraries are missing" }
+        return PythonRuntimeMetadata.capabilities.supportedAbis.filter { it in packaged }.toTypedArray()
+    }
 
     private companion object {
         const val RUNTIME_ACTION = "org.autojs.plugin.python.RUNTIME"

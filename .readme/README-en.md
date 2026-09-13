@@ -105,8 +105,8 @@ The plugin accepts an independent SOURCE, an optional bounded workspace archive,
 > Version 0.1.0 is paired only with AutoJs6 6.8.0, with minimum Host versionCode 5275 frozen and enforced; the final clean Host source revision and three-AAR distribution manifest are recorded in the lock. Each new execution rediscovers the provider; missing or disabled states prompt install or enable and never fall back, while install or re-enable needs no Host restart. Version 0.5.0-alpha.6 adds the Plugin Center ACTIVATE/WakeActivity recovery path for the stopped/notLaunched state left by some OEMs after first install. Host and Plugin APKs must use the same signer; mixing a debug Host with the production Plugin is deterministically rejected as PYTHON_RUNTIME_PROVIDER_UNTRUSTED. Stable APK identity is bound to that exact Plugin source and Host lock.
 
 ```text
-release target: 0.5.1
-release state: 0.5.1 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.2
+release state: 0.5.2 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,13 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 
 ******
 
+# v0.5.2
+
+###### 2026/09/13
+
+* `Fix` Read output artifacts safely on Android 7 without requiring an API 27 Java constant
+* `Fix` Report only the native ABIs present in the installed APK
+
 # v0.5.1
 
 ###### 2026/09/13
@@ -185,14 +192,6 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 * `Hint` 0.5.0 cumulative stable source candidate; the exact SM003-signed beta candidate passed all 10 Android smoke items, without claiming a stable APK, tag, or completed publication
 * `Feature` M6 consolidates M1-M5 capabilities and reusable item 2/3/4 materials while fixing the lightweight alpha → beta → stable candidate and publication boundaries
 * `Improvement` The 0.5.0-beta.1 arm64 APK pulled from QV710AF65F was byte-identical to the formal candidate, and the second complete ten-item run finished 10/10 PASS
-
-# v0.5.0-beta.1
-
-###### 2026/08/25
-
-* `Hint` 0.5.0-beta.1 feature-freeze source candidate; the exact SM003-signed alpha candidate passed all 10 Android smoke items, without claiming a beta APK, stable release, or completed publication
-* `Feature` M6 adds reusable item 2/3/4 projects and an independent artifact verifier so imports, stdin/interactive input, and structured results can be accepted repeatably
-* `Improvement` The 0.5.0-alpha.6 arm64 APK pulled from QV710AF65F was byte-identical to the formal candidate, and the complete ten-item checklist finished 10/10 PASS
 
 ##### For more releases
 

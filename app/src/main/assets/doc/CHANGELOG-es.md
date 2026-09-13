@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.2
+
+###### 2026/09/13
+
+* `Corrección` Corregir la lectura de archivos de salida en Android 7 conservando la protección de descriptores y enlaces simbólicos
+* `Corrección` Informar solo de las ABI nativas presentes en el APK instalado
+
 # v0.5.1
 
 ###### 2026/09/13

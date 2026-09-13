@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 0.5.0-alpha.6 为部分 OEM 首装后的 stopped/notLaunched 状态提供插件中心 ACTIVATE/WakeActivity 恢复路径. Host 与 Plugin APK 必须使用同一 signer; 调试 Host 与 production Plugin 混装会稳定拒绝为 PYTHON_RUNTIME_PROVIDER_UNTRUSTED. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.5.1
-release state: 0.5.1 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.2
+release state: 0.5.2 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,13 @@ M4 路径 A 已完成; M4 路径 B 与 Path C 评估均以 `NOT_ADMITTED` 关闭
 
 ******
 
+# v0.5.2
+
+###### 2026/09/13
+
+* `修复` 修复 Android 7 输出文件读取兼容性, 保留原有文件描述符与符号链接保护
+* `修复` 插件信息只报告当前安装包内实际存在的原生 ABI
+
 # v0.5.1
 
 ###### 2026/09/13
@@ -185,14 +192,6 @@ M4 路径 A 已完成; M4 路径 B 与 Path C 评估均以 `NOT_ADMITTED` 关闭
 * `提示` 0.5.0 累计稳定版源码候选; 精确 SM003 签名 beta 候选已通过 10 项 Android 冒烟, 尚不声明稳定 APK、tag 或 publication 完成
 * `新增` M6 汇总 M1-M5 能力与可复用的 2/3/4 测试材料, 固定 alpha → beta → stable 的轻量候选和发布边界
 * `优化` QV710AF65F 上回拉的 0.5.0-beta.1 arm64 APK 与正式候选逐字节一致, 第二轮完整十项清单结果为 10/10 PASS
-
-# v0.5.0-beta.1
-
-###### 2026/08/25
-
-* `提示` 0.5.0-beta.1 功能冻结源码候选; 精确 SM003 签名 alpha 候选已通过 10 项 Android 冒烟, 尚不声明 beta APK、稳定版或 publication 完成
-* `新增` M6 新增可复用的 2/3/4 测试项目与独立 artifact 校验材料, 让导入、stdin/交互输入和结构化结果可重复验收
-* `优化` QV710AF65F 上回拉的 0.5.0-alpha.6 arm64 APK 与正式候选逐字节一致, 完整十项清单结果为 10/10 PASS
 
 ##### 更多版本
 

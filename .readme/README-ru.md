@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Версия 0.5.0-alpha.6 добавляет восстановление Plugin Center ACTIVATE/WakeActivity для состояния stopped/notLaunched, которое некоторые OEM оставляют после первой установки. APK Host и Plugin должны использовать один signer; сочетание debug Host с production Plugin детерминированно отклоняется как PYTHON_RUNTIME_PROVIDER_UNTRUSTED. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.5.1
-release state: 0.5.1 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.2
+release state: 0.5.2 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,13 @@ M4 Path A завершен; оценки M4 Paths B и C обе завершил
 
 ******
 
+# v0.5.2
+
+###### 2026/09/13
+
+* `Исправлено` Исправлено чтение выходных файлов в Android 7 с сохранением защиты дескрипторов и символических ссылок
+* `Исправлено` Метаданные сообщают только о нативных ABI установленного APK
+
 # v0.5.1
 
 ###### 2026/09/13
@@ -185,14 +192,6 @@ M4 Path A завершен; оценки M4 Paths B и C обе завершил
 * `Примечание` 0.5.0 — кандидат исходного кода накопительного стабильного выпуска; точный beta-кандидат с подписью SM003 прошёл все 10 Android-проверок, без заявления о готовности стабильного APK, tag или publication
 * `Добавлено` M6 объединяет возможности M1-M5 и повторно используемые материалы пунктов 2/3/4, фиксируя облегчённые границы кандидатов alpha → beta → stable и публикации
 * `Улучшено` APK arm64 версии 0.5.0-beta.1, извлечённый с QV710AF65F, побайтово совпал с официальным кандидатом; второй полный запуск завершён с результатом 10/10 PASS
-
-# v0.5.0-beta.1
-
-###### 2026/08/25
-
-* `Примечание` 0.5.0-beta.1 — кандидат исходного кода с замороженными функциями; точный alpha-кандидат с подписью SM003 прошёл все 10 Android-проверок, без заявления о готовности beta APK, стабильного выпуска или publication
-* `Добавлено` M6 добавляет повторно используемые проекты для пунктов 2/3/4 и независимую проверку artifact, чтобы воспроизводимо проверять импорт, stdin/интерактивный ввод и структурированные результаты
-* `Улучшено` APK arm64 версии 0.5.0-alpha.6, извлечённый с QV710AF65F, побайтово совпал с официальным кандидатом; полный список завершён с результатом 10/10 PASS
 
 ##### Другие версии
 

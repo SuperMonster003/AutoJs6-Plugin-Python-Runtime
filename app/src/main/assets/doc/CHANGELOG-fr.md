@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.2
+
+###### 2026/09/13
+
+* `Correction` Corriger la lecture des fichiers de sortie sur Android 7 en conservant les protections des descripteurs et liens symboliques
+* `Correction` Indiquer uniquement les ABI natives présentes dans l’APK installé
+
 # v0.5.1
 
 ###### 2026/09/13

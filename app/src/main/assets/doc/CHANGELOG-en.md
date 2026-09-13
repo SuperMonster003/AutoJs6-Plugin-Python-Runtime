@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.2
+
+###### 2026/09/13
+
+* `Fix` Read output artifacts safely on Android 7 without requiring an API 27 Java constant
+* `Fix` Report only the native ABIs present in the installed APK
+
 # v0.5.1
 
 ###### 2026/09/13

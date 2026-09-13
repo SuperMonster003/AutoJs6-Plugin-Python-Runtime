@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="org.autojs.permission.PLUGIN" />
 
     <queries>
         <package android:name="org.autojs.autojs6" />
@@ -27,14 +28,14 @@
 
         <meta-data
             android:name="org.autojs.plugin.WAKE_ACTIVITY"
-            android:value=".WakeActivity" />
+            android:value="io.github.supermonster003.autojs6.plugin.python.runtime.WakeActivity" />
 
         <meta-data
             android:name="org.autojs.plugin.info.AUTHOR"
             android:value="SuperMonster003" />
 
         <activity
-            android:name=".WakeActivity"
+            android:name="io.github.supermonster003.autojs6.plugin.python.runtime.WakeActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:finishOnTaskLaunch="true"
