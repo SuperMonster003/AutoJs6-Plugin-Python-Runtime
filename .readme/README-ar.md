@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. يضيف 0.5.0-alpha.6 مسار استعادة Plugin Center ACTIVATE/WakeActivity لحالة stopped/notLaunched التي تتركها بعض أجهزة OEM بعد التثبيت الأول. يجب أن تستخدم حزم Host وPlugin APK نفس signer؛ ويُرفض خلط debug Host مع production Plugin بشكل حتمي باسم PYTHON_RUNTIME_PROVIDER_UNTRUSTED. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.5.1
-release state: 0.5.1 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.2
+release state: 0.5.2 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,13 @@ runtime/security/release owner: SuperMonster003
 
 ******
 
+# v0.5.2
+
+###### 2026/09/13
+
+* `إصلاح` إصلاح قراءة ملفات المخرجات على Android 7 مع الحفاظ على حماية واصفات الملفات والروابط الرمزية
+* `إصلاح` عرض واجهات ABI الأصلية الموجودة فعليا في ملف APK المثبت فقط
+
 # v0.5.1
 
 ###### 2026/09/13
@@ -185,14 +192,6 @@ runtime/security/release owner: SuperMonster003
 * `ملاحظة` 0.5.0 مرشح المصدر المستقر التراكمي؛ اجتاز مرشح beta المطابق والموقّع بـ SM003 اختبارات Android العشرة 10، من دون إعلان اكتمال APK المستقر أو tag أو publication
 * `إضافة` يجمع M6 قدرات M1-M5 ومواد الاختبار القابلة لإعادة الاستخدام للبنود 2/3/4، ويثبت حدود مرشحي alpha → beta → stable والنشر الخفيفة
 * `تحسين` تطابق APK arm64 للإصدار 0.5.0-beta.1 المسحوب من QV710AF65F بايتاً ببايت مع المرشح الرسمي، واكتملت الجولة الكاملة الثانية بنتيجة 10/10 PASS
-
-# v0.5.0-beta.1
-
-###### 2026/08/25
-
-* `ملاحظة` 0.5.0-beta.1 مرشح مصدر مع تجميد الميزات؛ اجتاز مرشح alpha المطابق والموقّع بـ SM003 اختبارات Android العشرة 10، من دون إعلان اكتمال beta APK أو الإصدار المستقر أو publication
-* `إضافة` يضيف M6 مشاريع قابلة لإعادة الاستخدام للبنود 2/3/4 ومدقق artifact مستقلاً كي يمكن قبول الاستيراد وstdin/الإدخال التفاعلي والنتائج المنظمة بصورة قابلة للتكرار
-* `تحسين` تطابق APK arm64 للإصدار 0.5.0-alpha.6 المسحوب من QV710AF65F بايتاً ببايت مع المرشح الرسمي، واكتملت القائمة ذات البنود العشرة بنتيجة 10/10 PASS
 
 ##### المزيد من الإصدارات
 

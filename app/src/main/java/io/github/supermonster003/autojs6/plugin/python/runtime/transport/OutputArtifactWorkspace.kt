@@ -134,6 +134,11 @@ internal class OutputArtifactWorkspace private constructor(
     }
 
     companion object {
+        // Linux O_CLOEXEC is stable across Android ABIs (bionic asm-generic/fcntl.h).
+        // Its android.system.OsConstants field was only exposed in API 27; the
+        // inline value keeps atomic close-on-exec protection on our API 24 floor.
+        private const val OPEN_CLOSE_ON_EXEC = 0x80000
+
         fun create(parentDirectory: File, requestId: PythonRequestId): OutputArtifactWorkspace {
             val parent = parentDirectory.canonicalFile
             check((parent.isDirectory || parent.mkdirs()) && parent.isDirectory) {
@@ -171,7 +176,7 @@ internal class OutputArtifactWorkspace private constructor(
             }
             val descriptor = Os.open(
                 source.path,
-                OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                OsConstants.O_RDONLY or OPEN_CLOSE_ON_EXEC or OsConstants.O_NOFOLLOW,
                 0,
             )
             val digest = MessageDigest.getInstance("SHA-256")

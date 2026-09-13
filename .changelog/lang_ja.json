@@ -5,6 +5,13 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v0.5.2": {
+      "released_date": "2026/09/13",
+      "fix": [
+        "ファイル記述子とシンボリックリンクの保護を維持して Android 7 の出力ファイル読み取りを修正",
+        "インストール済み APK に含まれるネイティブ ABI のみを報告"
+      ]
+    },
     "v0.5.1": {
       "released_date": "2026/09/13",
       "fix": [

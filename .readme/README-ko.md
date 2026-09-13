@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > 0.1.0은 AutoJs6 6.8.0 전용이며 최소 Host versionCode 5275가 동결되어 강제됩니다. 최종 clean Host source revision과 3개 AAR distribution manifest는 lock에 기록되었습니다. 새 실행마다 provider를 다시 검색하며, 없거나 비활성 상태면 install/enable을 안내하고 fallback하지 않습니다. 설치 또는 재활성화 후 Host 재시작은 필요 없습니다. 0.5.0-alpha.6은 일부 OEM이 첫 설치 후 남기는 stopped/notLaunched 상태를 위한 Plugin Center ACTIVATE/WakeActivity 복구 경로를 추가합니다. Host와 Plugin APK는 동일 signer를 사용해야 하며 debug Host와 production Plugin 혼용은 PYTHON_RUNTIME_PROVIDER_UNTRUSTED로 결정적으로 거부됩니다. stable APK identity는 해당 exact Plugin source와 Host lock에 결속됩니다.
 
 ```text
-release target: 0.5.1
-release state: 0.5.1 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.2
+release state: 0.5.2 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,13 @@ M4 Path A가 완료되었습니다. M4 Paths B/C 평가는 모두 `NOT_ADMITTED`
 
 ******
 
+# v0.5.2
+
+###### 2026/09/13
+
+* `수정` 파일 설명자 및 심볼릭 링크 보호를 유지하면서 Android 7 출력 파일 읽기 호환성 수정
+* `수정` 설치된 APK에 실제 포함된 네이티브 ABI만 보고
+
 # v0.5.1
 
 ###### 2026/09/13
@@ -185,14 +192,6 @@ M4 Path A가 완료되었습니다. M4 Paths B/C 평가는 모두 `NOT_ADMITTED`
 * `안내` 0.5.0 누적 안정 소스 후보입니다. 정확한 SM003 서명 beta 후보가 Android 10개 항목을 통과했으며 안정 APK, tag 또는 publication 완료를 아직 선언하지 않습니다
 * `추가` M6는 M1-M5 기능과 재사용 가능한 2/3/4 테스트 자료를 통합하고 경량 alpha → beta → stable 후보 및 배포 경계를 고정합니다
 * `개선` QV710AF65F에서 추출한 0.5.0-beta.1 arm64 APK가 공식 후보와 바이트 단위로 일치했고 두 번째 전체 10개 실행이 10/10 PASS였습니다
-
-# v0.5.0-beta.1
-
-###### 2026/08/25
-
-* `안내` 0.5.0-beta.1 기능 동결 소스 후보입니다. 정확한 SM003 서명 alpha 후보가 Android 10개 항목을 통과했으며 beta APK, 안정 버전 또는 publication 완료를 아직 선언하지 않습니다
-* `추가` M6에 재사용 가능한 2/3/4 테스트 프로젝트와 독립 artifact 검증기를 추가해 import, stdin/대화형 입력 및 구조화 결과를 반복 검수할 수 있게 했습니다
-* `개선` QV710AF65F에서 추출한 0.5.0-alpha.6 arm64 APK가 공식 후보와 바이트 단위로 일치했고 전체 10개 체크리스트가 10/10 PASS였습니다
 
 ##### 다른 버전
 

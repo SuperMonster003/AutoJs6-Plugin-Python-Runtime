@@ -1,6 +1,6 @@
 # M6 lightweight release process
 
-Status: `0.5.1` is the current stable source candidate. The historical exact SM003-signed
+Status: `0.5.2` is the current stable source candidate. The historical exact SM003-signed
 0.5.0-beta.1 candidate passed all ten Android smoke items; current final APK acceptance remains separate. This process replaces the
 new Roadmap's remaining release ambiguity; it does not replace the frozen
 historical verification of the already-published `v0.1.0` tag.

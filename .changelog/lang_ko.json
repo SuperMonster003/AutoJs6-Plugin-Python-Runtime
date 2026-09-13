@@ -5,6 +5,13 @@
   "changelog_label_improvement": "개선",
   "changelog_label_dependency": "의존성",
   "$data": {
+    "v0.5.2": {
+      "released_date": "2026/09/13",
+      "fix": [
+        "파일 설명자 및 심볼릭 링크 보호를 유지하면서 Android 7 출력 파일 읽기 호환성 수정",
+        "설치된 APK에 실제 포함된 네이티브 ABI만 보고"
+      ]
+    },
     "v0.5.1": {
       "released_date": "2026/09/13",
       "fix": [

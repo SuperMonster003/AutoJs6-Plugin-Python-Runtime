@@ -402,6 +402,7 @@ android {
 
     defaultConfig {
         applicationId = globalApplicationId
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         minSdk = 24
         targetSdk = 36
         versionCode = versions.appVersionCode
@@ -555,6 +556,8 @@ dependencies {
     implementation(files(pythonRuntimeApiAar))
 
     testImplementation(libs.junit)
+    androidTestImplementation(libs.test.ext.junit)
+    androidTestImplementation(libs.test.runner)
 }
 
 // IntelliJ resolves imported dependencies from Configuration.copy() instances.

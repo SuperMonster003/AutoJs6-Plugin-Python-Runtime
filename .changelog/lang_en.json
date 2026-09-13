@@ -5,6 +5,13 @@
   "changelog_label_improvement": "Improvement",
   "changelog_label_dependency": "Dependency",
   "$data": {
+    "v0.5.2": {
+      "released_date": "2026/09/13",
+      "fix": [
+        "Read output artifacts safely on Android 7 without requiring an API 27 Java constant",
+        "Report only the native ABIs present in the installed APK"
+      ]
+    },
     "v0.5.1": {
       "released_date": "2026/09/13",
       "fix": [

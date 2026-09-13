@@ -5,6 +5,13 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "相依項目",
   "$data": {
+    "v0.5.2": {
+      "released_date": "2026/09/13",
+      "fix": [
+        "修復 Android 7 輸出檔案讀取相容性, 保留原有檔案描述符與符號連結保護",
+        "插件資訊只報告目前安裝包內實際存在的原生 ABI"
+      ]
+    },
     "v0.5.1": {
       "released_date": "2026/09/13",
       "fix": [
