@@ -73,3 +73,9 @@ build-logic/*/build/
 # Re-apply generated-Python exclusions after the /tools allow-list above.
 **/__pycache__/
 *.py[cod]
+
+*.keystore
+
+*.pre-platform-versions.bak
+
+/app/releases/

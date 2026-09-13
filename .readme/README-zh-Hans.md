@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > 0.1.0 仅与 AutoJs6 6.8.0 配对, 最低 Host versionCode 已冻结并强制为 5275; 最终 clean Host 源码修订和三件 AAR distribution manifest 已写入 lock. 每次新执行都会重新发现 provider; 缺失或禁用时提示安装或启用且绝不 fallback, 安装或重新启用后无需重启 Host. 0.5.0-alpha.6 为部分 OEM 首装后的 stopped/notLaunched 状态提供插件中心 ACTIVATE/WakeActivity 恢复路径. Host 与 Plugin APK 必须使用同一 signer; 调试 Host 与 production Plugin 混装会稳定拒绝为 PYTHON_RUNTIME_PROVIDER_UNTRUSTED. 稳定 APK 身份与该精确 Plugin 源码和 Host lock 绑定.
 
 ```text
-release target: 0.5.0
-release state: 0.5.0 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.1
+release state: 0.5.1 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -171,10 +171,12 @@ M4 路径 A 已完成; M4 路径 B 与 Path C 评估均以 `NOT_ADMITTED` 关闭
 
 # v0.5.1
 
-###### 2026/09/12
+###### 2026/09/13
 
+* `提示` 0.5.1 稳定版源码候选; 最终设备验收与公开发布独立于历史 beta 验收结果
 * `修复` 执行 clean 后 Chaquopy 混淆规则文件缺失导致 Release 构建失败的问题
 * `优化` 构建阶段校验 64 位原生库的 16 KB 页大小对齐, 检查 manifest 契约并输出 JSON 报告
+* `优化` 宿主激活, 插件元数据, 多语言文档与签名发布归集遵循统一插件规范
 
 # v0.5.0
 

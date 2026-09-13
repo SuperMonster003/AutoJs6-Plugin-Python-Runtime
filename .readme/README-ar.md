@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > يرتبط 0.1.0 فقط بـ AutoJs6 6.8.0، وقد جمد وفرض الحد الأدنى Host versionCode 5275. سجلت clean Host source revision النهائية وmanifest توزيع AAR الثلاثة في lock. يعيد كل تنفيذ جديد اكتشاف provider؛ عند فقده أو تعطيله يطلب التثبيت أو التفعيل دون fallback، ولا يحتاج Host إلى إعادة تشغيل بعد التثبيت أو التفعيل. يضيف 0.5.0-alpha.6 مسار استعادة Plugin Center ACTIVATE/WakeActivity لحالة stopped/notLaunched التي تتركها بعض أجهزة OEM بعد التثبيت الأول. يجب أن تستخدم حزم Host وPlugin APK نفس signer؛ ويُرفض خلط debug Host مع production Plugin بشكل حتمي باسم PYTHON_RUNTIME_PROVIDER_UNTRUSTED. ترتبط stable APK identity بهذه exact Plugin source وHost lock.
 
 ```text
-release target: 0.5.0
-release state: 0.5.0 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.1
+release state: 0.5.1 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -171,10 +171,12 @@ runtime/security/release owner: SuperMonster003
 
 # v0.5.1
 
-###### 2026/09/12
+###### 2026/09/13
 
+* `ملاحظة` مرشح مصدر مستقر 0.5.1; يبقى قبول الجهاز النهائي والنشر منفصلين عن نتائج beta التاريخية
 * `إصلاح` فشل بناء Release بعد clean بسبب غياب ملف قواعد ProGuard الذي ينشئه Chaquopy
 * `تحسين` التحقق أثناء البناء من محاذاة صفحات 16 KB للمكتبات الأصلية ذات 64 بت, مع فحص عقد manifest وتقارير JSON
+* `تحسين` توحيد تنشيط المضيف وبيانات الإضافة والوثائق المترجمة وتجميع إصدارات APK الموقعة وفق قواعد الإضافات المشتركة
 
 # v0.5.0
 

@@ -6,12 +6,16 @@
   "changelog_label_dependency": "依赖",
   "$data": {
     "v0.5.1": {
-      "released_date": "2026/09/12",
+      "released_date": "2026/09/13",
       "fix": [
         "执行 clean 后 Chaquopy 混淆规则文件缺失导致 Release 构建失败的问题"
       ],
       "improvement": [
-        "构建阶段校验 64 位原生库的 16 KB 页大小对齐, 检查 manifest 契约并输出 JSON 报告"
+        "构建阶段校验 64 位原生库的 16 KB 页大小对齐, 检查 manifest 契约并输出 JSON 报告",
+        "宿主激活, 插件元数据, 多语言文档与签名发布归集遵循统一插件规范"
+      ],
+      "hint": [
+        "0.5.1 稳定版源码候选; 最终设备验收与公开发布独立于历史 beta 验收结果"
       ]
     },
     "v0.5.0": {

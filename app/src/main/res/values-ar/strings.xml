@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">بيئة تشغيل Python لـ AutoJs6</string>
-    <string name="plugin_name">بيئة تشغيل Python</string>
     <string name="plugin_description">تشغّل نصوص Python لـ AutoJs6 في عملية إضافة مستقلة</string>
+    <string name="plugin_name">بيئة تشغيل Python</string>
 </resources>

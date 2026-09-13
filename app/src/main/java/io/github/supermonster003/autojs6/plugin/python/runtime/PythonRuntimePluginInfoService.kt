@@ -13,6 +13,8 @@ class PythonRuntimePluginInfoService : Service() {
 
     private val binder = object : IPluginInfoProvider.Stub() {
         override fun getInfo(): PluginInfo {
+            @Suppress("DEPRECATION")
+            val installed = packageManager.getPackageInfo(packageName, 0)
             val info = PythonRuntimeMetadata.runtimeInfo
             val capabilities = Bundle().apply {
                 info.minHostVersionCode?.let {
@@ -29,13 +31,13 @@ class PythonRuntimePluginInfoService : Service() {
                 putBoolean(CAPABILITY_SECURITY_SANDBOX, false)
             }
             return PluginInfo(
-                name = getString(R.string.plugin_name),
+                name = getString(R.string.app_name),
                 description = getString(R.string.plugin_description),
                 instruction = null,
                 author = getString(R.string.plugin_author),
                 collaborators = null,
-                versionName = BuildConfig.VERSION_NAME,
-                versionCode = BuildConfig.VERSION_CODE.toLong(),
+                versionName = installed.versionName,
+                versionCode = if (android.os.Build.VERSION.SDK_INT >= 28) installed.longVersionCode else installed.versionCode.toLong(),
                 versionDate = getString(R.string.plugin_version_date),
                 id = BuildConfig.PLUGIN_ID,
                 engine = BuildConfig.PLUGIN_ENGINE,
