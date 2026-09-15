@@ -169,6 +169,12 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 
 ******
 
+# v0.5.3
+
+###### 2026/09/15
+
+* `Mejora` compileSdk sube a 37 (Android 17); targetSdk se mantiene en 36 hasta verificar el comportamiento que depende del objetivo
+
 # v0.5.2
 
 ###### 2026/09/13
@@ -186,14 +192,6 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 * `Corrección` Fallo de compilación Release después de clean cuando falta el archivo de reglas ProGuard generado por Chaquopy
 * `Mejora` Verificación de compilación de la alineación de páginas de 16 KB en bibliotecas nativas de 64 bits, con controles del contrato manifest e informes JSON
 * `Mejora` Activación del host, metadatos, documentación traducida y recopilación de APK firmados conforme a las convenciones comunes
-
-# v0.5.0
-
-###### 2026/08/25
-
-* `Nota` 0.5.0 es el candidato de código estable acumulativo; el candidato beta exacto firmado con SM003 superó las 10 pruebas Android, sin declarar un APK estable, tag ni publicación completada
-* `Función` M6 consolida las capacidades M1-M5 y los materiales reutilizables de los puntos 2/3/4, y fija los límites ligeros alpha → beta → stable y de publicación
-* `Mejora` El APK arm64 0.5.0-beta.1 extraído de QV710AF65F fue idéntico byte a byte al candidato formal; la segunda ejecución completa terminó con 10/10 PASS
 
 ##### Más versiones
 

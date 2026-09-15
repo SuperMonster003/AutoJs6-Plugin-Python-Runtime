@@ -15,7 +15,7 @@ python.license=PSF-2.0
 python.implementation=CPython
 android.minSdk=24
 android.targetSdk=36
-android.compileSdk=36
+android.compileSdk=37
 android.abis=arm64-v8a,x86_64
 # ADR 0003 evaluated build-time packages and admitted none. These values remain
 # the exact distributed-package policy, not a placeholder for an unresolved set.
