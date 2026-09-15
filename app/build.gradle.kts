@@ -208,9 +208,9 @@ val expectedRuntimeSupply = mapOf(
     "python.version.expected" to "3.13.9",
     "python.license" to "PSF-2.0",
     "python.implementation" to "CPython",
-    "android.minSdk" to "24",
-    "android.targetSdk" to "36",
-    "android.compileSdk" to "36",
+    "android.minSdk" to versions.sdkVersionMin.toString(),
+    "android.targetSdk" to versions.sdkVersionTarget.toString(),
+    "android.compileSdk" to versions.sdkVersionCompile.toString(),
     "android.abis" to "arm64-v8a,x86_64",
     "python.packages.policy" to "stdlib-only",
     "python.packages.count" to "0",
@@ -398,13 +398,13 @@ val releaseSigningReady =
 
 android {
     namespace = globalApplicationId
-    compileSdk = 36
+    compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
         applicationId = globalApplicationId
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        minSdk = 24
-        targetSdk = 36
+        minSdk = versions.sdkVersionMin
+        targetSdk = versions.sdkVersionTarget
         versionCode = versions.appVersionCode
         versionName = versions.appVersionName
 
