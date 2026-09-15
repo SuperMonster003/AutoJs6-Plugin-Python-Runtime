@@ -169,6 +169,12 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 
 ******
 
+# v0.5.3
+
+###### 2026/09/15
+
+* `Improvement` Raise compileSdk to 37 (Android 17); targetSdk stays at 36 until the behavior that depends on the target is verified
+
 # v0.5.2
 
 ###### 2026/09/13
@@ -186,14 +192,6 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 * `Fix` Release build failure after clean when the generated Chaquopy ProGuard rules file is missing
 * `Improvement` Build verification of 16 KB page alignment for 64-bit native libraries, including manifest contract checks and JSON reports
 * `Improvement` Host activation, plugin metadata, localized documentation and signed release collection follow the common plugin conventions
-
-# v0.5.0
-
-###### 2026/08/25
-
-* `Hint` 0.5.0 cumulative stable source candidate; the exact SM003-signed beta candidate passed all 10 Android smoke items, without claiming a stable APK, tag, or completed publication
-* `Feature` M6 consolidates M1-M5 capabilities and reusable item 2/3/4 materials while fixing the lightweight alpha → beta → stable candidate and publication boundaries
-* `Improvement` The 0.5.0-beta.1 arm64 APK pulled from QV710AF65F was byte-identical to the formal candidate, and the second complete ten-item run finished 10/10 PASS
 
 ##### For more releases
 
