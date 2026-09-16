@@ -5,6 +5,15 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "اعتماد",
   "$data": {
+    "v0.5.4": {
+      "released_date": "2026/09/16",
+      "improvement": [
+        "استهداف Android 17 (SDK 37) مع تحكم مستقل بإذن الشبكة المحلية للملحق وإرشادات استعادة الوصول"
+      ],
+      "hint": [
+        "مرشح مصدر مستقر 0.5.4; يبقى قبول الجهاز النهائي والنشر منفصلين عن نتائج beta التاريخية"
+      ]
+    },
     "v0.5.3": {
       "released_date": "2026/09/15",
       "improvement": [

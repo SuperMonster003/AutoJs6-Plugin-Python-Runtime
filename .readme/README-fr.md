@@ -35,7 +35,7 @@ Le fichier README.md actuel est disponible dans les langues suivantes:
 
 ******
 
-Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal.
+Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal. Sur Android 17 ou version ultérieure, autorisez les appareils à proximité pour ce plugin afin de contacter les appareils du réseau local. Les autorisations AutoJs6 ne sont pas partagées avec ce plugin. Internet public et les connexions en boucle locale ne nécessitent pas cette autorisation.
 
 > L'identité source 0.1.0 et le lock Host exact sont gelés. Les preuves RC locales de construction, APK, Binder et d'un appareil API 31 arm64-v8a restent historiques; la provenance APK/P3 stable est liée à l'identité release exacte, tandis qu'un production receipt constitue un niveau de preuve post-publication distinct.
 
@@ -105,8 +105,8 @@ Le plug-in accepte une SOURCE indépendante, une archive workspace bornée facul
 > La version 0.1.0 est associée uniquement à AutoJs6 6.8.0, avec le versionCode Host minimal 5275 gelé et imposé; la révision source Host finale et propre et le manifeste de distribution des trois AAR sont enregistrés dans le lock. Chaque nouvelle exécution redécouvre le provider; absent ou désactivé, il invite à installer ou activer sans fallback, et l'installation ou la réactivation ne demande aucun redémarrage de l'hôte. La version 0.5.0-alpha.6 ajoute la récupération Plugin Center ACTIVATE/WakeActivity pour l'état stopped/notLaunched laissé par certains OEM après la première installation. Les APK Host et Plugin doivent utiliser le même signer; mélanger un Host debug avec le Plugin de production est rejeté de façon déterministe par PYTHON_RUNTIME_PROVIDER_UNTRUSTED. L'identité des APK stables est liée à cette source Plugin exacte et au lock Host.
 
 ```text
-release target: 0.5.2
-release state: 0.5.2 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.4
+release state: 0.5.4 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,13 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 
 ******
 
+# v0.5.4
+
+###### 2026/09/16
+
+* `Note` Candidat source stable 0.5.4; la validation finale sur appareil et la publication restent distinctes des résultats beta historiques
+* `Amélioration` Cibler Android 17 (SDK 37) avec des autorisations réseau local propres au plugin et une aide à la récupération
+
 # v0.5.3
 
 ###### 2026/09/15
@@ -183,15 +190,6 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 * `Correction` Corriger la lecture des fichiers de sortie sur Android 7 en conservant les protections des descripteurs et liens symboliques
 * `Correction` Indiquer uniquement les ABI natives présentes dans l’APK installé
 * `Correction` Utiliser des dates de compilation en anglais indépendamment de la langue de la machine
-
-# v0.5.1
-
-###### 2026/09/13
-
-* `Note` Candidat source stable 0.5.1; la validation finale sur appareil et la publication restent distinctes des résultats beta historiques
-* `Correction` Échec de la compilation Release après clean lorsque le fichier de règles ProGuard généré par Chaquopy est absent
-* `Amélioration` Vérification à la compilation de l'alignement des pages de 16 KB des bibliothèques natives 64 bits, avec contrôle du contrat manifest et rapports JSON
-* `Amélioration` Harmonisation de l'activation, des métadonnées, de la documentation traduite et de la collecte des APK signés
 
 ##### Autres versions
 

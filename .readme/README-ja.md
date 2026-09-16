@@ -35,7 +35,7 @@
 
 ******
 
-Python Runtime は Python プロトコル V1 の独立 provider です. ホストから 1 つの Python ソーススナップショットを専用プロセスで受け取り, CPython で実行して, 制限付き出力, 構造化例外, 1 つの終端状態を返します.
+Python Runtime は Python プロトコル V1 の独立 provider です. ホストから 1 つの Python ソーススナップショットを専用プロセスで受け取り, CPython で実行して, 制限付き出力, 構造化例外, 1 つの終端状態を返します. Android 17 以降では, このプラグインの付近のデバイス権限を許可するとローカルネットワークのデバイスに接続できます. AutoJs6 の許可はプラグインに引き継がれません. インターネットとループバック接続にはこの権限は不要です.
 
 > 0.1.0 source identity と exact Host lock は凍結済みです. ローカル RC の build, APK, Binder, API 31 arm64-v8a 端末 1 台の証拠は履歴証拠のままです. stable APK/P3 provenance は exact release identity に紐づき, production receipt は公開後の独立した証拠レベルです.
 
@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > 0.1.0 は AutoJs6 6.8.0 専用で, 最小 Host versionCode 5275 は凍結され強制されます. 最終 clean Host source revision と 3 AAR distribution manifest は lock に記録済みです. 新規実行ごとに provider を再検出し, 不在または無効時は install/enable を案内して fallback しません. インストールまたは再有効化に Host 再起動は不要です. 0.5.0-alpha.6 は一部 OEM が初回インストール後に残す stopped/notLaunched 状態へ Plugin Center ACTIVATE/WakeActivity 復旧経路を追加します. Host と Plugin APK は同じ signer が必須で, debug Host と production Plugin の混在は PYTHON_RUNTIME_PROVIDER_UNTRUSTED として決定的に拒否されます. stable APK identity はその exact Plugin source と Host lock に紐づきます.
 
 ```text
-release target: 0.5.2
-release state: 0.5.2 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.4
+release state: 0.5.4 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,13 @@ M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMI
 
 ******
 
+# v0.5.4
+
+###### 2026/09/16
+
+* `注記` 0.5.4 安定版ソース候補. 最終候補の端末検証と公開は過去の beta 結果とは別に扱います
+* `改善` Android 17 (SDK 37) に対応し, プラグイン独立のローカルネットワーク権限設定と復旧案内を提供
+
 # v0.5.3
 
 ###### 2026/09/15
@@ -183,15 +190,6 @@ M4 Path A は完了しました. M4 Paths B/C の評価はいずれも `NOT_ADMI
 * `修正` ファイル記述子とシンボリックリンクの保護を維持して Android 7 の出力ファイル読み取りを修正
 * `修正` インストール済み APK に含まれるネイティブ ABI のみを報告
 * `修正` ビルド環境の言語にかかわらずプラグインのビルド日付を英語に統一
-
-# v0.5.1
-
-###### 2026/09/13
-
-* `注記` 0.5.1 安定版ソース候補. 最終候補の端末検証と公開は過去の beta 結果とは別に扱います
-* `修正` clean 後に Chaquopy が生成する ProGuard ルールファイルが見つからず Release ビルドに失敗する問題
-* `改善` 64 ビットのネイティブライブラリの 16 KB ページアラインメントをビルド時に検証, manifest 契約の検査と JSON レポートに対応
-* `改善` ホストからの有効化, メタデータ, 多言語文書および署名済み APK の収集を共通規約に統一
 
 ##### その他のバージョン
 

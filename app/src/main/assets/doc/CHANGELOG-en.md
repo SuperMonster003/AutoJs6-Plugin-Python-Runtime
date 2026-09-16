@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.4
+
+###### 2026/09/16
+
+* `Hint` 0.5.4 stable source candidate; final device acceptance and publication remain separate from the historical beta results
+* `Improvement` Target Android 17 (SDK 37) with separate local network permission controls and recovery guidance
+
 # v0.5.3
 
 ###### 2026/09/15

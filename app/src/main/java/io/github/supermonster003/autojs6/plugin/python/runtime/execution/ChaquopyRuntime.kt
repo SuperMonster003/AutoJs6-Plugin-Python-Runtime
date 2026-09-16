@@ -120,7 +120,9 @@ internal class ChaquopyRuntime(context: Context) {
                     "PythonError",
                 ),
                 exceptionMessage = boundedUtf8(
-                    required(result, "exception_message").toString(),
+                    io.github.supermonster003.autojs6.plugin.python.runtime.LocalNetworkAccess.explainFailure(
+                        applicationContext, required(result, "exception_message").toString(),
+                    ),
                     MAX_EXCEPTION_MESSAGE_BYTES,
                 ),
                 traceback = required(result, "traceback").asList()

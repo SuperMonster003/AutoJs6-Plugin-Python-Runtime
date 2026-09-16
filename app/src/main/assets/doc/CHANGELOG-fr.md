@@ -4,6 +4,13 @@
 
 ******
 
+# v0.5.4
+
+###### 2026/09/16
+
+* `Note` Candidat source stable 0.5.4; la validation finale sur appareil et la publication restent distinctes des résultats beta historiques
+* `Amélioration` Cibler Android 17 (SDK 37) avec des autorisations réseau local propres au plugin et une aide à la récupération
+
 # v0.5.3
 
 ###### 2026/09/15
