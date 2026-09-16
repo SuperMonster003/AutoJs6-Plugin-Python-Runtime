@@ -9,6 +9,7 @@
 ###### 2026/09/16
 
 * `Note` Candidat source stable 0.5.4; la validation finale sur appareil et la publication restent distinctes des résultats beta historiques
+* `Amélioration` Autorisation du réseau local sous Android 17 intégrée au parcours activation et aux paramètres du plugin, sans page du lanceur; sans autorisation, le plugin reste désactivé et le démarrage automatique est silencieux
 * `Amélioration` Cibler Android 17 (SDK 37) avec des autorisations réseau local propres au plugin et une aide à la récupération
 
 # v0.5.3

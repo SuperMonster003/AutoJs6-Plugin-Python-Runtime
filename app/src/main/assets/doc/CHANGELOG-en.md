@@ -9,6 +9,7 @@
 ###### 2026/09/16
 
 * `Hint` 0.5.4 stable source candidate; final device acceptance and publication remain separate from the historical beta results
+* `Improvement` Android 17 local network authorization moves to plugin-center enablement and plugin settings, with no launcher permission page; missing permission keeps the plugin disabled and automatic startup silent
 * `Improvement` Target Android 17 (SDK 37) with separate local network permission controls and recovery guidance
 
 # v0.5.3
