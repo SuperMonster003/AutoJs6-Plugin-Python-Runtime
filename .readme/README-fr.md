@@ -35,7 +35,7 @@ Le fichier README.md actuel est disponible dans les langues suivantes:
 
 ******
 
-Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal. Sur Android 17 ou version ultérieure, autorisez les appareils à proximité pour ce plugin afin de contacter les appareils du réseau local. Les autorisations AutoJs6 ne sont pas partagées avec ce plugin. Internet public et les connexions en boucle locale ne nécessitent pas cette autorisation.
+Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal. Sous Android 17 ou version ultérieure, autorisez les appareils à proximité avant de permettre ce plugin dans le centre de plugins AutoJs6. Cette autorisation se gère aussi dans les paramètres du plugin. Sans autorisation, le plugin reste désactivé et le démarrage automatique est ignoré sans message. Cette autorisation appartient au plugin et est indépendante de celle de AutoJs6.
 
 > L'identité source 0.1.0 et le lock Host exact sont gelés. Les preuves RC locales de construction, APK, Binder et d'un appareil API 31 arm64-v8a restent historiques; la provenance APK/P3 stable est liée à l'identité release exacte, tandis qu'un production receipt constitue un niveau de preuve post-publication distinct.
 
@@ -174,6 +174,7 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 ###### 2026/09/16
 
 * `Note` Candidat source stable 0.5.4; la validation finale sur appareil et la publication restent distinctes des résultats beta historiques
+* `Amélioration` Autorisation du réseau local sous Android 17 intégrée au parcours activation et aux paramètres du plugin, sans page du lanceur; sans autorisation, le plugin reste désactivé et le démarrage automatique est silencieux
 * `Amélioration` Cibler Android 17 (SDK 37) avec des autorisations réseau local propres au plugin et une aide à la récupération
 
 # v0.5.3

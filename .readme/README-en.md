@@ -35,7 +35,7 @@ The current README.md supports the following languages:
 
 ******
 
-Python Runtime is an independent provider for version 1 of the Python protocol. The host gives one Python source snapshot to a dedicated plugin process, which executes it with CPython and returns bounded output, structured exceptions, and exactly one terminal state. On Android 17 or later, allow Nearby devices for this plugin to connect to devices on your local network. AutoJs6 permission does not grant access to this plugin. Public internet and loopback connections do not require this permission.
+Python Runtime is an independent provider for version 1 of the Python protocol. The host gives one Python source snapshot to a dedicated plugin process, which executes it with CPython and returns bounded output, structured exceptions, and exactly one terminal state. On Android 17 or later, allow Nearby devices before enabling this plugin in the AutoJs6 plugin center. You can also manage this permission from the Settings page for this plugin. Without permission, the plugin stays disabled and automatic startup is skipped silently. The grant belongs to this plugin, independently of AutoJs6.
 
 > The 0.1.0 source identity and exact Host lock are frozen. Existing local RC build, APK, Binder, and one API 31 arm64-v8a device evidence remain historical; stable APK/P3 provenance is bound to the exact release identity, while a production receipt is a separate post-publication evidence level.
 
@@ -174,6 +174,7 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 ###### 2026/09/16
 
 * `Hint` 0.5.4 stable source candidate; final device acceptance and publication remain separate from the historical beta results
+* `Improvement` Android 17 local network authorization moves to plugin-center enablement and plugin settings, with no launcher permission page; missing permission keeps the plugin disabled and automatic startup silent
 * `Improvement` Target Android 17 (SDK 37) with separate local network permission controls and recovery guidance
 
 # v0.5.3

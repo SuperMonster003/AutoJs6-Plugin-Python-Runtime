@@ -5,7 +5,7 @@
   "h3_languages_with_ascii": "語言",
   "p_languages_all_supported_for_readme": "目前 README.md 支援以下語言",
   "h3_introduction": "簡介",
-  "p_introduction": "Python Runtime 是獨立的 Python 協議 V1 provider. 宿主將單一 Python 原始碼快照交給專用外掛程式程序, 外掛程式使用 CPython 執行並傳回有界輸出, 結構化例外及唯一終態. 在 Android 17 或更高版本上, 請為此插件允許附近裝置權限, 以連接區域網絡裝置. AutoJs6 的授權不會授予此插件權限. 公開互聯網及回環連線不需要此權限.",
+  "p_introduction": "Python Runtime 是獨立的 Python 協議 V1 provider. 宿主將單一 Python 原始碼快照交給專用外掛程式程序, 外掛程式使用 CPython 執行並傳回有界輸出, 結構化例外及唯一終態. 在 Android 17 或以上, 在 AutoJs6 外掛程式中心啟用此外掛程式前須允許存取附近的裝置. 亦可在此外掛程式的設定頁面管理區域網絡權限. 未獲授權時外掛程式保持關閉, 自動啟動將靜默略過. 此權限屬於外掛程式本身, 與 AutoJs6 的授權互相獨立.",
   "p_evidence_boundary": "0.1.0 原始碼身分及精確 Host lock 已凍結. 既有本機 RC 的建置, APK, Binder 及一部 API 31 arm64-v8a 裝置證據仍屬歷史證據; 穩定 APK/P3 provenance 與精確 release identity 綁定, production receipt 是發佈後的獨立證據層級.",
   "h3_functions": "功能",
   "features": [
