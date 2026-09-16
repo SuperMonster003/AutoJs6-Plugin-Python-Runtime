@@ -35,7 +35,7 @@
 
 ******
 
-Python Runtime — независимый provider протокола Python V1. Хост передает один снимок исходного кода в отдельный процесс, который выполняет его в CPython и возвращает ограниченный вывод, структурированные исключения и одно терминальное состояние.
+Python Runtime — независимый provider протокола Python V1. Хост передает один снимок исходного кода в отдельный процесс, который выполняет его в CPython и возвращает ограниченный вывод, структурированные исключения и одно терминальное состояние. На Android 17 и новее разрешите этому плагину доступ к устройствам поблизости для подключения к локальной сети. Разрешение AutoJs6 не распространяется на плагин. Общедоступный интернет и петлевые соединения не требуют этого разрешения.
 
 > Идентичность исходников 0.1.0 и точный Host lock заморожены. Существующие локальные RC-свидетельства build, APK, Binder и одного устройства API 31 arm64-v8a остаются историческими; stable APK/P3 provenance привязана к exact release identity, а production receipt является отдельным уровнем доказательства после публикации.
 
@@ -105,8 +105,8 @@ protocol: 1.0-1.6
 > Версия 0.1.0 предназначена только для AutoJs6 6.8.0; минимальный Host versionCode 5275 зафиксирован и принудительно проверяется. Финальная clean Host source revision и manifest дистрибутива из трех AAR записаны в lock. Каждый новый запуск заново обнаруживает provider; при отсутствии или отключении предлагается установка или включение без fallback, а после установки или включения Host перезапускать не нужно. Версия 0.5.0-alpha.6 добавляет восстановление Plugin Center ACTIVATE/WakeActivity для состояния stopped/notLaunched, которое некоторые OEM оставляют после первой установки. APK Host и Plugin должны использовать один signer; сочетание debug Host с production Plugin детерминированно отклоняется как PYTHON_RUNTIME_PROVIDER_UNTRUSTED. Stable APK identity привязана к этой exact Plugin source и Host lock.
 
 ```text
-release target: 0.5.2
-release state: 0.5.2 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
+release target: 0.5.4
+release state: 0.5.4 stable source candidate; protocol 1.0-1.6 and cumulative M1-M5 capabilities remain frozen with the embedded runtime stdlib-only; the exact SM003-signed 0.5.0-beta.1 arm64 APK from commit 4bbae75dbfb496995e5278684024f63ae9f71a43 was pulled from QV710AF65F with SHA-256 80FA480ACAE1C66C07DC59C9B588603B7F787E21DE72BB5A5521A2732B0C695F, byte-identical to the formal candidate, and passed all ten manual Android smoke items (10/10 PASS); the preceding exact alpha run and a matching Android-Debug run on OnePlus OPD2413 also passed 10/10, including OEM ACTIVATE recovery; deterministic item 2/3/4 materials live in examples/python/m6_manual_smoke; a stable signed artifact, exact stable smoke, stable tag, push, publication, and post-publication evidence remain outside this source claim
 paired host: AutoJs6 6.8.0 / current acceptance versionCode 5276 / minimum versionCode 5275
 release branch: master
 long-term signer: SM003
@@ -169,6 +169,13 @@ M4 Path A завершен; оценки M4 Paths B и C обе завершил
 
 ******
 
+# v0.5.4
+
+###### 2026/09/16
+
+* `Примечание` Кандидат исходного кода стабильной версии 0.5.4; окончательная проверка на устройствах и публикация отделены от исторических beta-результатов
+* `Улучшено` Поддержка Android 17 (SDK 37), отдельное управление разрешением локальной сети плагина и инструкции по восстановлению доступа
+
 # v0.5.3
 
 ###### 2026/09/15
@@ -183,15 +190,6 @@ M4 Path A завершен; оценки M4 Paths B и C обе завершил
 * `Исправлено` Исправлено чтение выходных файлов в Android 7 с сохранением защиты дескрипторов и символических ссылок
 * `Исправлено` Метаданные сообщают только о нативных ABI установленного APK
 * `Исправлено` Дата сборки в метаданных всегда записывается на английском независимо от языка системы
-
-# v0.5.1
-
-###### 2026/09/13
-
-* `Примечание` Кандидат исходного кода стабильной версии 0.5.1; окончательная проверка на устройствах и публикация отделены от исторических beta-результатов
-* `Исправлено` Сбой сборки Release после clean из-за отсутствия созданного Chaquopy файла правил ProGuard
-* `Улучшено` Проверка выравнивания страниц 16 KB для 64-битных нативных библиотек при сборке, включая контракт manifest и отчеты JSON
-* `Улучшено` Активация из хоста, метаданные, переведенная документация и сборка подписанных APK приведены к общим правилам
 
 ##### Другие версии
 

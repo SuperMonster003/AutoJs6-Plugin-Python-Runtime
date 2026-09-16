@@ -5,7 +5,7 @@
   "h3_languages_with_ascii": "言語",
   "p_languages_all_supported_for_readme": "現在の README.md は次の言語に対応しています",
   "h3_introduction": "概要",
-  "p_introduction": "Python Runtime は Python プロトコル V1 の独立 provider です. ホストから 1 つの Python ソーススナップショットを専用プロセスで受け取り, CPython で実行して, 制限付き出力, 構造化例外, 1 つの終端状態を返します.",
+  "p_introduction": "Python Runtime は Python プロトコル V1 の独立 provider です. ホストから 1 つの Python ソーススナップショットを専用プロセスで受け取り, CPython で実行して, 制限付き出力, 構造化例外, 1 つの終端状態を返します. Android 17 以降では, このプラグインの付近のデバイス権限を許可するとローカルネットワークのデバイスに接続できます. AutoJs6 の許可はプラグインに引き継がれません. インターネットとループバック接続にはこの権限は不要です.",
   "p_evidence_boundary": "0.1.0 source identity と exact Host lock は凍結済みです. ローカル RC の build, APK, Binder, API 31 arm64-v8a 端末 1 台の証拠は履歴証拠のままです. stable APK/P3 provenance は exact release identity に紐づき, production receipt は公開後の独立した証拠レベルです.",
   "h3_functions": "機能",
   "features": [

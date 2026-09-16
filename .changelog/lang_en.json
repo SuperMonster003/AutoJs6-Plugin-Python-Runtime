@@ -5,6 +5,15 @@
   "changelog_label_improvement": "Improvement",
   "changelog_label_dependency": "Dependency",
   "$data": {
+    "v0.5.4": {
+      "released_date": "2026/09/16",
+      "improvement": [
+        "Target Android 17 (SDK 37) with separate local network permission controls and recovery guidance"
+      ],
+      "hint": [
+        "0.5.4 stable source candidate; final device acceptance and publication remain separate from the historical beta results"
+      ]
+    },
     "v0.5.3": {
       "released_date": "2026/09/15",
       "improvement": [

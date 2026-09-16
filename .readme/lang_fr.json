@@ -5,7 +5,7 @@
   "h3_languages_with_ascii": "Langues",
   "p_languages_all_supported_for_readme": "Le fichier README.md actuel est disponible dans les langues suivantes",
   "h3_introduction": "Introduction",
-  "p_introduction": "Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal.",
+  "p_introduction": "Python Runtime est un fournisseur indépendant du protocole Python V1. L'hôte transmet un instantané de source Python à un processus dédié, qui l'exécute avec CPython et renvoie une sortie bornée, des exceptions structurées et un seul état terminal. Sur Android 17 ou version ultérieure, autorisez les appareils à proximité pour ce plugin afin de contacter les appareils du réseau local. Les autorisations AutoJs6 ne sont pas partagées avec ce plugin. Internet public et les connexions en boucle locale ne nécessitent pas cette autorisation.",
   "p_evidence_boundary": "L'identité source 0.1.0 et le lock Host exact sont gelés. Les preuves RC locales de construction, APK, Binder et d'un appareil API 31 arm64-v8a restent historiques; la provenance APK/P3 stable est liée à l'identité release exacte, tandis qu'un production receipt constitue un niveau de preuve post-publication distinct.",
   "h3_functions": "Fonctions",
   "features": [

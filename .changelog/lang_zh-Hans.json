@@ -5,6 +5,15 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v0.5.4": {
+      "released_date": "2026/09/16",
+      "improvement": [
+        "适配 Android 17 (SDK 37), 提供插件独立的本地网络权限控制及恢复引导"
+      ],
+      "hint": [
+        "0.5.4 稳定版源码候选; 最终设备验收与公开发布独立于历史 beta 验收结果"
+      ]
+    },
     "v0.5.3": {
       "released_date": "2026/09/15",
       "improvement": [

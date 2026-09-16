@@ -24,9 +24,11 @@ LANGUAGE_CODES = (
 class U1ReadmeFactsTest(unittest.TestCase):
     def test_all_language_sources_describe_current_protocol_and_existing_boundaries(self) -> None:
         common = json.loads((README_DIR / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.2", common["release_target"])
+        version = next(line.split("=", 1)[1] for line in (ROOT / "version.properties")
+                       .read_text(encoding="utf-8").splitlines() if line.startswith("VERSION_NAME="))
+        self.assertEqual(version, common["release_target"])
         for marker in (
-            "0.5.2 stable source candidate",
+            f"{version} stable source candidate",
             "protocol 1.0-1.6",
             "cumulative M1-M5",
             "stdlib-only",

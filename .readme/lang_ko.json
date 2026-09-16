@@ -5,7 +5,7 @@
   "h3_languages_with_ascii": "언어",
   "p_languages_all_supported_for_readme": "현재 README.md는 다음 언어를 지원합니다",
   "h3_introduction": "소개",
-  "p_introduction": "Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트가 하나의 Python 소스 스냅샷을 전용 프로세스에 전달하면 CPython으로 실행하고 제한된 출력, 구조화된 예외, 하나의 종료 상태를 반환합니다.",
+  "p_introduction": "Python Runtime은 Python 프로토콜 V1의 독립 provider입니다. 호스트가 하나의 Python 소스 스냅샷을 전용 프로세스에 전달하면 CPython으로 실행하고 제한된 출력, 구조화된 예외, 하나의 종료 상태를 반환합니다. Android 17 이상에서는 이 플러그인의 근처 기기 권한을 허용해야 로컬 네트워크 기기에 연결할 수 있습니다. AutoJs6 권한은 이 플러그인에 적용되지 않습니다. 공용 인터넷 및 루프백 연결에는 이 권한이 필요하지 않습니다.",
   "p_evidence_boundary": "0.1.0 source identity와 exact Host lock은 동결되었습니다. 기존 로컬 RC build, APK, Binder 및 API 31 arm64-v8a 기기 한 대의 증거는 이력 증거로 남습니다. stable APK/P3 provenance는 exact release identity에 결속되고 production receipt는 게시 후의 독립 증거 수준입니다.",
   "h3_functions": "기능",
   "features": [

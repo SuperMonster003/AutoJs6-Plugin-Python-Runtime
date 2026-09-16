@@ -46,7 +46,7 @@ class M6CandidateGateTest(unittest.TestCase):
     def test_current_locale_generation_and_aar_lock_are_consistent(self) -> None:
         version = MODULE.read_unique_properties(ROOT / "version.properties")["VERSION_NAME"]
         common = json.loads((ROOT / ".readme" / "common.json").read_text(encoding="utf-8"))
-        self.assertEqual("0.5.2", version)
+        MODULE.validate_version_name(version)
         self.assertEqual(version, common["release_target"])
         self.assertEqual(10, MODULE.validate_changelog_sources(ROOT, version))
         self.assertEqual(25, MODULE.validate_generated_documents(ROOT))
