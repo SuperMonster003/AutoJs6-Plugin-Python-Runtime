@@ -173,7 +173,7 @@ $platformVersionsPluginMatches = [regex]::Matches(
     'id\("io\.github\.supermonster003\.autojs6-platform-versions"\)'
 )
 Assert-True ($platformVersionsPluginMatches.Count -eq 2) 'The pinned platform-version selector must be declared and applied exactly once'
-Assert-True ($settings -match 'id\("io\.github\.supermonster003\.autojs6-platform-versions"\)\s+version\s+"1\.8\.1"') 'The platform-version selector plugin must remain pinned to 1.8.1'
+Assert-True ($settings -match 'id\("io\.github\.supermonster003\.autojs6-platform-versions"\)\s+version\s+"1\.8\.3"') 'The platform-version selector plugin must remain pinned to 1.8.3'
 Assert-True ($rootBuild -match 'id\("com\.android\.application"\)\s+version\s+System\.getProperty\("gradle\.agp\.version"\)\s+apply false') 'AGP must consume the platform selector result without a second version source'
 Assert-True ($wrapperProperties -match 'distributionSha256Sum=553c78f50dafcd54d65b9a444649057857469edf836431389695608536d6b746') 'Gradle wrapper SHA-256 is missing or drifted'
 Assert-True ($wrapperProperties -match 'distributionUrl=https\\://services\.gradle\.org/distributions/gradle-9\.5\.0-bin\.zip') 'Gradle wrapper distribution must remain pinned to 9.5.0'

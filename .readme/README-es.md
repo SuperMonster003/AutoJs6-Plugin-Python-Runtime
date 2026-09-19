@@ -171,9 +171,10 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 
 # v0.5.4
 
-###### 2026/09/16
+###### 2026/09/19
 
 * `Nota` Candidato de código estable 0.5.4; la aceptación final en dispositivos y la publicación siguen separadas de los resultados beta históricos
+* `Corrección` Advertencias de lectura de SDK XML v4 con AGP 9.1 y comprobaciones de alineación nativa de APK activadas por error al ensamblar pruebas unitarias JVM, mediante los plugins de compilación compartidos 1.8.3
 * `Mejora` Autorización de red local de Android 17 integrada en la activación y los ajustes del plugin, sin página de permisos en el lanzador; sin permiso, el plugin permanece desactivado y se omite el inicio automático sin avisos
 * `Mejora` Compatibilidad con Android 17 (SDK 37), controles de permiso de red local propios del plugin y ayuda para recuperar el acceso
 
