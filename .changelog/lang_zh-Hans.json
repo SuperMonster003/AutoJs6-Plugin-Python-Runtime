@@ -8,28 +8,28 @@
     "v0.5.4": {
       "released_date": "2026/09/19",
       "improvement": [
-        "Android 17 本地网络授权统一移至插件中心启用流程和插件设置, 不再提供启动器授权页面; 未获授权时保持关闭并静默跳过自动启动",
+        "Android 17 本地网络授权移至插件中心启用流程及插件设置, 移除启动器授权页面 (未授权时保持关闭并跳过自动启动)",
         "适配 Android 17 (SDK 37), 提供插件独立的本地网络权限控制及恢复引导"
       ],
       "hint": [
         "0.5.4 稳定版源码候选; 最终设备验收与公开发布独立于历史 beta 验收结果"
       ],
       "fix": [
-        "AGP 9.1 构建时的 SDK XML v4 解析警告及 JVM 单元测试组装任务误触发 APK 原生库对齐检查的问题 (共享构建插件 1.8.3)"
+        "AGP 9.1 构建时的 SDK XML v4 解析警告, 以及 JVM 单元测试误触发 APK 原生库对齐检查的问题 (共享构建插件 1.8.3)"
       ]
     },
     "v0.5.3": {
       "released_date": "2026/09/15",
       "improvement": [
-        "将 compileSdk 提升到 37 (Android 17), targetSdk 保持 36, 待依赖目标版本的行为验证后再提升"
+        "compileSdk 升级至 37 (Android 17), targetSdk 保持 36"
       ]
     },
     "v0.5.2": {
       "released_date": "2026/09/13",
       "fix": [
-        "修复 Android 7 输出文件读取兼容性, 保留原有文件描述符与符号链接保护",
+        "Android 7 输出文件读取兼容性, 保留原有文件描述符与符号链接保护",
         "插件信息只报告当前安装包内实际存在的原生 ABI",
-        "插件元数据的构建日期固定使用英文, 不受构建机器语言影响"
+        "插件信息中的构建日期受构建环境语言影响, 未统一使用英文格式的问题"
       ],
       "hint": [
         "0.5.2 稳定版源码候选; 最终设备验收与公开发布独立于历史 beta 验收结果"
@@ -41,8 +41,8 @@
         "执行 clean 后 Chaquopy 混淆规则文件缺失导致 Release 构建失败的问题"
       ],
       "improvement": [
-        "构建阶段校验 64 位原生库的 16 KB 页大小对齐, 检查 manifest 契约并输出 JSON 报告",
-        "宿主激活, 插件元数据, 多语言文档与签名发布归集遵循统一插件规范"
+        "构建阶段校验 64 位原生库的 16 KB 内存页对齐及 Manifest 配置, 并输出校验报告",
+        "统一宿主激活流程, 插件信息及多语言文档, 并完善签名发布校验"
       ],
       "hint": [
         "0.5.1 稳定版源码候选; 最终设备验收与公开发布独立于历史 beta 验收结果"
@@ -51,243 +51,243 @@
     "v0.5.0": {
       "released_date": "2026/08/25",
       "hint": [
-        "0.5.0 累计稳定版源码候选; 精确 SM003 签名 beta 候选已通过 10 项 Android 冒烟, 尚不声明稳定 APK、tag 或 publication 完成"
+        "稳定版源码候选, 已完成对应 Beta 签名安装包的设备冒烟验证 (尚未完成稳定版安装包及公开发布)"
       ],
       "feature": [
-        "M6 汇总 M1-M5 能力与可复用的 2/3/4 测试材料, 固定 alpha → beta → stable 的轻量候选和发布边界"
+        "汇总项目运行, 宿主能力, 自动化及依赖支持, 明确 Alpha/Beta/稳定版的验证与发布流程"
       ],
       "improvement": [
-        "QV710AF65F 上回拉的 0.5.0-beta.1 arm64 APK 与正式候选逐字节一致, 第二轮完整十项清单结果为 10/10 PASS"
+        "补充 0.5.0-beta.1 ARM64 签名安装包的完整设备冒烟记录, 并核对安装内容与候选产物一致"
       ]
     },
     "v0.5.0-beta.1": {
       "released_date": "2026/08/25",
       "hint": [
-        "0.5.0-beta.1 功能冻结源码候选; 精确 SM003 签名 alpha 候选已通过 10 项 Android 冒烟, 尚不声明 beta APK、稳定版或 publication 完成"
+        "功能冻结的 Beta 源码候选, 已验证对应 Alpha 签名安装包 (尚未完成 Beta 安装包及公开发布)"
       ],
       "feature": [
-        "M6 新增可复用的 2/3/4 测试项目与独立 artifact 校验材料, 让导入、stdin/交互输入和结构化结果可重复验收"
+        "可复用的导入, 标准输入, 交互输入及结构化结果测试项目和产物校验工具"
       ],
       "improvement": [
-        "QV710AF65F 上回拉的 0.5.0-alpha.6 arm64 APK 与正式候选逐字节一致, 完整十项清单结果为 10/10 PASS"
+        "补充 0.5.0-alpha.6 ARM64 签名安装包的完整设备冒烟记录, 并核对安装内容与候选产物一致"
       ]
     },
     "v0.5.0-alpha.6": {
       "released_date": "2026/08/25",
       "hint": [
-        "第六个 current-tree alpha 候选版; 为 OnePlus OPD2413 等 OEM 的首次插件激活补齐 AutoJs6 WakeActivity 契约, 不声明 production signed candidate、beta 或 publication 完成"
+        "Alpha 源码候选, 补充部分系统的首次插件激活支持 (尚未完成正式签名候选及公开发布)"
       ],
       "fix": [
-        "声明 `org.autojs.plugin.WAKE_ACTIVITY` 与 `org.autojs.plugin.action.WAKE`, 提供签名权限保护且立即结束的 NoDisplay Activity; 插件中心可通过 `ACTIVATE` 清除 `stopped/notLaunched` 状态并自动重试启用"
+        "部分系统首次安装后无法在插件中心激活的问题, 宿主可通过受签名权限保护的入口激活并重试启用"
       ],
       "improvement": [
-        "在 `afca7b14c` 调试 Host 与同 signer 诊断 Plugin 上复现并恢复原始失败, startup probe 于 `277 ms` 返回结构化结果; 另确认 signer 不匹配会独立 fail closed 为 `PYTHON_RUNTIME_PROVIDER_UNTRUSTED`"
+        "补充首次激活及签名不匹配的诊断验证, 签名不符时明确返回 PYTHON_RUNTIME_PROVIDER_UNTRUSTED"
       ]
     },
     "v0.5.0-alpha.5": {
       "released_date": "2026/08/25",
       "hint": [
-        "第五个 current-tree alpha 候选版; 三件 Host API release AAR 从精确 clean `afca7b14c` 重新构建后字节未变, provenance lock 已刷新到该来源; 不声明 signed APK、Android 十项冒烟、beta 或 publication 完成"
+        "Alpha 源码候选, 宿主 API 来源锁更新至 afca7b14c, 三个 AAR 内容未变 (尚未完成签名安装包及设备验收)"
       ],
       "improvement": [
-        "在隔离 worktree 中运行 Host `verifyPythonReleaseApiDistributionGate`, 以 `dirty=false` 固定 AutoJs6 6.8.0/versionCode 5276、协议 1.6、source fingerprint 与 distribution manifest SHA-256"
+        "核对 AutoJs6 6.8.0/5276 的协议 1.6 及 API 分发摘要, 保留明确的源码来源记录"
       ]
     },
     "v0.5.0-alpha.4": {
       "released_date": "2026/08/25",
       "hint": [
-        "第四个 current-tree alpha 候选版; M6 将未发布的 0.2/0.3/0.4 实现节点统一累计到 0.5.0, 不声明 beta、稳定版、signing 或 publication 完成"
+        "Alpha 源码候选, 将未发布的 0.2/0.3/0.4 功能累计至 0.5.0 (尚未完成签名及公开发布)"
       ],
       "feature": [
-        "新增 `tools/verify-m6-candidate.py`, 以显式 `--source-only`/`--full` 档位检查 clean Git、版本、Changelog、生成文档与 AAR lock, 并可追加便携测试、R2 静态门禁和 offline debug build"
+        "候选版本校验工具, 支持源码及完整构建两种检查范围, 核对版本, 文档, API 锁及离线构建"
       ],
       "improvement": [
-        "固定 10 项 Android 冒烟清单及 alpha → beta → 0.5.0 晋级顺序; 本地门禁不执行 ADB、signing、tag、push 或 publication"
+        "固定设备冒烟检查及 Alpha/Beta/稳定版推进顺序, 本地校验不执行签名或发布操作"
       ]
     },
     "v0.5.0-alpha.3": {
       "released_date": "2026/08/24",
       "hint": [
-        "第三个 M5 current-tree alpha 候选版; QV710AF65F 上的长任务与 Host FIFO Android 聚焦冒烟均通过, 冷启动实测决定不引入进程保留, 不声明发布或 release 完成"
+        "Alpha 源码候选, 已验证长任务及宿主排队执行 (公开发布及完整设备矩阵另行进行)"
       ],
       "improvement": [
-        "5 次 fresh-process 启动为 441/447/429/427/428 ms, 对应 5 个不同 Plugin PID; 全样本中位数为 429 ms, 排除首次后的中位数为 428.5 ms, 最大值为 447 ms",
-        "低于 1000 ms 门槛后关闭进程预热评估: 保留 per-execution 进程退休及其状态隔离/取消语义, 不新增 keep-process 选项"
+        "补充独立进程冷启动性能记录, 五次测试中位数为 429 ms (仅代表本轮设备结果)",
+        "依据冷启动结果保留每次执行后退出运行时进程的行为, 维持状态隔离及取消语义"
       ]
     },
     "v0.5.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [
-        "第二个 M5 current-tree alpha 候选版; Host FIFO 并发准入源码与离线 JVM/便携门禁已通过, 但尚未执行 Android 并发冒烟, 不声明 true parallel CPython、预热、发布或 release 完成"
+        "Alpha 源码候选, 宿主排队执行已通过离线检查, 尚未经 Android 设备验证 (不提供并行 CPython 执行或进程预热)"
       ],
       "feature": [
-        "在 Provider 发现前以公平 Host FIFO 接纳并发 Python 启动: 1 个 active owner 加最多 32 个 waiter; queued Stop 可中断, 不绑定插件、不消耗请求 timeout, 也不提前创建长任务前台通知"
+        "并发启动请求在宿主按先入先出顺序排队, 最多等待 32 项, 排队可取消且不占执行超时, 同时仅运行一个 Python 任务"
       ],
       "improvement": [
-        "已 dispatch 会话 close 后最多保留 Provider binding 3 秒, 确认进程代际退休再进行 FIFO 交接; 协议 1.6、三件 AAR 以及 Plugin 单会话/无 provider 队列边界均保持不变"
+        "会话关闭后最多等待 3 s 确认运行时进程退出, 再交接下一项排队任务"
       ]
     },
     "v0.5.0-alpha.1": {
       "released_date": "2026/08/24",
       "hint": [
-        "首个 M5 current-tree alpha 候选版; 协议 1.6 前台长任务源码与 Host/Plugin 离线 JVM、便携门禁已通过, 但尚未执行 M5 真机冒烟, 不声明发布、并发或进程预热完成"
+        "Alpha 源码候选, 前台长任务已通过离线检查, 尚未经真机验证 (不代表并发执行, 预热或发布完成)"
       ],
       "feature": [
-        "新增项目级 `executionMode=long-running`: 移除执行 deadline, 由 Host `specialUse` 前台服务、常驻通知与 Stop action 持有生命周期; 定时任务、后台/Intent/开发者入口稳定拒绝且不降级"
+        "项目支持 executionMode=long-running, 通过宿主前台服务及常驻通知运行无固定期限的任务并提供停止操作 (不支持定时, 后台, Intent 及开发者入口)"
       ],
       "improvement": [
-        "Provider 每 15 s 发布有序心跳, Host 强制 2 min 启动租约、45 s 心跳租约与独立前台服务租约; 丢失存活性和手动停止均 fail closed 并沿用进程重启取消, 有界协议 1.0-1.5 保持兼容"
+        "长任务定期上报心跳, 启动或心跳超时及手动停止时终止运行时进程 (兼容原有有限时长任务)"
       ]
     },
     "v0.4.0-alpha.9": {
       "released_date": "2026/08/24",
       "hint": [
-        "第九个 current-tree alpha 候选版; M4 Path C native 包评估以 `NOT_ADMITTED` 关闭, 内置运行时保持 `stdlib-only`, 未内置 Pillow、NumPy、OpenCV 或任何传递 native payload, 也不新增设备验收声明"
+        "Alpha 源码候选, 原生扩展包评估未通过, 内置运行时仍仅含标准库 (不内置 Pillow/NumPy/OpenCV)"
       ],
       "improvement": [
-        "ADR 0004 记录本地 `--no-index --find-links` 双 ABI offline debug build: Pillow 11.0.0 使每个 APK 增加 2,054,483 bytes, NumPy 1.26.2 增加 21,931,164 bytes, 六个候选输出均通过 `zipalign -c -P 16 4`",
-        "NDK 29 全闭包 ELF 审计拒绝双 ABI 均为 `0x1000` 的 FreeType, 以及 x86_64 为 `0x1000` 的 OpenBLAS/libgfortran; OpenCV 无官方 `cp313` Android wheel, 重开须有可复现 NDK r28+ wheel 与 16 KiB 公共引擎验收"
+        "记录 Pillow 11.0.0 及 NumPy 1.26.2 的离线双 ABI 构建与体积评估 (参阅 ADR 0004, 仅为候选评估)",
+        "补充原生扩展的准入限制, 部分 FreeType/OpenBLAS/libgfortran 库未达到 16 KiB 对齐, OpenCV 缺少官方 CPython 3.13 Android wheel"
       ]
     },
     "v0.4.0-alpha.8": {
       "released_date": "2026/08/24",
       "hint": [
-        "第八个 current-tree alpha 候选版; M4 Path B 构建期包评估以 `NOT_ADMITTED` 关闭, 内置运行时保持 `stdlib-only`, 未内置 `requests` 或任何候选依赖, 也不新增设备验收声明"
+        "Alpha 源码候选, 构建期依赖包评估未通过, 内置运行时仍仅含标准库 (未内置 requests 或候选依赖)"
       ],
       "improvement": [
-        "ADR 0003 固定 stdlib-only debug APK 的 arm64-v8a 23,709,688 bytes、x86_64 23,726,048 bytes 与 universal 34,622,039 bytes 基线; 没有经审计的离线 wheelhouse 时不报告伪造体积差值, 未来准入必须同时具备 Gradle `--offline`、`--no-index`、`--require-hashes`、许可证/哈希锁、三 APK 体积差值与 dual ABI 公共引擎验收"
+        "记录仅含标准库的安装包体积基线, 并明确离线依赖准入要求: 锁定哈希及许可证, 离线构建, 体积对照及双 ABI 引擎验证 (参阅 ADR 0003)"
       ]
     },
     "v0.4.0-alpha.7": {
       "released_date": "2026/08/24",
       "hint": [
-        "第七个 M3 自动化 current-tree alpha 候选版; 真实 Settings 完整工作流已在 API 37 模拟器通过, 发布、M4 路径 B/C 与完整设备矩阵不在本声明范围内"
+        "Alpha 源码候选, 已在 API 37 模拟器验证设置页自动化流程 (完整设备矩阵及发布另行进行)"
       ],
       "feature": [
-        "新增 `m3_complete_automation`: 使用 `app.launch`、`selector.find`、`selector.click` 与 `images.capture_screen` 的有界真实 Settings 工作流, 严格断言 PNG 结构及目标控件包含关系"
+        "完整自动化示例, 通过应用启动, 控件查找/点击及截图完成系统设置页操作"
       ],
       "fix": [
-        "Python 序列化前将平台上报的 `right < left` 或 `bottom < top` 无障碍边界收敛为保持锚点的 zero-area 轴, 同时以精确 selector 查询隔离无关树节点"
+        "平台返回反向无障碍边界时数据序列化不兼容的问题, 保留锚点并将对应轴长度归零"
       ],
       "improvement": [
-        "导出的 `RunIntentActivity` 公开项目路径已在 API 37 模拟器通过, 产出 1080x2424 PNG 与经 SHA-256 验证的产物, 随后将无障碍恢复为 0/null 并移除全部精确测试暂存"
+        "补充公开项目入口的 API 37 模拟器验证记录, 核对截图内容及输出产物摘要"
       ]
     },
     "v0.4.0-alpha.6": {
       "released_date": "2026/08/24",
       "hint": [
-        "第六个 M3 自动化 current-tree alpha 候选版; 已配置宿主 OCR 的正向识别在具备合格服务的 API 37 模拟器通过, API 31 真机在不改动其无障碍服务的前提下完成故障关闭; 更丰富的 OCR、发布及完整设备矩阵不在本声明范围内"
+        "Alpha 源码候选, 已验证宿主 OCR 识别及服务不可用时的错误返回 (完整设备矩阵及发布另行进行)"
       ],
       "feature": [
-        "新增 `autojs6.ocr.recognize(image)`, 接受有界 PNG/JPEG 字节, 并从已配置宿主 OCR 引擎返回有序不可变文本行元组"
+        "`autojs6.ocr.recognize(image)`, 接受有界 PNG/JPEG 字节, 并从已配置宿主 OCR 引擎返回有序不可变文本行元组"
       ],
       "improvement": [
-        "复用 1 MiB PNG/JPEG 上传、24 KiB 原始分块与 SHA-256 校验, 仅选择已启用、已授权且兼容的宿主 OCR 服务, 结果限制为 256 行、每行 4 KiB 严格 UTF-8、合计 48 KiB, 始终 release 并清零缓冲区, 以稳定 `OCR_UNAVAILABLE` 或 `OCR_FAILED` 报告失败"
+        "OCR 仅使用已启用并授权的宿主引擎, 输入上限 1 MiB, 结果最多 256 行且总计不超过 48 KiB, 失败时返回 OCR_UNAVAILABLE/OCR_FAILED"
       ]
     },
     "v0.4.0-alpha.5": {
       "released_date": "2026/08/24",
       "hint": [
-        "当前树第五个 M3 自动化 alpha 候选; 有界模板找图已在启用无障碍的 API 37 模拟器通过, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; OCR、发布及完整设备矩阵仍不在本次声明范围"
+        "Alpha 源码候选, 已验证模板找图及无障碍不可用时的错误返回 (OCR, 完整设备矩阵及发布另行进行)"
       ],
       "feature": [
-        "新增 `autojs6.images.find_image(template, *, region=None, threshold=0)`, 接受 PNG/JPEG 字节与可选有界区域, 返回左上角坐标或 `None`"
+        "`autojs6.images.find_image(template, *, region=None, threshold=0)`, 接受 PNG/JPEG 字节与可选有界区域, 返回左上角坐标或 None"
       ],
       "improvement": [
-        "每次执行上传一个最大 1 MiB 的模板, 以 24 KiB 原始块传输并校验 SHA-256, 单边解码不超过 2048 像素, 按 row-major 确定性扫描并校验 `autojs6-python-image-match-v1`; 仅全不透明像素参与、其余为通配, 无需 OpenCV, 始终 release 并清零缓冲区, 且仅对 Android 333 ms 截图节流执行有界 350 ms 等待重试"
+        "模板匹配支持 SHA-256 校验及截图限流重试, 模板上限为 1 MiB, 单边不超过 2048 像素, 按行扫描且仅完全不透明像素参与匹配 (无需 OpenCV)"
       ]
     },
     "v0.4.0-alpha.4": {
       "released_date": "2026/08/24",
       "hint": [
-        "当前树第四个 M3 自动化 alpha 候选; 有界屏幕找色已在启用无障碍的 API 37 模拟器通过, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; 模板找图、OCR、发布及完整设备矩阵仍不在本次声明范围"
+        "Alpha 源码候选, 已验证屏幕找色及无障碍不可用时的错误返回 (找图, OCR, 完整设备矩阵及发布另行进行)"
       ],
       "feature": [
-        "新增 `autojs6.images.find_color(color, *, region=None, threshold=0)`, 接受严格 RGB 整数或 `#RRGGBB` 文本、可选有界区域, 返回坐标或 `None`"
+        "`autojs6.images.find_color(color, *, region=None, threshold=0)`, 接受严格 RGB 整数或 `#RRGGBB` 文本/可选有界区域, 返回坐标或 None"
       ],
       "improvement": [
-        "每次调用只捕获一张最新 Android 11+ 无障碍截图, 以确定性 row-major 顺序和 0..255 逐通道阈值扫描, 校验精确 `autojs6-python-color-match-v1`, 不向 Python 传输图像字节或句柄"
+        "找色按从上到下, 从左到右的顺序扫描最新截图, 支持 0-255 的逐通道阈值 (需要 Android 11+ 无障碍截图)"
       ]
     },
     "v0.4.0-alpha.3": {
       "released_date": "2026/08/24",
       "hint": [
-        "当前树第三个 M3 自动化 alpha 候选; Android 11+ 有界截图完整路径已在启用无障碍的 API 37 模拟器通过聚焦验收, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; 找图找色、OCR、发布及完整设备矩阵仍不在本次声明范围"
+        "Alpha 源码候选, 已验证 Android 11+ 截图及服务不可用时的错误返回 (找图找色, OCR 及发布另行进行)"
       ],
       "feature": [
-        "新增 `autojs6.images.capture_screen`, 以 PNG/JPEG 返回经验证的编码字节, 或原子写入并发布执行输出产物"
+        "autojs6.images.capture_screen, 以 PNG/JPEG 返回经验证的编码字节, 或原子写入并发布执行输出产物"
       ],
       "improvement": [
-        "每次执行最多保留 1 张截图, 以 32 KiB 原始块传输且编码后最多 4 MiB; Python 核对顺序、EOF、SHA-256 与格式签名并始终 release, 宿主在替换/释放/终态清零, 失败使用稳定错误且不启用服务、不打开设置"
+        "截图支持分块传输及完整性校验, 每次执行最多保留一张, 编码后上限为 4 MiB, 失败时返回明确错误且不自动打开设置"
       ]
     },
     "v0.4.0-alpha.2": {
       "released_date": "2026/08/24",
       "hint": [
-        "当前树第二个 M3 自动化 alpha 候选; 完整有界 selector/UI 树路径已在启用无障碍的 API 37 模拟器通过聚焦验收, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed; 截图, OCR, 发布及完整设备矩阵仍不在本次声明范围"
+        "Alpha 源码候选, 已验证选择器, UI 树及服务不可用时的错误返回 (截图, OCR 及发布另行进行)"
       ],
       "feature": [
-        "新增实时 `autojs6.selector.snapshot/find/click/set_text` API, 通过不透明的执行级节点引用提供分离的无障碍树纯数据, AND 组合首次匹配查询及显式动作"
+        "autojs6.selector.snapshot/find/click/set_text, 用于读取无障碍树, 按组合条件查询及操作控件"
       ],
       "improvement": [
-        "限制快照节点, 深度, 载荷及节点文本, 选择器扫描规模, 查询/设置文本与保留节点; 扫描不完整返回 `SELECTOR_SCAN_LIMIT_EXCEEDED`, 引用过期返回 `STALE_NODE`, 无障碍不可用时不打开设置并抛出 `CapabilityUnavailableError`"
+        "限制快照节点, 深度, 载荷及节点文本, 选择器扫描规模, 查询/设置文本与保留节点; 扫描不完整返回 SELECTOR_SCAN_LIMIT_EXCEEDED, 引用过期返回 STALE_NODE, 无障碍不可用时不打开设置并抛出 CapabilityUnavailableError"
       ]
     },
     "v0.4.0-alpha.1": {
       "released_date": "2026/08/23",
       "hint": [
-        "首个 M3 自动化 current-tree alpha 候选; 有界坐标/全局动作已在启用无障碍的 API 37 模拟器通过聚焦验收, API 31 物理机在不改变既有无障碍服务的前提下通过 fail-closed, selector/UI 树、截图、OCR、发布与完整设备矩阵不在本次声明范围"
+        "Alpha 源码候选, 已验证坐标及全局动作 (选择器, UI 树, 截图, OCR 及发布另行进行)"
       ],
       "feature": [
-        "新增经宿主无障碍执行的实时 `autojs6.automator.click/long_click/press/swipe/back/home` API, 返回动作实际分发结果布尔值"
+        "经宿主无障碍执行的实时 `autojs6.automator.click/long_click/press/swipe/back/home` API, 返回动作实际分发结果布尔值"
       ],
       "improvement": [
-        "坐标只接受 0 到 1000000 的非布尔严格整数, press/swipe 持续时间只接受 1 到 4000 ms; 宿主无障碍不可用时抛 `CapabilityUnavailableError`, 不打开设置"
+        "坐标只接受 0 到 1000000 的非布尔严格整数, press/swipe 持续时间只接受 1 到 4000 ms; 宿主无障碍不可用时抛 CapabilityUnavailableError, 不打开设置"
       ]
     },
     "v0.3.0-alpha.6": {
       "released_date": "2026/08/23",
       "hint": [
-        "首个 M4 current-tree alpha 候选; 项目本地纯 Python 依赖路径已通过双设备聚焦验收, 后续 M3/M4 批次、发布及完整设备矩阵不在本次声明范围"
+        "Alpha 源码候选, 已验证项目内纯 Python 依赖导入 (后续功能及公开发布另行进行)"
       ],
       "feature": [
-        "支持从已准入项目根目录导入项目本地纯 Python 包与 `.dist-info` 元数据, 提供锁定版本的 `requests` 可复现示例, 且不引入运行时安装器"
+        "支持从已准入项目根目录导入项目本地纯 Python 包与 `.dist-info` 元数据, 提供锁定版本的 requests 可复现示例, 且不引入运行时安装器"
       ],
       "improvement": [
-        "将项目 workspace 上限提高到压缩 64 MiB、8192 个文件条目与解压 128 MiB, 分发前按快照实际三维需求匹配 Provider 能力; 缺失 import 仍抛 `ModuleNotFoundError`, 不触发在线 pip 或引擎回落"
+        "项目归档上限提升至压缩后 64 MiB, 8192 个文件及解压后 128 MiB, 缺失模块仍返回 ModuleNotFoundError (不自动运行 pip 或切换引擎)"
       ]
     },
     "v0.3.0-alpha.5": {
       "released_date": "2026/08/23",
       "hint": [
-        "M3 第五个 current-tree alpha 候选; 第二批有界 Host engines 能力已通过双设备聚焦验收, 后续能力、公开发布和完整设备矩阵仍不在本条声明范围内"
+        "Alpha 源码候选, 已验证宿主引擎接口 (后续功能及公开发布另行进行)"
       ],
       "feature": [
-        "新增实时 `autojs6.engines.current/run/stop_self` API, 提供不含绝对路径的当前引擎信息、非 Python Host 子脚本异步启动及确定性停止自身"
+        "autojs6.engines.current/run/stop_self, 用于查询当前执行, 异步启动宿主子脚本及停止自身 (不支持嵌套 Python 执行)"
       ],
       "improvement": [
-        "子脚本仅接受执行根目录内的规范化相对路径且每次执行最多成功启动 16 个; 嵌套 Python 稳定返回 `NESTED_PYTHON_NOT_ALLOWED`, `stop_self` 通过 provider 进程重启取消当前执行"
+        "子脚本仅接受执行根目录内的规范化相对路径且每次执行最多成功启动 16 个; 嵌套 Python 稳定返回 NESTED_PYTHON_NOT_ALLOWED, stop_self 通过 provider 进程重启取消当前执行"
       ]
     },
     "v0.3.0-alpha.4": {
       "released_date": "2026/08/23",
       "hint": [
-        "M3 第四个 current-tree alpha 候选; 前台 Host 对话框已通过双设备聚焦验收, 引擎、后续能力、公开发布和完整设备矩阵仍不在本条声明范围内"
+        "Alpha 源码候选, 已验证前台宿主对话框 (后续功能及公开发布另行进行)"
       ],
       "feature": [
-        "新增仅限前台的 `autojs6.dialogs.alert/confirm/prompt/select` API, 分别返回确认完成、布尔选择、可空文本与从零开始的可空选项索引"
+        "仅限前台的 `autojs6.dialogs.alert/confirm/prompt/select` API, 分别返回确认完成/布尔选择/可空文本与从零开始的可空选项索引"
       ],
       "improvement": [
-        "限制对话框标题、正文、回复与选项, 串行显示单个 Host 所有的对话框, 后台启动不会打开 UI 并稳定返回 `INTERACTIVE_NOT_ALLOWED`"
+        "限制对话框标题/正文/回复与选项, 串行显示单个 Host 所有的对话框, 后台启动不会打开 UI 并稳定返回 INTERACTIVE_NOT_ALLOWED"
       ]
     },
     "v0.3.0-alpha.3": {
       "released_date": "2026/08/23",
       "hint": [
-        "M3 第三个 current-tree alpha 候选; 第二批有界 Host files 能力已通过双设备聚焦验收, 对话框、引擎、后续能力、公开发布和完整设备矩阵仍不在本条声明范围内"
+        "Alpha 源码候选, 已验证宿主文件接口 (后续功能及公开发布另行进行)"
       ],
       "feature": [
-        "新增实时 `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API, 在当前项目根目录或单文件脚本目录内进行有界 UTF-8 文本访问"
+        "实时 `autojs6.files.read_text/write_text/exists/is_file/is_dir/list` API, 在当前项目根目录或单文件脚本目录内进行有界 UTF-8 文本访问"
       ],
       "improvement": [
         "拒绝不安全或越界路径, 限制文本与直接目录枚举, 返回稳定文件错误, 并明确区分实时 Host 根目录与冻结的插件 workspace 快照"
@@ -296,77 +296,77 @@
     "v0.3.0-alpha.2": {
       "released_date": "2026/08/23",
       "hint": [
-        "M3 第二个 current-tree alpha 候选; 完整首批低风险 Host 能力已实现, 后续能力批次、公开发布和完整设备矩阵仍不在本条声明范围内"
+        "Alpha 源码候选, 提供首批基础宿主能力 (后续功能, 完整设备矩阵及公开发布另行进行)"
       ],
       "feature": [
-        "新增实时 `autojs6.device.info()` 电量/屏幕/亮度/音量数据、`autojs6.console.log/warn/error` 宿主控制台级别及 `autojs6.notice` 通知"
+        "autojs6.device.info 支持电量, 屏幕, 亮度及音量信息, autojs6.console 支持分级日志, autojs6.notice 支持通知"
       ],
       "improvement": [
-        "严格校验 device 结果结构, 通知权限不足时稳定返回 `PERMISSION_DENIED`, 不打开设置或更改设备权限状态"
+        "严格校验 device 结果结构, 通知权限不足时稳定返回 PERMISSION_DENIED, 不打开设置或更改设备权限状态"
       ]
     },
     "v0.3.0-alpha.1": {
       "released_date": "2026/08/23",
       "hint": [
-        "M3 首个 current-tree alpha 候选; 协议 1.5 与低风险 Host 能力子集已实现, 后续能力、发布和完整设备矩阵仍不在本条声明范围内"
+        "Alpha 源码候选, 提供协议 1.5 及部分基础宿主能力 (后续功能, 完整设备矩阵及发布另行进行)"
       ],
       "feature": [
-        "新增协议 1.5 执行级 Host capability broker, 以纯数据 JSON 绑定 request UUID、插件 UID、单调调用序号、1024 次配额、64 KiB 消息及 5 秒 Host 调度上限",
-        "新增 `autojs6.toast`, `autojs6.clip.get/set` 与 `autojs6.app.launch/launch_app/open_url` 实时 Host API"
+        "宿主能力代理, 每次执行最多调用 1024 次, 单条消息上限 64 KiB, 宿主调度超时为 5 s",
+        "autojs6.toast, `autojs6.clip.get/set` 与 `autojs6.app.launch/launch_app/open_url` 实时 Host API"
       ],
       "improvement": [
-        "终态、取消、Binder death 与清理路径统一撤销 broker, Python 侧稳定映射 capability unavailable、Host 与协议错误"
+        "执行结束, 取消或进程退出时统一撤销宿主能力代理, 并返回明确的能力及协议错误"
       ]
     },
     "v0.2.0-alpha.1": {
       "released_date": "2026/08/13",
       "hint": [
-        "0.1 后的 U1 current-tree alpha 候选; U1-R2 module entry、live output、前台内置 input、显式结构化 JSON 与有界输出 artifact 仅完成到 E2, 后台启动与直接 sys.stdin 仍非交互, R2 E3 仍未完成, 且这些当前树结果不属于设备矩阵/发布/公开证据"
+        "Alpha 源码候选, 提供模块入口, 实时输出, 前台交互输入及结构化结果 (后台及直接 sys.stdin 仍为非交互, 完整设备验收及发布尚未完成)"
       ],
       "feature": [
-        "新增最大 1 MiB 的有限预置 stdin snapshot, 为 `input()` 与 `sys.stdin` 提供确定性输入和 EOF",
-        "完善项目导入语义, 支持 workspace 模块, 嵌套入口同级与根模块以及 package-relative import",
-        "新增协议 1.2 显式 `entryMode=file|module`; module 执行通过 `runpy` 提供正确的 `__package__`、`__spec__`、项目根目录 `sys.path[0]` 与相对导入, file 模式保持不变",
-        "新增协议 1.3: 有限 snapshot 到达 EOF 后, 仅前台内置 `input()` 使用可见回显、标准库 `getpass.getpass()` 使用隐藏回显的有界 prompt/reply; 后台启动绝不打开输入 UI, 直接 `sys.stdin` 始终有限",
-        "新增协议 1.4 显式严格 JSON 结果与可选输出 artifact, 对数量、规范化路径、单个/合计大小、精确 PFD 引用及 SHA-256 设限, 且绝不从 stdout 推断结果"
+        "预置标准输入, 上限为 1 MiB, input/sys.stdin 可读取内容并在结束后收到 EOF",
+        "项目导入支持工作区模块, 嵌套入口同级模块及包内相对导入",
+        "entryMode 支持 file/module, 模块模式提供对应包信息及相对导入语义",
+        "前台 input/getpass 支持交互输入及密码隐藏, 预置输入耗尽后弹出输入框 (后台及直接 sys.stdin 保持有限输入)",
+        "显式 JSON 结果及可选输出文件, 校验数量, 路径, 大小及 SHA-256 (不从标准输出推断结果)"
       ],
       "fix": [
-        "执行前按 strict UTF-8 解码源码, 非 UTF-8 encoding cookie 不再绕过契约"
+        "非 UTF-8 编码声明绕过源码编码约束的问题, 执行前统一严格校验 UTF-8"
       ],
       "improvement": [
-        "授予 `INTERNET`, 让可信脚本可直接使用标准库网络客户端, 同时仍禁用在线 pip 与自动代码下载",
-        "将 Provider 执行上限提高到 30 分钟, 有界输出提高到 16 MiB / 16384 个 chunk",
-        "将 stdout/stderr 的有界 chunk 与 credit 背压前移到脚本执行期间, 保留终态前的有序部分输出并禁止终态后输出",
-        "每次执行使用独立 `__main__`, 并恢复 stdin/stdout/stderr, argv, cwd, `sys.path`, module 与 importer cache 状态",
-        "为已打开但未 start 的 session 增加 5 秒 lease, 到期释放输入, descriptor 与单会话占位",
-        "Provider 在 Binder 入站强制最低 Host versionCode 5275, 不再只依赖 Host 侧发现检查"
+        "授予 INTERNET, 让可信脚本可直接使用标准库网络客户端, 同时仍禁用在线 pip 与自动代码下载",
+        "执行时长上限提升至 30 分钟, 输出上限提升至 16 MiB/16384 个数据块",
+        "标准输出及错误输出支持运行期间分块回传, 保留有序的部分结果, 执行结束后停止输出",
+        "每次执行使用独立 `__main__`, 并恢复 stdin/stdout/stderr, argv, cwd, sys.path, module 与 importer cache 状态",
+        "已打开但未启动的会话在 5 s 后自动释放输入, 文件描述符及会话占用",
+        "插件服务端增加宿主最低构建号 5275 校验"
       ]
     },
     "v0.1.0": {
       "released_date": "2026/08/12",
       "hint": [
-        "0.1.0 固定了稳定 Plugin 源码身份和精确 Host 6.8.0/5275 lock"
+        "锁定插件源码身份及 AutoJs6 6.8.0/5275 宿主 API 来源"
       ],
       "feature": [
-        "面向 AutoJs6 6.8.0 / versionCode 5275 的 Python 协议 1.0-1.1, 有界项目 workspace 与只读 app/device/execution/project 能力快照",
-        "无需重启 Host 的热插拔: 安装或重新启用后下次新执行重新发现并 pin 身份, 缺失或禁用绝不 fallback",
-        "在途 Binder death 终止当前执行且不得重放, 后续新执行重新发现 provider"
+        "Python 运行协议及项目工作区, 提供应用, 设备, 执行和项目的只读信息快照 (配套 AutoJs6 6.8.0/5275)",
+        "插件安装或重新启用后可在下次执行时自动发现, 无需重启宿主 (缺失或禁用时不回退其他引擎)",
+        "插件进程退出时终止当前执行, 后续请求重新发现插件 (不自动重放脚本)"
       ],
       "improvement": [
-        "将 Chaquopy 固定为 trusted-local, non-sandbox 运行时; SM003 为长期 signer, SuperMonster003 为 runtime/security/release owner"
+        "明确 Chaquopy 的可信本地执行范围及维护责任, 运行时不提供安全沙箱"
       ],
       "dependency": [
-        "锁定 {{ runtime_dependency }} 与 CPython {{ python_version_expected }}; 稳定 APK 与最终源码身份绑定并通过精确产物验证"
+        "锁定 {{ runtime_dependency }} 及 CPython {{ python_version_expected }}, 核对发行产物与源码身份"
       ]
     },
     "v0.1.0-alpha.1": {
       "released_date": "2026/08/09",
       "hint": [
-        "R2 概念验证源码. Gradle, APK, Binder 和设备验收尚未执行"
+        "概念验证源码, 尚未完成构建及设备验收"
       ],
       "feature": [
-        "独立 Python 协议 V1 provider scaffold, 专用运行时进程, 单活动会话和零 provider 队列",
-        "单源码 `__main__` 执行, 有界 stdout/stderr, 结构化异常以及进程重启式取消",
+        "独立 Python 运行时进程及服务框架, 同时仅允许一个活动会话且不提供插件侧队列",
+        "单文件 __main__ 执行, 支持标准输出/错误输出, 结构化异常及通过重启运行时进程取消任务",
         "固定顺序的 10 种语言 README 与应用内更新日志生成流程"
       ],
       "dependency": [
