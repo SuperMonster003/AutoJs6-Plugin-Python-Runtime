@@ -169,6 +169,12 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 
 ******
 
+# v0.5.5
+
+###### 2026/10/04
+
+* `Mejora` Los iconos del centro de plugins usan los tamaños, posiciones, imágenes claras y oscuras y fondos circulares ajustados en Icon Studio, conservando fuentes y parámetros reproducibles
+
 # v0.5.4
 
 ###### 2026/09/19
@@ -183,15 +189,6 @@ La ruta A de M4 está terminada; las evaluaciones M4 Paths B y C concluyeron `NO
 ###### 2026/09/15
 
 * `Mejora` compileSdk sube a 37 (Android 17); targetSdk se mantiene en 36 hasta verificar el comportamiento que depende del objetivo
-
-# v0.5.2
-
-###### 2026/09/13
-
-* `Nota` Candidato de código estable 0.5.2; la aceptación final en dispositivos y la publicación siguen separadas de los resultados beta históricos
-* `Corrección` Corregir la lectura de archivos de salida en Android 7 conservando la protección de descriptores y enlaces simbólicos
-* `Corrección` Informar solo de las ABI nativas presentes en el APK instalado
-* `Corrección` Usar fechas de compilación en inglés independientemente del idioma de la máquina
 
 ##### Más versiones
 

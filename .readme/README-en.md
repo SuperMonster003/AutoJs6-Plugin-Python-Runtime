@@ -169,6 +169,12 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 
 ******
 
+# v0.5.5
+
+###### 2026/10/04
+
+* `Improvement` Plugin Center icons use the sizes, positions, light and dark artwork, and circular backgrounds adjusted in Icon Studio, retaining reproducible sources and parameters
+
 # v0.5.4
 
 ###### 2026/09/19
@@ -183,15 +189,6 @@ M4 Path A is complete; M4 Paths B and C both concluded `NOT_ADMITTED`, so the em
 ###### 2026/09/15
 
 * `Improvement` Raise compileSdk to 37 (Android 17); targetSdk stays at 36 until the behavior that depends on the target is verified
-
-# v0.5.2
-
-###### 2026/09/13
-
-* `Hint` 0.5.2 stable source candidate; final device acceptance and publication remain separate from the historical beta results
-* `Fix` Read output artifacts safely on Android 7 without requiring an API 27 Java constant
-* `Fix` Report only the native ABIs present in the installed APK
-* `Fix` Use English build dates in plugin metadata regardless of the build machine locale
 
 ##### For more releases
 

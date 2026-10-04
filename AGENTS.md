@@ -16,3 +16,9 @@ This repository owns its existing plugin implementation and contracts. Keep iden
 - Edit JSON/templates rather than generated README/changelog. Keep the root README in Simplified Chinese, use the centered header, and omit IDE version badges. Changelog source stays in .changelog; generated language assets stay in app/src/main/assets/doc.
 - Run py .python/generate_markdown.py and its read-only --check after document edits. Run relevant Python and JVM tests, debug and androidTest assembly, lint, and signed release collection. Platform changes additionally require the Temurin vendor simulation from the workspace conventions. Use actual application variant task names if the repository differs.
 - Preserve native source/license locks, ABI inventory and 16 KB alignment checks. Existing device evidence is historical; never claim a new install, Binder or OEM test that was not executed.
+
+
+## Icon Studio publication snapshot (2026-10-04)
+
+- `.icons/recipe.json` and its content-addressed original assets own the current icon geometry, tone and backgrounds. Keep the portable renderer, generated resources, keep rules and icon CI in the same change.
+- Use `.python/generate_icon_studio.py --check` for read-only reproduction checks. Optical size bands are advisory; retain canvas, transparency and safe-circle checks. Three uses neutral foregrounds and fixed #FAFAFA / #212121 surfaces; other plugins may use colored artwork and custom or transparent surfaces.
