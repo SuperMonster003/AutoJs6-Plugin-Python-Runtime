@@ -169,6 +169,12 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 
 ******
 
+# v0.5.5
+
+###### 2026/10/04
+
+* `Amélioration` Les icônes du centre de plugins utilisent les tailles, positions, images claires et sombres et fonds circulaires réglés dans Icon Studio, avec les sources et paramètres permettant de les reproduire
+
 # v0.5.4
 
 ###### 2026/09/19
@@ -183,15 +189,6 @@ Le chemin A de M4 est terminé; les évaluations M4 Paths B et C concluent toute
 ###### 2026/09/15
 
 * `Amélioration` compileSdk passe à 37 (Android 17) ; targetSdk reste à 36 jusqu'à la vérification du comportement dépendant de la cible
-
-# v0.5.2
-
-###### 2026/09/13
-
-* `Note` Candidat source stable 0.5.2; la validation finale sur appareil et la publication restent distinctes des résultats beta historiques
-* `Correction` Corriger la lecture des fichiers de sortie sur Android 7 en conservant les protections des descripteurs et liens symboliques
-* `Correction` Indiquer uniquement les ABI natives présentes dans l’APK installé
-* `Correction` Utiliser des dates de compilation en anglais indépendamment de la langue de la machine
 
 ##### Autres versions
 
