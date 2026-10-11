@@ -179,7 +179,7 @@ class R6RcProvenanceSourceTest(unittest.TestCase):
     def test_fail_closed_identity_and_artifact_markers_are_present(self) -> None:
         markers = (
             "Git worktree is not clean",
-            "VERSION_BUILD must equal the clean repository commit count",
+            "VERSION_BUILD must stay within 10 of the clean repository commit count",
             "Host API AAR SHA-256 mismatch",
             "Python runtime canonical inventory SHA-256 mismatch",
             "signer set",

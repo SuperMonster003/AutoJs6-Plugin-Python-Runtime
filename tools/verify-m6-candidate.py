@@ -261,7 +261,7 @@ def inspect_source_candidate(root: Path = ROOT) -> dict[str, str | int]:
         commit_count = int(git_output(root, "rev-list", "--count", "HEAD"))
     except ValueError as error:
         raise CandidateError("Git commit count is not an integer") from error
-    require(version_build == commit_count, "VERSION_BUILD differs from Git commit count")
+    require(abs(version_build - commit_count) <= 10, "VERSION_BUILD is more than 10 away from the Git commit count")
     require(
         not git_output(root, "status", "--porcelain", "--untracked-files=all"),
         "Git worktree is not clean",

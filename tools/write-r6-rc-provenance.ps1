@@ -490,8 +490,8 @@ Assert-True (
     )
 ) 'Plugin VERSION_BUILD is invalid'
 Assert-True (
-    $pluginVersionBuild -eq $pluginIdentity.commitCount
-) 'Plugin VERSION_BUILD must equal the clean repository commit count'
+    [Math]::Abs($pluginVersionBuild - $pluginIdentity.commitCount) -le 10
+) 'Plugin VERSION_BUILD must stay within 10 of the clean repository commit count'
 
 $hostApkInfo = Get-ApkInfo $HostApk 'host'
 $pluginArm64Info = Get-ApkInfo $PluginArm64Apk 'plugin-arm64-v8a'

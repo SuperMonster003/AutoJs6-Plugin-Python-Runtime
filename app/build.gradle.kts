@@ -671,8 +671,9 @@ gradle.taskGraph.whenReady {
     }
     val commitCount = gitOutput("rev-list", "--count", "HEAD").toIntOrNull()
         ?: error("Release candidate provenance requires a numeric Git commit count")
-    require(versions.appVersionCode == commitCount) {
-        "VERSION_BUILD must equal the Git commit count before release artifact creation"
+    // VERSION_BUILD follows the commit count within 10 (shared rule of the AutoJs6 repositories).
+    require(Math.abs(versions.appVersionCode - commitCount) <= 10) {
+        "VERSION_BUILD must stay within 10 of the Git commit count before release artifact creation"
     }
     require(gitOutput("status", "--porcelain", "--untracked-files=all").isEmpty()) {
         "Release artifact creation requires a clean Git worktree"

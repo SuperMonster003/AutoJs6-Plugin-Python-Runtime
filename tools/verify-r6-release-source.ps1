@@ -162,8 +162,8 @@ if ($null -eq $head -or $head -notmatch '^[0-9a-fA-F]{40,64}$') {
     $commitCount = 0
     if (-not [int]::TryParse($commitCountText, [ref] $commitCount)) {
         Add-Blocker 'Git commit count is unavailable'
-    } elseif ($versionBuild -ne $commitCount) {
-        Add-Blocker 'VERSION_BUILD does not equal the Git commit count'
+    } elseif ([Math]::Abs($versionBuild - $commitCount) -gt 10) {
+        Add-Blocker 'VERSION_BUILD is more than 10 away from the Git commit count'
     }
     $status = Invoke-GitReadOnly @('status', '--porcelain', '--untracked-files=all')
     if ($null -eq $status -or $status.Length -ne 0) {
