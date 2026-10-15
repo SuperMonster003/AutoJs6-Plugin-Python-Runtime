@@ -94,7 +94,7 @@ engine: python
 protocol: 1.0-1.6
 ```
 
-독립 SOURCE, 선택적인 제한 workspace archive, 최대 1 MiB의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. 프로토콜 1.2는 승인된 project에 명시적인 file/module entry negotiation을 추가합니다. 프로토콜 1.3은 snapshot EOF 뒤 내장 `input()`에 Host 소유의 foreground 전용 prompt/reply를 추가하고 표준 라이브러리 `getpass.getpass()`는 숨김 입력을 사용합니다. 프로토콜 1.4는 명시적 엄격 JSON과 선택적 SHA-256 manifest output artifact를 추가하며 stdout은 진단 텍스트로 유지되고 결과로 분석되지 않습니다. 프로토콜 1.5는 단일 실행, plugin UID, call 순서 및 유한 quota에 묶인 pure-data Host broker를 추가합니다. Host dialog도 live Activity 기반 foreground 승인이 필요하며 background 실행은 UI를 열지 않고 `INTERACTIVE_NOT_ALLOWED`를 반환합니다. 직접 `sys.stdin`은 계속 유한하며 background 실행은 입력 UI를 열지 않고 user script에 Context, raw Binder, Host runtime 객체 또는 callback sink를 제공하지 않습니다.
+독립 SOURCE, 선택적인 제한 workspace archive, 최대 1 MiB의 유한한 사전 제공 stdin snapshot 및 프로토콜 1.1의 읽기 전용 호스트 capability snapshot을 받습니다. 프로토콜 1.2는 승인된 project에 명시적인 file/module entry negotiation을 추가합니다. 프로토콜 1.3은 snapshot EOF 뒤 내장 `input()`에 Host 소유의 foreground 전용 prompt/reply를 추가하고 표준 라이브러리 `getpass.getpass()`는 숨김 입력을 사용합니다. 프로토콜 1.4는 명시적 엄격 JSON과 선택적 SHA-256 manifest output artifact를 추가하며 stdout은 진단 텍스트로 유지되고 결과로 분석되지 않습니다. 프로토콜 1.5는 단일 실행, plugin UID, call 순서 및 유한 quota에 묶인 pure-data Host broker를 추가합니다. 프로토콜 1.6은 명시적 `long-running` 실행, 순서가 보장된 생존 하트비트, Host 소유의 포그라운드 서비스 및 수동 Stop을 추가합니다. 백그라운드 진입은 거부되며 다른 실행 모드로 폴백하지 않습니다. Host dialog도 live Activity 기반 foreground 승인이 필요하며 background 실행은 UI를 열지 않고 `INTERACTIVE_NOT_ALLOWED`를 반환합니다. 직접 `sys.stdin`은 계속 유한하며 background 실행은 입력 UI를 열지 않고 user script에 Context, raw Binder, Host runtime 객체 또는 callback sink를 제공하지 않습니다.
 
 ******
 
