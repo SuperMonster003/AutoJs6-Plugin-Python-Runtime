@@ -96,6 +96,8 @@ protocol: 1.0-1.6
 
 The plugin accepts an independent SOURCE, an optional bounded workspace archive, a finite pre-supplied stdin snapshot of at most 1 MiB, and the protocol 1.1 read-only host capability snapshot. Protocol 1.2 adds explicit file/module entry negotiation for admitted projects. Protocol 1.3 adds Host-owned, foreground-only prompt/reply for the built-in `input()` after snapshot EOF; standard-library `getpass.getpass()` uses hidden echo. Protocol 1.4 adds explicit strict JSON and optional SHA-256-manifested output artifacts; stdout remains diagnostic text and is never parsed as a result. Protocol 1.5 adds a pure-data Host capability broker bound to one execution, the plugin UID, call order, and a finite quota. Protocol 1.6 adds explicit `long-running` execution with ordered liveness heartbeats, a Host-owned foreground service, and manual Stop; background surfaces are rejected without downgrade. Foreground Host dialogs require the same live Activity-backed authorization; background launches receive `INTERACTIVE_NOT_ALLOWED` without opening UI. Direct `sys.stdin` remains finite, background launches never open input UI, and user scripts receive no Context, raw Binder, host runtime object, or callback sink.
 
+Type stubs: the `.pyi` files under `docs/python/types/autojs6/` describe every function, constant and exception class of the `autojs6` package. The Ace Editor plugin bundles the same stubs for completion, hover help and import checks in `.py` scripts; with other editors, set `docs/python/types` as the stub path of Pyright or mypy.
+
 ******
 
 ### Host integration status

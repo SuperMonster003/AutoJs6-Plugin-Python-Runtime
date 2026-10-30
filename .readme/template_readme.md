@@ -76,6 +76,8 @@ protocol: {{ protocol_version }}
 
 {{ p_plugin_scope }}
 
+{{ p_type_stubs }}
+
 ******
 
 ### {{ h3_host_integration_status }}

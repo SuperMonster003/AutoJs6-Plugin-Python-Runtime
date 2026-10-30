@@ -96,6 +96,8 @@ protocol: 1.0-1.6
 
 插件接收独立 SOURCE, 可选的有界 workspace archive, 最大 1 MiB 的有限预置 stdin snapshot, 以及协议 1.1 的只读宿主能力快照. 协议 1.2 为已准入项目增加显式 file/module 入口协商. 协议 1.3 在快照 EOF 后为内置 `input()` 增加由 Host 持有且仅限前台的 prompt/reply; 标准库 `getpass.getpass()` 使用隐藏回显. 协议 1.4 增加显式严格 JSON 结果与可选的 SHA-256 manifest 输出 artifact, stdout 仅用于诊断且绝不被解析为结果. 协议 1.5 增加绑定单次执行、插件 UID、调用序号与配额的纯数据 Host capability broker. 协议 1.6 增加显式 `long-running` 执行、有序存活心跳、Host 持有的前台服务与手动 Stop; 后台入口会被拒绝且不降级. Host 对话框还要求由存活 Activity 支撑的前台授权; 后台启动不会打开 UI, 而是稳定返回 `INTERACTIVE_NOT_ALLOWED`. 直接 `sys.stdin` 始终有限, 后台启动绝不打开输入 UI, 用户脚本也不会得到 Context、原始 Binder、宿主运行时对象或 callback sink.
 
+类型桩: `docs/python/types/autojs6/` 下的 `.pyi` 文件描述了 `autojs6` 包的全部函数, 常量与异常类. Ace Editor 插件内置同一份类型桩, 为 `.py` 脚本提供补全, 悬停提示与导入检查; 使用其他编辑器时, 可把 `docs/python/types` 设为 Pyright 或 mypy 的 stub 路径.
+
 ******
 
 ### 宿主集成状态
