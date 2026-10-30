@@ -1,13 +1,13 @@
 # Type stub of the AutoJs6 Python Runtime package `autojs6` (mirrors app/src/main/python/autojs6/automator.py).
-# AutoJs6 tools/api-coverage/language_runtimes.py checks its names and signatures against the plugin.
+# AutoJs6 tools/api-coverage/language_runtimes.py checks its names, signatures and constant values against the plugin.
 """Bounded, execution-scoped accessibility actions performed by the AutoJs6 Host."""
 
 from typing import Final
 
-DEFAULT_PRESS_DURATION_MILLIS: Final[int]
-DEFAULT_SWIPE_DURATION_MILLIS: Final[int]
-MAX_COORDINATE: Final[int]
-MAX_DURATION_MILLIS: Final[int]
+DEFAULT_PRESS_DURATION_MILLIS: Final = 100
+DEFAULT_SWIPE_DURATION_MILLIS: Final = 300
+MAX_COORDINATE: Final = 1000000
+MAX_DURATION_MILLIS: Final = 4000
 
 
 def back() -> bool:

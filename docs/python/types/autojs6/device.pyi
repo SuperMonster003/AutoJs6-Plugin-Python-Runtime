@@ -1,5 +1,5 @@
 # Type stub of the AutoJs6 Python Runtime package `autojs6` (mirrors app/src/main/python/autojs6/device.py).
-# AutoJs6 tools/api-coverage/language_runtimes.py checks its names and signatures against the plugin.
+# AutoJs6 tools/api-coverage/language_runtimes.py checks its names, signatures and constant values against the plugin.
 """Frozen metadata and live, identifier-free AutoJs6 device state."""
 
 

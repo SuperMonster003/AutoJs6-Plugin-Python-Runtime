@@ -1,14 +1,14 @@
 # Type stub of the AutoJs6 Python Runtime package `autojs6` (mirrors app/src/main/python/autojs6/files.py).
-# AutoJs6 tools/api-coverage/language_runtimes.py checks its names and signatures against the plugin.
+# AutoJs6 tools/api-coverage/language_runtimes.py checks its names, signatures and constant values against the plugin.
 """Bounded live access to the current script's Host-side directory."""
 
 import builtins
 import os
 from typing import Final
 
-MAX_LIST_ENTRIES: Final[int]
-MAX_PATH_BYTES: Final[int]
-MAX_TEXT_BYTES: Final[int]
+MAX_LIST_ENTRIES: Final = 128
+MAX_PATH_BYTES: Final = 4096
+MAX_TEXT_BYTES: Final = 32768
 
 
 def exists(path: str | os.PathLike[str]) -> bool:

@@ -1,20 +1,20 @@
 # Type stub of the AutoJs6 Python Runtime package `autojs6` (mirrors app/src/main/python/autojs6/selector.py).
-# AutoJs6 tools/api-coverage/language_runtimes.py checks its names and signatures against the plugin.
+# AutoJs6 tools/api-coverage/language_runtimes.py checks its names, signatures and constant values against the plugin.
 """Bounded UI-tree snapshots and explicit node actions through Host accessibility."""
 
 from typing import Final
 
-DEFAULT_FIND_NODES: Final[int]
-DEFAULT_SNAPSHOT_DEPTH: Final[int]
-DEFAULT_SNAPSHOT_NODES: Final[int]
-MAX_DEPTH: Final[int]
-MAX_FIND_NODES: Final[int]
-MAX_NODE_TEXT_CODE_POINTS: Final[int]
-MAX_QUERY_TEXT_BYTES: Final[int]
-MAX_RETAINED_NODES: Final[int]
-MAX_SET_TEXT_BYTES: Final[int]
-MAX_SNAPSHOT_NODES: Final[int]
-SNAPSHOT_SCHEMA: Final[str]
+DEFAULT_FIND_NODES: Final = 512
+DEFAULT_SNAPSHOT_DEPTH: Final = 16
+DEFAULT_SNAPSHOT_NODES: Final = 64
+MAX_DEPTH: Final = 32
+MAX_FIND_NODES: Final = 1024
+MAX_NODE_TEXT_CODE_POINTS: Final = 256
+MAX_QUERY_TEXT_BYTES: Final = 1024
+MAX_RETAINED_NODES: Final = 128
+MAX_SET_TEXT_BYTES: Final = 4096
+MAX_SNAPSHOT_NODES: Final = 128
+SNAPSHOT_SCHEMA: Final = "autojs6-python-ui-tree-v1"
 
 
 def click(node: str | dict[str, object]) -> bool:

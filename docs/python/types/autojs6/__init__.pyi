@@ -1,5 +1,5 @@
 # Type stub of the AutoJs6 Python Runtime package `autojs6` (mirrors app/src/main/python/autojs6/__init__.py).
-# AutoJs6 tools/api-coverage/language_runtimes.py checks its names and signatures against the plugin.
+# AutoJs6 tools/api-coverage/language_runtimes.py checks its names, signatures and constant values against the plugin.
 """Execution-scoped AutoJs6 data, result and live Host capability APIs."""
 
 from . import app as app

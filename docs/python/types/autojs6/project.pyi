@@ -1,11 +1,11 @@
 # Type stub of the AutoJs6 Python Runtime package `autojs6` (mirrors app/src/main/python/autojs6/project.py).
-# AutoJs6 tools/api-coverage/language_runtimes.py checks its names and signatures against the plugin.
+# AutoJs6 tools/api-coverage/language_runtimes.py checks its names, signatures and constant values against the plugin.
 """Bounded read-only convenience access to the private project snapshot."""
 
 import os
 from typing import Final
 
-MAX_READ_BYTES: Final[int]
+MAX_READ_BYTES: Final = 1048576
 
 
 def exists(path: str | os.PathLike[str]) -> bool:
